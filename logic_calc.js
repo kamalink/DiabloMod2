@@ -1,0 +1,1218 @@
+// --- КАЛЬКУЛЯТОРЫ И МЕХАНИКИ ---
+
+window.openSkillCalculator = function() {
+    const modal = document.getElementById('skill-calc-modal');
+    const classSelect = document.getElementById('calc-class-select');
+    
+    classSelect.innerHTML = '<option value="" disabled selected>Выберите класс</option>';
+    for (let cls in window.skillDB) {
+        classSelect.innerHTML += `<option value="${cls}">${cls}</option>`;
+    }
+    
+    window.updateCalcSkills();
+    modal.style.display = 'block';
+}
+
+window.updateCalcSkills = function() {
+    const cls = document.getElementById('calc-class-select').value;
+    const skillSelect = document.getElementById('calc-skill-select');
+    skillSelect.innerHTML = '';
+    
+    if (window.skillDB[cls]) {
+        window.skillDB[cls].forEach((skill, index) => {
+            skillSelect.innerHTML += `<option value="${index}">${skill.name}</option>`;
+        });
+    }
+    window.updateCalcRunes();
+}
+
+window.updateCalcRunes = function() {
+    const cls = document.getElementById('calc-class-select').value;
+    const skillIdx = document.getElementById('calc-skill-select').value;
+    const runeSelect = document.getElementById('calc-rune-select');
+    runeSelect.innerHTML = '';
+
+    if (cls && window.skillDB[cls] && window.skillDB[cls][skillIdx]) {
+        const runes = window.skillDB[cls][skillIdx].runes;
+        runes.forEach((rune, index) => {
+            runeSelect.innerHTML += `<option value="${index}">${rune.name}</option>`;
+        });
+    }
+    window.loadCalcSkillData();
+}
+
+window.loadCalcSkillData = function() {
+    const cls = document.getElementById('calc-class-select').value;
+    const skillIdx = document.getElementById('calc-skill-select').value;
+    const runeIdx = document.getElementById('calc-rune-select').value;
+    
+    const buyBtn = document.querySelector('.buy-skill-btn');
+    if (cls && window.skillDB[cls] && window.skillDB[cls][skillIdx]) {
+        const skillName = window.skillDB[cls][skillIdx].name;
+        const runeName = window.skillDB[cls][skillIdx].runes[runeIdx].name;
+        if (window.playerData.learnedSkills[skillName] && window.playerData.learnedSkills[skillName].includes(runeName)) {
+            buyBtn.innerText = "ИЗУЧЕНО";
+            buyBtn.disabled = true;
+            buyBtn.style.background = "#333";
+            buyBtn.style.color = "#aaa";
+        } else {
+            buyBtn.innerText = "ИЗУЧИТЬ";
+            buyBtn.disabled = false;
+            buyBtn.style.background = ""; // Reset to CSS default
+            buyBtn.style.color = "";
+        }
+    }
+
+    if (cls && window.skillDB[cls] && window.skillDB[cls][skillIdx]) {
+        const runeData = window.skillDB[cls][skillIdx].runes[runeIdx];
+        if (runeData) {
+            document.getElementById('calc-dmg').innerText = runeData.dmg || 0;
+            
+            let aoeVal = runeData.aoe || 1;
+            if (aoeVal === 2.5) {
+                if (cls === 'Чародей' || cls === 'Колдун') aoeVal = 1.6;
+                else if (cls === 'Охотник на демонов') aoeVal = 1.9;
+            }
+            
+            let aoeText = `x${aoeVal}`;
+            if (aoeVal === 1) aoeText = "Одиночная (х1)";
+            else if (aoeVal === 1.3) aoeText = "Малая группа (х1.3)";
+            else if (aoeVal === 1.5) aoeText = "Линия (х1.5)";
+            else if (aoeVal === 1.75) aoeText = "Конус (х1.75)";
+            else if (aoeVal === 1.9) {
+                if (cls === 'Охотник на демонов') aoeText = "В любую точку (х1.9)";
+                else aoeText = "Средняя (х1.9)";
+            }
+            else if (aoeVal === 2) aoeText = "Вокруг (х2)";
+            else if (aoeVal === 2.5) aoeText = "В любую точку (х2.5)";
+            else if (aoeVal === 1.6) aoeText = "В любую точку (х1.6)";
+
+            document.getElementById('calc-aoe').innerText = aoeText;
+            document.getElementById('calc-aoe').dataset.value = aoeVal;
+
+            document.getElementById('calc-slow').innerText = runeData.slow || 0;
+            document.getElementById('calc-stun').innerText = runeData.stun || 0;
+            document.getElementById('calc-heal').innerText = runeData.heal || 0;
+            document.getElementById('calc-buff-dmg').innerText = runeData.buffDmg || 0;
+            document.getElementById('calc-buff-def').innerText = runeData.buffDef || 0;
+            document.getElementById('calc-eff-inc').innerText = runeData.effInc || 0;
+            document.getElementById('calc-res-gain').innerText = runeData.resGain || 0;
+            document.getElementById('calc-buff-perm').value = runeData.buffPerm ? "true" : "false";
+            document.getElementById('calc-buff-duration').value = runeData.buffDuration || 0;
+            document.getElementById('calc-dmg-amp').value = runeData.dmgAmp || 0;
+            document.getElementById('calc-cost-red-flat').value = runeData.costRedFlat || 0;
+            document.getElementById('calc-dmg-2').value = runeData.dmg2 || 0;
+            document.getElementById('calc-aoe-2').value = runeData.aoe2 || 1;
+            
+            const skillName = window.skillDB[cls][skillIdx].name;
+            const runeName = window.skillDB[cls][skillIdx].runes[runeIdx].name;
+            
+            document.getElementById('calc-skill-cost-box').style.display = (runeName === "Призма" || runeName === "Сила бури") ? 'block' : 'none';
+            
+            const synergyBox = document.getElementById('calc-synergy-box');
+            if (runeData.dmgAmp > 0) {
+                synergyBox.style.display = 'block';
+                const synSelect = document.getElementById('calc-synergy-skill');
+                if (synSelect.dataset.class !== cls) {
+                    synSelect.innerHTML = '<option value="">-- Выберите навык --</option>';
+                    window.skillDB[cls].forEach((s, i) => {
+                        s.runes.forEach((r, ri) => {
+                            if (r.dmg > 0) synSelect.innerHTML += `<option value="${i}-${ri}">${s.name} - ${r.name} (${r.dmg}%)</option>`;
+                        });
+                    });
+                    synSelect.dataset.class = cls;
+                }
+            } else {
+                synergyBox.style.display = 'none';
+            }
+        } else {
+            document.getElementById('calc-skill-cost-box').style.display = 'none';
+            document.getElementById('calc-synergy-box').style.display = 'none';
+        }
+    }
+    window.calculateSkillCost();
+}
+
+// Вспомогательная функция для расчета стоимости руны из БД
+window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
+    if (!window.skillDB[className] || !window.skillDB[className][skillIdx]) return { cost: 0, details: [] };
+    
+    const runeData = window.skillDB[className][skillIdx].runes[runeIdx];
+    if (!runeData) return { cost: 0, details: [] };
+
+    const dmg = runeData.dmg || 0;
+    let aoeMult = runeData.aoe || 1;
+    if (aoeMult === 2.5) {
+        if (className === 'Чародей' || className === 'Колдун') aoeMult = 1.6;
+        else if (className === 'Охотник на демонов') aoeMult = 1.9;
+    }
+
+    const slow = runeData.slow || 0;
+    const stun = runeData.stun || 0;
+    const heal = runeData.heal || 0;
+    const buffDmg = runeData.buffDmg || 0;
+    const buffDef = runeData.buffDef || 0;
+    const effInc = runeData.effInc || 0;
+    const resGain = runeData.resGain || 0;
+    const isBuffPerm = runeData.buffPerm || false;
+    const buffDuration = runeData.buffDuration || 0;
+    const dmgAmp = runeData.dmgAmp || 0;
+    const costRedFlat = runeData.costRedFlat || 0;
+    const dmg2 = runeData.dmg2 || 0;
+    let aoe2 = runeData.aoe2 || 1;
+    
+    // Для синергии и снижения затрат берем значения из UI, так как они зависят от выбора пользователя
+    const mainSkillCost = parseFloat(document.getElementById('calc-main-skill-cost').value) || 0;
+    const synVal = document.getElementById('calc-synergy-skill').value;
+    
+    const meleeClasses = ["Варвар", "Монах", "Крестоносец"];
+    const rangedClasses = ["Чародей", "Колдун", "Охотник на демонов"];
+    const isMelee = meleeClasses.includes(className);
+    const isRanged = rangedClasses.includes(className);
+    
+    let controlMult = 1;
+    let slowMult = 1;
+
+    if (isMelee) { controlMult = 2.5; slowMult = 0; }
+    else if (isRanged) { slowMult = 1.5; }
+
+    let cost = 0;
+    let details = [];
+
+    let totalEffInc = effInc;
+    if (costRedFlat > 0 && mainSkillCost > costRedFlat) {
+        let newCost = mainSkillCost - costRedFlat;
+        let ratio = mainSkillCost / newCost;
+        let addedEff = (ratio - 1) * 100;
+        totalEffInc += addedEff;
+        details.push(`Эфф. от сниж. затрат (${mainSkillCost} -> ${newCost}): +${addedEff.toFixed(1)}%`);
+    }
+
+    if (dmg > 0) {
+        let baseDmgCost = (dmg / 100) * 2 * aoeMult;
+        let finalDmgCost = baseDmgCost;
+        let formula = `Урон (${dmg}% * 2 * ${aoeMult})`;
+        
+        if (totalEffInc > 0) {
+            formula += ` * (1 + ${totalEffInc.toFixed(1)}%)`;
+            finalDmgCost = baseDmgCost * (1 + totalEffInc / 100);
+        }
+        
+        cost += finalDmgCost;
+        details.push(`${formula} = ${finalDmgCost.toFixed(2)}`);
+    }
+
+    if (dmg2 > 0) {
+        if (aoe2 === 2.5) {
+            if (className === "Чародей" || className === "Колдун") aoe2 = 1.6;
+            else if (className === "Охотник на демонов") aoe2 = 1.9;
+        }
+
+        let dmg2Cost = (dmg2 / 100) * 2 * aoe2;
+        
+        if (totalEffInc > 0) {
+            dmg2Cost = dmg2Cost * (1 + totalEffInc / 100);
+            details.push(`Доп. Урон (${dmg2}% * 2 * ${aoe2}) * (1 + ${totalEffInc.toFixed(1)}%) = ${dmg2Cost.toFixed(2)}`);
+        } else {
+            details.push(`Доп. Урон (${dmg2}% * 2 * ${aoe2}) = ${dmg2Cost.toFixed(2)}`);
+        }
+        
+        cost += dmg2Cost;
+    }
+
+    if (slow > 0) { 
+        let baseSlowCost = slow / 20;
+        let val = baseSlowCost * aoeMult * slowMult;
+        cost += val; 
+        let formula = `Замедл (${slow}% / 20)`;
+        if (aoeMult !== 1) formula += ` * ${aoeMult}(AOE)`;
+        if (slowMult !== 1) formula += ` * ${slowMult}(Класс)`;
+        details.push(`${formula} = ${val.toFixed(2)}`); 
+    }
+    if (stun > 0) { 
+        let val = stun * aoeMult * controlMult;
+        cost += val; 
+        let formula = `Стан (${stun}с)`;
+        if (aoeMult !== 1) formula += ` * ${aoeMult}(AOE)`;
+        if (controlMult !== 1) formula += ` * ${controlMult}(Класс)`;
+        details.push(`${formula} = ${val.toFixed(2)}`); 
+    }
+
+    if (heal > 0) { 
+        let val = (heal / 5) * 2;
+        cost += val; 
+        details.push(`Лечение (${heal}% / 5 * 2) = ${val.toFixed(2)}`); 
+    }
+
+    if (buffDmg > 0) { 
+        let multiplier = isBuffPerm ? 4 : 2;
+        let val = (buffDmg / 10) * multiplier;
+        cost += val; 
+        details.push(`Бафф Урона (${buffDmg}% / 10 * ${multiplier}) = ${val.toFixed(2)}`); 
+    }
+    if (buffDef > 0) { 
+        let multiplier = 1;
+        if (isBuffPerm) multiplier = 4;
+        else if (buffDuration >= 10 && buffDuration <= 20) multiplier = 2;
+        else multiplier = 1;
+
+        let val = (buffDef / 5) * multiplier;
+        cost += val; 
+        let desc = `Бафф Защиты (${buffDef}% / 5 * ${multiplier})`;
+        details.push(`${desc} = ${val.toFixed(2)}`); 
+    }
+
+    const maxResources = {
+        "Чародей": 100,
+        "Колдун": 750,
+        "Монах": 250,
+        "Варвар": 100,
+        "Крестоносец": 100,
+        "Охотник на демонов": 125
+    };
+    if (resGain > 0 && maxResources[className]) {
+        const maxRes = maxResources[className];
+        const resGainPercent = (resGain / maxRes) * 100;
+        const val = (resGainPercent / 5) * 1;
+        cost += val;
+        details.push(`Восст. ресурса (${resGain} / ${maxRes} / 5%) = ${val.toFixed(2)}`);
+    }
+
+    if (window.skillDB[className] && window.skillDB[className][skillIdx] && window.skillDB[className][skillIdx].runes[runeIdx].customCost) {
+        let cc = window.skillDB[className][skillIdx].runes[runeIdx].customCost;
+        cost += cc;
+        details.push(`Доп. эффект: ${cc}`);
+    }
+
+    if (dmgAmp > 0) {
+        if (synVal) {
+            const [sIdx, rIdx] = synVal.split('-');
+            const targetRune = window.skillDB[className][sIdx].runes[rIdx];
+            
+            const tDmg = targetRune.dmg || 0;
+            let tAoe = targetRune.aoe || 1;
+            if (tAoe === 2.5) {
+                if (className === "Чародей" || className === "Колдун") tAoe = 1.6;
+                else if (className === "Охотник на демонов") tAoe = 1.9;
+            }
+
+            if (tDmg > 0) {
+                const targetCost = (tDmg / 100) * 2 * tAoe;
+                
+                let multiplier = 1;
+                if (isBuffPerm) multiplier = 4;
+                else if (buffDuration >= 10 && buffDuration <= 20) multiplier = 2;
+
+                const part1 = targetCost * (dmgAmp / 100);
+                const part2 = (dmgAmp / 10) * multiplier * aoeMult;
+                const addedCost = part1 + part2;
+                
+                cost += addedCost;
+                details.push(`Синергия: (${targetCost.toFixed(2)} * ${dmgAmp}%) + (${(dmgAmp/10*multiplier).toFixed(1)} * ${aoeMult}) = ${addedCost.toFixed(2)}`);
+            }
+        } else {
+            details.push(`<span style="color:#ff4444">⚠️ Выберите навык для расчета синергии!</span>`);
+        }
+    }
+
+    if (dmg === 0 && dmg2 === 0 && totalEffInc > 0) {
+        let oldCost = cost;
+        cost = cost * (1 + totalEffInc / 100);
+        details.push(`Общая Эфф. (+${totalEffInc.toFixed(1)}%): ${oldCost.toFixed(2)} -> ${cost.toFixed(2)}`);
+    }
+
+    return { cost: cost, details: details };
+}
+
+window.calculateSkillCost = function() {
+    const className = document.getElementById('calc-class-select').value;
+    const skillIdx = document.getElementById('calc-skill-select').value;
+    const runeIdx = document.getElementById('calc-rune-select').value;
+
+    if (!className || skillIdx === '' || runeIdx === '') return;
+
+    // 1. Считаем полную стоимость выбранной руны
+    const currentCalc = window.calculateRuneCostFromDB(className, skillIdx, runeIdx);
+    let finalCost = currentCalc.cost;
+    let details = currentCalc.details;
+
+    // 2. Проверяем, изучена ли Базовая руна (индекс 0)
+    const skillName = window.skillDB[className][skillIdx].name;
+    const baseRuneName = window.skillDB[className][skillIdx].runes[0].name;
+    const isBaseLearned = window.playerData.learnedSkills[skillName] && window.playerData.learnedSkills[skillName].includes(baseRuneName);
+
+    // 3. Если выбрана НЕ базовая руна, и базовая уже изучена -> вычитаем стоимость базовой
+    if (runeIdx != 0 && isBaseLearned) {
+        const baseCalc = window.calculateRuneCostFromDB(className, skillIdx, 0);
+        // Базовая руна обычно не имеет синергии/снижения затрат в контексте "базы", 
+        // поэтому расчет через DB (где эти поля из UI могут быть пустыми или дефолтными) приемлем.
+        if (baseCalc.cost > 0) {
+            finalCost = Math.max(0, finalCost - baseCalc.cost);
+            details.push(`<br><span style="color:#66ff66">✅ Скидка за изученную базу: -${baseCalc.cost.toFixed(2)}</span>`);
+        }
+    }
+
+    document.getElementById('calc-result').innerText = finalCost.toFixed(2);
+    document.getElementById('calc-details').innerHTML = details.join('<br>') || "Нет параметров";
+}
+
+window.buySkill = function() {
+    const cost = parseFloat(document.getElementById('calc-result').innerText);
+    const className = document.getElementById('calc-class-select').value;
+    const skillIdx = document.getElementById('calc-skill-select').value;
+    const runeIdx = document.getElementById('calc-rune-select').value;
+
+    if (!className || skillIdx === '' || runeIdx === '') {
+        window.showCustomAlert("⚠️ Сначала выберите класс, навык и руну.");
+        return;
+    }
+
+    if (!window.playerData.className || window.playerData.className === "Класс не выбран") {
+        window.showCustomAlert("⚠️ Сначала выберите класс (билд) в меню Классов.");
+        return;
+    }
+
+    if (window.playerData.className && window.playerData.className !== "Класс не выбран") {
+        if (window.playerData.className !== className) {
+             window.showCustomAlert(`❌ Вы не можете изучить навык класса <span style="color:#d4af37">${className}</span>.<br><br>Ваш класс: <span style="color:#66ccff">${window.playerData.className}</span>.`);
+             return;
+        }
+    }
+
+    const skillName = window.skillDB[className][skillIdx].name;
+    const runeName = window.skillDB[className][skillIdx].runes[runeIdx].name;
+
+    if (window.playerData.learnedSkills[skillName] && window.playerData.learnedSkills[skillName].includes(runeName)) {
+        window.showCustomAlert(`✅ Навык "${skillName} (${runeName})" уже изучен.`);
+        return;
+    }
+
+    if (isNaN(cost) || cost < 0) { 
+        window.showCustomAlert("⚠️ Стоимость навыка не рассчитана.");
+        return;
+    }
+    
+    if (window.playerData.runes >= cost) {
+        window.showCustomConfirm(
+            `Изучить "${skillName} (${runeName})" за <span style="color:#fff">${cost}</span> 📖?<br><br>У вас останется: ${(window.playerData.runes - cost).toFixed(1)} 📖`,
+            () => {
+                window.playerData.runes = parseFloat((window.playerData.runes - cost).toFixed(1));
+                
+                if (!window.playerData.learnedSkills[skillName]) {
+                    window.playerData.learnedSkills[skillName] = [];
+                }
+                window.playerData.learnedSkills[skillName].push(runeName);
+
+                window.saveToStorage();
+                window.updateUI();
+                window.showCustomAlert("✅ Навык успешно изучен!");
+            }
+        );
+    } else {
+        window.showCustomAlert(`❌ Недостаточно рун!<br><br>Нужно: <span style="color:#ff4444">${cost}</span> 📖<br>У вас: <span style="color:#66ccff">${window.playerData.runes}</span> 📖`);
+    }
+}
+
+// Вспомогательная функция для форматирования валюты
+window.formatCurrency = function(yen) {
+    let g = Math.floor(yen / 1000000);
+    let remainder = yen % 1000000;
+    let s = Math.floor(remainder / 10000);
+    remainder = remainder % 10000;
+    let c = Math.floor(remainder / 100);
+    let y = remainder % 100;
+
+    let parts = [];
+    if (g > 0) parts.push(`${g}🥇`);
+    if (s > 0) parts.push(`${s}🥈`);
+    if (c > 0) parts.push(`${c}🥉`);
+    if (y > 0 || parts.length === 0) parts.push(`${y}🧧`);
+
+    return parts.join(' ');
+}
+
+window.openExpCalculator = function() {
+    document.getElementById('exp-calc-modal').style.display = 'block';
+    document.getElementById('exp-mobs').value = 0;
+    document.getElementById('exp-elites').value = 0;
+    document.getElementById('exp-bosses').value = 0;
+    window.calculateExp();
+}
+
+window.calculateExp = function() {
+    const mobs = parseInt(document.getElementById('exp-mobs').value) || 0;
+    const elites = parseInt(document.getElementById('exp-elites').value) || 0;
+    const bosses = parseInt(document.getElementById('exp-bosses').value) || 0;
+
+    let runesBase = (mobs * 0.01) + (elites * 0.1) + (bosses * 3);
+    let paraBase = (mobs * 0.01) + (elites * 0.1) + (bosses * 3);
+
+    const g = (window.playerData.guild || "").toLowerCase();
+    let runesMod = 1;
+    let paraMod = 1;
+
+    if (g.includes('торговц')) {
+        runesBase = (elites * 0.1) + (bosses * 3);
+        paraBase = (elites * 0.1) + (bosses * 3);
+    } else if (g.includes('охотник на гоблинов')) {
+        runesMod += 0.2; paraMod += 0.2;
+    } else if (g.includes('охотник на ☠️')) {
+        const eliteBossBase = (elites * 0.1) + (bosses * 3);
+        const bonus = eliteBossBase * 0.33;
+        runesBase += bonus; paraBase += bonus;
+    } else if (g.includes('помощник охотника')) {
+        const eliteBossBase = (elites * 0.1) + (bosses * 3);
+        const bonus = eliteBossBase * 0.15;
+        runesBase += bonus; paraBase += bonus;
+    } else if (g.includes('ученик чародея')) {
+        runesMod += 0.1; paraMod += 0.1;
+    } else if (g.includes('вампир')) {
+        const ranks = [0.10, 0.13, 0.16, 0.20, 0.25, 0.40, 0.50, 0.60, 0.75, 1.00];
+        const r = (window.playerData.rank || 1) - 1;
+        const bonus = ranks[Math.min(r, 9)] || 0.10;
+        runesMod += bonus; paraMod += bonus;
+    } else if (g.includes('чародей')) {
+        const ranks = [0.15, 0.20, 0.28, 0.35, 0.50, 0.75, 1.00, 1.25, 1.50, 2.00];
+        const r = (window.playerData.rank || 1) - 1;
+        const bonus = ranks[Math.min(r, 9)] || 0.15;
+        runesMod += bonus; paraMod += bonus;
+    } else if (g.includes('гэмблер')) {
+        runesMod -= 0.25; paraMod -= 0.25;
+    } else if (g.includes('вор') && !g.includes('воришка')) {
+        runesMod -= 0.175; paraMod -= 0.175;
+    } else if (g.includes('воришка')) {
+        runesMod -= 0.1; paraMod -= 0.1;
+    } else if (g.includes('салага')) {
+        runesMod -= 0.1; paraMod -= 0.1;
+    } else if (g.includes('громила')) {
+        runesMod -= 0.2; paraMod -= 0.2;
+    } else if (g.includes('лорд войны')) {
+        runesMod += 0.07;
+    }
+
+    const totalRunes = (runesBase * runesMod).toFixed(2);
+    const totalPara = (paraBase * paraMod).toFixed(2);
+
+    document.getElementById('exp-result-display').innerHTML = `
+        <span style="color:#fff">Награда:</span><br>
+        <span style="color:#66ccff; font-size:1.2rem;">${totalRunes} 📖</span> | 
+        <span style="color:#d4af37; font-size:1.2rem;">${totalPara} ⏳</span>
+    `;
+}
+
+window.applyExpCalculation = function() {
+    const mobs = parseInt(document.getElementById('exp-mobs').value) || 0;
+    const elites = parseInt(document.getElementById('exp-elites').value) || 0;
+    const bosses = parseInt(document.getElementById('exp-bosses').value) || 0;
+    
+    window.calculateExp();
+    const resHTML = document.getElementById('exp-result-display').innerHTML;
+    const runesMatch = resHTML.match(/([\d\.]+) 📖/);
+    const paraMatch = resHTML.match(/([\d\.]+) ⏳/);
+    
+    const addRunes = runesMatch ? parseFloat(runesMatch[1]) : 0;
+    const addPara = paraMatch ? parseFloat(paraMatch[1]) : 0;
+
+    window.playerData.runes = parseFloat((window.playerData.runes + addRunes).toFixed(2));
+    window.playerData.para = parseFloat((window.playerData.para + addPara).toFixed(2));
+    window.playerData.kills += mobs;
+    window.playerData.elites_solo += elites;
+    window.playerData.bosses += bosses;
+
+    window.saveToStorage();
+    window.updateUI();
+    document.getElementById('exp-calc-modal').style.display = 'none';
+    window.showCustomAlert(`✅ Получено: ${addRunes} 📖 и ${addPara} ⏳<br>Статистика обновлена.`);
+}
+
+window.addMoney = function(g, s, c, y) {
+    window.playerData.gold_g += g;
+    window.playerData.gold_s += s;
+    window.playerData.gold_c += c;
+    window.playerData.gold_y += y;
+    if (window.coinSound) { window.coinSound.currentTime = 0; window.coinSound.play().catch(e => {}); }
+    window.updateUI();
+    alert(`💰 Получено: ${s} серебра!`);
+}
+
+window.claimProfessionReward = function(profNum) {
+    if (profNum === 1) {
+        window.playerData.gold_s += 1;
+        if (window.coinSound) { window.coinSound.currentTime = 0; window.coinSound.play().catch(e => {}); }
+        window.playerData.runes += 1.5;
+        window.playerData.para += 1.5;
+        window.updateUI();
+        window.showCustomAlert("💰 Получено: 1🥈, 1.5 📖, 1.5 ⏳");
+    }
+}
+
+window.togglePentagram = function(id) {
+    const el = document.getElementById(id);
+    if (el) {
+        window.playerData[id] = el.checked;
+        window.updateUI();
+    }
+}
+
+window.buyZakens = function(mode) {
+    const modal = document.getElementById('zaken-buy-modal');
+    const title = modal.querySelector('h3');
+    const buyBtn = document.getElementById('btn-confirm-buy');
+    const sellBtn = document.getElementById('btn-confirm-sell');
+    
+    const priceYen = window.getZakenPrice(window.playerData.level);
+    const lvl = window.playerData.level;
+
+    if (mode === 'buy') {
+        // Проверка уровня (20+, кратно 5 до 70, или >70)
+        if (lvl < 20) {
+            window.showCustomAlert("❌ Покупка закенов доступна с 20 уровня.");
+            return;
+        }
+        
+        // Если уровень меньше 70 и не кратен 5 (20, 25, 30...)
+        if (lvl < 70 && lvl % 5 !== 0) {
+            window.showCustomAlert("❌ До 70 уровня покупка доступна только на уровнях, кратных 5 (20, 25, 30...).");
+            return;
+        }
+
+        title.innerText = '💰 ПОКУПКА ЗАКЕНОВ';
+        title.style.color = '#d4af37';
+        modal.style.borderColor = '#d4af37';
+        buyBtn.style.display = 'inline-block';
+        sellBtn.style.display = 'none';
+        document.getElementById('zaken-price-display').innerText = "";
+    } else {
+        title.innerText = '📉 ПРОДАЖА ЗАКЕНОВ';
+        title.style.color = '#ff4444';
+        modal.style.borderColor = '#ff4444';
+        buyBtn.style.display = 'none';
+        sellBtn.style.display = 'inline-block';
+        // Цена продажи рассчитывается в updateZakenTotalCost, здесь просто текст
+        document.getElementById('zaken-price-display').innerText = `Цена продажи зависит от уровня`;
+    }
+    
+    document.getElementById('zaken-count-input').value = 1;
+    modal.dataset.mode = mode; // Сохраняем режим
+    window.updateZakenTotalCost();
+    
+    modal.style.display = 'block';
+}
+
+window.updateZakenTotalCost = function() {
+    const count = parseInt(document.getElementById('zaken-count-input').value) || 0;
+    const modal = document.getElementById('zaken-buy-modal');
+    const mode = modal.dataset.mode;
+    const lvl = window.playerData.level;
+    
+    let priceYen = window.getZakenPrice(lvl);
+    
+    if (mode === 'sell') {
+        priceYen = priceYen * 0.8;
+    }
+
+    const totalYen = priceYen * count;
+    const label = mode === 'buy' ? 'Стоимость' : 'Получите';
+    document.getElementById('zaken-total-cost').innerText = `${label}: ${window.formatCurrency(totalYen)}`;
+}
+
+window.confirmBuyZakens = function() {
+    const count = parseInt(document.getElementById('zaken-count-input').value);
+    const priceYen = window.getZakenPrice(window.playerData.level);
+    
+    if (isNaN(count) || count <= 0) {
+        window.showCustomAlert("Некорректное число.");
+        return;
+    }
+
+    const totalCostYen = priceYen * count;
+    const currentYen = window.getAllMoneyInYen();
+
+    if (currentYen >= totalCostYen) {
+        window.setMoneyFromYen(currentYen - totalCostYen);
+        window.playerData.zakens += count;
+        window.playerData.black_market += count;
+        window.updateUI();
+        document.getElementById('zaken-buy-modal').style.display = 'none';
+        window.showCustomAlert(`✅ Куплено ${count} 🔖 за ${window.formatCurrency(totalCostYen)}.`);
+    } else {
+        window.showCustomAlert(`❌ Недостаточно средств!<br>Нужно: ${window.formatCurrency(totalCostYen)}`);
+    }
+}
+
+window.confirmSellZakens = function() {
+    const count = parseInt(document.getElementById('zaken-count-input').value);
+    const lvl = window.playerData.level;
+    
+    if (isNaN(count) || count <= 0) {
+        window.showCustomAlert("Некорректное число.");
+        return;
+    }
+
+    if (window.playerData.zakens < count) {
+        window.showCustomAlert(`❌ Недостаточно закенов!<br>У вас: ${window.playerData.zakens}`);
+        return;
+    }
+
+    // Расчет цены продажи
+    let basePrice = window.getZakenPrice(lvl);
+    
+    const sellPricePerUnit = basePrice * 0.8; // 80% от цены
+    const totalSellYen = Math.floor(sellPricePerUnit * count);
+
+    window.playerData.zakens -= count;
+    window.playerData.gold_y += totalSellYen;
+    // Нормализация валюты происходит в updateUI -> calculateRank -> но лучше сделать тут или использовать addMoney
+    // Проще добавить напрямую и нормализовать
+    while (window.playerData.gold_y >= 100) { window.playerData.gold_y -= 100; window.playerData.gold_c++; }
+    while (window.playerData.gold_c >= 100) { window.playerData.gold_c -= 100; window.playerData.gold_s++; }
+    while (window.playerData.gold_s >= 100) { window.playerData.gold_s -= 100; window.playerData.gold_g++; }
+
+    window.updateUI();
+    document.getElementById('zaken-buy-modal').style.display = 'none';
+    window.showCustomAlert(`✅ Продано ${count} 🔖 за ${window.formatCurrency(totalSellYen)}.`);
+}
+
+
+window.buyReagent = function() {
+    showCustomPrompt("Покупка реагента", "Цена: 10🥈 за 1 шт.", "1", (quantity) => {
+        if (isNaN(quantity) || quantity <= 0) {
+            showCustomAlert("Некорректное количество.");
+            return;
+        }
+
+        const costPerUnit = 100000; // 10 silver = 100000 yen
+        const totalCost = costPerUnit * quantity;
+        const currentMoney = getAllMoneyInYen();
+
+        if (currentMoney >= totalCost) {
+            setMoneyFromYen(currentMoney - totalCost);
+            playerData.reagents += quantity;
+            updateUI();
+            showCustomAlert(`✅ Куплено ${quantity} реагентов за ${window.formatCurrency(totalCost)}.`);
+        } else {
+            showCustomAlert(`❌ Недостаточно средств!`);
+        }
+    });
+}
+
+window.sellDeathBreath = function() {
+    showCustomPrompt("Продажа Дыхания Смерти", `Цена: 5🥈 за 1 шт.<br>У вас: ${playerData.death_breath} 🧪`, "1", (quantity) => {
+        if (isNaN(quantity) || quantity <= 0) {
+            showCustomAlert("Некорректное количество.");
+            return;
+        }
+
+        if (playerData.death_breath < quantity) {
+            showCustomAlert(`❌ Недостаточно Дыханий Смерти!`);
+            return;
+        }
+
+        const pricePerUnit = 50000; // 5 silver = 50000 yen
+        const totalGain = pricePerUnit * quantity;
+        
+        playerData.death_breath -= quantity;
+        const currentMoney = getAllMoneyInYen();
+        setMoneyFromYen(currentMoney + totalGain);
+        updateUI();
+        showCustomAlert(`✅ Продано ${quantity} 🧪 за ${window.formatCurrency(totalGain)}.`);
+    });
+}
+
+window.craftHealthPotion = function() {
+    showCustomPrompt("Крафт зелий здоровья", `Нужно: 1🧪 и 1 реагент за зелье.`, "1", (quantity) => {
+        if (isNaN(quantity) || quantity <= 0) {
+            showCustomAlert("Некорректное количество.");
+            return;
+        }
+
+        const currentReagents = window.playerData.reagents || 0;
+        if (window.playerData.death_breath < quantity || currentReagents < quantity) {
+            let errorMsg = "❌ Недостаточно ресурсов!<br>";
+            if (window.playerData.death_breath < quantity) errorMsg += `Нужно 🧪: ${quantity} (у вас ${window.playerData.death_breath})<br>`;
+            if (currentReagents < quantity) errorMsg += `Нужно реагентов: ${quantity} (у вас ${currentReagents})`;
+            showCustomAlert(errorMsg);
+            return;
+        }
+
+        playerData.death_breath -= quantity;
+        playerData.reagents -= quantity;
+        playerData.potions += quantity;
+        updateUI();
+        showCustomAlert(`✅ Скрафчено ${quantity} 💊.`);
+    });
+}
+
+window.applySkillPenalty = function() {
+    const lvl = playerData.level;
+    let penaltyYen = 0;
+    if (lvl <= 20) penaltyYen = 1000;
+    else if (lvl <= 40) penaltyYen = 2500;
+    else if (lvl <= 60) penaltyYen = 5000;
+    else penaltyYen = 10000;
+
+    const currentMoney = getAllMoneyInYen();
+    setMoneyFromYen(currentMoney - penaltyYen);
+    updateUI();
+    showCustomAlert(`🚨 Использовано неизученное умение!<br>Списано: ${window.formatCurrency(penaltyYen)}`);
+}
+
+
+window.applyEscapePenalty = function() {
+    const lvl = playerData.level;
+    let penaltyYen = 0;
+    if (lvl <= 20) penaltyYen = 10000;
+    else if (lvl <= 40) penaltyYen = 30000;
+    else if (lvl <= 60) penaltyYen = 60000;
+    else if (lvl <= 69) penaltyYen = 100000;
+    else if (lvl <= 75) penaltyYen = 300000;
+    else if (lvl <= 85) penaltyYen = 1000000;
+    else penaltyYen = 5000000;
+
+    const currentMoney = getAllMoneyInYen();
+    setMoneyFromYen(currentMoney - penaltyYen);
+    updateUI();
+    showCustomAlert(`🚨 Использована спас-способность!<br>Списано: ${window.formatCurrency(penaltyYen)}`);
+}
+
+window.buyPotion = function() {
+    showCustomPrompt("Экстренная покупка зелий", "Сколько зелий (💊) купить и выпить?", "1", (quantity) => {
+        if (isNaN(quantity) || quantity <= 0) {
+            showCustomAlert("Некорректное количество.");
+            return;
+        }
+
+        const lvl = playerData.level;
+        let pricePerPotion = 0;
+
+        if (lvl < 70) {
+            if (lvl <= 20) pricePerPotion = 1000; // 10c
+            else if (lvl <= 40) pricePerPotion = 4000; // 40c
+            else if (lvl <= 52) pricePerPotion = 20000; // 2s
+            else if (lvl <= 61) pricePerPotion = 40000; // 4s
+            else if (lvl <= 66) pricePerPotion = 80000; // 8s
+            else pricePerPotion = 200000; // 20s
+        } else {
+            const basePrice = 200000; // 20s
+            const maxVp = playerData.maxVp || 0;
+            pricePerPotion = basePrice * Math.pow(1.05, maxVp);
+        }
+
+        const totalCost = Math.floor(pricePerPotion * quantity);
+        const currentMoney = getAllMoneyInYen();
+
+        if (currentMoney >= totalCost) {
+            setMoneyFromYen(currentMoney - totalCost);
+            updateUI();
+            showCustomAlert(`✅ Куплено и выпито ${quantity} 💊. Списано: ${window.formatCurrency(totalCost)}.`);
+        } else {
+            showCustomAlert(`❌ Недостаточно средств!`);
+        }
+    });
+}
+
+function getSmithSellPrice(level) {
+    // Эта функция использует таблицу из раздела "Кузница" -> "Продажа ресурсов (5%)"
+    if (level <= 5) return 25;
+    if (level <= 10) return 30;
+    if (level <= 15) return 40;
+    if (level <= 20) return 55;
+    if (level <= 25) return 100;
+    if (level <= 30) return 200;
+    if (level <= 35) return 280;
+    if (level <= 40) return 460;
+    if (level <= 45) return 650;
+    if (level <= 50) return 1100;
+    if (level <= 55) return 1800;
+    if (level <= 60) return 2700;
+    if (level <= 65) return 4500;
+    if (level <= 69) return 7000;
+    if (level >= 70) return 8700;
+    return 25; // Default
+}
+
+window.sellResources = function() {
+    const modal = document.getElementById('multi-sell-modal');
+    const inputsContainer = document.getElementById('multi-sell-inputs');
+    const totalDisplay = document.getElementById('multi-sell-total');
+    const okBtn = document.getElementById('multi-sell-ok-btn');
+    const cancelBtn = document.getElementById('multi-sell-cancel-btn');
+    const levelInput = document.getElementById('multi-sell-level');
+    levelInput.value = window.lastResourceSellLevel || 1;
+
+    document.getElementById('multi-sell-title').innerText = "Продажа ресурсов";
+    const resources = [
+        { type: 'n', name: 'N Grade 📓', mult: 1, stock: window.playerData.res_n || 0 },
+        { type: 'dc', name: 'D/C Grade 📘/📒', mult: 3, stock: window.playerData.res_dc || 0 },
+        { type: 'b', name: 'B Grade 📙', mult: 4, stock: window.playerData.res_b || 0 },
+        { type: 'a', name: 'A Grade 📕', mult: 10.5, stock: window.playerData.res_a || 0 }
+    ];
+
+    inputsContainer.innerHTML = resources.map(r => `
+        <label style="display: flex; justify-content: space-between; align-items: center;">
+            <span>${r.name} (x${r.mult})<br><small style="color:#888">В наличии: ${r.stock}</small></span>
+            <input type="number" data-type="${r.type}" data-mult="${r.mult}" class="multi-sell-input" value="0" min="0" style="width: 80px; padding: 5px; background: #000; border: 1px solid #444; color: #fff;">
+        </label>
+    `).join('');
+
+    const updateTotal = () => {
+        let totalYen = 0;
+        const level = parseInt(levelInput.value) || 1;
+        window.lastResourceSellLevel = level;
+        const basePrice = getSmithSellPrice(level);
+
+        inputsContainer.querySelectorAll('.multi-sell-input').forEach(input => {
+            const quantity = parseInt(input.value) || 0;
+            const mult = parseFloat(input.dataset.mult);
+            totalYen += quantity * basePrice * mult;
+        });
+        totalDisplay.innerHTML = `Итого: ${window.formatCurrency(Math.floor(totalYen))}`;
+    };
+
+    levelInput.oninput = updateTotal;
+    inputsContainer.querySelectorAll('.multi-sell-input').forEach(input => {
+        input.oninput = updateTotal;
+    });
+
+    okBtn.onclick = () => {
+        let totalGain = 0;
+        let error = false;
+        const quantities = {};
+        const level = parseInt(levelInput.value) || 1;
+        const basePrice = getSmithSellPrice(level);
+
+        inputsContainer.querySelectorAll('.multi-sell-input').forEach(input => {
+            const resType = input.dataset.type;
+            const quantity = parseInt(input.value) || 0;
+            quantities[resType] = (quantities[resType] || 0) + quantity;
+
+            if (quantity > (window.playerData[`res_${resType}`] || 0)) {
+                error = true;
+            }
+            totalGain += quantity * basePrice * parseFloat(input.dataset.mult);
+        });
+
+        if (error) {
+            showCustomAlert("❌ Недостаточно ресурсов одного из типов!");
+            return;
+        }
+
+        if (totalGain > 0) {
+            for (const resType in quantities) {
+                window.playerData[`res_${resType}`] -= quantities[resType];
+            }
+            const currentMoney = getAllMoneyInYen();
+            setMoneyFromYen(currentMoney + Math.floor(totalGain));
+            updateUI();
+            showCustomAlert(`✅ Ресурсы проданы! Получено: ${window.formatCurrency(Math.floor(totalGain))}`);
+        }
+        modal.style.display = 'none';
+    };
+
+    cancelBtn.onclick = () => {
+        modal.style.display = 'none';
+    };
+
+    updateTotal();
+    modal.style.display = 'flex';
+}
+
+window.resetProgress = function() {
+    window.showCustomConfirm(
+        "⚠️ ВНИМАНИЕ ⚠️<br><br>Вы собираетесь полностью стереть весь прогресс, статистику, выбранные классы и гильдии.<br><br>Это действие нельзя отменить.<br><br>Вы уверены?",
+        () => {
+            window.playerData = {
+                name: "НЕФАЛЕМ",
+                level: 1,
+                gold_g: 0, gold_s: 0, gold_c: 0, gold_y: 0,
+                runes: 0, para: 0, zakens: 0, maxVp: 0, potions: 0,
+                guild_html: "", class_html: "",
+                stat_str: 0, stat_dex: 0, stat_int: 0, stat_vit: 0,
+                kills: 0, elites_solo: 0, bosses: 0, gobs_solo: 0, gobs_assist: 0,
+                found_legs: 0, found_yellows: 0, res_n: 0, res_dc: 0, res_b: 0, res_a: 0, reagents: 0,
+                runes_sold: 0, reputation: 0, deals: 0, chests_found: 0,
+                steals: 0, theft_fine: "", black_market: 0, zaken_discount: "",
+                xp_bonus: "", potion_price: "", lvl70_portal: "",
+                learnedSkills: {},
+                penta_1: false, penta_2: false, penta_3: false,
+                className: "Класс не выбран",
+                build: "",
+                guild: "Нет",
+                rank: 0,
+                rankName: "",
+                joined_level: 1
+            };
+
+            window.saveToStorage();
+            document.getElementById('active-guild-bonus').style.display = 'none';
+            document.getElementById('active-class-bonus').style.display = 'none';
+            window.updateUI();
+        }
+    );
+}
+
+// --- ЛОГИКА УСЛУГ ЮВЕЛИРА ---
+
+const gemPrices = [
+    // rank is index + 1
+    { insert: 8000, sell: 1300, rent: 3000 },       // Rank 1
+    { insert: 16000, sell: 2500, rent: 5500 },      // Rank 2
+    { insert: 33000, sell: 5000, rent: 10000 },     // Rank 3
+    { insert: 50000, sell: 7500, rent: 17000 },     // Rank 4
+    { insert: 100000, sell: 15000, rent: 33000 },    // Rank 5
+    { insert: 110000, sell: 17500, rent: 35000 },    // Rank 6
+    { insert: 230000, sell: 35000, rent: 75000 },    // Rank 7
+    { insert: 380000, sell: 57500, rent: 130000 },   // Rank 8
+    { insert: 760000, sell: 115000, rent: 250000 },  // Rank 9
+    { insert: 1150000, sell: 172500, rent: 400000 }  // Rank 10
+];
+
+window.openGemServices = function(mode) {
+    const modal = document.getElementById('gem-service-modal');
+    const title = document.getElementById('gem-service-title');
+    const buttonsContainer = document.getElementById('gem-service-buttons');
+    const itemTypeSelector = document.getElementById('gem-item-type-selector');
+    const rentDurationBox = document.getElementById('gem-rent-duration-box');
+
+    buttonsContainer.innerHTML = ''; // Clear previous buttons
+
+    if (mode === 'main') {
+        title.innerText = 'Услуги Ювелира';
+        buttonsContainer.innerHTML = `
+            <button class="craft-btn buy" onclick="executeGemService('insert')">Вставить/Убрать</button>
+            <button class="craft-btn sell" onclick="executeGemService('sell')">Продать</button>
+        `;
+        itemTypeSelector.style.display = 'flex';
+        rentDurationBox.style.display = 'none';
+    } else if (mode === 'rent') {
+        const g = (window.playerData.guild || "").toLowerCase();
+        if (!g.includes('торговц')) {
+            showCustomAlert("❌ Аренда доступна только членам Гильдии Торговцев.");
+            return;
+        }
+        title.innerText = 'Аренда Самоцветов';
+        buttonsContainer.innerHTML = `
+            <button class="craft-btn craft" onclick="executeGemService('rent')">Арендовать</button>
+        `;
+        itemTypeSelector.style.display = 'none';
+        rentDurationBox.style.display = 'block';
+    }
+    
+    buttonsContainer.innerHTML += `<button class="death-cancel-btn" onclick="closeGemModal()">Отмена</button>`;
+    
+    modal.style.display = 'flex';
+}
+
+window.closeGemModal = function() {
+    document.getElementById('gem-service-modal').style.display = 'none';
+}
+
+window.executeGemService = function(operation) {
+    const gemRank = parseInt(document.getElementById('gem-rank-input').value);
+    const quantity = parseInt(document.getElementById('gem-quantity-input').value);
+    const itemTypeMult = parseFloat(document.querySelector('input[name="gem-item-type"]:checked').value);
+    const rentDuration = parseInt(document.getElementById('gem-rent-duration').value) || 1;
+
+    if (isNaN(gemRank) || gemRank < 1 || gemRank > 10 || isNaN(quantity) || quantity <= 0) {
+        showCustomAlert("❌ Неверный ранг или количество.");
+        return;
+    }
+
+    const priceData = gemPrices[gemRank - 1];
+    if (!priceData) {
+        showCustomAlert("❌ Неверный ранг камня.");
+        return;
+    }
+
+    let singleCost = 0;
+    let operationText = "";
+    let isIncome = false;
+
+    const g = (window.playerData.guild || "").toLowerCase();
+    const playerRank = window.playerData.rank || 0;
+
+    if (operation === 'insert') {
+        singleCost = priceData.insert * itemTypeMult;
+        operationText = `Вставить/убрать ${quantity} 💎 ${gemRank} ранга`;
+        if (g.includes('торговц')) {
+            singleCost = 0; // Guild bonus
+            operationText += " (Бесплатно для Торговцев)";
+        }
+    } else if (operation === 'sell') {
+        let sellMult = 1; // База 5%
+        if (g.includes('торговц')) {
+            // Проценты продажи для торговцев по рангам (0-10)
+            const sellPercents = [10, 13, 15, 17, 19, 21, 23, 25, 28, 32, 35];
+            const p = sellPercents[playerRank] || 10;
+            sellMult = p / 5; // Отношение к базовым 5%
+        }
+        singleCost = priceData.sell * sellMult;
+        operationText = `Продать ${quantity} 💎 ${gemRank} ранга`;
+        isIncome = true;
+    } else if (operation === 'rent') {
+        singleCost = priceData.rent;
+        operationText = `Арендовать ${quantity} 💎 ${gemRank} ранга`;
+    }
+
+    const totalCost = singleCost * quantity;
+    const costFormatted = formatCurrency(totalCost);
+    const confirmMsg = isIncome 
+        ? `${operationText}?<br>Вы получите: ${costFormatted}`
+        : `${operationText}?<br>Стоимость: ${costFormatted}`;
+
+    showCustomConfirm(confirmMsg, () => {
+        const currentMoney = getAllMoneyInYen();
+        if (isIncome) {
+            setMoneyFromYen(currentMoney + totalCost);
+            showCustomAlert(`✅ Продано! Получено: ${costFormatted}`);
+        } else {
+            if (currentMoney < totalCost) {
+                showCustomAlert("❌ Недостаточно средств!");
+                return;
+            }
+            setMoneyFromYen(currentMoney - totalCost);
+            showCustomAlert(`✅ Услуга оплачена! Списано: ${costFormatted}`);
+            
+            if (operation === 'rent') {
+                window.playerData.active_rents.push({
+                    rank: gemRank,
+                    count: quantity,
+                    startLvl: window.playerData.level,
+                    duration: rentDuration
+                });
+            }
+        }
+        updateUI();
+        closeGemModal();
+    });
+}
+
+// --- ЛОГИКА ПРОДАЖИ КРАФТА ---
+
+function getBaseNPriceForCraft(level) {
+    if (level <= 5) return 25;
+    if (level <= 10) return 35;
+    if (level <= 15) return 50;
+    if (level <= 20) return 100;
+    if (level <= 25) return 140;
+    if (level <= 30) return 200;
+    if (level <= 35) return 300;
+    if (level <= 40) return 600;
+    if (level <= 45) return 900;
+    if (level <= 50) return 1400;
+    if (level <= 55) return 2300;
+    if (level <= 60) return 3500;
+    if (level <= 65) return 6000;
+    if (level <= 69) return 9300;
+    if (level >= 70) return 12000;
+    return 25;
+}
+
+function getCraftedItemBasePrice(level, grade) {
+    const nPrice5 = getBaseNPriceForCraft(level);
+    let finalPrice5 = 0;
+
+    switch(grade) {
+        case 'N': finalPrice5 = nPrice5; break;
+        case 'DC': finalPrice5 = nPrice5 * 3; break;
+        case 'B': finalPrice5 = nPrice5 * 4; break;
+        case 'A': finalPrice5 = nPrice5 * 5.25; break; // Множитель для продажи крафта
+        // Расчет для высших грейдов как множитель от 'A'
+        case 'S': finalPrice5 = (nPrice5 * 10.5) * 1.5; break;
+        case 'S+': finalPrice5 = (nPrice5 * 10.5) * 1.56; break;
+        case 'Spectrum': finalPrice5 = (nPrice5 * 10.5) * 4.875; break;
+        default: finalPrice5 = nPrice5;
+    }
+    // Возвращаем 100% цену (таблица для 5%, поэтому * 20)
+    return finalPrice5 * 20;
+}
+
+window.openSellCraftedModal = function() {
+    const modal = document.getElementById('sell-craft-modal');
+    const propertiesContainer = document.getElementById('craft-sell-properties');
+
+    // Данные о свойствах, взятые из раздела "Покупка предметов"
+    const itemPropertiesData = [
+        { percent: 40, items: ["Основа оружия"] },
+        { percent: 30, items: ["Основа брони", "Живучесть", "Осн.Хар.", "Гнездо (голова/оруж)"] },
+        { percent: 20, items: ["Восстановление"] },
+        { percent: 15, items: ["Все сопротивления", "Крит урон", "Крит шанс"] },
+        { percent: 10, items: ["Не Осн.Хар.", "Броня", "Здоровье", "Ур. в бижутерии", "Скор. атак", "Гнездо (броня)", "Урон стихии", "Урон умения", "+ Ур. к скилу", "Сниж. затрат / КДР", "Урон по области"]},
+        { percent: 5, items: ["Одно сопрот.", "Скор. передвижения", "Урон уменьшен"] }
+    ];
+
+    // Генерируем чекбоксы для свойств
+    propertiesContainer.innerHTML = '';
+    itemPropertiesData.forEach(group => {
+        group.items.forEach(item => {
+            const label = document.createElement('label');
+            label.style.fontSize = '0.8rem';
+            label.innerHTML = `<input type="checkbox" class="craft-prop-check" data-percent="${group.percent}" onchange="calculateCraftedSellPrice()"> ${item} (+${group.percent}%)`;
+            propertiesContainer.appendChild(label);
+        });
+    });
+
+    // Отображаем бонус гильдии к продаже
+    const g = (window.playerData.guild || "").toLowerCase();
+    let guildBonusText = "Продажа: 100%";
+    let guildBonusColor = "#fff";
+    if (g.includes('салага') || g.includes('громила') || g.includes('лорд войны')) { 
+        guildBonusText = "Продажа: 90%"; 
+        guildBonusColor = "#66ff66"; 
+    }
+    else if (g.includes('лорд войны')) { guildBonusText = "Продажа: 90%"; guildBonusColor = "#66ff66"; }
+    const bonusSpan = document.getElementById('craft-sell-guild-bonus');
+    bonusSpan.innerText = `(${guildBonusText})`;
+    bonusSpan.style.color = guildBonusColor;
+
+    // Сбрасываем значения и показываем окно
+    document.getElementById('craft-sell-level').value = window.lastCraftSellLevel || 1;
+    document.getElementById('craft-sell-grade').value = 'N';
+    calculateCraftedSellPrice();
+    modal.style.display = 'block';
+}
+
+window.calculateCraftedSellPrice = function() {
+    const level = parseInt(document.getElementById('craft-sell-level').value) || 1;
+    window.lastCraftSellLevel = level;
+    const grade = document.getElementById('craft-sell-grade').value;
+
+    // 1. Получаем базовую 100% цену
+    let price = getCraftedItemBasePrice(level, grade);
+
+    // 2. Считаем бонус от выбранных свойств
+    let propertiesBonusPercent = 0;
+    document.querySelectorAll('.craft-prop-check:checked').forEach(checkbox => {
+        propertiesBonusPercent += parseFloat(checkbox.dataset.percent);
+    });
+
+    price = price * (propertiesBonusPercent / 100);
+
+    // 3. Применяем бонус/штраф гильдии
+    const g = (window.playerData.guild || "").toLowerCase();
+    let guildMultiplier = 1.0; // Базовая продажа 100%
+    if (g.includes('салага') || g.includes('громила') || g.includes('лорд войны')) guildMultiplier = 0.9;
+    
+    price = price * guildMultiplier;
+
+    // 4. Отображаем результат
+    const totalDisplay = document.getElementById('craft-sell-total');
+    totalDisplay.innerHTML = `Итоговая цена: ${window.formatCurrency(Math.floor(price))}`;
+    totalDisplay.dataset.totalYen = Math.floor(price); // Сохраняем для кнопки
+}
+
+window.confirmSellCraftedItem = function() {
+    const totalYen = parseInt(document.getElementById('craft-sell-total').dataset.totalYen) || 0;
+
+    if (totalYen <= 0) {
+        showCustomAlert("❌ Цена предмета равна нулю.");
+        return;
+    }
+
+    const currentMoney = getAllMoneyInYen();
+    setMoneyFromYen(currentMoney + totalYen);
+    updateUI();
+
+    document.getElementById('sell-craft-modal').style.display = 'none';
+    showCustomAlert(`✅ Предмет продан! Получено: ${window.formatCurrency(totalYen)}`);
+}
