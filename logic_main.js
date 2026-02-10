@@ -43,7 +43,7 @@ window.onload = function() {
             const modals = [
                 'custom-prompt-modal', 'custom-confirm-modal', 'iframe-modal', 
                 'multi-sell-modal', 'gem-service-modal', 'sell-craft-modal', 
-                'zaken-buy-modal', 'skill-calc-modal', 'exp-calc-modal', 
+                'zaken-buy-modal', 'skill-calc-modal', 'exp-calc-modal',
                 'death-modal', 'edit-modal', 'text-window'
             ]; // Ordered from most to least specific/top-level
             
@@ -90,6 +90,12 @@ window.onload = function() {
     // Запуск случайных глитч-эффектов
     startRandomGlitches();
 
+    // Инициализация перетаскивания для всех модальных окон
+    const draggableIds = ['text-window', 'edit-modal', 'death-modal', 'skill-calc-modal', 'exp-calc-modal', 'zaken-buy-modal', 'sell-craft-modal', 'gem-service-modal', 'multi-sell-modal', 'custom-confirm-modal', 'custom-prompt-modal'];
+    draggableIds.forEach(id => {
+        window.makeDraggable(document.getElementById(id));
+    });
+
     // Звук клика
     document.addEventListener('click', function(e) {
         if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.id === 'randomizer-btn') {
@@ -101,34 +107,38 @@ window.onload = function() {
 };
 
 // Функция для случайных глитч-эффектов
-function startRandomGlitches() {
+window.startRandomGlitches = function() {
     const overlay = document.getElementById('glitch-overlay');
     const screamer = document.getElementById('screamer-sound');
 
-    // Не запускать, если элементы не найдены
-    if (!overlay || !screamer) return;
-
-    // Функция для запуска одного эффекта
-    const triggerEffect = () => {
-        // 15% шанс на срабатывание
-        if (Math.random() < 0.15) {
+    // 1. Таймер для Скримера (Звук) - Ровно каждые 30 секунд
+    setInterval(() => {
+        if (!screamer) return;
+        // 40% шанс на звук
+        if (Math.random() < 0.40) {
             screamer.currentTime = 0;
-            screamer.volume = 0.08;
+            screamer.volume = 0.104; // 0.08 * 1.3
             screamer.play().catch(() => {});
-
-            overlay.classList.add('active');
-            setTimeout(() => {
-                overlay.classList.remove('active');
-            }, 400); // Должно соответствовать длительности анимации в CSS
         }
-        
-        // Запланировать следующую проверку
-        const randomInterval = Math.random() * 20000 + 10000; // от 10 до 30 секунд
-        setTimeout(triggerEffect, randomInterval);
+    }, 30000);
+
+    // 2. Таймер для Визуального глитча - Случайно 5-10 секунд
+    const triggerVisual = () => {
+        if (overlay) {
+            // Случайный тип глитча (1, 2 или 3)
+            const glitchType = Math.floor(Math.random() * 3) + 1;
+            overlay.className = `active-glitch-${glitchType}`; // Сброс классов и установка нового
+            
+            setTimeout(() => {
+                overlay.className = ''; // Убираем класс
+            }, 200 + Math.random() * 300); // Длительность 0.2 - 0.5 сек
+        }
+
+        const nextInterval = 5000 + Math.random() * 5000; // 5 - 10 секунд
+        setTimeout(triggerVisual, nextInterval);
     };
 
-    // Запускаем цикл
-    triggerEffect();
+    triggerVisual();
 }
 
 // Таймер бездействия
@@ -150,5 +160,52 @@ window.showIdleScreen = function() {
         screen.style.display = 'flex';
         void screen.offsetWidth;
         screen.classList.add('active');
+    }
+}
+
+// Функция перетаскивания
+window.makeDraggable = function(elmnt) {
+    if (!elmnt) return;
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    
+    // Ищем заголовок для перетаскивания
+    const header = elmnt.querySelector('h2') || elmnt.querySelector('h3') || elmnt.querySelector('#window-title') || elmnt.querySelector('#prompt-title') || elmnt.querySelector('#confirm-title');
+    
+    if (header) {
+        header.onmousedown = dragMouseDown;
+        header.style.cursor = 'move';
+    } else {
+        // Если заголовка нет, тянем за сам элемент (аккуратно, может мешать кликам)
+        // elmnt.onmousedown = dragMouseDown; 
+    }
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // Получаем позицию курсора
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // Вычисляем смещение
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        // Устанавливаем новую позицию
+        // Важно: убираем transform translate, чтобы позиционирование работало корректно от top/left
+        elmnt.style.transform = "none"; 
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+        document.onmouseup = null;
+        document.onmousemove = null;
     }
 }

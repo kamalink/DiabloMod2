@@ -137,7 +137,7 @@ window.worldData = {
             <p>✅ +1 Пассивное умение</p>
             <p>✅ +10 🥈</p>
             <div style="text-align: center; margin-top: 15px;">
-                <button class="claim-reward-btn" onclick="addMoney(0, 10, 0, 0)">💰 ПОЛУЧИТЬ 10🥈</button>
+                <button class="claim-reward-btn" id="btn-prof-2" onclick="claimProfessionReward(2)">💰 ПОЛУЧИТЬ НАГРАДУ</button>
             </div>
         `
     },
@@ -150,6 +150,9 @@ window.worldData = {
             <p>✅ +1 Активное умение</p>
             <p>✅ +2 Пассивных умения</p>
             <p>✅ +💍 С 👹 уже ваши</p>
+            <div style="text-align: center; margin-top: 15px;">
+                <button class="claim-reward-btn" id="btn-prof-3" onclick="claimProfessionReward(3)">💰 ПОЛУЧИТЬ НАГРАДУ</button>
+            </div>
         `
     },
     difficulty_table: {

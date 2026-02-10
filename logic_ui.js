@@ -266,6 +266,9 @@ window.showText = function(title, content) {
         if (document.getElementById('penta_2')) document.getElementById('penta_2').checked = window.playerData.penta_2;
         if (document.getElementById('penta_3')) document.getElementById('penta_3').checked = window.playerData.penta_3;
     }
+
+    // Обновляем состояние кнопок профессий, если это меню профессий
+    if (window.updateProfessionButtonState) window.updateProfessionButtonState();
 }
 
 window.openIframe = function(url) {

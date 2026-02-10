@@ -418,6 +418,25 @@ window.buySkill = function() {
         return;
     }
 
+    // --- ПРОВЕРКА ЛИМИТА НАВЫКОВ (ПРОФЕССИИ) ---
+    // База: 1 активный
+    // Профа 1: +2 (Итого 3)
+    // Профа 2: +2 (Итого 5)
+    // Профа 3: +1 (Итого 6)
+    let maxSkills = 1;
+    if (window.playerData.professions[1]) maxSkills += 2;
+    if (window.playerData.professions[2]) maxSkills += 2;
+    if (window.playerData.professions[3]) maxSkills += 1;
+
+    // Считаем только уникальные названия навыков (не руны)
+    const currentSkillCount = Object.keys(window.playerData.learnedSkills).length;
+
+    // Если навык новый (еще не в списке), проверяем лимит
+    if (!window.playerData.learnedSkills[skillName] && currentSkillCount >= maxSkills) {
+        window.showCustomAlert(`❌ Достигнут лимит навыков (${currentSkillCount}/${maxSkills}).<br>Получите награду за Профессию, чтобы открыть слоты.`);
+        return;
+    }
+
     if (isNaN(cost) || cost < 0) { 
         window.showCustomAlert("⚠️ Стоимость навыка не рассчитана.");
         return;
@@ -572,25 +591,6 @@ window.addMoney = function(g, s, c, y) {
     if (window.coinSound) { window.coinSound.currentTime = 0; window.coinSound.play().catch(e => {}); }
     window.updateUI();
     alert(`💰 Получено: ${s} серебра!`);
-}
-
-window.claimProfessionReward = function(profNum) {
-    if (profNum === 1) {
-        window.playerData.gold_s += 1;
-        if (window.coinSound) { window.coinSound.currentTime = 0; window.coinSound.play().catch(e => {}); }
-        window.playerData.runes += 1.5;
-        window.playerData.para += 1.5;
-        window.updateUI();
-        window.showCustomAlert("💰 Получено: 1🥈, 1.5 📖, 1.5 ⏳");
-    }
-}
-
-window.togglePentagram = function(id) {
-    const el = document.getElementById(id);
-    if (el) {
-        window.playerData[id] = el.checked;
-        window.updateUI();
-    }
 }
 
 window.buyZakens = function(mode) {
@@ -1037,17 +1037,37 @@ window.resetProgress = function() {
             window.playerData = {
                 name: "НЕФАЛЕМ",
                 level: 1,
-                gold_g: 0, gold_s: 0, gold_c: 0, gold_y: 0,
-                runes: 0, para: 0, zakens: 0, maxVp: 0, potions: 0,
+                gold_g: 0, gold_s: 0, gold_c: 0, gold_y: 0, // Валюта
+                runes: 0, para: 0, zakens: 0, maxVp: 0, potions: 5, death_breath: 0, // Ресурсы
+                
+                // Панели
                 guild_html: "", class_html: "",
+                
+                // Характеристики
                 stat_str: 0, stat_dex: 0, stat_int: 0, stat_vit: 0,
-                kills: 0, elites_solo: 0, bosses: 0, gobs_solo: 0, gobs_assist: 0,
-                found_legs: 0, found_yellows: 0, res_n: 0, res_dc: 0, res_b: 0, res_a: 0, reagents: 0,
+                
+                // Статистика
+                kills: 0, base_kills: 0, base_elites: 0,
+                elites_solo: 0, bosses: 0, gobs_solo: 0, gobs_assist: 0, 
+                found_legs: 0, found_yellows: 0,
+                
+                // Ресурсы крафта
+                res_n: 0, res_dc: 0, res_b: 0, res_a: 0, reagents: 0,
+                
+                // Статистика гильдий
                 runes_sold: 0, reputation: 0, deals: 0, chests_found: 0,
-                steals: 0, theft_fine: "", black_market: 0, zaken_discount: "",
-                xp_bonus: "", potion_price: "", lvl70_portal: "",
-                learnedSkills: {},
+                steals: 0, black_market: 0,
+                
+                // Состояния и бонусы
+                theft_fine: "", zaken_discount: "", xp_bonus: "", potion_price: "",
+                lvl70_portal: "", active_rents: [], forgottenSkills: {},
+                professions: { 1: false, 2: false, 3: false },
+                
+                // Куб и навыки
                 penta_1: false, penta_2: false, penta_3: false,
+                learnedSkills: {},
+                
+                // Профиль
                 className: "Класс не выбран",
                 build: "",
                 guild: "Нет",

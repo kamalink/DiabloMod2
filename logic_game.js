@@ -79,6 +79,7 @@ window.selectProfileItem = function(title, path, bypassConditions = false) {
             textWindow.style.display = 'none';
             textWindow.classList.remove('fly-to-bonus');
             window.updateUI();
+            window.updateProfessionButtonState(); // Обновляем состояние кнопок если открыто окно
         }, 850);
     };
 
@@ -849,7 +850,9 @@ window.processDeath = function() {
     const g = (window.playerData.guild || "").toLowerCase();
     
     if (g.includes('вампир')) {
-        guildPenaltyText = `С шансом 90% вы обманете смерть и не понесете потерь. <br>В противном случае (10%): изгнание из клана, потеря ${runePenalty} 📖 и 5% шанс забыть навык.`;
+        let pen = window.playerData.para * 0.1;
+        if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen * 10) / 10;
+        guildPenaltyText = `С шансом 90% вы обманете смерть и не понесете потерь. <br>В противном случае (10%): изгнание из клана, потеря ${runePenalty} 📖, потеря ${pen.toFixed(1)} ⏳ и 5% шанс забыть навык.`;
     }
     else if (g.includes('торговц')) {
         const lostYen = Math.floor(window.getAllMoneyInYen() * 0.2);

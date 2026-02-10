@@ -43,6 +43,7 @@ window.playerData = savedData ? JSON.parse(savedData) : {
     lvl70_portal: "",
     active_rents: [], // Список активных аренд: { rank, count, startLvl, duration }
     forgottenSkills: {}, // Счетчик забытых навыков
+    professions: { 1: false, 2: false, 3: false }, // Состояние профессий
     
     // Пентограмма (чекбоксы)
     penta_1: false, penta_2: false, penta_3: false,
@@ -66,6 +67,7 @@ if (typeof window.playerData.res_b === 'undefined') window.playerData.res_b = 0;
 if (typeof window.playerData.res_a === 'undefined') window.playerData.res_a = 0;
 if (!window.playerData.active_rents) window.playerData.active_rents = [];
 if (!window.playerData.forgottenSkills) window.playerData.forgottenSkills = {};
+if (!window.playerData.professions) window.playerData.professions = { 1: false, 2: false, 3: false };
 
 // Глобальные переменные состояния
 window.historyStack = ['main'];
