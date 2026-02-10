@@ -26,7 +26,10 @@
     <div id="breadcrumb">ГЛАВНАЯ</div>
     <div class="wallpaper"></div>
 
-    <div class="menu-container">
+    <!-- Эффекты -->
+    <div id="glitch-overlay"></div>
+
+    <div class="menu-container rpg-entry-effect">
         <div class="header-title" id="menu-title">Diablo III Mod</div>
         <div id="buttons-area"></div>
     </div>
@@ -58,7 +61,9 @@
     </div>
 
     <!-- Контейнер для музыки -->
-    <div id="music-player" style="position: fixed; bottom: 0; right: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none;"></div>
+    <div id="audio-container" style="position: fixed; bottom: 0; right: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none;">
+        <audio id="screamer-sound" src="screamer.mp3" preload="auto"></audio>
+    </div>
 
     <!-- МОДАЛЬНОЕ ОКНО КАЛЬКУЛЯТОРА НАВЫКОВ -->
     <div id="skill-calc-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; max-width: 700px; max-height: 90vh; background: #1a1a1a; border: 2px solid #d4af37; z-index: 5000; padding: 20px; overflow-y: auto; box-shadow: 0 0 50px #000;">

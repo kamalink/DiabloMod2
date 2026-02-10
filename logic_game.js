@@ -439,6 +439,11 @@ window.checkGuildProgression = function() {
         const noBtn = document.getElementById('confirm-no-btn');
         
         noBtn.className = 'death-confirm-btn'; // Делаем вторую кнопку красной
+        yesBtn.style.background = '#5a0000';
+        yesBtn.style.borderColor = '#d4af37';
+        noBtn.style.background = '#5a0000';
+        noBtn.style.borderColor = '#d4af37';
+
         yesBtn.style.display = 'inline-block';
         noBtn.style.display = 'inline-block';
         yesBtn.innerText = 'Громила';
@@ -446,11 +451,13 @@ window.checkGuildProgression = function() {
         
         yesBtn.onclick = function() {
             modal.style.display = 'none';
+            yesBtn.style.background = ''; yesBtn.style.borderColor = ''; // Сброс
             window.selectProfileItem('Громила', 'Гильдии > Соратники', true);
         };
         
         noBtn.onclick = function() {
             modal.style.display = 'none';
+            noBtn.style.background = ''; noBtn.style.borderColor = ''; // Сброс
             window.selectProfileItem('Лорд Войны', 'Гильдии > Соратники', true);
         };
         
@@ -476,6 +483,11 @@ window.checkGuildProgression = function() {
         const noBtn = document.getElementById('confirm-no-btn');
         
         noBtn.className = 'death-confirm-btn'; // Делаем вторую кнопку красной
+        yesBtn.style.background = '#5a0000';
+        yesBtn.style.borderColor = '#d4af37';
+        noBtn.style.background = '#5a0000';
+        noBtn.style.borderColor = '#d4af37';
+
         yesBtn.style.display = 'inline-block';
         noBtn.style.display = 'inline-block';
         yesBtn.innerText = 'Охотник на гоблинов';
@@ -483,11 +495,13 @@ window.checkGuildProgression = function() {
         
         yesBtn.onclick = function() {
             modal.style.display = 'none';
+            yesBtn.style.background = ''; yesBtn.style.borderColor = ''; // Сброс
             window.selectProfileItem('Охотник на гоблинов', 'Гильдии > Гильдия Охотников', true);
         };
         
         noBtn.onclick = function() {
             modal.style.display = 'none';
+            noBtn.style.background = ''; noBtn.style.borderColor = ''; // Сброс
             window.selectProfileItem('Охотник на ☠️', 'Гильдии > Гильдия Охотников', true);
         };
         
@@ -835,7 +849,7 @@ window.processDeath = function() {
     const g = (window.playerData.guild || "").toLowerCase();
     
     if (g.includes('вампир')) {
-        guildPenaltyText = "Изгнание из клана";
+        guildPenaltyText = `С шансом 90% вы обманете смерть и не понесете потерь. <br>В противном случае (10%): изгнание из клана, потеря ${runePenalty} 📖 и 5% шанс забыть навык.`;
     }
     else if (g.includes('торговц')) {
         const lostYen = Math.floor(window.getAllMoneyInYen() * 0.2);
@@ -885,8 +899,41 @@ window.processPartnerDeath = function() {
     const content = document.getElementById('death-modal-content');
     const actions = document.getElementById('death-modal-actions');
     
-    content.innerHTML = `Умер напарник?<br>
-    <span style='font-size:0.9rem; color:#aaa;'>Потери уменьшены в 2 раза.<br>Предметы не теряются.<br>Маги не теряют руны.</span>`;
+    const g = (window.playerData.guild || "").toLowerCase();
+    let penaltyText = "";
+
+    // Потеря рун для не-магов
+    if (!g.includes('чародей') && !g.includes('вампир') && !g.includes('ученик')) {
+        const runePenalty = (Math.floor(window.playerData.para * 0.1 * 100) / 100) / 2;
+        penaltyText += `<span style='font-size:0.9rem; color:#ff4444;'>Потеря рун: -${runePenalty.toFixed(2)} 📖</span><br>`;
+    }
+
+    // Штраф гильдии
+    if (g.includes('торговц')) {
+        const lostYen = Math.floor(window.getAllMoneyInYen() * 0.1); // 10%
+        penaltyText += `<span style='font-size:0.9rem; color:#aaa;'>Штраф гильдии: -10% Денег (${window.formatCurrency(lostYen)})</span>`;
+    } else if (g.includes('охотник') || g.includes('помощник')) {
+        let pen = Math.floor((window.playerData.reputation * 0.1) / 2);
+        penaltyText += `<span style='font-size:0.9rem; color:#aaa;'>Штраф гильдии: -5% Репутации (-${pen})</span>`;
+    } else if (g.includes('чародей') || g.includes('ученик') || g.includes('вампир')) {
+        let pen = (window.playerData.para * 0.1) / 2;
+        if (pen > 0 && pen < 1) pen = 1; else pen = Math.floor(pen * 10) / 10;
+        penaltyText += `<span style='font-size:0.9rem; color:#aaa;'>Штраф гильдии: -5% Парагона (-${pen.toFixed(1)})</span>`;
+    } else if (g.includes('гэмблер')) {
+        let pen = Math.floor(window.playerData.deals * 0.1 / 2);
+        penaltyText += `<span style='font-size:0.9rem; color:#aaa;'>Штраф гильдии: -5% Сделок (-${pen})</span>`;
+    } else if (g.includes('вор') || g.includes('воришка')) {
+        let pen = Math.floor(window.playerData.steals * 0.1 / 2);
+        penaltyText += `<span style='font-size:0.9rem; color:#aaa;'>Штраф гильдии: -5% Краж (-${pen})</span>`;
+    } else if (g.includes('искатель') || g.includes('джимми')) {
+        let pen = Math.floor(window.playerData.chests_found * 0.1 / 2);
+        penaltyText += `<span style='font-size:0.9rem; color:#aaa;'>Штраф гильдии: -5% Сундуков (-${pen})</span>`;
+    } else if (g.includes('салага') || g.includes('громила') || g.includes('лорд')) {
+        let pen = Math.floor(window.playerData.kills * 0.1 / 2);
+        penaltyText += `<span style='font-size:0.9rem; color:#aaa;'>Штраф гильдии: -5% Убитых мобов (-${pen})</span>`;
+    }
+
+    content.innerHTML = `Умер напарник?<br><br>${penaltyText}<br><span style='font-size:0.9rem; color:#aaa;'>Предметы не теряются.</span>`;
     
     actions.innerHTML = `
         <button class="death-confirm-btn" onclick="confirmPartnerDeath()">ПОДТВЕРДИТЬ</button>
@@ -898,33 +945,29 @@ window.processPartnerDeath = function() {
 window.confirmPartnerDeath = function() {
     const g = (window.playerData.guild || "").toLowerCase();
     
-    // Маги не теряют руны и парагон при смерти напарника
+    // Маги не теряют руны при смерти напарника
     if (!g.includes('чародей') && !g.includes('вампир') && !g.includes('ученик')) {
         const runePenalty = Math.floor(window.playerData.para * 0.1 * 100) / 100 / 2; // Половина
         window.playerData.runes = window.playerData.runes - runePenalty;
-        
-        let pen = (window.playerData.para * 0.1) / 2; 
-        if (pen > 0 && pen < 1) pen = 1; else pen = Math.floor(pen * 10) / 10; 
-        window.playerData.para -= pen; 
-
-        // Штрафы гильдий (половина) для не-магов
-        if (g.includes('торговц')) {
-            // -10% денег вместо 20%
-            window.playerData.gold_g = Math.floor(window.playerData.gold_g * 0.9 * 10) / 10;
-            window.playerData.gold_s = Math.floor(window.playerData.gold_s * 0.9 * 10) / 10;
-            window.playerData.gold_c = Math.floor(window.playerData.gold_c * 0.9 * 10) / 10;
-            window.playerData.gold_y = Math.floor(window.playerData.gold_y * 0.9 * 10) / 10;
-        } 
-        else if (g.includes('охотник') || g.includes('помощник')) {
-            let pen = (window.playerData.reputation * 0.1) / 2;
-            if (pen > 0 && pen < 1) pen = 1; else pen = Math.floor(pen);
-            window.playerData.reputation -= pen;
-        }
-        else if (g.includes('гэмблер')) { let pen = Math.floor(window.playerData.deals * 0.1 / 2); window.playerData.deals -= pen; }
-        else if (g.includes('вор') || g.includes('воришка')) { let pen = Math.floor(window.playerData.steals * 0.1 / 2); window.playerData.steals -= pen; }
-        else if (g.includes('искатель') || g.includes('джимми')) { let pen = Math.floor(window.playerData.chests_found * 0.1 / 2); window.playerData.chests_found -= pen; }
-        else if (g.includes('салага') || g.includes('громила') || g.includes('лорд')) { let pen = Math.floor(window.playerData.kills * 0.1 / 2); window.playerData.kills -= pen; }
     }
+
+    // Штрафы гильдий (половина)
+    if (g.includes('торговц')) {
+        window.playerData.gold_g = Math.floor(window.playerData.gold_g * 0.9 * 10) / 10;
+        window.playerData.gold_s = Math.floor(window.playerData.gold_s * 0.9 * 10) / 10;
+        window.playerData.gold_c = Math.floor(window.playerData.gold_c * 0.9 * 10) / 10;
+        window.playerData.gold_y = Math.floor(window.playerData.gold_y * 0.9 * 10) / 10;
+    } else if (g.includes('охотник') || g.includes('помощник')) {
+        let pen = Math.floor((window.playerData.reputation * 0.1) / 2);
+        window.playerData.reputation -= pen;
+    } else if (g.includes('чародей') || g.includes('ученик') || g.includes('вампир')) {
+        let pen = (window.playerData.para * 0.1) / 2;
+        if (pen > 0 && pen < 1) pen = 1; else pen = Math.floor(pen * 10) / 10;
+        window.playerData.para -= pen;
+    } else if (g.includes('гэмблер')) { let pen = Math.floor(window.playerData.deals * 0.1 / 2); window.playerData.deals -= pen; 
+    } else if (g.includes('вор') || g.includes('воришка')) { let pen = Math.floor(window.playerData.steals * 0.1 / 2); window.playerData.steals -= pen; 
+    } else if (g.includes('искатель') || g.includes('джимми')) { let pen = Math.floor(window.playerData.chests_found * 0.1 / 2); window.playerData.chests_found -= pen; 
+    } else if (g.includes('салага') || g.includes('громила') || g.includes('лорд')) { let pen = Math.floor(window.playerData.kills * 0.1 / 2); window.playerData.kills -= pen; }
 
     window.updateUI();
     document.getElementById('death-modal').style.display = 'none';
@@ -937,7 +980,7 @@ window.confirmDeath = function() {
     // Шанс выжить для вампира
     if (g.includes('вампир') && Math.random() > 0.1) {
         window.showCustomAlert("🩸 Вы обманули смерть!");
-        setTimeout(() => document.getElementById('death-modal').style.display = 'none', 100);
+        document.getElementById('death-modal').style.display = 'none';
         return;
     }
 
@@ -976,7 +1019,11 @@ window.confirmDeath = function() {
     const runePenalty = Math.floor(window.playerData.para * 0.1 * 100) / 100; 
     window.playerData.runes = window.playerData.runes - runePenalty;
 
+    // Штраф гильдии
     if (g.includes('вампир')) {
+        let pen = window.playerData.para * 0.1;
+        if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen * 10) / 10;
+        window.playerData.para -= pen;
         window.playerData.guild = "Нет";
         window.playerData.guild_html = "";
         document.getElementById('active-guild-bonus').style.display = 'none';
@@ -1013,4 +1060,14 @@ window.confirmDeath = function() {
 
     window.updateUI();
     document.getElementById('death-modal').style.display = 'none';
+
+    const grimMessages = [
+        "Тьма поглотила вашу душу...",
+        "Ваше путешествие окончено... на этот раз.",
+        "Смерть настигла вас.",
+        "Даже самый могучий нефалем смертен.",
+        "Ваша история обрывается здесь."
+    ];
+    const randomMessage = grimMessages[Math.floor(Math.random() * grimMessages.length)];
+    window.showCustomAlert(randomMessage);
 }

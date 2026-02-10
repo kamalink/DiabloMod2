@@ -545,3 +545,34 @@ window.renderLearnedSkillsWidget = function() {
     }
     content.innerHTML = html;
 }
+
+window.filterItems = function(inputElement) {
+    const searchTerm = inputElement.value;
+    const searchTermLower = searchTerm.toLowerCase();
+    // Контейнер - это следующий элемент после input
+    const container = inputElement.nextElementSibling;
+    if (!container) return;
+
+    const items = container.querySelectorAll('.item-category');
+    items.forEach(item => {
+        // Сохраняем оригинальный HTML, если еще не сохранен
+        if (!item.dataset.originalHtml) {
+            item.dataset.originalHtml = item.innerHTML;
+        }
+        const originalHtml = item.dataset.originalHtml;
+        const itemTextLower = item.innerText.toLowerCase();
+
+        // Сначала восстанавливаем оригинальный HTML
+        item.innerHTML = originalHtml;
+
+        if (searchTermLower && itemTextLower.includes(searchTermLower)) {
+            item.style.display = 'block';
+            const regex = new RegExp(searchTerm.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+            item.innerHTML = item.innerHTML.replace(regex, (match) => `<span class="search-highlight">${match}</span>`);
+        } else if (searchTermLower) {
+            item.style.display = 'none';
+        } else {
+            item.style.display = 'block';
+        }
+    });
+}
