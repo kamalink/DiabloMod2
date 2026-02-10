@@ -42,6 +42,7 @@ window.playerData = savedData ? JSON.parse(savedData) : {
     potion_price: "",
     lvl70_portal: "",
     active_rents: [], // Список активных аренд: { rank, count, startLvl, duration }
+    forgottenSkills: {}, // Счетчик забытых навыков
     
     // Пентограмма (чекбоксы)
     penta_1: false, penta_2: false, penta_3: false,
@@ -64,6 +65,7 @@ if (typeof window.playerData.res_dc === 'undefined') window.playerData.res_dc = 
 if (typeof window.playerData.res_b === 'undefined') window.playerData.res_b = 0;
 if (typeof window.playerData.res_a === 'undefined') window.playerData.res_a = 0;
 if (!window.playerData.active_rents) window.playerData.active_rents = [];
+if (!window.playerData.forgottenSkills) window.playerData.forgottenSkills = {};
 
 // Глобальные переменные состояния
 window.historyStack = ['main'];

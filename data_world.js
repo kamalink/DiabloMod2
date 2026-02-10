@@ -229,6 +229,7 @@ window.worldData = {
         content: `
             <div style="text-align: center; margin-bottom: 20px;">
                 <button class="death-btn" onclick="processDeath()">☠️ Я УМЕР</button>
+                <button class="death-confirm-btn" style="background: #444; border-color: #888; font-size: 0.8rem; margin-left: 10px;" onclick="processPartnerDeath()">Напарник умер</button>
             </div>
             <div style="border: 2px solid #ff4444; padding: 15px; background: rgba(255, 68, 68, 0.05); border-radius: 8px;">
                 <p style="color: #ff4444; font-weight: bold; text-align: center; font-size: 1.1rem;">💀 ПОСЛЕДСТВИЯ СМЕРТИ ГЕРОЯ:</p>

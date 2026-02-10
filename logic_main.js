@@ -21,6 +21,21 @@ window.onload = function() {
     window.restorePanels();
     window.updateUI();
     window.renderMenu('main', 'ГЛАВНАЯ', true);
+
+    // Настройка и попытка автозапуска музыки
+    const slider = document.getElementById('volume-slider');
+    window.audioTrack.volume = 0.3;
+    if (slider) slider.value = 0.3;
+    
+    // Попытка автозапуска (может быть заблокирована браузером)
+    window.toggleMusic(); 
+
+    // Гарантированный запуск при первом клике
+    document.addEventListener('click', function initAudio() {
+        if (!window.isMusicPlaying) window.toggleMusic();
+        document.removeEventListener('click', initAudio);
+    }, { once: true });
+
     
     // Запуск слежения за бездействием
     document.addEventListener('mousemove', window.resetIdleTimer);

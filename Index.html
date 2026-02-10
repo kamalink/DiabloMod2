@@ -39,7 +39,8 @@
 
     <button id="reset-btn" onclick="resetProgress()">🗑️ СТЕРЕТЬ ВСЕ</button>
     <button id="music-btn" onclick="toggleMusic()">🎵 МУЗЫКА</button>
-    <a href="https://randstuff.ru/number/" target="_blank" id="randomizer-btn">🎲 РАНДОМ</a>
+    <input type="range" id="volume-slider" min="0" max="1" step="0.01" oninput="setVolume(this.value)" style="display: none; position: fixed; top: 55px; right: 310px; width: 100px; z-index: 1001;">
+    <a href="#" onclick="event.preventDefault(); window.openIframe('https://randstuff.ru/number/');" id="randomizer-btn">🎲 РАНДОМ</a>
 
     <!-- Виджет изученных навыков -->
     <div id="learned-skills-widget" style="position: fixed; top: 60px; right: 310px; width: 180px; max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.8); border: 1px solid #444; padding: 10px; color: #ccc; font-size: 0.75rem; z-index: 900; display: none; border-radius: 4px;">
@@ -156,7 +157,7 @@
     </div>
 
     <!-- МОДАЛЬНОЕ ОКНО ДЛЯ ВВОДА ЧИСЛА -->
-    <div id="custom-prompt-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 7000; align-items: center; justify-content: center;">
+    <div id="custom-prompt-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9990; align-items: center; justify-content: center;">
         <div id="prompt-content" style="width: 90%; max-width: 400px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #d4af37; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); padding: 25px; text-align: center; font-family: 'Cinzel', serif; color: #e0e0e0;">
             <h3 id="prompt-title" style="color: #d4af37; margin-top: 0; font-size: 1.5rem;"></h3>
             <p id="prompt-text" style="font-family: 'Lora', serif; font-size: 1.1rem; margin: 20px 0; line-height: 1.5;"></p>
@@ -239,8 +240,16 @@
         </div>
     </div>
 
+    <!-- МОДАЛЬНОЕ ОКНО IFRAME (Внешние сайты) -->
+    <div id="iframe-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9995; align-items: center; justify-content: center;">
+        <div style="width: 95%; height: 90%; position: relative; background: #000; border: 2px solid #d4af37;">
+            <span class="close-x" onclick="document.getElementById('iframe-modal').style.display='none'" style="position: absolute; top: -35px; right: 0; color: #fff; font-size: 2rem;">[X]</span>
+            <iframe id="web-frame" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
     <!-- Окно подтверждения (Generic) -->
-    <div id="custom-confirm-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 7000;">
+    <div id="custom-confirm-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9990;">
         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 400px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #d4af37; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2), inset 0 0 50px rgba(50, 20, 0, 0.5); padding: 25px; text-align: center; font-family: 'Cinzel', serif; font-weight: 700; color: #e0e0e0; border-radius: 4px;">
             <h3 id="confirm-title" style="color: #d4af37; margin-top: 0; text-shadow: 0 0 10px #500; font-size: 1.5rem;">⚠️ ВНИМАНИЕ</h3>
             <div id="confirm-message" style="font-family: 'Lora', serif; font-size: 1.1rem; margin: 20px 0; line-height: 1.5;"></div>
@@ -273,7 +282,7 @@
     <div class="stat-group">
         <div class="stat-group-title">Герой & Билд</div>
         <div class="stat-row"><span id="view-class">Класс не выбран</span> <span id="view-build" style="font-size:0.7rem;"></span></div>
-        <div class="stat-row">Уровень: <span id="view-lvl" class="stat-value">1</span> 🌒</div>
+        <div class="stat-row">Уровень: <span id="view-lvl" class="stat-value">1</span></div>
         <div class="stat-row">Зелья: <span id="view-potions" class="stat-value">5</span> 💊 <span id="view-potion-price" style="font-size: 0.7rem;"></span></div>
         <!-- Характеристики гильдий -->
         <div class="stat-row" id="view-stat-str-row">Сила: <span id="view-stat-str" class="stat-value">0</span> 🏮</div>
@@ -293,7 +302,6 @@
         </div>
     <div class="stat-row" style="margin-top:8px;">Руны: <span id="view-runes" class="stat-value">0</span> 📖</div>
         <div class="stat-row">Парагон: <span id="view-para" class="stat-value">0</span> ⏳</div>
-        <div class="stat-row" style="font-size: 0.7rem;">Бонус опыта: <span id="view-xp-bonus">-</span></div>
     <div class="stat-row">Закены: <span id="view-zakens" class="stat-value">0</span> 🔖 <span id="view-zaken-discount" style="font-size: 0.7rem;"></span></div>
     </div>
 

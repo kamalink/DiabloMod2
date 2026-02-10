@@ -60,6 +60,8 @@ window.loadCalcSkillData = function() {
     const runeIdx = document.getElementById('calc-rune-select').value;
     
     const buyBtn = document.querySelector('.buy-skill-btn');
+    const detailsP = document.getElementById('calc-details');
+    
     if (cls && window.skillDB[cls] && window.skillDB[cls][skillIdx]) {
         const skillName = window.skillDB[cls][skillIdx].name;
         const runeName = window.skillDB[cls][skillIdx].runes[runeIdx].name;
@@ -74,6 +76,21 @@ window.loadCalcSkillData = function() {
             buyBtn.disabled = false;
             buyBtn.style.background = ""; // Reset to CSS default
             buyBtn.style.color = "";
+            buyBtn.style.display = "inline-block";
+
+            // Логика для базовой руны: если изучена любая другая руна этого навыка, кнопку убираем
+            if (runeIdx == 0) {
+                const learnedRunes = window.playerData.learnedSkills[skillName];
+                if (learnedRunes && learnedRunes.length > 0) {
+                    buyBtn.style.display = "none";
+                }
+            }
+            
+            // Счетчик забытых
+            const forgottenCount = window.playerData.forgottenSkills[skillName] || 0;
+            if (forgottenCount > 0) {
+                buyBtn.innerHTML += ` <span style="font-size:0.6rem; color:#888;">(забыт ${forgottenCount} раз)</span>`;
+            }
         }
     }
 
@@ -626,11 +643,15 @@ window.updateZakenTotalCost = function() {
     const modal = document.getElementById('zaken-buy-modal');
     const mode = modal.dataset.mode;
     const lvl = window.playerData.level;
-    
+    const g = (window.playerData.guild || "").toLowerCase();
     let priceYen = window.getZakenPrice(lvl);
     
     if (mode === 'sell') {
         priceYen = priceYen * 0.8;
+        // Вампирский штраф
+        if (g.includes('вампир')) {
+            priceYen *= 0.5;
+        }
     }
 
     const totalYen = priceYen * count;
@@ -677,10 +698,15 @@ window.confirmSellZakens = function() {
     }
 
     // Расчет цены продажи
+    const g = (window.playerData.guild || "").toLowerCase();
     let basePrice = window.getZakenPrice(lvl);
-    
-    const sellPricePerUnit = basePrice * 0.8; // 80% от цены
+    let sellPricePerUnit = basePrice * 0.8; // 80% от цены
+    // Вампирский штраф
+    if (g.includes('вампир')) {
+        sellPricePerUnit *= 0.5;
+    }
     const totalSellYen = Math.floor(sellPricePerUnit * count);
+   
 
     window.playerData.zakens -= count;
     window.playerData.gold_y += totalSellYen;
@@ -729,11 +755,14 @@ window.sellDeathBreath = function() {
             showCustomAlert(`❌ Недостаточно Дыханий Смерти!`);
             return;
         }
-
+        const g = (window.playerData.guild || "").toLowerCase();
         const pricePerUnit = 50000; // 5 silver = 50000 yen
-        const totalGain = pricePerUnit * quantity;
+        let totalGain = pricePerUnit * quantity;
         
         playerData.death_breath -= quantity;
+        if (g.includes('вампир')) {
+            totalGain *= 0.5;
+        }
         const currentMoney = getAllMoneyInYen();
         setMoneyFromYen(currentMoney + totalGain);
         updateUI();
@@ -803,7 +832,11 @@ window.buyPotion = function() {
             showCustomAlert("Некорректное количество.");
             return;
         }
-
+        const g = (window.playerData.guild || "").toLowerCase();
+        if (g.includes('вампир')) {
+            showCustomAlert(`🩸 Вампиры не нуждаются в покупных зельях.`);
+            return;
+        }
         const lvl = playerData.level;
         let pricePerPotion = 0;
 
@@ -818,6 +851,11 @@ window.buyPotion = function() {
             const basePrice = 200000; // 20s
             const maxVp = playerData.maxVp || 0;
             pricePerPotion = basePrice * Math.pow(1.05, maxVp);
+        }
+
+        // Применяем скидку гильдии
+        if (window.playerData.potion_discount_val) {
+            pricePerPotion = pricePerPotion * (1 + window.playerData.potion_discount_val);
         }
 
         const totalCost = Math.floor(pricePerPotion * quantity);
@@ -897,11 +935,17 @@ window.sellResources = function() {
     });
 
     okBtn.onclick = () => {
+        const g = (window.playerData.guild || "").toLowerCase();
         let totalGain = 0;
         let error = false;
         const quantities = {};
         const level = parseInt(levelInput.value) || 1;
         const basePrice = getSmithSellPrice(level);
+
+        let sellMultiplier = 1.0;
+        if (g.includes('вампир')) {
+            sellMultiplier = 0.5;
+        }
 
         inputsContainer.querySelectorAll('.multi-sell-input').forEach(input => {
             const resType = input.dataset.type;
@@ -913,7 +957,7 @@ window.sellResources = function() {
             }
             totalGain += quantity * basePrice * parseFloat(input.dataset.mult);
         });
-
+        totalGain *= sellMultiplier;
         if (error) {
             showCustomAlert("❌ Недостаточно ресурсов одного из типов!");
             return;
@@ -937,6 +981,53 @@ window.sellResources = function() {
 
     updateTotal();
     modal.style.display = 'flex';
+}
+
+window.sellRunes = function(guildType) {
+    const g = (window.playerData.guild || "").toLowerCase();
+    // Проверка: можно нажать только кнопку своей гильдии
+    if (!g.includes(guildType)) {
+        window.showCustomAlert("❌ Вы не можете использовать эту услугу.");
+        return;
+    }
+
+    // Расчет цены за 1 руну
+    let pricePerRune = 0;
+    const rank = window.playerData.rank || 1;
+    
+    if (g.includes('чародей') && !g.includes('ученик')) {
+        const prices = [0, 2000, 3700, 6000, 9000, 13500, 18000, 22500, 27000, 32000, 45000];
+        pricePerRune = prices[rank] || 2000;
+    } else if (g.includes('ученик')) {
+        pricePerRune = 1500; // Фикс 15 бронзы
+    } else if (g.includes('вампир')) {
+         if (rank === 1) {
+            pricePerRune = 1500;
+        } else {
+            const wizardPrices = [0, 2000, 3700, 6000, 9000, 13500, 18000, 22500, 27000, 32000, 45000];
+            const wizardPrice = wizardPrices[rank] || 2000;
+            pricePerRune = wizardPrice * 0.84;
+        }
+    }
+
+    window.showCustomPrompt("Продажа Рун", `Цена за 1 📖: ${window.formatCurrency(pricePerRune)}<br>У вас: ${window.playerData.runes} 📖`, "1", (quantity) => {
+        if (isNaN(quantity) || quantity <= 0) return;
+        if (window.playerData.runes < quantity) { window.showCustomAlert("Недостаточно рун."); return; }
+        
+        window.playerData.runes -= quantity;
+        window.playerData.runes_sold += quantity;
+        
+        const totalGain = Math.floor(pricePerRune * quantity);
+        window.playerData.gold_y += totalGain;
+        
+        // Нормализация денег
+        while (window.playerData.gold_y >= 100) { window.playerData.gold_y -= 100; window.playerData.gold_c++; }
+        while (window.playerData.gold_c >= 100) { window.playerData.gold_c -= 100; window.playerData.gold_s++; }
+        while (window.playerData.gold_s >= 100) { window.playerData.gold_s -= 100; window.playerData.gold_g++; }
+        
+        window.updateUI();
+        window.showCustomAlert(`✅ Продано ${quantity} 📖 за ${window.formatCurrency(totalGain)}`);
+    });
 }
 
 window.resetProgress = function() {
@@ -1069,6 +1160,10 @@ window.executeGemService = function(operation) {
             sellMult = p / 5; // Отношение к базовым 5%
         }
         singleCost = priceData.sell * sellMult;
+        // Вампирский штраф
+        if (g.includes('вампир')) {
+            singleCost *= 0.5;
+        }
         operationText = `Продать ${quantity} 💎 ${gemRank} ранга`;
         isIncome = true;
     } else if (operation === 'rent') {
@@ -1076,7 +1171,8 @@ window.executeGemService = function(operation) {
         operationText = `Арендовать ${quantity} 💎 ${gemRank} ранга`;
     }
 
-    const totalCost = singleCost * quantity;
+    let totalCost = singleCost * quantity;
+    if (operation === 'rent') totalCost *= rentDuration;
     const costFormatted = formatCurrency(totalCost);
     const confirmMsg = isIncome 
         ? `${operationText}?<br>Вы получите: ${costFormatted}`
@@ -1085,7 +1181,7 @@ window.executeGemService = function(operation) {
     showCustomConfirm(confirmMsg, () => {
         const currentMoney = getAllMoneyInYen();
         if (isIncome) {
-            setMoneyFromYen(currentMoney + totalCost);
+            setMoneyFromYen(currentMoney + Math.floor(totalCost));
             showCustomAlert(`✅ Продано! Получено: ${costFormatted}`);
         } else {
             if (currentMoney < totalCost) {
@@ -1214,7 +1310,10 @@ window.calculateCraftedSellPrice = function() {
     const g = (window.playerData.guild || "").toLowerCase();
     let guildMultiplier = 1.0; // Базовая продажа 100%
     if (g.includes('салага') || g.includes('громила') || g.includes('лорд войны')) guildMultiplier = 0.9;
-    
+    // Вампирский штраф
+    if (g.includes('вампир')) {
+        guildMultiplier = 0.5;
+    }
     price = price * guildMultiplier;
 
     // 4. Отображаем результат
@@ -1224,12 +1323,16 @@ window.calculateCraftedSellPrice = function() {
 }
 
 window.confirmSellCraftedItem = function() {
-    const totalYen = parseInt(document.getElementById('craft-sell-total').dataset.totalYen) || 0;
+    let totalYen = parseInt(document.getElementById('craft-sell-total').dataset.totalYen) || 0;
 
     if (totalYen <= 0) {
         showCustomAlert("❌ Цена предмета равна нулю.");
         return;
     }
+    // Доп. проверка на вампира, т.к. цена уже посчитана с бонусом
+    // Но если логика поменяется, лучше пересчитать тут
+    // const g = (window.playerData.guild || "").toLowerCase();
+    // if (g.includes('вампир')) totalYen *= 0.5;
 
     const currentMoney = getAllMoneyInYen();
     setMoneyFromYen(currentMoney + totalYen);

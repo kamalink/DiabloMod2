@@ -146,11 +146,12 @@ window.guildsData = {
     ],
     vampire_mage: {
         content: `
+            <button class="craft-btn smith-sell" onclick="sellRunes('вампир')" style="position: absolute; top: 55px; right: 20px; z-index: 100; font-size: 0.8rem; padding: 4px 8px;">Продать 📖</button>
             <div style="border: 1px solid #66ff66; padding: 10px; background: rgba(102, 255, 102, 0.05); margin-bottom: 10px;">
                 <b style="color: #66ff66;">Плюсы ⬆️:</b><br>
                 📜🔺 Бесплатные 💊<br>
                 📜🔺 Шанс умереть 10%<br>
-                📜🔺 Бесплатный парагон в восстановление
+                📜🔺 Бесплатный парагон в восстановление<br>
                 📜🔺 Уроки стоят на 30% больше за каждые 100🔮
             </div>
             <div style="border: 1px solid #ff4444; padding: 10px; background: rgba(255, 68, 68, 0.05); margin-bottom: 10px;">
@@ -163,23 +164,23 @@ window.guildsData = {
             <p style="color: #d4af37; text-align: center; font-weight: bold;">⛓️ РАНГ</p>
             <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse; text-align: left;">
                 <tr style="color: #d4af37; border-bottom: 1px solid #5a0000;">
-                    <th>Ранг</th><th>Условие</th><th>Бонус 📖⏳ / Прод.</th>
+                    <th>Ранг</th><th>Условие</th><th>Бонус 📖⏳ / 💲 / Прод.</th>
                 </tr>
-                <tr><td>🌊 Союзник</td><td>1к🔮 / 50⏳</td><td>+10% / 50%⏬</td></tr>
-                <tr><td>🔥 Начинающий</td><td>2к🔮 / 100⏳</td><td>+13% / 48%</td></tr>
-                <tr><td>🌊 Странник</td><td>3к🔮 / 200⏳</td><td>+16% / 46%</td></tr>
-                <tr><td>🔥 Вызывающий</td><td>4к🔮 / 300⏳</td><td>+20% / 44%</td></tr>
-                <tr><td>🌊 Мистик</td><td>5к🔮 / 450⏳</td><td>+25% / 42%</td></tr>
-                <tr><td>🔥 Магиус</td><td>6к🔮 / 600⏳</td><td>+40% / 40%</td></tr>
-                <tr><td>🌊 Чернокнижник</td><td>7к🔮 / 700⏳</td><td>+50% / 38%</td></tr>
-                <tr><td>🔥 Волшебник</td><td>8к🔮 / 800⏳</td><td>+60% / 36%</td></tr>
-                <tr><td>🌊 Мастер В.</td><td>9к🔮 / 900⏳</td><td>+75% / 34%</td></tr>
+                <tr><td>🌊 Союзник</td><td>1к🔮 / 50⏳</td><td>+10% / 15🥉 / 50%⏬</td></tr>
+                <tr><td>🔥 Начинающий</td><td>2к🔮 / 100⏳</td><td>+13% / 31🥉 / 48%</td></tr>
+                <tr><td>🌊 Странник</td><td>3к🔮 / 200⏳</td><td>+16% / 50🥉 / 46%</td></tr>
+                <tr><td>🔥 Вызывающий</td><td>4к🔮 / 300⏳</td><td>+20% / 75🥉 / 44%</td></tr>
+                <tr><td>🌊 Мистик</td><td>5к🔮 / 450⏳</td><td>+25% / 1.13🥈 / 42%</td></tr>
+                <tr><td>🔥 Магиус</td><td>6к🔮 / 600⏳</td><td>+40% / 1.51🥈 / 40%</td></tr>
+                <tr><td>🌊 Чернокнижник</td><td>7к🔮 / 700⏳</td><td>+50% / 1.89🥈 / 38%</td></tr>
+                <tr><td>🔥 Волшебник</td><td>8к🔮 / 800⏳</td><td>+60% / 2.26🥈 / 36%</td></tr>
+                <tr><td>🌊 Мастер В.</td><td>9к🔮 / 900⏳</td><td>+75% / 2.68🥈 / 34%</td></tr>
                 <tr style="background: rgba(212,175,55,0.1);">
-                    <td>🔥 Архимагиус</td><td>10к🔮 / 1000⏳</td><td>+100% / 30%</td>
+                    <td>🔥 Архимагиус</td><td>10к🔮 / 1000⏳</td><td>+100% / 3.78🥈 / 30%</td>
                 </tr>
             </table>
             <hr>
-            <p><strong>Пример1️⃣ (Продажа рун):</strong><br>
+            <p><strong>Пример1️⃣ (Продажа рун Чародеем):</strong><br>
             Интеллект 2754 - 340 (парагон) = 2414 / 100🔮 = 24.<br>
             108 * 30 * 24 / 100 = 7🥈78🥉 * 3 = <b>23🥈33🥉</b></p>
             <p><strong>Пример2️⃣ (Высасывание опыта):</strong><br>
@@ -189,11 +190,12 @@ window.guildsData = {
     },
     wizard_mage: {
         content: `
+            <button class="craft-btn smith-sell" onclick="sellRunes('чародей')" style="position: absolute; top: 55px; right: 20px; z-index: 100; font-size: 0.8rem; padding: 4px 8px;">Продать 📖</button>
             <div style="border: 1px solid #66ff66; padding: 10px; background: rgba(102, 255, 102, 0.05); margin-bottom: 10px;">
                 <b style="color: #66ff66;">Плюсы ⬆️:</b><br>
                 📜🔺 💊 на 55% ⏬<br>
                 📜🔺 Уроки: +27.5% к цене за каждые 100 🔮<br>
-                📜🔺 Продажа 1 📖 за 15🥉
+                📜🔺 Продажа 1 📖 за 20🥉 (Ранг 1)
             </div>
             <div style="border: 1px solid #ff4444; padding: 10px; background: rgba(255, 68, 68, 0.05); margin-bottom: 10px;">
                 <b style="color: #ff4444;">Минусы ⬇️:</b><br>
@@ -220,6 +222,7 @@ window.guildsData = {
     },
     apprentice_mage: {
         content: `
+            <button class="craft-btn smith-sell" onclick="sellRunes('ученик')" style="position: absolute; top: 55px; right: 20px; z-index: 100; font-size: 0.8rem; padding: 4px 8px;">Продать 📖</button>
             <div style="border: 1px solid #66ff66; padding: 10px; background: rgba(102, 255, 102, 0.05); margin-bottom: 10px;">
                 <b style="color: #66ff66;">Плюсы ⬆️:</b><br>
                 📜🔺 💊 на 30% ⏬ | 📖 и ⏳ на 10% ⏫<br>

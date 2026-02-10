@@ -168,43 +168,22 @@ window.renderMenu = function(menuId, titleText, isBack = false) {
         menuTitle.innerText = "Diablo III Mod";
     }
 
-    // Специальная отрисовка для меню навыков (Круглое меню)
+    // Специальная отрисовка для меню навыков (Сетка 2x3)
     if (menuId === 'skills_study_menu') {
-        const circleContainer = document.createElement('div');
-        circleContainer.className = 'skills-circle-container';
+        const gridContainer = document.createElement('div');
+        gridContainer.className = 'skills-grid-container';
         
-        // Центральная кнопка калькулятора
-        const calcBtn = document.createElement('button');
-        calcBtn.className = 'skills-center-btn';
-        calcBtn.innerText = '🧮';
-        calcBtn.onclick = () => window.openSkillCalculator();
-        circleContainer.appendChild(calcBtn);
-
-        // Элементы по кругу
-        const radius = 115; // Радиус круга
-        const items = window.gameData[menuId];
-        const angleStep = (2 * Math.PI) / items.length;
-
-        items.forEach((item, index) => {
+        window.gameData[menuId].forEach((item) => {
             const btn = document.createElement('button');
-            btn.className = 'skills-circle-btn';
+            btn.className = 'd2-button skill-grid-btn';
             btn.innerText = item.title;
-            
-            // Расчет позиции (начинаем с -90 градусов, т.е. с 12 часов)
-            const angle = index * angleStep - (Math.PI / 2);
-            const x = Math.round(radius * Math.cos(angle));
-            const y = Math.round(radius * Math.sin(angle));
-            
-            btn.style.left = `calc(50% + ${x}px - 45px)`; // 45px - половина ширины кнопки
-            btn.style.top = `calc(50% + ${y}px - 45px)`;
-            
             btn.onclick = () => {
                 const targetData = window.gameData[item.id];
                 if (targetData && targetData.content) window.showText(item.title, targetData.content);
             };
-            circleContainer.appendChild(btn);
+            gridContainer.appendChild(btn);
         });
-        area.appendChild(circleContainer);
+        area.appendChild(gridContainer);
         return; // Прерываем стандартную отрисовку кнопок
     }
 
@@ -234,7 +213,7 @@ window.renderMenu = function(menuId, titleText, isBack = false) {
         btn.onclick = () => {
             const targetData = window.gameData[item.id];
             if (item.url) {
-                window.open(item.url, '_blank');
+                window.openIframe(item.url);
                 return;
             }
             if (targetData) {
@@ -289,13 +268,23 @@ window.showText = function(title, content) {
     }
 }
 
+window.openIframe = function(url) {
+    const modal = document.getElementById('iframe-modal');
+    const frame = document.getElementById('web-frame');
+    frame.src = url;
+    modal.style.display = 'flex';
+}
+
 window.updateUI = function() {
     if (!window.playerData || !window.playerData.name) return;
     
     window.calculateRank();
 
     document.getElementById('view-name').innerText = window.playerData.name.toUpperCase();
-    document.getElementById('view-lvl').innerText = window.playerData.level;
+    
+    let xpBonusText = window.playerData.xp_bonus ? `(XP: ${window.playerData.xp_bonus})` : "";
+    document.getElementById('view-lvl').innerHTML = `${window.playerData.level} 🌒 <span style="font-size:0.7rem; color:#aaa;">${xpBonusText}</span>`;
+    
     document.getElementById('view-gold-g').innerText = window.playerData.gold_g;
     document.getElementById('view-gold-s').innerText = window.playerData.gold_s;
     document.getElementById('view-gold-c').innerText = window.playerData.gold_c;
@@ -336,7 +325,6 @@ window.updateUI = function() {
     document.getElementById('view-black-market').innerText = window.playerData.black_market;
     document.getElementById('view-zakens').innerText = window.playerData.zakens;
     
-    document.getElementById('view-xp-bonus').innerText = window.playerData.xp_bonus;
     document.getElementById('view-potion-price').innerText = window.playerData.potion_price ? `(${window.playerData.potion_price})` : "";
     document.getElementById('view-zaken-discount').innerText = window.playerData.zaken_discount || "-";
     document.getElementById('view-theft-fine').innerText = window.playerData.theft_fine ? `(Штраф: ${window.playerData.theft_fine})` : "";
@@ -446,19 +434,29 @@ window.toggleEditModal = function() {
     }
 }
 
+window.setVolume = function(value) {
+    window.audioTrack.volume = value;
+}
+
 window.toggleMusic = function() {
     const btn = document.getElementById('music-btn');
+    const slider = document.getElementById('volume-slider');
     if (window.isMusicPlaying) {
         window.audioTrack.pause();
         window.audioTrack.currentTime = 0;
         btn.innerHTML = '🎵 МУЗЫКА';
         btn.style.borderColor = '#66ccff'; btn.style.color = '#66ccff';
+        slider.style.display = 'none';
         window.isMusicPlaying = false;
     } else {
-        window.audioTrack.play().catch(e => alert("Не удалось воспроизвести файл."));
-        btn.innerHTML = '🔇 СТОП';
-        btn.style.borderColor = '#ff4444'; btn.style.color = '#ff4444';
-        window.isMusicPlaying = true;
+        window.audioTrack.play().then(() => {
+            btn.innerHTML = '🔇 СТОП';
+            btn.style.borderColor = '#ff4444'; btn.style.color = '#ff4444';
+            slider.style.display = 'block';
+            window.isMusicPlaying = true;
+        }).catch(e => {
+            // Autoplay failed
+        });
     }
 }
 
