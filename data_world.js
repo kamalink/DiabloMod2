@@ -123,9 +123,9 @@ window.worldData = {
         { id: 'death_rules', title: 'Смерти', content: 'В разработке...' }
     ],
     professions_menu: [
-        { id: 'prof_1', title: '1 Профессия' },
-        { id: 'prof_2', title: '2 Профессия' },
-        { id: 'prof_3', title: '3 Профессия' }
+        { id: 'prof_1', title: 'Профессия I' },
+        { id: 'prof_2', title: 'Профессия II' },
+        { id: 'prof_3', title: 'Профессия III' }
     ],
     prof_1: {
         content: `
@@ -136,7 +136,7 @@ window.worldData = {
             <p>✅ +1.5 📖 и ⏳</p>
             <p>✅ +1 🥈</p>
             <div style="text-align: center; margin-top: 15px;">
-                <button class="claim-reward-btn" onclick="window.claimProfessionReward(1)">💰 ПОЛУЧИТЬ НАГРАДУ</button>
+                <button class="claim-reward-btn" onclick="window.claimProfessionReward(1)">Получить профессию</button>
             </div>
         `
     },
@@ -148,7 +148,7 @@ window.worldData = {
             <p>✅ +1 Пассивное умение</p>
             <p>✅ +10 🥈</p>
             <div style="text-align: center; margin-top: 15px;">
-                <button class="claim-reward-btn" id="btn-prof-2" onclick="window.claimProfessionReward(2)">💰 ПОЛУЧИТЬ НАГРАДУ</button>
+                <button class="claim-reward-btn" id="btn-prof-2" onclick="window.claimProfessionReward(2)">Получить профессию</button>
             </div>
         `
     },
@@ -162,7 +162,7 @@ window.worldData = {
             <p>✅ +2 Пассивных умения</p>
             <p>✅ +💍 С 👹 уже ваши</p>
             <div style="text-align: center; margin-top: 15px;">
-                <button class="claim-reward-btn" id="btn-prof-3" onclick="window.claimProfessionReward(3)">💰 ПОЛУЧИТЬ НАГРАДУ</button>
+                <button class="claim-reward-btn" id="btn-prof-3" onclick="window.claimProfessionReward(3)">Получить профессию</button>
             </div>
         `
     },
@@ -234,7 +234,7 @@ window.worldData = {
             <p>📗 <b>66+🌒:</b> Древние / S Grade / Spectrum</p>
             <hr style="border-color: #333;">
             <p style="color: #ff7979;"><b>⚠️ ПРАВИЛА И ГИЛЬДИИ:</b></p>
-            <p>🫳 Кража | 🎭 Репутация | 🔖 Закены</p>
+            <p>🧤 Кража | 🎭 Репутация | 🔖 Закены</p>
             <p>🧾 Ранг | 📢 Вступление | ‼️ Крит. правило</p>
             <p>� Позитив | 🔻 Негатив | 🔹/🌀 Пункты</p>
         `

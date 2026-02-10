@@ -4,11 +4,11 @@ window.onload = function() {
     // Агрегация данных
     window.gameData = {
         main: [
-            { id: 'econ', title: '1. Экономика' },
-            { id: 'guilds', title: '2. Гильдии и Классы' },
-            { id: 'skills_root', title: '3. Навыки и Опыт' },
-            { id: 'portals', title: '4. Порталы' },
-            { id: 'death_root', title: '5. Смерть, Сложность, Профы' }
+            { id: 'econ', title: 'Экономика' },
+            { id: 'guilds', title: 'Гильдии и Классы' },
+            { id: 'skills_root', title: 'Навыки и Опыт' },
+            { id: 'portals', title: 'Порталы' },
+            { id: 'death_root', title: 'Смерть, Сложность, Профы' }
         ],
         ...window.economyData,
         ...window.guildsData,

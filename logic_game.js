@@ -1149,6 +1149,8 @@ window.confirmDeath = function() {
     else if (g.includes('искатель') || g.includes('джимми')) { let pen = window.playerData.chests_found * 0.1; if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen); window.playerData.chests_found -= pen; }
     else if (g.includes('салага') || g.includes('громила') || g.includes('лорд')) { let pen = window.playerData.kills * 0.1; if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen); window.playerData.kills -= pen; }
 
+    let finalMessage = "";
+
     // 5% шанс забыть навык
     if (Math.random() < 0.05) {
         const learned = window.playerData.learnedSkills;
@@ -1157,7 +1159,7 @@ window.confirmDeath = function() {
             const randomSkill = skillNames[Math.floor(Math.random() * skillNames.length)];
             delete window.playerData.learnedSkills[randomSkill];
             window.playerData.forgottenSkills[randomSkill] = (window.playerData.forgottenSkills[randomSkill] || 0) + 1;
-            window.showCustomAlert(`🧠 Амнезия! Вы забыли навык: <span style="color:#ff4444">${randomSkill}</span>`);
+            finalMessage += `🧠 Амнезия! Вы забыли навык:<br><br><span style="color:#ff4444; font-size: 1.2rem; font-weight: bold;">${randomSkill}</span><br><br>`;
         }
     }
 
@@ -1172,7 +1174,8 @@ window.confirmDeath = function() {
         "Ваша история обрывается здесь."
     ];
     const randomMessage = grimMessages[Math.floor(Math.random() * grimMessages.length)];
-    window.showCustomAlert(randomMessage);
+    
+    window.showCustomAlert(finalMessage);
 }
 
 window.claimProfessionReward = function(profNum) {

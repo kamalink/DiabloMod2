@@ -1,6 +1,6 @@
 // --- ИНТЕРФЕЙС И ОТРИСОВКА ---
 
-window.renderMenu = function(menuId, titleText, isBack = false) {
+window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) {
     const area = document.getElementById('buttons-area');
     const menuTitle = document.getElementById('menu-title');
     const breadcrumb = document.getElementById('breadcrumb');
@@ -199,16 +199,91 @@ window.renderMenu = function(menuId, titleText, isBack = false) {
         if (item.id === 'monk') btn.classList.add('btn-monk');
         if (item.id === 'crus') btn.classList.add('btn-crusader');
         if (item.id === 'necro') btn.classList.add('btn-necromancer');
-        if (menuId === 'guilds_list') btn.classList.add('btn-guild');
 
-        btn.innerText = item.title;
-        btn.style.opacity = '0';
-        btn.style.animation = `fadeInUp 0.3s ease-out forwards ${index * 0.05}s`;
+        // --- Check for button locks ---
+        let isLocked = false;
+        let lockReason = "";
 
-        btn.addEventListener('animationend', () => {
-            btn.style.opacity = '1';
-            btn.style.animation = 'none';
-        });
+        const guildId = item.id;
+            const pData = window.playerData;
+            switch(guildId) {
+                case 'traders_guild':
+                    if (pData.stat_vit < 1000) { isLocked = true; lockReason = "🔒 1000 ⛑️"; }
+                    break;
+                case 'vampire_mage':
+                case 'wizard_mage':
+                    if (pData.stat_int < 1000 && pData.para < 50) { isLocked = true; lockReason = "🔒 1000🔮 | 50⏳"; }
+                    break;
+                case 'goblin_hunter':
+                case 'elite_hunter':
+                    if (pData.reputation < 85) { isLocked = true; lockReason = "🔒 85 🎭"; }
+                    break;
+                case 'db_gambler':
+                    if (pData.deals < 7 && pData.stat_dex < 1000) { isLocked = true; lockReason = "🔒 7 🤝 | 1000🥢"; }
+                    break;
+                case 'db_thief':
+                    if (pData.steals < 7) { isLocked = true; lockReason = "🔒 7 🧤"; }
+                    break;
+                case 'adv_explorer':
+                    if (pData.found_legs < 5) { isLocked = true; lockReason = "🔒 5 📙"; }
+                    break;
+                case 'adv_wealth':
+                    if (pData.found_legs < 8) { isLocked = true; lockReason = "🔒 8 📙"; }
+                    break;
+                case 'comp_brute':
+                case 'comp_warlord':
+                    if (pData.stat_str < 1000 && (pData.kills + (pData.base_kills || 0)) < 1700) { isLocked = true; lockReason = "🔒 1000🏮 | 1700💀"; }
+                    break;
+                case 'prof_1':
+                    if (pData.level <= 20) { isLocked = true; lockReason = "🔒 Требуется ур. 21"; }
+                    break;
+                case 'prof_2':
+                    if (pData.level <= 40) { isLocked = true; lockReason = "🔒 Требуется ур. 41"; }
+                    break;
+                case 'prof_3':
+                    if (pData.level <= 70) { isLocked = true; lockReason = "🔒 Требуется ур. 71"; }
+                    break;
+            }
+
+        if (isLocked) {
+            btn.disabled = true;
+            btn.innerHTML = `<span style="text-decoration: line-through; color: #888;">${item.title}</span><br><span style="font-size: 0.8rem; color: #ff4444; text-transform: none;">${lockReason}</span>`;
+            btn.classList.add('locked-btn');
+            btn.style.opacity = '0.7';
+
+            // Hover preview for locked buttons
+            btn.onmouseenter = () => {
+                btn.hoverTimer = setTimeout(() => {
+                    const targetData = window.gameData[item.id];
+                    if (targetData && targetData.content) {
+                        window.showText(item.title, targetData.content);
+                        const textWindow = document.getElementById('text-window');
+                        if(textWindow) textWindow.classList.add('preview-mode');
+                    }
+                }, 1000);
+            };
+            btn.onmouseleave = () => {
+                if (btn.hoverTimer) clearTimeout(btn.hoverTimer);
+                const textWindow = document.getElementById('text-window');
+                if (textWindow && textWindow.style.display === 'block' && textWindow.classList.contains('preview-mode')) {
+                    textWindow.style.display = 'none';
+                    textWindow.classList.remove('preview-mode');
+                }
+            };
+        } else {
+            btn.innerText = item.title;
+            if (!noAnim) {
+                btn.style.opacity = '0';
+                btn.style.animation = `fadeInUp 0.3s ease-out forwards ${index * 0.05}s`;
+                btn.addEventListener('animationend', () => {
+                    btn.style.opacity = '1';
+                    btn.style.animation = 'none';
+                });
+            } else {
+                btn.style.opacity = '1';
+                btn.style.animation = 'none';
+            }
+        }
         
         btn.onclick = () => {
             const targetData = window.gameData[item.id];
@@ -241,6 +316,7 @@ window.showText = function(title, content) {
     windowArea.style.transform = 'translate(-50%, -50%)';
 
     windowArea.style.display = 'block';
+    windowArea.classList.remove('preview-mode'); // Убираем режим превью, если открываем кликом
     titleArea.innerText = title;
     
     let html = (typeof content === 'object') ? content.content : content;
@@ -304,6 +380,16 @@ window.updateUI = function() {
         if (bestRank) rankEl.innerText = `🏆 РЕЙТИНГ: ${bestRank}`;
     }
     
+    const profs = window.playerData.professions;
+    let profText = "Без профессии";
+    if (profs) {
+        if (profs[3]) profText = "3-я Профессия";
+        else if (profs[2]) profText = "2-я Профессия";
+        else if (profs[1]) profText = "1-я Профессия";
+    }
+    const profEl = document.getElementById('view-profession');
+    if (profEl) profEl.innerText = profText;
+
     let xpBonusText = window.playerData.xp_bonus ? `(XP: ${window.playerData.xp_bonus})` : "";
     document.getElementById('view-lvl').innerHTML = `${window.playerData.level} 🌒 <span style="font-size:0.7rem; color:#aaa;">${xpBonusText}</span>`;
     
@@ -367,6 +453,16 @@ window.updateUI = function() {
 
     window.renderLearnedSkillsWidget();
     localStorage.setItem('d3mod_player', JSON.stringify(window.playerData));
+
+    // Обновляем состояние кнопок профессий в открытом окне (если оно открыто)
+    if (window.updateProfessionButtonState) window.updateProfessionButtonState();
+
+    // Re-render current menu to update locks without animation
+    const currentMenuId = window.historyStack[window.historyStack.length - 1];
+    const currentTitle = window.pathNames[window.pathNames.length - 1];
+    if (currentMenuId && window.gameData && window.gameData[currentMenuId] && currentMenuId !== 'skills_study_menu') {
+         window.renderMenu(currentMenuId, currentTitle, true, true);
+    }
 }
 
 window.updatePentaSlot = function(id, isActive) {

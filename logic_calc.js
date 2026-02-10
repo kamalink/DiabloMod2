@@ -108,6 +108,7 @@ window.loadCalcSkillData = function() {
             buyBtn.style.background = "#333";
             buyBtn.style.color = "#aaa";
             buyBtn.style.border = "1px solid #555"; // Убираем зеленую рамку
+            buyBtn.style.display = "inline-block";
         } else {
             buyBtn.innerText = "ИЗУЧИТЬ";
             buyBtn.disabled = false;
@@ -404,19 +405,19 @@ window.calculateSkillCost = function() {
     let finalCost = currentCalc.cost;
     let details = currentCalc.details;
 
-    // 2. Проверяем, изучена ли Базовая руна (индекс 0)
+    // 2. Проверяем, изучена ли хоть одна руна этого навыка
     const skillName = window.skillDB[className][skillIdx].name;
-    const baseRuneName = window.skillDB[className][skillIdx].runes[0].name;
-    const isBaseLearned = window.playerData.learnedSkills[skillName] && window.playerData.learnedSkills[skillName].includes(baseRuneName);
+    const learnedRunes = window.playerData.learnedSkills[skillName];
+    const isAnyRuneLearned = learnedRunes && learnedRunes.length > 0;
 
-    // 3. Если выбрана НЕ базовая руна, и базовая уже изучена -> вычитаем стоимость базовой
-    if (runeIdx != 0 && isBaseLearned) {
+    // 3. Если навык уже открыт (изучена любая руна), вычитаем стоимость базовой версии
+    if (isAnyRuneLearned) {
         const baseCalc = window.calculateRuneCostFromDB(className, skillIdx, 0);
         // Базовая руна обычно не имеет синергии/снижения затрат в контексте "базы", 
         // поэтому расчет через DB (где эти поля из UI могут быть пустыми или дефолтными) приемлем.
         if (baseCalc.cost > 0) {
             finalCost = Math.max(0, finalCost - baseCalc.cost);
-            details.push(`<br><span style="color:#66ff66">✅ Скидка за изученную базу: -${baseCalc.cost.toFixed(2)}</span>`);
+            details.push(`<br><span style="color:#66ff66">✅ Скидка за изученный навык: -${baseCalc.cost.toFixed(2)}</span>`);
         }
     }
 
@@ -470,7 +471,7 @@ window.buySkill = function() {
 
     // Если навык новый (еще не в списке), проверяем лимит
     if (!window.playerData.learnedSkills[skillName] && currentSkillCount >= maxSkills) {
-        window.showCustomAlert(`❌ Достигнут лимит навыков (${currentSkillCount}/${maxSkills}).<br>Получите следующюю профессию чтобы открыть новые слоты.`);
+        window.showCustomAlert(`❌ Достигнут лимит навыков (${currentSkillCount}/${maxSkills}).`);
         return;
     }
 

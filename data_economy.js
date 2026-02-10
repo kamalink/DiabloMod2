@@ -2,7 +2,7 @@ window.economyData = {
     econ: [
         { 
             id: 'enchant', 
-            title: '1. Зачарование', 
+            title: 'Зачарование', 
             content: `
                 <div class="craft-row"><p>Продажа 🧪 — 5🥈</p><button class="craft-btn sell" onclick="sellDeathBreath()">Продать</button></div>
                 <div class="craft-row"><p>Покупка реагента — 10🥈</p><button class="craft-btn buy" onclick="buyReagent()">Купить</button></div>
@@ -19,7 +19,7 @@ window.economyData = {
         },
         { 
             id: 'potions', 
-            title: '2. Штрафы и Зелья', 
+            title: 'Штрафы и Зелья', 
             content: `
                 <div class="craft-row"><p style="color: #ff4444; font-weight: bold;">🚨 Неизученное умение:</p><button class="craft-btn sell" onclick="applySkillPenalty()">Использовал</button></div>
                 <p style="font-size:0.8rem; text-align:center;">1-20🌒: 10🥉 | 20-40🌒: 25🥉 | 40-60🌒: 50🥉 | 60+🌒: 1🥈</p>
@@ -32,10 +32,10 @@ window.economyData = {
                 <p style="font-size: 0.9rem; border-top: 1px solid #333; padding-top: 5px;">После 70 🌒: 20🥈 * 1.05<sup>макс. ВП</sup></p>
             `
         },
-        { id: 'smith_jewel', title: '3. Ювелирка и Кузница' },
+        { id: 'smith_jewel', title: 'Ювелирка и Кузница' },
         { 
             id: 'buy', 
-            title: '5. Покупка предметов', 
+            title: 'Покупка предметов', 
             content: `
                 <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
                     <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
@@ -72,7 +72,7 @@ window.economyData = {
                 </div>
             `
         },
-        { id: 'items_menu', title: '6. Предметы и цены' }
+        { id: 'items_menu', title: 'Предметы и цены' }
     ],
     smith_jewel: [
         { 
@@ -164,7 +164,7 @@ window.economyData = {
         }
     ],
     items_menu: [
-        { id: 'bulk_sale', title: '1. Продажа предметов оптом 5%', content: `
+        { id: 'bulk_sale', title: 'Продажа предметов оптом 5%', content: `
             <p style="text-align: center; color: #d4af37; font-size: 1.2rem;"><strong>Продажа оптом 5%</strong></p>
             <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: center;">
                 <tr style="color: #d4af37; border-bottom: 2px solid #5a0000;">
@@ -187,8 +187,8 @@ window.economyData = {
                 <tr style="background: rgba(212, 175, 55, 0.1);"><td>70</td><td>1🥈20🥉</td><td>—</td><td>—</td></tr>
             </table>
         ` },
-        { id: 'grades_abc_menu', title: '2. A grade' },
-        { id: 'grade_ssplus', title: '3. S, S+, Spectrum grade', content: `
+        { id: 'grades_abc_menu', title: 'A grade' },
+        { id: 'grade_ssplus', title: 'S, S+, Spectrum grade', content: `
             <p style="color: #ff4444;">❗ S grade (Древние и первозд. <span class="grade-b">B</span>, <span class="grade-a">A</span> grade)</p>
             🔹 <span class="frame-drev">Древний</span> х1.5 <span class="grade-b">B grade</span><br><br>
             🔹 <span class="frame-drev">Древний</span> х1.5 <span class="grade-a">A grade</span><br><br>

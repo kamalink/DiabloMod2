@@ -195,9 +195,9 @@
     background: linear-gradient(to bottom, #222, #111);
     border: 1px solid #d4af37; color: #d4af37;
     font-family: 'Cinzel', serif; font-weight: 700;
-    cursor: pointer; margin-left: 10px; vertical-align: middle; transition: 0.3s;
+    cursor: pointer; margin-left: 10px; vertical-align: middle; transition: transform 0.3s, box-shadow 0.3s, color 0.3s;
 }
-.calc-nav-btn:hover { background: #333; color: #fff; box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
+.calc-nav-btn:hover { background: linear-gradient(to bottom, #333, #222); color: #fff; box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
 
 .claim-reward-btn {
     background: linear-gradient(to bottom, #2d5a3a, #1d3824);

@@ -56,9 +56,9 @@ window.guildsData = {
         `
     },
     hunters_guild: [
-        { id: 'goblin_hunter', title: '1. Охотник на гоблинов' },
-        { id: 'elite_hunter', title: '2. Охотник на ☠️' },
-        { id: 'hunter_helper', title: '3. Помощник Охотника' }
+        { id: 'goblin_hunter', title: 'Охотник на гоблинов' },
+        { id: 'elite_hunter', title: 'Охотник на ☠️' },
+        { id: 'hunter_helper', title: 'Помощник Охотника' }
     ],
     goblin_hunter: {
         content: `

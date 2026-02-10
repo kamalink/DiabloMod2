@@ -3,6 +3,9 @@ body, html {
     background-color: transparent; color: #b8a078;
     font-family: 'Lora', serif;
     cursor: url('cursor.png'), auto; /* Локальный курсор */
+    overflow-y: scroll; /* Сохраняем функционал скролла */
+    scrollbar-width: none; /* Firefox: скрываем скроллбар */
+    -ms-overflow-style: none; /* IE/Edge */
 }
 
 * {
@@ -12,6 +15,11 @@ body, html {
 /* Курсор при наведении на активные элементы */
 button, a, .select-btn, .close-x, input, select, label, .penta-slot {
     cursor: url('cursor.png'), pointer !important;
+}
+
+/* Скрываем скроллбар для Chrome/Safari/Opera */
+body::-webkit-scrollbar, html::-webkit-scrollbar {
+    display: none;
 }
 
 /* Эффект зернистости (шум) */
@@ -83,19 +91,13 @@ body::after {
         url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 3h1v1H1V3zm2-2h1v1H3V1z' fill='%23000' fill-opacity='0.5' fill-rule='evenodd'/%3E%3C/svg%3E");
     
     /* Границы и Рамка */
-    border: 1px solid #2a0505;
-    border-radius: 4px;
-    
-    /* Сложная рамка через box-shadow */
-    box-shadow: 
-        /* Внутренняя глубина */
-        inset 0 0 20px #000,
-        /* Золотая рамка (внутренняя) */
-        inset 0 0 0 2px #d4af37,
-        /* Черная обводка внутри рамки */
-        inset 0 0 0 3px #000,
-        /* Внешняя тень */
-        0 5px 15px #000;
+    border: 10px solid;
+    border-image-source: url("data:image/svg+xml,%3csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3e%3cstyle%3e.s { fill: none; stroke: %23d4af37; stroke-width: 1; } .f { fill: %23d4af37; }%3c/style%3e%3cpath class='f' d='M0 10 L0 0 L10 0 L10 2 L2 2 L2 10 Z' /%3e%3cpath class='f' d='M30 0 L40 0 L40 10 L38 10 L38 2 L30 2 Z' /%3e%3cpath class='f' d='M40 30 L40 40 L30 40 L30 38 L38 38 L38 30 Z' /%3e%3cpath class='f' d='M10 40 L0 40 L0 30 L2 30 L2 38 L10 38 Z' /%3e%3cline x1='10' y1='1' x2='30' y2='1' class='s' /%3e%3cline x1='39' y1='10' x2='39' y2='30' class='s' /%3e%3cline x1='30' y1='39' x2='10' y2='39' class='s' /%3e%3cline x1='1' y1='30' x2='1' y2='10' class='s' /%3e%3c/svg%3e");
+    border-image-slice: 15;
+    border-image-width: 10px;
+    border-image-outset: 0px;
+    border-image-repeat: stretch;
+    box-shadow: 0 5px 15px #000;
 
     cursor: pointer;
     transition: all 0.2s ease-in-out;
@@ -118,12 +120,6 @@ body::after {
     /* Темно-серый/черный оттенок */
     background-color: #151515;
     color: #a0a0a0;
-    /* Серебряная рамка для второстепенных кнопок */
-    box-shadow: 
-        inset 0 0 20px #000,
-        inset 0 0 0 2px #777,
-        inset 0 0 0 3px #000,
-        0 5px 15px #000;
 }
 
 .d2-button:hover {
@@ -137,27 +133,29 @@ body::after {
 /* Состояния наведения для разных типов */
 .main-btn:hover {
     background-color: #3a0a0a;
-    box-shadow: 
-        inset 0 0 30px rgba(255, 0, 0, 0.2),
-        inset 0 0 0 2px #ffd700, /* Яркое золото */
-        inset 0 0 0 3px #000,
-        0 0 20px rgba(212, 175, 55, 0.4); /* Внешнее свечение */
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); /* Внешнее свечение */
 }
 
 .sub-btn:hover {
     background-color: #252525;
     color: #fff;
-    box-shadow: 
-        inset 0 0 30px rgba(255, 255, 255, 0.05),
-        inset 0 0 0 2px #aaa, /* Яркое серебро */
-        inset 0 0 0 3px #000,
-        0 0 15px rgba(200, 200, 200, 0.2);
+    box-shadow: 0 0 15px rgba(200, 200, 200, 0.2);
 }
 
 .d2-button:active {
     transform: scale(0.98);
-    box-shadow: inset 0 0 15px #000 !important; /* Эффект нажатия */
+    box-shadow: inset 0 0 25px #000 !important; /* Эффект нажатия */
     top: 1px;
+}
+
+.d2-button.locked-btn {
+    cursor: not-allowed;
+    opacity: 0.7;
+    border-image-source: url("data:image/svg+xml,%3csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3e%3cstyle%3e.s { fill: none; stroke: %23666; stroke-width: 1; } .f { fill: %23666; }%3c/style%3e%3cpath class='f' d='M0 10 L0 0 L10 0 L10 2 L2 2 L2 10 Z' /%3e%3cpath class='f' d='M30 0 L40 0 L40 10 L38 10 L38 2 L30 2 Z' /%3e%3cpath class='f' d='M40 30 L40 40 L30 40 L30 38 L38 38 L38 30 Z' /%3e%3cpath class='f' d='M10 40 L0 40 L0 30 L2 30 L2 38 L10 38 Z' /%3e%3cline x1='10' y1='1' x2='30' y2='1' class='s' /%3e%3cline x1='39' y1='10' x2='39' y2='30' class='s' /%3e%3cline x1='30' y1='39' x2='10' y2='39' class='s' /%3e%3cline x1='1' y1='30' x2='1' y2='10' class='s' /%3e%3c/svg%3e");
+}
+.d2-button.locked-btn:hover {
+    transform: none;
+    box-shadow: 0 5px 15px #000;
 }
 
 /* Кнопки навигации */
@@ -170,6 +168,13 @@ body::after {
 #window-title { font-family: 'Cinzel', serif; font-weight: 700; color: #d4af37; text-align: center; border-bottom: 1px solid #5a0000; padding-bottom: 10px; }
 #window-content { font-size: 1.15rem; line-height: 1.6; color: #ccc; margin-top: 20px; }
 .close-x { position: absolute; top: 15px; right: 15px; color: #ff4444; cursor: pointer; font-size: 1.5rem; text-shadow: 0 0 5px #000; }
+
+/* Режим предпросмотра для окна (не перехватывает мышь) */
+#text-window.preview-mode {
+    pointer-events: none;
+    opacity: 0.95;
+    border-color: #888;
+}
 
 table { width: 100%; border-collapse: collapse; margin: 15px 0; }
 th, td { border: 1px solid #333; padding: 8px; text-align: center; }
@@ -266,9 +271,6 @@ th { color: #d4af37; }
 .btn-monk { background: linear-gradient(to bottom, #5a4a2d, #382d1d) !important; }      /* Горчичный */
 .btn-crusader { background: linear-gradient(to bottom, #5a5a4d, #38382d) !important; }  /* Платиновый/Серый */
 .btn-necromancer { background: linear-gradient(to bottom, #3d3d3d, #242424) !important; } /* Темно-серый */
-
-/* Цвет для кнопок Гильдий (сделаем их чуть более "золотистыми") */
-.btn-guild { background: linear-gradient(to bottom, #463c23, #2b2516) !important; border-color: #7a6a3e !important; }
 
 #randomizer-btn {
     position: fixed;
@@ -590,4 +592,3 @@ th { color: #d4af37; }
 .rpg-entry-effect {
     animation: rpg-entry 3.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
-
