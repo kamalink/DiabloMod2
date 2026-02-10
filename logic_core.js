@@ -44,6 +44,8 @@ window.playerData = savedData ? JSON.parse(savedData) : {
     active_rents: [], // Список активных аренд: { rank, count, startLvl, duration }
     forgottenSkills: {}, // Счетчик забытых навыков
     professions: { 1: false, 2: false, 3: false }, // Состояние профессий
+    claimed_torments: [], // Полученные награды за Torment
+    claimed_ranks: [], // Полученные награды за ранг
     
     // Пентограмма (чекбоксы)
     penta_1: false, penta_2: false, penta_3: false,
@@ -68,6 +70,8 @@ if (typeof window.playerData.res_a === 'undefined') window.playerData.res_a = 0;
 if (!window.playerData.active_rents) window.playerData.active_rents = [];
 if (!window.playerData.forgottenSkills) window.playerData.forgottenSkills = {};
 if (!window.playerData.professions) window.playerData.professions = { 1: false, 2: false, 3: false };
+if (!window.playerData.claimed_torments) window.playerData.claimed_torments = [];
+if (!window.playerData.claimed_ranks) window.playerData.claimed_ranks = [];
 
 // Глобальные переменные состояния
 window.historyStack = ['main'];
@@ -131,6 +135,11 @@ window.getZakenPrice = function(level) {
 
 window.showCustomConfirm = function(msg, onYes, onNo) {
     const modal = document.getElementById('custom-confirm-modal');
+    // Сброс позиции
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+
     document.getElementById('confirm-message').innerHTML = msg;
     const yesBtn = document.getElementById('confirm-yes-btn');
     const noBtn = document.getElementById('confirm-no-btn');
@@ -159,6 +168,11 @@ window.showCustomConfirm = function(msg, onYes, onNo) {
 
 window.showCustomAlert = function(msg) {
     const modal = document.getElementById('custom-confirm-modal');
+    // Сброс позиции
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+
     document.getElementById('confirm-message').innerHTML = msg;
     const yesBtn = document.getElementById('confirm-yes-btn');
     const noBtn = document.getElementById('confirm-no-btn');
@@ -180,6 +194,11 @@ window.closeWindow = function() {
 
 window.showCustomPrompt = function(title, text, defaultValue, onOk) {
     const modal = document.getElementById('custom-prompt-modal');
+    // Сброс позиции
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+
     document.getElementById('prompt-title').innerText = title;
     document.getElementById('prompt-text').innerHTML = text;
     const input = document.getElementById('prompt-input');

@@ -108,7 +108,6 @@ window.onload = function() {
 
 // Функция для случайных глитч-эффектов
 window.startRandomGlitches = function() {
-    const overlay = document.getElementById('glitch-overlay');
     const screamer = document.getElementById('screamer-sound');
 
     // 1. Таймер для Скримера (Звук) - Ровно каждые 30 секунд
@@ -121,24 +120,6 @@ window.startRandomGlitches = function() {
             screamer.play().catch(() => {});
         }
     }, 30000);
-
-    // 2. Таймер для Визуального глитча - Случайно 5-10 секунд
-    const triggerVisual = () => {
-        if (overlay) {
-            // Случайный тип глитча (1, 2 или 3)
-            const glitchType = Math.floor(Math.random() * 3) + 1;
-            overlay.className = `active-glitch-${glitchType}`; // Сброс классов и установка нового
-            
-            setTimeout(() => {
-                overlay.className = ''; // Убираем класс
-            }, 200 + Math.random() * 300); // Длительность 0.2 - 0.5 сек
-        }
-
-        const nextInterval = 5000 + Math.random() * 5000; // 5 - 10 секунд
-        setTimeout(triggerVisual, nextInterval);
-    };
-
-    triggerVisual();
 }
 
 // Таймер бездействия
@@ -182,7 +163,14 @@ window.makeDraggable = function(elmnt) {
     function dragMouseDown(e) {
         e = e || window.event;
         e.preventDefault();
-        // Получаем позицию курсора
+
+        // Рассчитываем позицию элемента в пикселях и отключаем transform
+        const rect = elmnt.getBoundingClientRect();
+        elmnt.style.top = rect.top + 'px';
+        elmnt.style.left = rect.left + 'px';
+        elmnt.style.transform = 'none';
+
+        // get the mouse cursor position at startup:
         pos3 = e.clientX;
         pos4 = e.clientY;
         document.onmouseup = closeDragElement;
@@ -192,14 +180,12 @@ window.makeDraggable = function(elmnt) {
     function elementDrag(e) {
         e = e || window.event;
         e.preventDefault();
-        // Вычисляем смещение
+        // calculate the new cursor position:
         pos1 = pos3 - e.clientX;
         pos2 = pos4 - e.clientY;
         pos3 = e.clientX;
         pos4 = e.clientY;
-        // Устанавливаем новую позицию
-        // Важно: убираем transform translate, чтобы позиционирование работало корректно от top/left
-        elmnt.style.transform = "none"; 
+        // set the element's new position:
         elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
         elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
     }

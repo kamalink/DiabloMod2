@@ -430,6 +430,7 @@ window.checkGuildProgression = function() {
             }
         );
     }
+
     // 2. Салага -> Громила или Лорд Войны
     else if (g.includes('салага') && window.playerData.kills >= 500) {
         // Тут выбор из двух, поэтому просто уведомляем или открываем меню
@@ -508,6 +509,95 @@ window.checkGuildProgression = function() {
         
         modal.style.display = 'block';
     }
+}
+
+window.checkTormentReward = function() {
+    const input = document.getElementById('torment-input');
+    if (!input) return;
+    const grLevel = parseInt(input.value);
+
+    if (isNaN(grLevel) || grLevel < 1) {
+        window.showCustomAlert("❌ Введите корректный уровень Великого Портала.");
+        return;
+    }
+
+    const grToTormentMap = {
+        8: 1, 12: 2, 15: 3, 17: 4, 20: 5, 25: 6,
+        30: 7, 35: 8, 40: 9, 45: 10, 50: 11, 55: 12, 60: 13, 65: 14, 70: 15, 75: 16
+    };
+
+    const tormentLevel = grToTormentMap[grLevel];
+
+    if (!tormentLevel) {
+        window.showCustomAlert(`Уровень ВП ${grLevel} не дает право на получение награды за Torment.<br><small>Награда выдается только за точные уровни ВП, открывающие новый Torment (8, 12, 15, 17, 20, 25, 30...).</small>`);
+        return;
+    }
+
+    if (!window.playerData.claimed_torments) window.playerData.claimed_torments = [];
+
+    if (window.playerData.claimed_torments.includes(tormentLevel)) {
+        window.showCustomAlert(`✅ Награда за Torment ${tormentLevel} уже была получена.`);
+        return;
+    }
+
+    let reward = 0;
+    const baseGold = 1; // 1 gold
+    reward = (grLevel <= 100) ? (baseGold * Math.pow(1.04, grLevel)) : (baseGold * Math.pow(1.05, grLevel));
+    const rewardYen = Math.floor(reward * 1000000);
+
+    window.showCustomConfirm(
+        `Вы закрыли ВП ${grLevel}, что соответствует <b>Torment ${tormentLevel}</b>.<br><br>Получить награду в размере <span style="color:#ffd700">${window.formatCurrency(rewardYen)}</span>?`,
+        () => {
+            window.setMoneyFromYen(window.getAllMoneyInYen() + rewardYen);
+            window.playerData.claimed_torments.push(tormentLevel);
+            window.saveToStorage();
+            window.updateUI();
+            window.showCustomAlert(`✅ Награда за Torment ${tormentLevel} получена!`);
+        }
+    );
+}
+
+window.checkRankReward = function() {
+    const rankInput = document.getElementById('rank-input');
+    const grInput = document.getElementById('rank-gr-input');
+    if (!rankInput || !grInput) return;
+
+    const rank = parseInt(rankInput.value);
+    const grLevel = parseInt(grInput.value);
+
+    if (isNaN(rank) || rank < 1 || isNaN(grLevel) || grLevel < 1) {
+        window.showCustomAlert("❌ Введите корректное место в рейтинге и уровень ВП.");
+        return;
+    }
+
+    const allowedRanks = [600, 500, 400, 300, 200, 100, 50, 25, 10, 5, 2, 1];
+    if (!allowedRanks.includes(rank)) {
+        window.showCustomAlert(`❌ Награда за ${rank}-е место не предусмотрена.`);
+        return;
+    }
+
+    if (!window.playerData.claimed_ranks) window.playerData.claimed_ranks = [];
+
+    if (window.playerData.claimed_ranks.includes(rank)) {
+        window.showCustomAlert(`✅ Награда за ${rank}-е место уже была получена.`);
+        return;
+    }
+
+    const baseGold = 6; // 6 gold
+    const multiplier = (grLevel <= 100) ? Math.pow(1.04, grLevel) : Math.pow(1.05, grLevel);
+    const reward = baseGold * multiplier;
+    const rewardYen = Math.floor(reward * 1000000);
+
+    window.showCustomConfirm(
+        `Вы заняли <b>${rank}-е место</b>, закрыв ВП ${grLevel}.<br><br>Получить награду в размере <span style="color:#ffd700">${window.formatCurrency(rewardYen)}</span>?`,
+        () => {
+            window.setMoneyFromYen(window.getAllMoneyInYen() + rewardYen);
+            window.playerData.claimed_ranks.push(rank);
+            window.saveToStorage();
+            window.updateUI();
+            window.showCustomAlert(`✅ Награда за ${rank}-е место получена!`);
+        }
+    );
 }
 
 window.applyGuildRewards = function(oldData) {
@@ -841,6 +931,11 @@ window.processDeath = function() {
     const modal = document.getElementById('death-modal');
     const content = document.getElementById('death-modal-content');
     const actions = document.getElementById('death-modal-actions');
+
+    // Сброс позиции окна
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
     
     // Предварительный расчет потерь рун
     const runePenalty = Math.floor(window.playerData.para * 0.1 * 100) / 100;
@@ -901,6 +996,11 @@ window.processPartnerDeath = function() {
     const modal = document.getElementById('death-modal');
     const content = document.getElementById('death-modal-content');
     const actions = document.getElementById('death-modal-actions');
+
+    // Сброс позиции окна
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
     
     const g = (window.playerData.guild || "").toLowerCase();
     let penaltyText = "";
@@ -1073,4 +1173,102 @@ window.confirmDeath = function() {
     ];
     const randomMessage = grimMessages[Math.floor(Math.random() * grimMessages.length)];
     window.showCustomAlert(randomMessage);
+}
+
+window.claimProfessionReward = function(profNum) {
+    const lvl = window.playerData.level;
+    
+    // Проверка уровней
+    if (profNum === 1 && lvl <= 20) {
+        window.showCustomAlert("❌ Доступно после 20 уровня.");
+        return;
+    }
+    if (profNum === 2 && lvl <= 40) {
+        window.showCustomAlert("❌ Доступно после 40 уровня.");
+        return;
+    }
+    if (profNum === 3 && lvl <= 70) {
+        window.showCustomAlert("❌ Доступно после 70 уровня.");
+        return;
+    }
+
+    // Проверка предыдущей профессии
+    if (profNum > 1 && !window.playerData.professions[profNum - 1]) {
+        window.showCustomAlert(`❌ Сначала получите награду за ${profNum - 1} Профессию.`);
+        return;
+    }
+
+    if (window.playerData.professions[profNum]) {
+        window.showCustomAlert("✅ Награда уже получена.");
+        return;
+    }
+
+    // Выдача наград
+    if (profNum === 1) {
+        window.playerData.gold_s += 1;
+        window.playerData.runes += 1.5;
+        window.playerData.para += 1.5;
+        window.showCustomAlert("💰 Получено: 1🥈, 1.5 📖, 1.5 ⏳<br>🔓 Открыто: +2 Активных, +1 Пассивный слот.");
+    }
+    else if (profNum === 2) {
+        window.playerData.gold_s += 10;
+        window.showCustomAlert("💰 Получено: 10🥈<br>🔓 Открыто: +2 Активных, +1 Пассивный слот.");
+    }
+    else if (profNum === 3) {
+        window.showCustomAlert("🔓 Открыто: +1 Активный, +2 Пассивных слота.<br>💍 Кольца с боссов теперь ваши!");
+    }
+
+    if (window.coinSound) { window.coinSound.currentTime = 0; window.coinSound.play().catch(e => {}); }
+    
+    // Сохраняем прогресс
+    window.playerData.professions[profNum] = true;
+    window.saveToStorage();
+    window.updateUI();
+    
+    // Обновляем кнопку
+    if (window.updateProfessionButtonState) window.updateProfessionButtonState();
+}
+
+window.updateProfessionButtonState = function() {
+    // Ищем кнопки в открытом окне text-window
+    const content = document.getElementById('window-content');
+    if (!content) return;
+
+    const btns = content.querySelectorAll('.claim-reward-btn');
+    btns.forEach(btn => {
+        let profNum = 0;
+        if (btn.onclick.toString().includes('claimProfessionReward(1)')) profNum = 1;
+        if (btn.onclick.toString().includes('claimProfessionReward(2)')) profNum = 2;
+        if (btn.onclick.toString().includes('claimProfessionReward(3)')) profNum = 3;
+
+        if (profNum > 0) {
+            const lvl = window.playerData.level;
+            let isLocked = false;
+            if (profNum === 1 && lvl <= 20) isLocked = true;
+            if (profNum === 2 && lvl <= 40) isLocked = true;
+            if (profNum === 3 && lvl <= 70) isLocked = true;
+
+            if (window.playerData.professions[profNum]) {
+                btn.innerText = "✅ ПОЛУЧЕНО";
+                btn.disabled = true;
+                btn.style.opacity = "0.5";
+            } else if (isLocked) {
+                btn.innerText = `🔒 Требуется ур. ${profNum === 1 ? 21 : (profNum === 2 ? 41 : 71)}`;
+                btn.disabled = true;
+                btn.style.opacity = "0.5";
+                btn.style.borderColor = "#555";
+            } else {
+                btn.disabled = false;
+                btn.style.opacity = "1";
+            }
+        }
+    });
+}
+
+window.togglePentagram = function(id) {
+    const el = document.getElementById(id);
+    if (el) {
+        window.playerData[id] = el.checked;
+        window.updateUI();
+    }
 }

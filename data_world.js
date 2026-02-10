@@ -21,6 +21,17 @@ window.worldData = {
                 ❗ Награда в 💰 выдаётся только на рейтингах:<br>
                 <b>600, 500, 400, 300, 200, 100, 50, 25, 10, 5, 2 и 1</b>
             </p>
+            <div style="text-align: center; margin-top: 20px; border-top: 1px solid #555; padding-top: 15px;">
+                <p><b>Проверить награду за Torment</b></p>
+                <input type="number" id="torment-input" placeholder="Уровень ВП" style="width: 100px; padding: 5px; background: #000; border: 1px solid #444; color: #fff;">
+                <button class="claim-reward-btn" onclick="window.checkTormentReward()">Проверить</button>
+            </div>
+            <div style="text-align: center; margin-top: 20px; border-top: 1px solid #555; padding-top: 15px;">
+                <p><b>Проверить награду за место в рейтинге</b></p>
+                <input type="number" id="rank-input" placeholder="Место" style="width: 80px; padding: 5px; background: #000; border: 1px solid #444; color: #fff;">
+                <input type="number" id="rank-gr-input" placeholder="Уровень ВП" style="width: 100px; padding: 5px; background: #000; border: 1px solid #444; color: #fff;">
+                <button class="claim-reward-btn" onclick="window.checkRankReward()">Получить</button>
+            </div>
         `
     },
     portals_pentagram: {
@@ -29,15 +40,15 @@ window.worldData = {
             
             <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; margin-bottom: 10px; border: 1px solid #333;">
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 5px;">
-                    <input type="checkbox" id="penta_1" onchange="togglePentagram('penta_1')"> 
+                    <input type="checkbox" id="penta_1" onchange="window.togglePentagram('penta_1')"> 
                     <span>1️⃣ вкладка — закрытие 25🏛️</span>
                 </label>
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 5px;">
-                    <input type="checkbox" id="penta_2" onchange="togglePentagram('penta_2')"> 
+                    <input type="checkbox" id="penta_2" onchange="window.togglePentagram('penta_2')"> 
                     <span>2️⃣ вкладка — закрытие 60🏛️</span>
                 </label>
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                    <input type="checkbox" id="penta_3" onchange="togglePentagram('penta_3')"> 
+                    <input type="checkbox" id="penta_3" onchange="window.togglePentagram('penta_3')"> 
                     <span>3️⃣ вкладка — закрытие 100🏛️</span>
                 </label>
             </div>
@@ -125,7 +136,7 @@ window.worldData = {
             <p>✅ +1.5 📖 и ⏳</p>
             <p>✅ +1 🥈</p>
             <div style="text-align: center; margin-top: 15px;">
-                <button class="claim-reward-btn" onclick="claimProfessionReward(1)">💰 ПОЛУЧИТЬ НАГРАДУ</button>
+                <button class="claim-reward-btn" onclick="window.claimProfessionReward(1)">💰 ПОЛУЧИТЬ НАГРАДУ</button>
             </div>
         `
     },
@@ -137,7 +148,7 @@ window.worldData = {
             <p>✅ +1 Пассивное умение</p>
             <p>✅ +10 🥈</p>
             <div style="text-align: center; margin-top: 15px;">
-                <button class="claim-reward-btn" id="btn-prof-2" onclick="claimProfessionReward(2)">💰 ПОЛУЧИТЬ НАГРАДУ</button>
+                <button class="claim-reward-btn" id="btn-prof-2" onclick="window.claimProfessionReward(2)">💰 ПОЛУЧИТЬ НАГРАДУ</button>
             </div>
         `
     },
@@ -151,7 +162,7 @@ window.worldData = {
             <p>✅ +2 Пассивных умения</p>
             <p>✅ +💍 С 👹 уже ваши</p>
             <div style="text-align: center; margin-top: 15px;">
-                <button class="claim-reward-btn" id="btn-prof-3" onclick="claimProfessionReward(3)">💰 ПОЛУЧИТЬ НАГРАДУ</button>
+                <button class="claim-reward-btn" id="btn-prof-3" onclick="window.claimProfessionReward(3)">💰 ПОЛУЧИТЬ НАГРАДУ</button>
             </div>
         `
     },

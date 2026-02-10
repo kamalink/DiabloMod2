@@ -235,6 +235,11 @@ window.showText = function(title, content) {
     const titleArea = document.getElementById('window-title');
     const contentArea = document.getElementById('window-content');
 
+    // Сброс позиции окна, чтобы оно всегда появлялось по центру
+    windowArea.style.top = '50%';
+    windowArea.style.left = '50%';
+    windowArea.style.transform = 'translate(-50%, -50%)';
+
     windowArea.style.display = 'block';
     titleArea.innerText = title;
     
@@ -274,6 +279,11 @@ window.showText = function(title, content) {
 window.openIframe = function(url) {
     const modal = document.getElementById('iframe-modal');
     const frame = document.getElementById('web-frame');
+
+    // Сброс позиции
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
     frame.src = url;
     modal.style.display = 'flex';
 }
@@ -284,6 +294,15 @@ window.updateUI = function() {
     window.calculateRank();
 
     document.getElementById('view-name').innerText = window.playerData.name.toUpperCase();
+    
+    const bestRank = window.playerData.claimed_ranks && window.playerData.claimed_ranks.length > 0 
+        ? Math.min(...window.playerData.claimed_ranks) 
+        : null;
+    const rankEl = document.getElementById('view-ladder-rank');
+    if (rankEl) {
+        rankEl.style.display = bestRank ? 'block' : 'none';
+        if (bestRank) rankEl.innerText = `🏆 РЕЙТИНГ: ${bestRank}`;
+    }
     
     let xpBonusText = window.playerData.xp_bonus ? `(XP: ${window.playerData.xp_bonus})` : "";
     document.getElementById('view-lvl').innerHTML = `${window.playerData.level} 🌒 <span style="font-size:0.7rem; color:#aaa;">${xpBonusText}</span>`;
@@ -383,6 +402,11 @@ window.toggleEditModal = function() {
     if (modal.style.display === 'block') {
         modal.style.display = 'none';
     } else {
+        // Сброс позиции окна
+        modal.style.top = '50%';
+        modal.style.left = '50%';
+        modal.style.transform = 'translate(-50%, -50%)';
+
         document.getElementById('input-name').value = window.playerData.name || "";
         
         // Выбор класса убран из книги судеб

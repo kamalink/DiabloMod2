@@ -4,6 +4,11 @@ window.openSkillCalculator = function() {
     const modal = document.getElementById('skill-calc-modal');
     const classSelect = document.getElementById('calc-class-select');
     
+    // Сброс позиции окна, чтобы оно всегда появлялось по центру
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+
     classSelect.innerHTML = '<option value="" disabled selected>Выберите класс</option>';
     for (let cls in window.skillDB) {
         classSelect.innerHTML += `<option value="${cls}">${cls}</option>`;
@@ -19,22 +24,54 @@ window.updateCalcSkills = function() {
     skillSelect.innerHTML = '';
     
     if (window.skillDB[cls]) {
-        // Группировка по категориям
-        const categories = {};
-        window.skillDB[cls].forEach((skill, index) => {
-            const cat = skill.category || "Другое";
-            if (!categories[cat]) categories[cat] = [];
-            categories[cat].push({ index: index, name: skill.name });
-        });
+        // --- Изменено: убрана группировка, добавлено форматирование для выравнивания ---
+        // Сортируем навыки по категориям, чтобы они шли вместе, сохраняя исходный индекс
+        
+        // Определяем логический порядок категорий для сортировки
+        const categoryOrder = {
+            "Основное": 1,
+            "Вспомогательное": 2,
+            "Сила": 3,
+            "Мастерство": 4,
+            "Защита": 5,
+            "Чары": 6,
+            "Другое": 99
+        };
 
-        for (const [catName, skills] of Object.entries(categories)) {
-            const group = document.createElement('optgroup');
-            group.label = catName;
-            skills.forEach(s => {
-                group.innerHTML += `<option value="${s.index}">${s.name}</option>`;
+        const sortedSkills = [...window.skillDB[cls]]
+            .map((skill, index) => ({...skill, originalIndex: index}))
+            .sort((a, b) => {
+                const orderA = categoryOrder[a.category || "Другое"] || 99;
+                const orderB = categoryOrder[b.category || "Другое"] || 99;
+                
+                // Сначала сортируем по порядку категорий
+                if (orderA !== orderB) {
+                    return orderA - orderB;
+                }
+                // Если категории одинаковые, сортируем по имени навыка
+                return a.name.localeCompare(b.name, 'ru');
             });
-            skillSelect.appendChild(group);
-        }
+
+        let lastCategory = null;
+        sortedSkills.forEach((skill) => {
+            const cat = skill.category || "Другое";
+            const name = skill.name;
+            let displayString = '';
+            
+            if (cat !== lastCategory) {
+                const catString = `[${cat}]`;
+                const maxCatWidth = 18; // Примерная ширина для "[Вспомогательное] "
+                const paddingNeeded = maxCatWidth - catString.length;
+                const padding = '&nbsp;'.repeat(Math.max(2, paddingNeeded));
+                displayString = `${catString}${padding}${name}`;
+                lastCategory = cat;
+            } else {
+                const padding = '&nbsp;'.repeat(18 + 2); // Отступ для навыков той же категории
+                displayString = `${padding}${name}`;
+            }
+
+            skillSelect.innerHTML += `<option value="${skill.originalIndex}">${displayString}</option>`;
+        });
     }
     window.updateCalcRunes();
 }
@@ -433,7 +470,7 @@ window.buySkill = function() {
 
     // Если навык новый (еще не в списке), проверяем лимит
     if (!window.playerData.learnedSkills[skillName] && currentSkillCount >= maxSkills) {
-        window.showCustomAlert(`❌ Достигнут лимит навыков (${currentSkillCount}/${maxSkills}).<br>Получите награду за Профессию, чтобы открыть слоты.`);
+        window.showCustomAlert(`❌ Достигнут лимит навыков (${currentSkillCount}/${maxSkills}).<br>Получите следующюю профессию чтобы открыть новые слоты.`);
         return;
     }
 
@@ -490,6 +527,11 @@ window.formatCurrency = function(yen) {
 }
 
 window.openExpCalculator = function() {
+    const modal = document.getElementById('exp-calc-modal');
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+
     document.getElementById('exp-calc-modal').style.display = 'block';
     document.getElementById('exp-mobs').value = 0;
     document.getElementById('exp-elites').value = 0;
@@ -598,6 +640,11 @@ window.buyZakens = function(mode) {
     const title = modal.querySelector('h3');
     const buyBtn = document.getElementById('btn-confirm-buy');
     const sellBtn = document.getElementById('btn-confirm-sell');
+    
+    // Сброс позиции
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
     
     const priceYen = window.getZakenPrice(window.playerData.level);
     const lvl = window.playerData.level;
@@ -898,6 +945,11 @@ window.sellResources = function() {
     const okBtn = document.getElementById('multi-sell-ok-btn');
     const cancelBtn = document.getElementById('multi-sell-cancel-btn');
     const levelInput = document.getElementById('multi-sell-level');
+
+    // Сброс позиции
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
     levelInput.value = window.lastResourceSellLevel || 1;
 
     document.getElementById('multi-sell-title').innerText = "Продажа ресурсов";
@@ -1061,7 +1113,7 @@ window.resetProgress = function() {
                 // Состояния и бонусы
                 theft_fine: "", zaken_discount: "", xp_bonus: "", potion_price: "",
                 lvl70_portal: "", active_rents: [], forgottenSkills: {},
-                professions: { 1: false, 2: false, 3: false },
+                professions: { 1: false, 2: false, 3: false }, claimed_torments: [], claimed_ranks: [],
                 
                 // Куб и навыки
                 penta_1: false, penta_2: false, penta_3: false,
@@ -1106,6 +1158,11 @@ window.openGemServices = function(mode) {
     const buttonsContainer = document.getElementById('gem-service-buttons');
     const itemTypeSelector = document.getElementById('gem-item-type-selector');
     const rentDurationBox = document.getElementById('gem-rent-duration-box');
+
+    // Сброс позиции
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
 
     buttonsContainer.innerHTML = ''; // Clear previous buttons
 
@@ -1267,6 +1324,12 @@ function getCraftedItemBasePrice(level, grade) {
 
 window.openSellCraftedModal = function() {
     const modal = document.getElementById('sell-craft-modal');
+
+    // Сброс позиции
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+
     const propertiesContainer = document.getElementById('craft-sell-properties');
 
     // Данные о свойствах, взятые из раздела "Покупка предметов"
