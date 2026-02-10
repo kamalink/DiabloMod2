@@ -168,6 +168,46 @@ window.renderMenu = function(menuId, titleText, isBack = false) {
         menuTitle.innerText = "Diablo III Mod";
     }
 
+    // Специальная отрисовка для меню навыков (Круглое меню)
+    if (menuId === 'skills_study_menu') {
+        const circleContainer = document.createElement('div');
+        circleContainer.className = 'skills-circle-container';
+        
+        // Центральная кнопка калькулятора
+        const calcBtn = document.createElement('button');
+        calcBtn.className = 'skills-center-btn';
+        calcBtn.innerText = '🧮';
+        calcBtn.onclick = () => window.openSkillCalculator();
+        circleContainer.appendChild(calcBtn);
+
+        // Элементы по кругу
+        const radius = 115; // Радиус круга
+        const items = window.gameData[menuId];
+        const angleStep = (2 * Math.PI) / items.length;
+
+        items.forEach((item, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'skills-circle-btn';
+            btn.innerText = item.title;
+            
+            // Расчет позиции (начинаем с -90 градусов, т.е. с 12 часов)
+            const angle = index * angleStep - (Math.PI / 2);
+            const x = Math.round(radius * Math.cos(angle));
+            const y = Math.round(radius * Math.sin(angle));
+            
+            btn.style.left = `calc(50% + ${x}px - 45px)`; // 45px - половина ширины кнопки
+            btn.style.top = `calc(50% + ${y}px - 45px)`;
+            
+            btn.onclick = () => {
+                const targetData = window.gameData[item.id];
+                if (targetData && targetData.content) window.showText(item.title, targetData.content);
+            };
+            circleContainer.appendChild(btn);
+        });
+        area.appendChild(circleContainer);
+        return; // Прерываем стандартную отрисовку кнопок
+    }
+
     // Отрисовка кнопок
     window.gameData[menuId].forEach((item, index) => {
         const btn = document.createElement('button');
@@ -315,6 +355,7 @@ window.updateUI = function() {
     window.updatePentaSlot('slot-penta-2', window.playerData.penta_2);
     window.updatePentaSlot('slot-penta-3', window.playerData.penta_3);
 
+    window.renderLearnedSkillsWidget();
     localStorage.setItem('d3mod_player', JSON.stringify(window.playerData));
 }
 
@@ -470,6 +511,14 @@ window.savePlayerData = function() {
     window.playerData.black_market = parseInt(document.getElementById('input-black-market').value) || 0;
     window.playerData.zakens = parseInt(document.getElementById('input-zakens').value) || 0;
 
+    // Проверка изменения денег для звука
+    if (oldData.gold_g !== window.playerData.gold_g || 
+        oldData.gold_s !== window.playerData.gold_s || 
+        oldData.gold_c !== window.playerData.gold_c || 
+        oldData.gold_y !== window.playerData.gold_y) {
+        if (window.coinSound) { window.coinSound.currentTime = 0; window.coinSound.play().catch(e => {}); }
+    }
+
     window.calculateRank();
     window.applyGuildRewards(oldData);
     window.checkGuildExitConditions();
@@ -478,4 +527,23 @@ window.savePlayerData = function() {
 
     window.updateUI();
     window.toggleEditModal();
+}
+
+window.renderLearnedSkillsWidget = function() {
+    const container = document.getElementById('learned-skills-widget');
+    const content = document.getElementById('learned-skills-content');
+    if (!container || !content) return;
+
+    const skills = window.playerData.learnedSkills || {};
+    if (Object.keys(skills).length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'block';
+    let html = '';
+    for (const [skill, runes] of Object.entries(skills)) {
+        html += `<div style="margin-bottom: 4px; line-height: 1.2;"><span style="color: #fff; font-weight: bold;">${skill}</span><br><span style="color: #888; font-size: 0.7rem;">${runes.join(', ')}</span></div>`;
+    }
+    content.innerHTML = html;
 }

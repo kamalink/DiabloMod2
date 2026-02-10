@@ -817,3 +817,114 @@ window.calculateRank = function() {
 
     window.playerData.theft_fine = theft_fine_val;
 }
+
+window.processDeath = function() {
+    const modal = document.getElementById('death-modal');
+    const content = document.getElementById('death-modal-content');
+    const actions = document.getElementById('death-modal-actions');
+    
+    // Предварительный расчет потерь рун
+    const runePenalty = Math.floor(window.playerData.para * 0.1 * 100) / 100;
+    
+    // Расчет штрафа гильдии для отображения
+    let guildPenaltyText = "";
+    const g = (window.playerData.guild || "").toLowerCase();
+    
+    if (g.includes('вампир')) {
+        guildPenaltyText = "Изгнание из клана";
+    }
+    else if (g.includes('торговц')) {
+        const lostYen = Math.floor(window.getAllMoneyInYen() * 0.2);
+        guildPenaltyText = `-20% Денег (${window.formatCurrency(lostYen)})`;
+    }
+    else if (g.includes('охотник') || g.includes('помощник')) {
+        let pen = window.playerData.reputation * 0.1;
+        if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen);
+        guildPenaltyText = `-10% Репутации (-${pen})`;
+    }
+    else if (g.includes('чародей') || g.includes('ученик')) {
+        let pen = window.playerData.para * 0.1;
+        if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen * 10) / 10;
+        guildPenaltyText = `-10% Парагона (-${pen})`;
+    }
+    else if (g.includes('гэмблер')) {
+        let pen = Math.floor(window.playerData.deals * 0.1);
+        guildPenaltyText = `-10% Сделок (-${pen})`;
+    }
+    else if (g.includes('вор') || g.includes('воришка')) {
+        let pen = Math.floor(window.playerData.steals * 0.1);
+        guildPenaltyText = `-10% Краж (-${pen})`;
+    }
+    else if (g.includes('искатель') || g.includes('джимми')) {
+        let pen = Math.floor(window.playerData.chests_found * 0.1);
+        guildPenaltyText = `-10% Сундуков (-${pen})`;
+    }
+    else if (g.includes('салага') || g.includes('громила') || g.includes('лорд')) {
+        let pen = Math.floor(window.playerData.kills * 0.1);
+        guildPenaltyText = `-10% Убитых мобов (-${pen})`;
+    }
+    else guildPenaltyText = "Нет штрафа гильдии";
+
+    content.innerHTML = `Вы действительно умерли?<br>
+    <span style='font-size:0.9rem; color:#ff4444;'>Потеря рун: -${runePenalty} 📖</span><br>
+    <span style='font-size:0.9rem; color:#aaa;'>Будет применён штраф согласно вашей гильдии: <b style="color:#d4af37">${guildPenaltyText}</b></span>`;
+    
+    actions.innerHTML = `
+        <button class="death-confirm-btn" onclick="confirmDeath()">ДА, Я УМЕР</button>
+        <button class="death-cancel-btn" onclick="document.getElementById('death-modal').style.display='none'">ОТМЕНА</button>
+    `;
+    modal.style.display = 'block';
+}
+
+window.confirmDeath = function() {
+    if (window.pendingVampireJoin) {
+        window.pendingVampireJoin = false;
+        window.selectProfileItem('Вампир', 'Гильдии > Коллегия магов', true);
+        document.getElementById('death-modal').style.display = 'none';
+        window.showCustomAlert("🩸 Вы умерли и возродились Вампиром!");
+        return;
+    }
+
+    // 1. Руны: -10% от текущего парагона
+    const runePenalty = Math.floor(window.playerData.para * 0.1 * 100) / 100; 
+    window.playerData.runes = window.playerData.runes - runePenalty;
+
+    const g = (window.playerData.guild || "").toLowerCase();
+    
+    if (g.includes('вампир')) {
+        window.playerData.guild = "Нет";
+        window.playerData.guild_html = "";
+        document.getElementById('active-guild-bonus').style.display = 'none';
+    }
+    else if (g.includes('торговц')) {
+        window.playerData.gold_g = Math.floor(window.playerData.gold_g * 0.8 * 10) / 10;
+        window.playerData.gold_s = Math.floor(window.playerData.gold_s * 0.8 * 10) / 10;
+        window.playerData.gold_c = Math.floor(window.playerData.gold_c * 0.8 * 10) / 10;
+        window.playerData.gold_y = Math.floor(window.playerData.gold_y * 0.8 * 10) / 10;
+    } 
+    else if (g.includes('охотник') || g.includes('помощник')) {
+        let pen = window.playerData.reputation * 0.1;
+        if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen);
+        window.playerData.reputation -= pen;
+    }
+    // ... (остальные штрафы аналогично логике выше, сокращено для краткости, но логика сохранена из предыдущих итераций)
+    else if (g.includes('чародей') || g.includes('ученик')) { let pen = window.playerData.para * 0.1; if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen * 10) / 10; window.playerData.para -= pen; }
+    else if (g.includes('гэмблер')) { let pen = window.playerData.deals * 0.1; if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen); window.playerData.deals -= pen; }
+    else if (g.includes('вор') || g.includes('воришка')) { let pen = window.playerData.steals * 0.1; if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen); window.playerData.steals -= pen; }
+    else if (g.includes('искатель') || g.includes('джимми')) { let pen = window.playerData.chests_found * 0.1; if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen); window.playerData.chests_found -= pen; }
+    else if (g.includes('салага') || g.includes('громила') || g.includes('лорд')) { let pen = window.playerData.kills * 0.1; if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen); window.playerData.kills -= pen; }
+
+    // 5% шанс забыть навык
+    if (Math.random() < 0.05) {
+        const learned = window.playerData.learnedSkills;
+        const skillNames = Object.keys(learned);
+        if (skillNames.length > 0) {
+            const randomSkill = skillNames[Math.floor(Math.random() * skillNames.length)];
+            delete window.playerData.learnedSkills[randomSkill];
+            window.showCustomAlert(`🧠 Амнезия! Вы забыли навык: <span style="color:#ff4444">${randomSkill}</span>`);
+        }
+    }
+
+    window.updateUI();
+    document.getElementById('death-modal').style.display = 'none';
+}

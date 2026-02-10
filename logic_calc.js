@@ -19,9 +19,22 @@ window.updateCalcSkills = function() {
     skillSelect.innerHTML = '';
     
     if (window.skillDB[cls]) {
+        // Группировка по категориям
+        const categories = {};
         window.skillDB[cls].forEach((skill, index) => {
-            skillSelect.innerHTML += `<option value="${index}">${skill.name}</option>`;
+            const cat = skill.category || "Другое";
+            if (!categories[cat]) categories[cat] = [];
+            categories[cat].push({ index: index, name: skill.name });
         });
+
+        for (const [catName, skills] of Object.entries(categories)) {
+            const group = document.createElement('optgroup');
+            group.label = catName;
+            skills.forEach(s => {
+                group.innerHTML += `<option value="${s.index}">${s.name}</option>`;
+            });
+            skillSelect.appendChild(group);
+        }
     }
     window.updateCalcRunes();
 }
@@ -55,6 +68,7 @@ window.loadCalcSkillData = function() {
             buyBtn.disabled = true;
             buyBtn.style.background = "#333";
             buyBtn.style.color = "#aaa";
+            buyBtn.style.border = "1px solid #555"; // Убираем зеленую рамку
         } else {
             buyBtn.innerText = "ИЗУЧИТЬ";
             buyBtn.disabled = false;
@@ -406,6 +420,14 @@ window.buySkill = function() {
                 window.saveToStorage();
                 window.updateUI();
                 window.showCustomAlert("✅ Навык успешно изучен!");
+                
+                // Обновляем кнопку сразу
+                const buyBtn = document.querySelector('.buy-skill-btn');
+                buyBtn.innerText = "ИЗУЧЕНО";
+                buyBtn.disabled = true;
+                buyBtn.style.background = "#333";
+                buyBtn.style.color = "#aaa";
+                buyBtn.style.border = "1px solid #555";
             }
         );
     } else {

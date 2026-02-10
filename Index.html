@@ -41,6 +41,12 @@
     <button id="music-btn" onclick="toggleMusic()">🎵 МУЗЫКА</button>
     <a href="https://randstuff.ru/number/" target="_blank" id="randomizer-btn">🎲 РАНДОМ</a>
 
+    <!-- Виджет изученных навыков -->
+    <div id="learned-skills-widget" style="position: fixed; top: 60px; right: 310px; width: 180px; max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.8); border: 1px solid #444; padding: 10px; color: #ccc; font-size: 0.75rem; z-index: 900; display: none; border-radius: 4px;">
+        <div style="color: #d4af37; border-bottom: 1px solid #555; margin-bottom: 5px; font-weight: bold; text-align: center;">ИЗУЧЕНО</div>
+        <div id="learned-skills-content"></div>
+    </div>
+
     <button id="edit-char-btn" style="top: 60px;" onclick="toggleEditModal()">✍️ КНИГА СУДЕБ</button>
 
     <!-- Окно смерти -->
