@@ -468,11 +468,15 @@ window.checkGuildProgression = function() {
     // 3. Ученик чародея -> Чародей
     else if (g.includes('ученик чародея')) {
         // Условие для чародея: 1000 инты или 50 парагона
-        if (window.playerData.stat_int >= 1000 || window.playerData.para >= 50) {
+        if (!window.playerData.refused_wizard_promotion && (window.playerData.stat_int >= 1000 || window.playerData.para >= 50)) {
              window.showCustomConfirm(
                 "Вы готовы стать полноценным Чародеем?",
                 () => {
                     window.selectProfileItem('Чародей', 'Гильдии > Коллегия магов', true);
+                },
+                () => {
+                    window.playerData.refused_wizard_promotion = true;
+                    window.saveToStorage();
                 }
             );
         }
@@ -960,8 +964,7 @@ window.processDeath = function() {
     }
     else if (g.includes('чародей') || g.includes('ученик')) {
         let pen = window.playerData.para * 0.1;
-        if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen * 10) / 10;
-        guildPenaltyText = `-10% Парагона (-${pen})`;
+        guildPenaltyText = `-10% Парагона (-${pen.toFixed(2)})`;
     }
     else if (g.includes('гэмблер')) {
         let pen = Math.floor(window.playerData.deals * 0.1);
@@ -1020,8 +1023,7 @@ window.processPartnerDeath = function() {
         penaltyText += `<span style='font-size:0.9rem; color:#aaa;'>Штраф гильдии: -5% Репутации (-${pen})</span>`;
     } else if (g.includes('чародей') || g.includes('ученик') || g.includes('вампир')) {
         let pen = (window.playerData.para * 0.1) / 2;
-        if (pen > 0 && pen < 1) pen = 1; else pen = Math.floor(pen * 10) / 10;
-        penaltyText += `<span style='font-size:0.9rem; color:#aaa;'>Штраф гильдии: -5% Парагона (-${pen.toFixed(1)})</span>`;
+        penaltyText += `<span style='font-size:0.9rem; color:#aaa;'>Штраф гильдии: -5% Парагона (-${pen.toFixed(2)})</span>`;
     } else if (g.includes('гэмблер')) {
         let pen = Math.floor(window.playerData.deals * 0.1 / 2);
         penaltyText += `<span style='font-size:0.9rem; color:#aaa;'>Штраф гильдии: -5% Сделок (-${pen})</span>`;
@@ -1065,8 +1067,7 @@ window.confirmPartnerDeath = function() {
         window.playerData.reputation -= pen;
     } else if (g.includes('чародей') || g.includes('ученик') || g.includes('вампир')) {
         let pen = (window.playerData.para * 0.1) / 2;
-        if (pen > 0 && pen < 1) pen = 1; else pen = Math.floor(pen * 10) / 10;
-        window.playerData.para -= pen;
+        window.playerData.para = parseFloat((window.playerData.para - pen).toFixed(2));
     } else if (g.includes('гэмблер')) { let pen = Math.floor(window.playerData.deals * 0.1 / 2); window.playerData.deals -= pen; 
     } else if (g.includes('вор') || g.includes('воришка')) { let pen = Math.floor(window.playerData.steals * 0.1 / 2); window.playerData.steals -= pen; 
     } else if (g.includes('искатель') || g.includes('джимми')) { let pen = Math.floor(window.playerData.chests_found * 0.1 / 2); window.playerData.chests_found -= pen; 
@@ -1125,8 +1126,7 @@ window.confirmDeath = function() {
     // Штраф гильдии
     if (g.includes('вампир')) {
         let pen = window.playerData.para * 0.1;
-        if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen * 10) / 10;
-        window.playerData.para -= pen;
+        window.playerData.para = parseFloat((window.playerData.para - pen).toFixed(2));
         window.playerData.guild = "Нет";
         window.playerData.guild_html = "";
         document.getElementById('active-guild-bonus').style.display = 'none';
@@ -1143,7 +1143,7 @@ window.confirmDeath = function() {
         window.playerData.reputation -= pen;
     }
     // ... (остальные штрафы аналогично логике выше, сокращено для краткости, но логика сохранена из предыдущих итераций)
-    else if (g.includes('чародей') || g.includes('ученик')) { let pen = window.playerData.para * 0.1; if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen * 10) / 10; window.playerData.para -= pen; }
+    else if (g.includes('чародей') || g.includes('ученик')) { let pen = window.playerData.para * 0.1; window.playerData.para = parseFloat((window.playerData.para - pen).toFixed(2)); }
     else if (g.includes('гэмблер')) { let pen = window.playerData.deals * 0.1; if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen); window.playerData.deals -= pen; }
     else if (g.includes('вор') || g.includes('воришка')) { let pen = window.playerData.steals * 0.1; if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen); window.playerData.steals -= pen; }
     else if (g.includes('искатель') || g.includes('джимми')) { let pen = window.playerData.chests_found * 0.1; if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen); window.playerData.chests_found -= pen; }
@@ -1175,7 +1175,7 @@ window.confirmDeath = function() {
     ];
     const randomMessage = grimMessages[Math.floor(Math.random() * grimMessages.length)];
     
-    window.showCustomAlert(finalMessage);
+    window.showCustomAlert(randomMessage + "<br><br>" + finalMessage);
 }
 
 window.claimProfessionReward = function(profNum) {

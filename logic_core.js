@@ -11,7 +11,7 @@ window.playerData = savedData ? JSON.parse(savedData) : {
     para: 0,
     zakens: 0,
     maxVp: 0,
-    potions: 5,
+    potions: 0,
     death_breath: 0,
     
     // Сохраненный HTML боковых панелей
@@ -44,8 +44,10 @@ window.playerData = savedData ? JSON.parse(savedData) : {
     active_rents: [], // Список активных аренд: { rank, count, startLvl, duration }
     forgottenSkills: {}, // Счетчик забытых навыков
     professions: { 1: false, 2: false, 3: false }, // Состояние профессий
+    refused_wizard_promotion: false,
     claimed_torments: [], // Полученные награды за Torment
     claimed_ranks: [], // Полученные награды за ранг
+    difficulty: "T1", // Текущий уровень сложности
     
     // Пентограмма (чекбоксы)
     penta_1: false, penta_2: false, penta_3: false,
@@ -72,6 +74,7 @@ if (!window.playerData.forgottenSkills) window.playerData.forgottenSkills = {};
 if (!window.playerData.professions) window.playerData.professions = { 1: false, 2: false, 3: false };
 if (!window.playerData.claimed_torments) window.playerData.claimed_torments = [];
 if (!window.playerData.claimed_ranks) window.playerData.claimed_ranks = [];
+if (typeof window.playerData.refused_wizard_promotion === 'undefined') window.playerData.refused_wizard_promotion = false;
 
 // Глобальные переменные состояния
 window.historyStack = ['main'];

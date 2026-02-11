@@ -48,8 +48,6 @@
         <div id="learned-skills-content"></div>
     </div>
 
-    <button id="edit-char-btn" style="top: 60px;" onclick="toggleEditModal()">✍️ КНИГА СУДЕБ</button>
-
     <!-- Окно смерти -->
     <div id="death-modal">
         <h2>☠️ СМЕРТЬ ГЕРОЯ</h2>
@@ -143,6 +141,72 @@
         <button class="exp-apply-btn" onclick="applyExpCalculation()">✅ ПРИМЕНИТЬ</button>
     </div>
 
+    <!-- МОДАЛЬНОЕ ОКНО КАЛЬКУЛЯТОРА СЛОЖНОСТИ -->
+    <div id="difficulty-calc-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; max-width: 500px; max-height: 90vh; background: #1a1a1a; border: 2px solid #d4af37; z-index: 5000; padding: 20px; overflow-y: auto; box-shadow: 0 0 50px #000;">
+        <span class="close-x" onclick="document.getElementById('difficulty-calc-modal').style.display='none'">[X]</span>
+        <h3 style="color: #d4af37; text-align: center; font-family: 'Cinzel', serif; margin-top: 0;">📈 КАЛЬКУЛЯТОР СЛОЖНОСТИ</h3>
+        
+        <div id="diff-calc-damage-section">
+            <h4 style="color: #ff4444; border-bottom: 1px solid #555; padding-bottom: 5px;">⚔️ УРОН</h4>
+            <div class="exp-input-row"><label>Урон героя:</label><input type="number" id="diff-hero-dmg" value="0"></div>
+            
+            <div class="exp-input-row">
+                <label style="font-size:0.8rem;">% Умения на вещах:</label>
+                <input type="number" id="diff-item-skill-pct" value="0" placeholder="%">
+            </div>
+            
+            <div class="exp-input-row">
+                <label style="font-size:0.8rem;">% Умения (Авто):</label>
+                <div style="text-align:right; flex:1; padding-right:10px; font-size:0.8rem; color:#66ccff;" id="diff-auto-skill-name">Нет</div>
+                <input type="number" id="diff-skill-pct" value="0" readonly style="background:#222; color:#aaa;">
+            </div>
+            
+            <div class="exp-input-row"><label>% Стихии:</label><input type="number" id="diff-elem-pct" value="0" placeholder="%"></div>
+            <div class="exp-input-row"><label>% Лег. камни:</label><input type="number" id="diff-gems-pct" value="0" placeholder="%"></div>
+            
+            <h4 style="color: #d4af37; border-bottom: 1px solid #555; padding-bottom: 5px; margin-top: 10px;">📦 КУБ КАНАИ</h4>
+            <!-- Слот 1 -->
+            <div class="exp-input-row" style="gap:5px;">
+                <select id="diff-cube-1-type" class="d2-button" style="margin:0; padding:2px; font-size:0.7rem; width:100px;"><option value="dmg">Урон (Общ)</option><option value="skill">Урон (Скилл)</option><option value="tough">Живучесть</option></select>
+                <input type="number" id="diff-cube-1-val" value="0" placeholder="%" style="width:60px;">
+            </div>
+            <!-- Слот 2 -->
+            <div class="exp-input-row" style="gap:5px;">
+                <select id="diff-cube-2-type" class="d2-button" style="margin:0; padding:2px; font-size:0.7rem; width:100px;"><option value="dmg">Урон (Общ)</option><option value="skill">Урон (Скилл)</option><option value="tough">Живучесть</option></select>
+                <input type="number" id="diff-cube-2-val" value="0" placeholder="%" style="width:60px;">
+            </div>
+            <!-- Слот 3 -->
+            <div class="exp-input-row" style="gap:5px;">
+                <select id="diff-cube-3-type" class="d2-button" style="margin:0; padding:2px; font-size:0.7rem; width:100px;"><option value="dmg">Урон (Общ)</option><option value="skill">Урон (Скилл)</option><option value="tough">Живучесть</option></select>
+                <input type="number" id="diff-cube-3-val" value="0" placeholder="%" style="width:60px;">
+            </div>
+
+            <div class="exp-input-row"><label>Урон напарника:</label><input type="number" id="diff-partner-dmg" value="0"></div>
+            <div style="text-align: right; color: #ff4444; font-weight: bold; margin-top: 5px;">
+                Итого Урон: <span id="diff-total-dmg">0</span>
+            </div>
+        </div>
+
+        <div id="diff-calc-toughness-section" style="margin-top: 20px;">
+            <h4 style="color: #66ff66; border-bottom: 1px solid #555; padding-bottom: 5px;">🛡️ ЖИВУЧЕСТЬ</h4>
+            <div class="exp-input-row"><label>⛑️ + Восст.:</label><input type="number" id="diff-base-tough" value="0"></div>
+            <div class="exp-input-row"><label>Легендарки (х):</label><input type="number" id="diff-leg-tough" value="1"></div>
+            <div class="exp-input-row"><label>Навыки (х):</label><input type="number" id="diff-skill-tough" value="1"></div>
+            <div class="exp-input-row"><label>Пассивки (х):</label><input type="number" id="diff-pass-tough" value="1"></div>
+            <div style="text-align: right; color: #66ff66; font-weight: bold; margin-top: 5px;">
+                Итого Живучесть: <span id="diff-total-tough">0</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; padding: 10px; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; text-align: center;">
+            <div style="font-size: 0.9rem; color: #aaa;">Рекомендуемая сложность:</div>
+            <div id="diff-result-tier" style="font-size: 1.5rem; color: #d4af37; font-weight: bold;">-</div>
+            <div id="diff-result-details" style="font-size: 0.8rem; color: #ccc; margin-top: 5px;"></div>
+        </div>
+
+        <button class="exp-apply-btn" onclick="applyDifficulty()">✅ ПРИМЕНИТЬ СЛОЖНОСТЬ</button>
+    </div>
+
     <!-- МОДАЛЬНОЕ ОКНО ПОКУПКИ ЗАКЕНОВ -->
     <div id="zaken-buy-modal">
         <span class="close-x" onclick="document.getElementById('zaken-buy-modal').style.display='none'">[X]</span>
@@ -169,6 +233,33 @@
                 <button id="prompt-cancel-btn" class="death-cancel-btn" style="min-width: 100px;">Отмена</button>
             </div>
         </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО ДОБАВЛЕНИЯ ДЕНЕГ -->
+    <div id="add-money-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 350px; background: #1a1a1a; border: 2px solid #d4af37; z-index: 6000; padding: 25px; box-shadow: 0 0 50px #000; font-family: 'Lora', serif; color: #e0e0e0; text-align: center;">
+        <span class="close-x" onclick="document.getElementById('add-money-modal').style.display='none'">[X]</span>
+        <h3 id="add-money-title" style="color: #d4af37; font-family: 'Cinzel', serif; margin-top: 0;">💰 ДОБАВИТЬ СРЕДСТВА</h3>
+        
+        <div style="display: flex; flex-direction: column; gap: 10px; margin: 20px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label>🥇 Золото:</label>
+                <input type="number" id="add-gold-g" value="0" min="0" style="width: 80px; padding: 5px; background: #000; border: 1px solid #444; color: #fff; text-align: center;">
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label>🥈 Серебро:</label>
+                <input type="number" id="add-gold-s" value="0" min="0" style="width: 80px; padding: 5px; background: #000; border: 1px solid #444; color: #fff; text-align: center;">
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label>🥉 Медь:</label>
+                <input type="number" id="add-gold-c" value="0" min="0" style="width: 80px; padding: 5px; background: #000; border: 1px solid #444; color: #fff; text-align: center;">
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label>🧧 Йена:</label>
+                <input type="number" id="add-gold-y" value="0" min="0" style="width: 80px; padding: 5px; background: #000; border: 1px solid #444; color: #fff; text-align: center;">
+            </div>
+        </div>
+
+        <button class="death-confirm-btn" onclick="confirmAddMoney()">ДОБАВИТЬ</button>
     </div>
 
     <!-- МОДАЛЬНОЕ ОКНО ПРОДАЖИ КРАФТА -->
@@ -270,153 +361,81 @@
     </div>
 
 <div id="char-sheet">
-    <div style="text-align: center; color: #d4af37; font-size: 1.2rem; margin-bottom: 10px;" id="view-name">НЕФАЛЕМ</div>
+    <input type="text" id="input-name" class="char-input name-input" value="НЕФАЛЕМ" onchange="savePlayerData()">
     <div id="view-ladder-rank" style="text-align: center; color: #ff4444; font-size: 0.9rem; margin-bottom: 10px; font-weight: bold; display: none;"></div>
     
-    <div class="stat-group">
-        <div class="stat-group-title">Куб (Пентограмма)</div>
-        <div style="text-align: center; margin-top: 5px; display: flex; justify-content: center; gap: 5px;">
-            <div id="slot-penta-1" class="penta-slot" title="Слот 1 (25 ВП)"></div>
-            <div id="slot-penta-2" class="penta-slot" title="Слот 2 (60 ВП)"></div>
-            <div id="slot-penta-3" class="penta-slot" title="Слот 3 (100 ВП)"></div>
-        </div>
-    </div>
-
-    <div class="stat-group">
-        <div class="stat-group-title">Герой & Билд</div>
-        <div class="stat-row"><span id="view-class">Класс не выбран</span> <span id="view-build" style="font-size:0.7rem;"></span></div>
-        <div class="stat-row">Уровень: <span id="view-lvl" class="stat-value">1</span></div>
-        <div class="stat-row">Зелья: <span id="view-potions" class="stat-value">5</span> 💊 <span id="view-potion-price" style="font-size: 0.7rem;"></span></div>
-        <!-- Характеристики гильдий -->
-        <div class="stat-row" id="view-stat-str-row">Сила: <span id="view-stat-str" class="stat-value">0</span> 🏮</div>
-        <div class="stat-row" id="view-stat-dex-row">Ловкость: <span id="view-stat-dex" class="stat-value">0</span> 🥢</div>
-        <div class="stat-row" id="view-stat-int-row">Интеллект: <span id="view-stat-int" class="stat-value">0</span> 🔮</div>
-        <div class="stat-row" id="view-stat-vit-row">Живучесть: <span id="view-stat-vit" class="stat-value">0</span> ⛑️</div>
-        <div class="stat-row">Макс ВП: <span id="view-max-vp" class="stat-value">0</span> 🏛️</div>
-    </div>
-
-    <div class="stat-group">
-        <div class="stat-group-title">Финансы</div>
-        <div class="money-row">
-            <span class="money-unit"><span id="view-gold-g">0</span>🥇</span>
-            <span class="money-unit"><span id="view-gold-s">0</span>🥈</span>
-            <span class="money-unit"><span id="view-gold-c">0</span>🥉</span>
-            <span class="money-unit"><span id="view-gold-y">0</span>🧧</span>
-        </div>
-    <div class="stat-row" style="margin-top:8px;">Руны: <span id="view-runes" class="stat-value">0</span> 📖</div>
-        <div class="stat-row">Парагон: <span id="view-para" class="stat-value">0</span> ⏳</div>
-    <div class="stat-row">Закены: <span id="view-zakens" class="stat-value">0</span> 🔖 <span id="view-zaken-discount" style="font-size: 0.7rem;"></span></div>
-    </div>
-
-    <div class="stat-group">
-        <div class="stat-group-title">Гильдия & Ранг</div>
-        <div class="stat-row">Профессия: <span id="view-profession" class="stat-value">Нет</span></div>
-        <div class="stat-row">Орден: <span id="view-guild" class="stat-value">Нет</span></div>
-        <div class="stat-row">Ранг: <span id="view-rank" class="stat-value">0</span> 🧾</div>
-        <div class="stat-row">Продано рун: <span id="view-runes-sold" class="stat-value">0</span> 📖</div>
-        <div class="stat-row">Репутация: <span id="view-reputation" class="stat-value">0</span> 🎭</div>
-        <div class="stat-row">Сделки: <span id="view-deals" class="stat-value">0</span> 🤝</div>
-        <div class="stat-row">Сундуки: <span id="view-chests" class="stat-value">0</span> 📦</div>
-    </div>
-
-    <div class="stat-group">
-        <div class="stat-row">Куплено на ЧР: <span id="view-black-market" class="stat-value">0</span> 🕶️</div>
-        <div class="stat-row">Украдено: <span id="view-steals" class="stat-value">0</span> <span id="view-theft-fine" style="font-size: 0.6rem;"></span></div>
-    </div>
-
-    <div class="stat-group">
-        <div class="stat-group-title">Статистика & Лут</div>
-        <div class="stat-row">Убито мобов: <span id="view-kills" class="stat-value">0</span> 💀</div>
-        <div class="stat-row">Элита (соло): <span id="view-elites-solo" class="stat-value">0</span> ☠️</div>
-        <div class="stat-row">Боссы: <span id="view-bosses" class="stat-value">0</span> 👹</div>
-        <div class="stat-row">Гоблины: <span id="view-gobs-solo" class="stat-value">0</span>(С) / <span id="view-gobs-assist" class="stat-value">0</span>(П)</div>
-        <div class="stat-row">Найдено Лег: <span id="view-found-legs" class="stat-value">0</span> 📙</div>
-        <div class="stat-row">Найдено Желтых: <span id="view-found-yellows" class="stat-value">0</span> 📒</div>
-        <div class="stat-row">Ресурсы: <span id="view-res-n" class="stat-value">0</span>📓 <span id="view-res-dc" class="stat-value">0</span>📘📒 <span id="view-res-b" class="stat-value">0</span>📙 <span id="view-res-a" class="stat-value">0</span>📕</div>
-        <div class="stat-row">Реагенты: <span id="view-reagents" class="stat-value">0</span></div>
-        <div class="stat-row">Дыхание смерти: <span id="view-death-breath" class="stat-value">0</span> 🧪</div>
-        <div class="stat-row" style="font-size: 0.7rem;">Портал 70: <span id="view-lvl70-portal">-</span></div>
-    </div>
-</div>
-
-<div id="edit-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a1a1a; border: 3px solid #d4af37; padding: 20px; z-index: 2000; color: white; font-family: 'Lora', serif; width: 600px; max-height: 90vh; overflow-y: auto;">
-    <h2 style="color:#d4af37; text-align:center;">КНИГА СУДЕБ</h2>
-    
-    <div class="edit-grid">
-        <!-- ЛЕВАЯ КОЛОНКА -->
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-            <h4 style="color: #66ccff; margin: 0;">ОСНОВНОЕ</h4>
-            <label>Имя: <input type="text" id="input-name" style="width: 100%;"></label>
-            <label>Класс: 
-                <select id="input-class" style="width: 100%; background: #333; color: white; border: 1px solid #555;">
-                    <option value="Класс не выбран">Не выбран</option>
-                    <option value="Варвар">Варвар</option>
-                    <option value="Крестоносец">Крестоносец</option>
-                    <option value="Охотник на демонов">Охотник на демонов</option>
-                    <option value="Монах">Монах</option>
-                    <option value="Колдун">Колдун</option>
-                    <option value="Чародей">Чародей</option>
-                </select>
-            </label>
-            <label>Уровень 🌒: <input type="number" step="0.1" id="input-lvl" style="width: 60px;"></label>
-            <label>Зелья 💊: <input type="number" id="input-potions" style="width: 60px;"></label>
-            
-            <!-- Поля "Изначально" (скрываются если > 0) -->
-            <div id="input-base-kills-box"><label>Изнач. мобов: <input type="number" id="input-base-kills" style="width: 60px;"></label></div>
-            <div id="input-base-elites-box"><label>Изнач. элиток: <input type="number" id="input-base-elites" style="width: 60px;"></label></div>
-            
-            <!-- Характеристики гильдий (скрыты по умолчанию) -->
-            <div id="input-stat-str-box"><label>Сила 🏮: <input type="number" id="input-stat-str" style="width: 60px;"></label></div>
-            <div id="input-stat-dex-box"><label>Ловкость 🥢: <input type="number" id="input-stat-dex" style="width: 60px;"></label></div>
-            <div id="input-stat-int-box"><label>Интеллект 🔮: <input type="number" id="input-stat-int" style="width: 60px;"></label></div>
-            <div id="input-stat-vit-box"><label>Живучесть ⛑️: <input type="number" id="input-stat-vit" style="width: 60px;"></label></div>
-            
-            <h4 style="color: #ffd700; margin: 5px 0 0 0;">ФИНАНСЫ</h4>
-            <label>Золото 🥇: <input type="number" step="0.1" id="input-gold-g" style="width: 60px;"></label>
-            <label>Золото 🥈: <input type="number" step="0.1" id="input-gold-s" style="width: 60px;"></label>
-            <label>Золото 🥉: <input type="number" step="0.1" id="input-gold-c" style="width: 60px;"></label>
-            <label>Золото 🧧: <input type="number" step="0.1" id="input-gold-y" style="width: 60px;"></label>
-            <label>Руны 📖: <input type="number" step="0.1" id="input-runes" style="width: 60px;"></label>
-            <label>Парагон ⏳: <input type="number" step="0.1" id="input-para" style="width: 60px;"></label>
-            <label>Закены 🔖: <input type="number" id="input-zakens" style="width: 60px;"></label>
-
-            <h4 style="color: #ff7979; margin: 5px 0 0 0;">БОЙ И ПРОГРЕСС</h4>
-            <label>Мобы 💀: <input type="number" id="input-kills" style="width: 80px;"></label>
-            <label>Элита (Сам) ☠️: <input type="number" id="input-elites-solo" style="width: 80px;"></label>
-            <label>Боссы 👹: <input type="number" id="input-bosses" style="width: 80px;"></label>
-            <label>Гоблины (Сам) ⭐: <input type="number" id="input-gobs-solo" style="width: 80px;"></label>
-            <label>Гоблины (Помощь) 🤝: <input type="number" id="input-gobs-assist" style="width: 80px;"></label>
-            <label>Макс ВП 🏛️: <input type="number" id="input-max-vp" style="width: 60px;"></label>
-            <label>Портал 70 ур.: <input type="number" id="input-lvl70-portal" style="width: 60px;"></label>
-        </div>
-
-        <!-- ПРАВАЯ КОЛОНКА -->
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-            <h4 style="color: #a29bfe; margin: 0;">ЛУТ И РЕСУРСЫ</h4>
-            <label>Найдено Лег 📙: <input type="number" id="input-found-legs" style="width: 60px;"></label>
-            <label>Найдено Желтых 📒: <input type="number" id="input-found-yellows" style="width: 60px;"></label>
-            <label>Дыхание смерти 🧪: <input type="number" id="input-death-breath" style="width: 60px;"></label>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 5px; flex-wrap: wrap; align-items: center;">
-                <label style="font-size: 0.9rem;">📓: <input type="number" id="input-res-n" style="width: 40px;"></label>
-                <label style="font-size: 0.9rem;">📘📒: <input type="number" id="input-res-dc" style="width: 40px;"></label>
-                <label style="font-size: 0.9rem;">📙: <input type="number" id="input-res-b" style="width: 40px;"></label>
-                <label style="font-size: 0.9rem;">📕: <input type="number" id="input-res-a" style="width: 40px;"></label>
+    <div class="char-sheet-grid">
+        <!-- Левая колонка -->
+        <div class="char-sheet-col">
+            <div class="stat-group">
+                <div class="stat-group-title">Герой</div>
+                <div class="stat-row"><span id="view-class">Класс не выбран</span> <span id="view-build" style="font-size:0.7rem;"></span></div>
+                <div class="stat-row">Уровень: <input type="number" id="input-lvl" class="char-input" value="1" onchange="savePlayerData()"> 🌒 <span id="view-xp-bonus" style="font-size:0.7rem; color:#aaa;"></span></div>
+                <div class="stat-row">Зелья: <input type="number" id="input-potions" class="char-input" value="5" onchange="savePlayerData()"> 💊 <span id="view-potion-price" style="font-size: 0.7rem;"></span></div>
+                <div class="stat-row">Макс ВП: <input type="number" id="input-max-vp" class="char-input" value="0" onchange="savePlayerData()"> 🏛️</div>
+                <div style="text-align: center; margin-top: 5px; display: flex; justify-content: center; gap: 5px; border-top: 1px solid #333; padding-top: 5px;">
+                    <div id="slot-penta-1" class="penta-slot" title="Слот 1 (25 ВП)"></div>
+                    <div id="slot-penta-2" class="penta-slot" title="Слот 2 (60 ВП)"></div>
+                    <div id="slot-penta-3" class="penta-slot" title="Слот 3 (100 ВП)"></div>
+                </div>
             </div>
-            <label>Реагенты: <input type="number" id="input-reagents" style="width: 60px;"></label>
 
-            <h4 style="color: #55efc4; margin: 5px 0 0 0;">ГИЛЬДИЯ И ТЕНЬ</h4>
-            <label>Продано Рун 📖: <input type="number" step="0.1" id="input-runes-sold" style="width: 60px;"></label>
-            <label>Репутация 🎭: <input type="number" id="input-reputation" style="width: 60px;"></label>
-            <label>Сделки : <input type="number" id="input-deals" style="width: 60px;"></label>
-            <label>Сундуки 📦: <input type="number" id="input-chests" style="width: 60px;"></label>
-            <label>Украдено: <input type="number" id="input-steals" style="width: 60px;"></label>
-            <label>Куплено на ЧР 🕶️: <input type="number" id="input-black-market" style="width: 60px;"></label>
+            <div class="stat-group">
+                <div class="stat-group-title">Финансы <span class="add-money-btn" onclick="openAddMoneyModal()" title="Добавить средства">[+]</span></div>
+                <div class="money-row">
+                    <span class="money-unit"><input type="number" id="input-gold-g" class="char-input money-input" value="0" onchange="savePlayerData()">🥇</span>
+                    <span class="money-unit"><input type="number" id="input-gold-s" class="char-input money-input" value="0" onchange="savePlayerData()">🥈</span>
+                    <span class="money-unit"><input type="number" id="input-gold-c" class="char-input money-input" value="0" onchange="savePlayerData()">🥉</span>
+                    <span class="money-unit"><input type="number" id="input-gold-y" class="char-input money-input" value="0" onchange="savePlayerData()">🧧</span>
+                </div>
+                <div class="stat-row" style="margin-top:8px;">Руны: <input type="number" id="input-runes" class="char-input" value="0" step="0.1" onchange="savePlayerData()"> 📖</div>
+                <div class="stat-row">Парагон: <input type="number" id="input-para" class="char-input" value="0" step="0.1" onchange="savePlayerData()"> ⏳</div>
+                <div class="stat-row">Закены: <input type="number" id="input-zakens" class="char-input" value="0" onchange="savePlayerData()"> 🔖 <span id="view-zaken-discount" style="font-size: 0.7rem;"></span></div>
+            </div>
+
+            <div class="stat-group">
+                <div class="stat-group-title">Гильдия</div>
+                <div class="stat-row">Профессия: <span id="view-profession" class="stat-value">Нет</span></div>
+                <div class="stat-row">Орден: <span id="view-guild" class="stat-value">Нет</span></div>
+                <div class="stat-row">Ранг: <span id="view-rank" class="stat-value">0</span> 🧾</div>
+                <div class="stat-row">Продано рун: <input type="number" id="input-runes-sold" class="char-input" value="0" onchange="savePlayerData()"> 📖</div>
+                <div class="stat-row">Репутация: <input type="number" id="input-reputation" class="char-input" value="0" onchange="savePlayerData()"> 🎭</div>
+                <div class="stat-row">Сделки: <input type="number" id="input-deals" class="char-input" value="0" onchange="savePlayerData()"> 🤝</div>
+                <div class="stat-row">Сундуки: <input type="number" id="input-chests" class="char-input" value="0" onchange="savePlayerData()"> 📦</div>
+                <div class="stat-row">Куплено на ЧР: <input type="number" id="input-black-market" class="char-input" value="0" onchange="savePlayerData()"> 🕶️</div>
+                <div class="stat-row">Украдено: <input type="number" id="input-steals" class="char-input" value="0" onchange="savePlayerData()"> <span id="view-theft-fine" style="font-size: 0.6rem;"></span></div>
+            </div>
+
+            <div class="stat-group">
+                <div class="stat-group-title">Атрибуты</div>
+                <div class="stat-row" id="input-stat-str-box">Сила: <input type="number" id="input-stat-str" class="char-input" value="0" onchange="savePlayerData()"> 🏮</div>
+                <div class="stat-row" id="input-stat-dex-box">Ловкость: <input type="number" id="input-stat-dex" class="char-input" value="0" onchange="savePlayerData()"> 🥢</div>
+                <div class="stat-row" id="input-stat-int-box">Интеллект: <input type="number" id="input-stat-int" class="char-input" value="0" onchange="savePlayerData()"> 🔮</div>
+                <div class="stat-row" id="input-stat-vit-box">Живучесть: <input type="number" id="input-stat-vit" class="char-input" value="0" onchange="savePlayerData()"> ⛑️</div>
+            </div>
         </div>
-    </div>
-        
-    <div style="margin-top: 20px; text-align: center;">
-        <button onclick="savePlayerData()" style="background: #d4af37; color: black; padding: 10px 20px; border: none; cursor: pointer; font-weight: bold; margin-right: 10px;">СОХРАНИТЬ</button>
-        <button onclick="toggleEditModal()" style="background: #5a0000; color: white; padding: 10px 20px; border: none; cursor: pointer;">ОТМЕНА</button>
+
+        <!-- Правая колонка -->
+        <div class="char-sheet-col">
+            <div class="stat-group">
+                <div class="stat-group-title">Бой и Прогресс</div>
+                <div class="stat-row">Убито мобов: <input type="number" id="input-kills" class="char-input" value="0" onchange="savePlayerData()"> 💀</div>
+                <div class="stat-row">Элита (соло): <input type="number" id="input-elites-solo" class="char-input" value="0" onchange="savePlayerData()"> ☠️</div>
+                <div class="stat-row">Боссы: <input type="number" id="input-bosses" class="char-input" value="0" onchange="savePlayerData()"> 👹</div>
+                <div class="stat-row">Гоблины: <input type="number" id="input-gobs-solo" class="char-input" value="0" onchange="savePlayerData()">(С) / <input type="number" id="input-gobs-assist" class="char-input" value="0" onchange="savePlayerData()">(П)</div>
+                <div class="stat-row" style="font-size: 0.7rem;">Портал 70: <input type="text" id="input-lvl70-portal" class="char-input" style="width: 60px;" onchange="savePlayerData()"></div>
+                <div class="stat-row">Сложность: <span id="view-difficulty" class="stat-value">T1</span></div>
+            </div>
+
+            <div class="stat-group">
+                <div class="stat-group-title">Лут и Крафт</div>
+                <div class="stat-row">Найдено Лег: <input type="number" id="input-found-legs" class="char-input" value="0" onchange="savePlayerData()"> 📙</div>
+                <div class="stat-row">Найдено Желтых: <input type="number" id="input-found-yellows" class="char-input" value="0" onchange="savePlayerData()"> 📒</div>
+                <div class="stat-row">Ресурсы: <input type="number" id="input-res-n" class="char-input" value="0" style="width:30px;" onchange="savePlayerData()">📓 <input type="number" id="input-res-dc" class="char-input" value="0" style="width:30px;" onchange="savePlayerData()">📘📒 <input type="number" id="input-res-b" class="char-input" value="0" style="width:30px;" onchange="savePlayerData()">📙 <input type="number" id="input-res-a" class="char-input" value="0" style="width:30px;" onchange="savePlayerData()">📕</div>
+                <div class="stat-row">Реагенты: <input type="number" id="input-reagents" class="char-input" value="0" onchange="savePlayerData()"></div>
+                <div class="stat-row">Дыхание смерти: <input type="number" id="input-death-breath" class="char-input" value="0" onchange="savePlayerData()"> 🧪</div>
+            </div>
+        </div>
     </div>
 </div>
 

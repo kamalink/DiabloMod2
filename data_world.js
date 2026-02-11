@@ -171,8 +171,8 @@ window.worldData = {
             <p style="text-align: center; color: #ff4444; font-weight: bold;">👥 РАСЧЕТ ДЛЯ 2 ИГРОКОВ</p>
             <p style="font-size: 0.9rem;">🌒 01-19: Высокий | 🌒 20-39: Эксперт<br>🌒 40-60: Мастер | 🌒 61-65: Т1 | 🌒 66-69: Т2</p>
             <hr>
-            <p style="font-size: 0.85rem; color: #d4af37;"><b>Как считается УРОН (🔹 Умножение):</b><br>
-            Урон героя 🔹 Множитель умения на вещах 🔹 % умения 🔹 Стихии 🔹 Лег.камни 🔹 Куб</p>
+            <p style="font-size: 0.85rem; color: #d4af37;"><b>Как считается УРОН (🔹 Умножение):</b> <button class="calc-nav-btn" onclick="openDifficultyCalculator()" style="padding: 2px 8px; font-size: 0.7rem;">🧮 РАСЧЕТ</button><br>
+            Урон героя 🔹 % Умения на вещах 🔹 % Умения (Авто) 🔹 % Стихии 🔹 Лег.камни 🔹 Куб</p>
             <hr>
             <p style="color: #66ff66;"><b>🛡️ КАК СЧИТАЕТСЯ ЖИВУЧЕСТЬ:</b></p>
             <p style="font-size: 0.85rem;">(⛑️ + Восстановление) 🔹 ⛑️ от легендарок 🔹 ⛑️ в скиллах 🔹 ⛑️ в пассивках</p>

@@ -408,7 +408,7 @@ th { color: #d4af37; }
     position: fixed;
     left: 10px;
     top: 100px;
-    width: 280px;
+    width: 550px; /* Увеличена ширина для 2 колонок */
     /* Новый темный стиль */
     background: linear-gradient(180deg, #1a1a1a 0%, #050505 100%);
     border: 1px solid #d4af37;
@@ -421,6 +421,17 @@ th { color: #d4af37; }
     max-height: 80vh;
     overflow-y: auto;
     transition: transform 0.3s;
+}
+
+.char-sheet-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.char-sheet-col {
+    display: flex;
+    flex-direction: column;
 }
 
 .stat-group {
@@ -441,10 +452,37 @@ th { color: #d4af37; }
     text-align: center;
 }
 
+.add-money-btn {
+    cursor: pointer;
+    color: #66ff66;
+    font-size: 0.8rem;
+    margin-left: 5px;
+}
+.add-money-btn:hover { color: #fff; text-shadow: 0 0 5px #66ff66; }
+
 .stat-value {
     font-weight: bold;
     color: #fff;
 }
+
+.char-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed #444;
+    color: #fff;
+    font-family: inherit;
+    font-weight: bold;
+    width: 50px;
+    text-align: center;
+    padding: 0;
+}
+.char-input:focus {
+    outline: none;
+    border-bottom: 1px solid #d4af37;
+    background: rgba(255,255,255,0.05);
+}
+.name-input { width: 100%; text-align: center; font-size: 1.2rem; color: #d4af37; border-bottom: none; }
+.money-input { width: 35px; text-align: right; }
 
 /* Переопределение цветов для темного фона */
 #view-class { color: #66ccff !important; font-weight: bold; }
@@ -483,21 +521,6 @@ th { color: #d4af37; }
 .btn-class-select {
     background: linear-gradient(to right, #1a1a2e, #16213e);
     border: 1px solid #66ccff; color: #66ccff;
-}
-
-
-/* Кнопка Редактировать */
-#edit-char-btn {
-    position: fixed;
-    left: 10px;
-    top: 15px;
-    padding: 5px 15px;
-    background: #5a0000;
-    color: #ffd700;
-    border: 1px solid #d4af37;
-    cursor: pointer;
-    font-family: 'Cinzel', serif; font-weight: 700;
-    z-index: 1001;
 }
 
 /* Кнопка смерти */

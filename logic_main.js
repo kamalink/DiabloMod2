@@ -41,10 +41,11 @@ window.onload = function() {
         // --- ESC to close modals ---
         if (event.key === 'Escape') {
             const modals = [
+                'add-money-modal',
                 'custom-prompt-modal', 'custom-confirm-modal', 'iframe-modal', 
                 'multi-sell-modal', 'gem-service-modal', 'sell-craft-modal', 
-                'zaken-buy-modal', 'skill-calc-modal', 'exp-calc-modal',
-                'death-modal', 'edit-modal', 'text-window'
+                'zaken-buy-modal', 'skill-calc-modal', 'exp-calc-modal', 'difficulty-calc-modal',
+                'death-modal', 'text-window'
             ]; // Ordered from most to least specific/top-level
             
             for (const id of modals) {
@@ -58,6 +59,12 @@ window.onload = function() {
 
         // --- Enter to confirm ---
         if (event.key === 'Enter') {
+            // Blur character sheet inputs on Enter
+            if (document.activeElement && document.activeElement.classList.contains('char-input')) {
+                document.activeElement.blur();
+                return;
+            }
+
             // Handle custom prompt (input field)
             const promptModal = document.getElementById('custom-prompt-modal');
             if (promptModal && promptModal.style.display === 'flex') {
@@ -91,7 +98,7 @@ window.onload = function() {
     startRandomGlitches();
 
     // Инициализация перетаскивания для всех модальных окон
-    const draggableIds = ['text-window', 'edit-modal', 'death-modal', 'skill-calc-modal', 'exp-calc-modal', 'zaken-buy-modal', 'sell-craft-modal', 'gem-service-modal', 'multi-sell-modal', 'custom-confirm-modal', 'custom-prompt-modal'];
+    const draggableIds = ['text-window', 'death-modal', 'skill-calc-modal', 'exp-calc-modal', 'difficulty-calc-modal', 'zaken-buy-modal', 'sell-craft-modal', 'gem-service-modal', 'multi-sell-modal', 'custom-confirm-modal', 'custom-prompt-modal', 'add-money-modal'];
     draggableIds.forEach(id => {
         window.makeDraggable(document.getElementById(id));
     });

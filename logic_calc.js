@@ -1091,7 +1091,7 @@ window.resetProgress = function() {
                 name: "НЕФАЛЕМ",
                 level: 1,
                 gold_g: 0, gold_s: 0, gold_c: 0, gold_y: 0, // Валюта
-                runes: 0, para: 0, zakens: 0, maxVp: 0, potions: 5, death_breath: 0, // Ресурсы
+                runes: 0, para: 0, zakens: 0, maxVp: 0, potions: 0, death_breath: 0, // Ресурсы
                 
                 // Панели
                 guild_html: "", class_html: "",
@@ -1115,6 +1115,7 @@ window.resetProgress = function() {
                 theft_fine: "", zaken_discount: "", xp_bonus: "", potion_price: "",
                 lvl70_portal: "", active_rents: [], forgottenSkills: {},
                 professions: { 1: false, 2: false, 3: false }, claimed_torments: [], claimed_ranks: [],
+                refused_wizard_promotion: false,
                 
                 // Куб и навыки
                 penta_1: false, penta_2: false, penta_3: false,
@@ -1424,4 +1425,216 @@ window.confirmSellCraftedItem = function() {
 
     document.getElementById('sell-craft-modal').style.display = 'none';
     showCustomAlert(`✅ Предмет продан! Получено: ${window.formatCurrency(totalYen)}`);
+}
+
+window.openAddMoneyModal = function() {
+     const modal = document.getElementById('add-money-modal');
+    // Сброс значений
+    document.getElementById('add-gold-g').value = 0;
+    document.getElementById('add-gold-s').value = 0;
+    document.getElementById('add-gold-c').value = 0;
+    document.getElementById('add-gold-y').value = 0;
+    
+    // Сброс позиции
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+    
+    modal.style.display = 'block';
+}
+
+window.confirmAddMoney = function() {
+    const g = parseInt(document.getElementById('add-gold-g').value) || 0;
+    const s = parseInt(document.getElementById('add-gold-s').value) || 0;
+    const c = parseInt(document.getElementById('add-gold-c').value) || 0;
+    const y = parseInt(document.getElementById('add-gold-y').value) || 0;
+    
+    if (g === 0 && s === 0 && c === 0 && y === 0) {
+        document.getElementById('add-money-modal').style.display = 'none';
+        return;
+    }
+    
+    const addedYen = (g * 1000000) + (s * 10000) + (c * 100) + y;
+    const currentYen = window.getAllMoneyInYen();
+    
+    window.setMoneyFromYen(currentYen + addedYen);
+    window.updateUI();
+    
+    document.getElementById('add-money-modal').style.display = 'none';
+    window.showCustomAlert(`✅ Добавлено: ${window.formatCurrency(addedYen)}`);
+        }
+
+// --- КАЛЬКУЛЯТОР СЛОЖНОСТИ ---
+
+const difficultyTable = [
+    { tier: "T1", dmg: 2000000, tough: 4340000 },
+    { tier: "T2", dmg: 3200000, tough: 7140000 },
+    { tier: "T3", dmg: 6000000, tough: 11460000 },
+    { tier: "T4", dmg: 9750000, tough: 18120000 },
+    { tier: "T5", dmg: 15600000, tough: 29400000 },
+    { tier: "T6", dmg: 25000000, tough: 47100000 },
+    { tier: "T7", dmg: 55000000, tough: 75360000 },
+    { tier: "T8", dmg: 121000000, tough: 120580000 },
+    { tier: "T9", dmg: 266000000, tough: 192930000 },
+    { tier: "T10", dmg: 586000000, tough: 308690000 },
+    { tier: "T11", dmg: 1290000000, tough: 494000000 },
+    { tier: "T12", dmg: 2830000000, tough: 790000000 },
+    { tier: "T13", dmg: 6230000000, tough: 1264000000 },
+    { tier: "T14", dmg: 8540000000, tough: 2023000000 },
+    { tier: "T15", dmg: 18800000000, tough: 3237000000 },
+    { tier: "T16", dmg: 41400000000, tough: 5179000000 }
+];
+
+window.openDifficultyCalculator = function() {
+    const modal = document.getElementById('difficulty-calc-modal');
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+    
+    // Reset inputs
+    const inputs = modal.querySelectorAll('input');
+    inputs.forEach(inp => {
+        if (inp.id.includes('mult') || (inp.id.includes('tough') && !inp.id.includes('base'))) inp.value = 1;
+        else inp.value = 0;
+    });
+
+    // Auto-fetch best skill
+    let maxDmg = 0;
+    let bestSkillName = "Нет";
+    const cls = window.playerData.className;
+    const learned = window.playerData.learnedSkills || {};
+
+    if (cls && window.skillDB[cls]) {
+        for (const [sName, runes] of Object.entries(learned)) {
+            // Find skill in DB
+            const skillObj = window.skillDB[cls].find(s => s.name === sName);
+            if (skillObj) {
+                runes.forEach(rName => {
+                    const runeObj = skillObj.runes.find(r => r.name === rName);
+                    if (runeObj && runeObj.dmg > maxDmg) {
+                        maxDmg = runeObj.dmg;
+                        bestSkillName = `${sName} (${rName})`;
+                    }
+                });
+            }
+        }
+    }
+    
+    document.getElementById('diff-skill-pct').value = maxDmg;
+    document.getElementById('diff-auto-skill-name').innerText = bestSkillName;
+    
+    // Add listeners for live calculation
+    inputs.forEach(inp => inp.oninput = window.calculateDifficulty);
+    
+    // Add listeners for selects
+    const selects = modal.querySelectorAll('select');
+    selects.forEach(sel => sel.onchange = window.calculateDifficulty);
+
+    window.calculateDifficulty();
+    modal.style.display = 'block';
+}
+
+window.calculateDifficulty = function() {
+    const lvl = window.playerData.level || 1;
+
+    // --- Pre-70 Logic ---
+    if (lvl < 70) {
+        let tier = "Обычный";
+        if (lvl <= 19) tier = "Высокий";
+        else if (lvl <= 39) tier = "Эксперт";
+        else if (lvl <= 60) tier = "Мастер";
+        else if (lvl <= 65) tier = "T1";
+        else if (lvl <= 69) tier = "T2";
+
+        document.getElementById('diff-result-tier').innerText = tier;
+        document.getElementById('diff-result-details').innerHTML = `Уровень ${lvl} < 70.<br>Сложность определяется уровнем.`;
+        document.getElementById('diff-result-tier').dataset.tier = tier;
+        
+        // Still calc numbers for fun, but return early for tier logic? 
+        // User wants logic based on table ONLY after 70.
+        // But we should still show the calculated damage numbers.
+    }
+
+    // Damage
+    const heroDmg = parseFloat(document.getElementById('diff-hero-dmg').value) || 0;
+    const itemSkillPct = parseFloat(document.getElementById('diff-item-skill-pct').value) || 0;
+    const skillPct = parseFloat(document.getElementById('diff-skill-pct').value) || 0;
+    const elemPct = parseFloat(document.getElementById('diff-elem-pct').value) || 0;
+    const gemsPct = parseFloat(document.getElementById('diff-gems-pct').value) || 0;
+    const partnerDmg = parseFloat(document.getElementById('diff-partner-dmg').value) || 0;
+
+    // Cube Logic
+    let cubeDmgMult = 1;
+    let cubeToughMult = 1;
+
+    for (let i = 1; i <= 3; i++) {
+        const type = document.getElementById(`diff-cube-${i}-type`).value;
+        const val = parseFloat(document.getElementById(`diff-cube-${i}-val`).value) || 0;
+        
+        if (val > 0) {
+            if (type === 'dmg' || type === 'skill') {
+                // Treat both General and Skill damage from cube as multipliers for simplicity/mod rules
+                cubeDmgMult *= (1 + val / 100);
+            } else if (type === 'tough') {
+                cubeToughMult *= (1 + val / 100);
+            }
+        }
+    }
+
+    // Formula: Hero * (1 + ItemSkill%) * (Skill%/100) * (1 + Elem%) * (1 + Gems%) * Cube
+    // Note: Skill% is usually e.g. 740, so we multiply by 7.4.
+    // If skillPct is 0 (no skill), we assume x1 to not zero out damage? No, usually 100% weapon damage is base.
+    // But here we take specific skill %. If 0, it means 0 damage from skills.
+    
+    const skillMult = skillPct > 0 ? (skillPct / 100) : 1;
+
+    const totalHeroDmg = heroDmg * (1 + itemSkillPct/100) * skillMult * (1 + elemPct/100) * (1 + gemsPct/100) * cubeDmgMult;
+    const totalDmg = totalHeroDmg + partnerDmg;
+
+    document.getElementById('diff-total-dmg').innerText = totalDmg.toLocaleString('ru-RU', { maximumFractionDigits: 0 });
+
+    // Toughness
+    const baseTough = parseFloat(document.getElementById('diff-base-tough').value) || 0;
+    const legTough = parseFloat(document.getElementById('diff-leg-tough').value) || 1;
+    const skillTough = parseFloat(document.getElementById('diff-skill-tough').value) || 1;
+    const passTough = parseFloat(document.getElementById('diff-pass-tough').value) || 1;
+
+    const totalTough = baseTough * legTough * skillTough * passTough * cubeToughMult;
+
+    document.getElementById('diff-total-tough').innerText = totalTough.toLocaleString('ru-RU', { maximumFractionDigits: 0 });
+
+    // Determine Tier
+    if (lvl >= 70) {
+        let dmgTier = "Ниже T1";
+        let toughTier = "Ниже T1";
+        let dmgIndex = -1;
+        let toughIndex = -1;
+
+        for (let i = 0; i < difficultyTable.length; i++) {
+            if (totalDmg >= difficultyTable[i].dmg) {
+                dmgTier = difficultyTable[i].tier;
+                dmgIndex = i;
+            }
+            if (totalTough >= difficultyTable[i].tough) {
+                toughTier = difficultyTable[i].tier;
+                toughIndex = i;
+            }
+        }
+
+        const maxIndex = Math.max(dmgIndex, toughIndex);
+        const resultTier = maxIndex >= 0 ? difficultyTable[maxIndex].tier : "Ниже T1";
+
+        document.getElementById('diff-result-tier').innerText = resultTier;
+        document.getElementById('diff-result-details').innerHTML = `По урону: ${dmgTier}<br>По живучести: ${toughTier}`;
+        document.getElementById('diff-result-tier').dataset.tier = resultTier;
+    }
+}
+
+window.applyDifficulty = function() {
+    const tier = document.getElementById('diff-result-tier').dataset.tier;
+    window.playerData.difficulty = tier;
+    window.saveToStorage();
+    window.updateUI();
+    document.getElementById('difficulty-calc-modal').style.display = 'none';
+    window.showCustomAlert(`✅ Уровень сложности обновлен: ${tier}`);
 }

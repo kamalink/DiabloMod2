@@ -369,7 +369,7 @@ window.updateUI = function() {
     
     window.calculateRank();
 
-    document.getElementById('view-name').innerText = window.playerData.name.toUpperCase();
+    document.getElementById('input-name').value = window.playerData.name;
     
     const bestRank = window.playerData.claimed_ranks && window.playerData.claimed_ranks.length > 0 
         ? Math.min(...window.playerData.claimed_ranks) 
@@ -391,47 +391,49 @@ window.updateUI = function() {
     if (profEl) profEl.innerText = profText;
 
     let xpBonusText = window.playerData.xp_bonus ? `(XP: ${window.playerData.xp_bonus})` : "";
-    document.getElementById('view-lvl').innerHTML = `${window.playerData.level} 🌒 <span style="font-size:0.7rem; color:#aaa;">${xpBonusText}</span>`;
+    document.getElementById('input-lvl').value = window.playerData.level;
+    document.getElementById('view-xp-bonus').innerText = xpBonusText;
     
-    document.getElementById('view-gold-g').innerText = window.playerData.gold_g;
-    document.getElementById('view-gold-s').innerText = window.playerData.gold_s;
-    document.getElementById('view-gold-c').innerText = window.playerData.gold_c;
-    document.getElementById('view-gold-y').innerText = window.playerData.gold_y;
-    document.getElementById('view-runes').innerText = window.playerData.runes;
-    document.getElementById('view-para').innerText = window.playerData.para;
-    document.getElementById('view-potions').innerText = window.playerData.potions;
+    document.getElementById('input-gold-g').value = window.playerData.gold_g;
+    document.getElementById('input-gold-s').value = window.playerData.gold_s;
+    document.getElementById('input-gold-c').value = window.playerData.gold_c;
+    document.getElementById('input-gold-y').value = window.playerData.gold_y;
+    document.getElementById('input-runes').value = window.playerData.runes;
+    document.getElementById('input-para').value = window.playerData.para;
+    document.getElementById('input-potions').value = window.playerData.potions;
     
-    document.getElementById('view-stat-str').innerText = window.playerData.stat_str;
-    document.getElementById('view-stat-dex').innerText = window.playerData.stat_dex;
-    document.getElementById('view-stat-int').innerText = window.playerData.stat_int;
-    document.getElementById('view-stat-vit').innerText = window.playerData.stat_vit;
+    document.getElementById('input-stat-str').value = window.playerData.stat_str;
+    document.getElementById('input-stat-dex').value = window.playerData.stat_dex;
+    document.getElementById('input-stat-int').value = window.playerData.stat_int;
+    document.getElementById('input-stat-vit').value = window.playerData.stat_vit;
     
-    document.getElementById('view-kills').innerText = (window.playerData.kills + (window.playerData.base_kills || 0));
-    document.getElementById('view-elites-solo').innerText = (window.playerData.elites_solo + (window.playerData.base_elites || 0));
-    document.getElementById('view-bosses').innerText = window.playerData.bosses;
-    document.getElementById('view-gobs-solo').innerText = window.playerData.gobs_solo;
-    document.getElementById('view-gobs-assist').innerText = window.playerData.gobs_assist;
-    document.getElementById('view-max-vp').innerText = window.playerData.maxVp;
-    document.getElementById('view-lvl70-portal').innerText = window.playerData.lvl70_portal || "-";
+    document.getElementById('input-kills').value = window.playerData.kills;
+    document.getElementById('input-elites-solo').value = window.playerData.elites_solo;
+    document.getElementById('input-bosses').value = window.playerData.bosses;
+    document.getElementById('input-gobs-solo').value = window.playerData.gobs_solo;
+    document.getElementById('input-gobs-assist').value = window.playerData.gobs_assist;
+    document.getElementById('input-max-vp').value = window.playerData.maxVp;
+    document.getElementById('view-difficulty').innerText = window.playerData.difficulty || "T1";
+    document.getElementById('input-lvl70-portal').value = window.playerData.lvl70_portal || "";
 
-    document.getElementById('view-found-legs').innerText = window.playerData.found_legs;
-    document.getElementById('view-found-yellows').innerText = window.playerData.found_yellows;
-    document.getElementById('view-res-n').innerText = window.playerData.res_n || 0;
-    document.getElementById('view-res-dc').innerText = window.playerData.res_dc || 0;
-    document.getElementById('view-res-b').innerText = window.playerData.res_b || 0;
-    document.getElementById('view-res-a').innerText = window.playerData.res_a || 0;
-    document.getElementById('view-reagents').innerText = window.playerData.reagents || 0;
-    document.getElementById('view-death-breath').innerText = window.playerData.death_breath;
+    document.getElementById('input-found-legs').value = window.playerData.found_legs;
+    document.getElementById('input-found-yellows').value = window.playerData.found_yellows;
+    document.getElementById('input-res-n').value = window.playerData.res_n || 0;
+    document.getElementById('input-res-dc').value = window.playerData.res_dc || 0;
+    document.getElementById('input-res-b').value = window.playerData.res_b || 0;
+    document.getElementById('input-res-a').value = window.playerData.res_a || 0;
+    document.getElementById('input-reagents').value = window.playerData.reagents || 0;
+    document.getElementById('input-death-breath').value = window.playerData.death_breath;
 
     document.getElementById('view-rank').innerText = `${window.playerData.rank} (${window.playerData.rankName})`;
 
-    document.getElementById('view-runes-sold').innerText = window.playerData.runes_sold;
-    document.getElementById('view-reputation').innerText = window.playerData.reputation;
-    document.getElementById('view-deals').innerText = window.playerData.deals;
-    document.getElementById('view-chests').innerText = window.playerData.chests_found;
-    document.getElementById('view-steals').innerText = window.playerData.steals;
-    document.getElementById('view-black-market').innerText = window.playerData.black_market;
-    document.getElementById('view-zakens').innerText = window.playerData.zakens;
+    document.getElementById('input-runes-sold').value = window.playerData.runes_sold;
+    document.getElementById('input-reputation').value = window.playerData.reputation;
+    document.getElementById('input-deals').value = window.playerData.deals;
+    document.getElementById('input-chests').value = window.playerData.chests_found;
+    document.getElementById('input-steals').value = window.playerData.steals;
+    document.getElementById('input-black-market').value = window.playerData.black_market;
+    document.getElementById('input-zakens').value = window.playerData.zakens;
     
     document.getElementById('view-potion-price').innerText = window.playerData.potion_price ? `(${window.playerData.potion_price})` : "";
     document.getElementById('view-zaken-discount').innerText = window.playerData.zaken_discount || "-";
@@ -442,10 +444,10 @@ window.updateUI = function() {
     document.getElementById('view-guild').innerText = window.playerData.guild || "Нет";
 
     // Показываем все поля характеристик всегда
-       document.getElementById('input-stat-str-box').style.display = 'block';
-        document.getElementById('input-stat-dex-box').style.display = 'block';
-        document.getElementById('input-stat-int-box').style.display = 'block';
-        document.getElementById('input-stat-vit-box').style.display = 'block';
+    // document.getElementById('input-stat-str-box').style.display = 'block';
+    // document.getElementById('input-stat-dex-box').style.display = 'block';
+    // document.getElementById('input-stat-int-box').style.display = 'block';
+    // document.getElementById('input-stat-vit-box').style.display = 'block';
  
     window.updatePentaSlot('slot-penta-1', window.playerData.penta_1);
     window.updatePentaSlot('slot-penta-2', window.playerData.penta_2);
@@ -492,71 +494,6 @@ window.restorePanels = function() {
     }
 }
 
-window.toggleEditModal = function() {
-    const modal = document.getElementById('edit-modal');
-    if (!modal) return;
-    if (modal.style.display === 'block') {
-        modal.style.display = 'none';
-    } else {
-        // Сброс позиции окна
-        modal.style.top = '50%';
-        modal.style.left = '50%';
-        modal.style.transform = 'translate(-50%, -50%)';
-
-        document.getElementById('input-name').value = window.playerData.name || "";
-        
-        // Выбор класса убран из книги судеб
-        document.getElementById('input-class').parentElement.style.display = 'none';
-
-        document.getElementById('input-lvl').value = window.playerData.level || 0;
-        document.getElementById('input-gold-g').value = window.playerData.gold_g || 0;
-        document.getElementById('input-base-kills').value = window.playerData.base_kills || 0;
-        document.getElementById('input-base-elites').value = window.playerData.base_elites || 0;
-        document.getElementById('input-base-kills-box').style.display = (window.playerData.base_kills > 0) ? 'none' : 'block';
-        document.getElementById('input-base-elites-box').style.display = (window.playerData.base_elites > 0) ? 'none' : 'block';
-        document.getElementById('input-gold-s').value = window.playerData.gold_s || 0;
-        document.getElementById('input-gold-c').value = window.playerData.gold_c || 0;
-        document.getElementById('input-gold-y').value = window.playerData.gold_y || 0;
-        document.getElementById('input-runes').value = window.playerData.runes || 0;
-        document.getElementById('input-para').value = window.playerData.para || 0;
-        document.getElementById('input-potions').value = window.playerData.potions || 5;
-        document.getElementById('input-stat-str').value = window.playerData.stat_str || 0;
-        document.getElementById('input-stat-dex').value = window.playerData.stat_dex || 0;
-        document.getElementById('input-stat-int').value = window.playerData.stat_int || 0;
-        document.getElementById('input-stat-vit').value = window.playerData.stat_vit || 0;
-        document.getElementById('input-kills').value = window.playerData.kills || 0;
-        document.getElementById('input-elites-solo').value = window.playerData.elites_solo || 0;
-        document.getElementById('input-bosses').value = window.playerData.bosses || 0;
-        document.getElementById('input-gobs-solo').value = window.playerData.gobs_solo || 0;
-        document.getElementById('input-gobs-assist').value = window.playerData.gobs_assist || 0;
-        document.getElementById('input-max-vp').value = window.playerData.maxVp || 0;
-        document.getElementById('input-lvl70-portal').value = window.playerData.lvl70_portal || "";
-        document.getElementById('input-found-legs').value = window.playerData.found_legs || 0;
-        document.getElementById('input-found-yellows').value = window.playerData.found_yellows || 0;
-        document.getElementById('input-death-breath').value = window.playerData.death_breath || 0;
-        document.getElementById('input-res-n').value = window.playerData.res_n || 0;
-        document.getElementById('input-res-dc').value = window.playerData.res_dc || 0;
-        document.getElementById('input-res-b').value = window.playerData.res_b || 0;
-        document.getElementById('input-res-a').value = window.playerData.res_a || 0;
-        document.getElementById('input-reagents').value = window.playerData.reagents || 0;
-        document.getElementById('input-runes-sold').value = window.playerData.runes_sold || 0;
-        document.getElementById('input-reputation').value = window.playerData.reputation || 0;
-        document.getElementById('input-deals').value = window.playerData.deals || 0;
-        document.getElementById('input-chests').value = window.playerData.chests_found || 0;
-        document.getElementById('input-steals').value = window.playerData.steals || 0;
-        document.getElementById('input-black-market').value = window.playerData.black_market || 0;
-        document.getElementById('input-zakens').value = window.playerData.zakens || 0;
-        
-        // Показываем все поля характеристик всегда
-        document.getElementById('input-stat-str-box').style.display = 'block';
-        document.getElementById('input-stat-dex-box').style.display = 'block';
-        document.getElementById('input-stat-int-box').style.display = 'block';
-        document.getElementById('input-stat-vit-box').style.display = 'block';
-
-        modal.style.display = 'block';
-    }
-}
-
 window.setVolume = function(value) {
     window.audioTrack.volume = value;
 }
@@ -587,50 +524,66 @@ window.savePlayerData = function() {
     // 1. Сохраняем старые данные для сравнения
     const oldData = { ...window.playerData };
 
+    // Вспомогательные функции для безопасного чтения
+    const getVal = (id, isFloat = false) => {
+        const el = document.getElementById(id);
+        if (!el) return null;
+        const val = isFloat ? parseFloat(el.value) : parseInt(el.value);
+        return isNaN(val) ? 0 : val;
+    };
+    const getStr = (id) => {
+        const el = document.getElementById(id);
+        return el ? el.value : null;
+    };
+
     // 2. Читаем новые данные из полей
-    window.playerData.name = document.getElementById('input-name').value;
-    window.playerData.level = parseFloat(document.getElementById('input-lvl').value) || 1;
+   const name = getStr('input-name');
+    if (name !== null) window.playerData.name = name;
     
-    window.playerData.base_kills = parseInt(document.getElementById('input-base-kills').value) || 0;
-    window.playerData.base_elites = parseInt(document.getElementById('input-base-elites').value) || 0;
-
-    window.playerData.gold_g = parseFloat(document.getElementById('input-gold-g').value) || 0;
-    window.playerData.gold_s = parseFloat(document.getElementById('input-gold-s').value) || 0;
-    window.playerData.gold_c = parseFloat(document.getElementById('input-gold-c').value) || 0;
-    window.playerData.gold_y = parseFloat(document.getElementById('input-gold-y').value) || 0;
-    window.playerData.runes = parseFloat(document.getElementById('input-runes').value) || 0;
-    window.playerData.para = parseFloat(document.getElementById('input-para').value) || 0;
-    window.playerData.potions = parseInt(document.getElementById('input-potions').value) || 0;
+    const lvl = getVal('input-lvl', true);
+    if (lvl !== null) window.playerData.level = lvl;
     
-    window.playerData.stat_str = parseInt(document.getElementById('input-stat-str').value) || 0;
-    window.playerData.stat_dex = parseInt(document.getElementById('input-stat-dex').value) || 0;
-    window.playerData.stat_int = parseInt(document.getElementById('input-stat-int').value) || 0;
-    window.playerData.stat_vit = parseInt(document.getElementById('input-stat-vit').value) || 0;
+    // base_kills и base_elites удалены из HTML, не читаем их
     
-    window.playerData.kills = parseInt(document.getElementById('input-kills').value) || 0;
-    window.playerData.elites_solo = parseInt(document.getElementById('input-elites-solo').value) || 0;
-    window.playerData.bosses = parseInt(document.getElementById('input-bosses').value) || 0;
-    window.playerData.gobs_solo = parseInt(document.getElementById('input-gobs-solo').value) || 0;
-    window.playerData.gobs_assist = parseInt(document.getElementById('input-gobs-assist').value) || 0;
-    window.playerData.maxVp = parseInt(document.getElementById('input-max-vp').value) || 0;
-    window.playerData.lvl70_portal = document.getElementById('input-lvl70-portal').value;
+    const gg = getVal('input-gold-g', true); if (gg !== null) window.playerData.gold_g = gg;
+    const gs = getVal('input-gold-s', true); if (gs !== null) window.playerData.gold_s = gs;
+    const gc = getVal('input-gold-c', true); if (gc !== null) window.playerData.gold_c = gc;
+    const gy = getVal('input-gold-y', true); if (gy !== null) window.playerData.gold_y = gy;
+    
+    const runes = getVal('input-runes', true); if (runes !== null) window.playerData.runes = runes;
+    const para = getVal('input-para', true); if (para !== null) window.playerData.para = para;
+    const potions = getVal('input-potions'); if (potions !== null) window.playerData.potions = potions;
+    
+    const str = getVal('input-stat-str'); if (str !== null) window.playerData.stat_str = str;
+    const dex = getVal('input-stat-dex'); if (dex !== null) window.playerData.stat_dex = dex;
+    const int = getVal('input-stat-int'); if (int !== null) window.playerData.stat_int = int;
+    const vit = getVal('input-stat-vit'); if (vit !== null) window.playerData.stat_vit = vit;
+    
+    const kills = getVal('input-kills'); if (kills !== null) window.playerData.kills = kills;
+    const elites = getVal('input-elites-solo'); if (elites !== null) window.playerData.elites_solo = elites;
+    const bosses = getVal('input-bosses'); if (bosses !== null) window.playerData.bosses = bosses;
+    const gobsS = getVal('input-gobs-solo'); if (gobsS !== null) window.playerData.gobs_solo = gobsS;
+    const gobsA = getVal('input-gobs-assist'); if (gobsA !== null) window.playerData.gobs_assist = gobsA;
+    const maxVp = getVal('input-max-vp'); if (maxVp !== null) window.playerData.maxVp = maxVp;
+    
+    const portal70 = getStr('input-lvl70-portal'); if (portal70 !== null) window.playerData.lvl70_portal = portal70;
 
-    window.playerData.found_legs = parseInt(document.getElementById('input-found-legs').value) || 0;
-    window.playerData.found_yellows = parseInt(document.getElementById('input-found-yellows').value) || 0;
-    window.playerData.death_breath = parseInt(document.getElementById('input-death-breath').value) || 0;
-    window.playerData.res_n = parseInt(document.getElementById('input-res-n').value) || 0;
-    window.playerData.res_dc = parseInt(document.getElementById('input-res-dc').value) || 0;
-    window.playerData.res_b = parseInt(document.getElementById('input-res-b').value) || 0;
-    window.playerData.res_a = parseInt(document.getElementById('input-res-a').value) || 0;
-    window.playerData.reagents = parseInt(document.getElementById('input-reagents').value) || 0;
+    const legs = getVal('input-found-legs'); if (legs !== null) window.playerData.found_legs = legs;
+    const yellows = getVal('input-found-yellows'); if (yellows !== null) window.playerData.found_yellows = yellows;
+    const db = getVal('input-death-breath'); if (db !== null) window.playerData.death_breath = db;
+    const resN = getVal('input-res-n'); if (resN !== null) window.playerData.res_n = resN;
+    const resDC = getVal('input-res-dc'); if (resDC !== null) window.playerData.res_dc = resDC;
+    const resB = getVal('input-res-b'); if (resB !== null) window.playerData.res_b = resB;
+    const resA = getVal('input-res-a'); if (resA !== null) window.playerData.res_a = resA;
+    const reag = getVal('input-reagents'); if (reag !== null) window.playerData.reagents = reag;
 
-    window.playerData.runes_sold = parseFloat(document.getElementById('input-runes-sold').value) || 0;
-    window.playerData.reputation = parseInt(document.getElementById('input-reputation').value) || 0;
-    window.playerData.deals = parseInt(document.getElementById('input-deals').value) || 0;
-    window.playerData.chests_found = parseInt(document.getElementById('input-chests').value) || 0;
-    window.playerData.steals = parseInt(document.getElementById('input-steals').value) || 0;
-    window.playerData.black_market = parseInt(document.getElementById('input-black-market').value) || 0;
-    window.playerData.zakens = parseInt(document.getElementById('input-zakens').value) || 0;
+    const rSold = getVal('input-runes-sold', true); if (rSold !== null) window.playerData.runes_sold = rSold;
+    const rep = getVal('input-reputation'); if (rep !== null) window.playerData.reputation = rep;
+    const deals = getVal('input-deals'); if (deals !== null) window.playerData.deals = deals;
+    const chests = getVal('input-chests'); if (chests !== null) window.playerData.chests_found = chests;
+    const steals = getVal('input-steals'); if (steals !== null) window.playerData.steals = steals;
+    const bm = getVal('input-black-market'); if (bm !== null) window.playerData.black_market = bm;
+    const zakens = getVal('input-zakens'); if (zakens !== null) window.playerData.zakens = zakens;
 
     // Проверка изменения денег для звука
     if (oldData.gold_g !== window.playerData.gold_g || 
@@ -644,10 +597,10 @@ window.savePlayerData = function() {
     window.applyGuildRewards(oldData);
     window.checkGuildExitConditions();
     window.checkGuildProgression(); // Проверка на повышение
+    window.saveToStorage();
     // checkGuildExitConditions теперь также проверяет аренду, так как она вызывается здесь
 
     window.updateUI();
-    window.toggleEditModal();
 }
 
 window.renderLearnedSkillsWidget = function() {
