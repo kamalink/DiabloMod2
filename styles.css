@@ -1,3 +1,7 @@
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 body, html {
     margin: 0; padding: 0; width: 100%; height: 100%;
     background-color: transparent; color: #b8a078;
@@ -6,6 +10,18 @@ body, html {
     overflow-y: scroll; /* Сохраняем функционал скролла */
     scrollbar-width: none; /* Firefox: скрываем скроллбар */
     -ms-overflow-style: none; /* IE/Edge */
+}
+/* Контейнеры, которые будут плавно появляться */
+.menu-container,
+#char-sheet,
+#right-panels-stack,
+#reset-btn,
+#music-btn,
+#randomizer-btn,
+#breadcrumb,
+#learned-skills-widget {
+    opacity: 0;
+    animation: fadeIn 5s ease-in forwards;
 }
 
 * {
@@ -626,4 +642,11 @@ th { color: #d4af37; }
 .buy-prop-item:hover { background: rgba(255, 255, 255, 0.1); }
 .buy-prop-item.selected {
     background: rgba(102, 255, 102, 0.2); color: #66ff66; text-shadow: 0 0 5px #66ff66; border: 1px solid #66ff66;
+}
+.sell-prop-item {
+    cursor: pointer; padding: 2px 5px; border-radius: 3px; transition: all 0.2s; display: inline-block;
+}
+.sell-prop-item:hover { background: rgba(255, 255, 255, 0.1); }
+.sell-prop-item.selected {
+    background: rgba(255, 102, 102, 0.2); color: #ff6666; text-shadow: 0 0 5px #ff6666; border: 1px solid #ff6666;
 }
