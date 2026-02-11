@@ -42,18 +42,16 @@
     <input type="range" id="volume-slider" min="0" max="1" step="0.01" oninput="setVolume(this.value)" style="display: none; position: fixed; top: 55px; right: 310px; width: 100px; z-index: 1001;">
     <a href="#" onclick="event.preventDefault(); window.openIframe('https://randstuff.ru/number/');" id="randomizer-btn">🎲 РАНДОМ</a>
 
-    <!-- Контейнер виджетов (Навыки + Инвентарь) -->
-    <div id="widgets-container" style="position: fixed; top: 110px; right: 310px; width: 180px; z-index: 900; display: flex; flex-direction: column; gap: 10px; pointer-events: none;">
-        <div id="learned-skills-widget" style="pointer-events: auto; max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.8); border: 1px solid #444; padding: 10px; color: #ccc; font-size: 0.75rem; display: none; border-radius: 4px;">
-            <div style="color: #d4af37; border-bottom: 1px solid #555; margin-bottom: 5px; font-weight: bold; text-align: center;">ИЗУЧЕНО</div>
-            <div id="learned-skills-content"></div>
-        </div>
-        <div id="inventory-widget" style="pointer-events: auto; max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.8); border: 1px solid #444; padding: 10px; color: #ccc; font-size: 0.75rem; display: none; border-radius: 4px;">
-            <div style="color: #d4af37; border-bottom: 1px solid #555; margin-bottom: 5px; font-weight: bold; text-align: center;">ИНВЕНТАРЬ</div>
-            <div id="inventory-content"></div>
-        </div>
+    <!-- Виджет изученных навыков -->
+    <div id="learned-skills-widget" style="position: fixed; top: 110px; right: 310px; width: 180px; max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.8); border: 1px solid #444; padding: 10px; color: #ccc; font-size: 0.75rem; z-index: 900; display: none; border-radius: 4px;">
+        <div style="color: #d4af37; border-bottom: 1px solid #555; margin-bottom: 5px; font-weight: bold; text-align: center;">ИЗУЧЕНО</div>
+        <div id="learned-skills-content"></div>
     </div>
-
+ <!-- Виджет инвентаря -->
+    <div id="inventory-widget" style="position: fixed; top: 430px; right: 310px; width: 180px; max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.8); border: 1px solid #444; padding: 10px; color: #ccc; font-size: 0.75rem; z-index: 900; display: none; border-radius: 4px;">
+        <div style="color: #d4af37; border-bottom: 1px solid #555; margin-bottom: 5px; font-weight: bold; text-align: center;">ИНВЕНТАРЬ</div>
+        <div id="inventory-content"></div>
+    </div>
     <!-- Окно смерти -->
     <div id="death-modal">
         <h2>☠️ СМЕРТЬ ГЕРОЯ</h2>
@@ -129,6 +127,7 @@
     <div id="exp-calc-modal">
         <span class="close-x" onclick="document.getElementById('exp-calc-modal').style.display='none'">[X]</span>
         <h3>📊 ПОДСЧЕТ ОПЫТА</h3>
+    
         
         <div class="exp-input-row">
             <label>💀 Мобы:</label>
@@ -272,7 +271,7 @@
                     </select>
                 </label>
             </div>
-            <button id="craft-sell-action-btn" class="craft-btn smith-sell" onclick="sellCraftedItemFromModal()">ПРОДАТЬ</button>
+            <button class="craft-btn smith-sell" onclick="sellCraftedItemFromModal()">ПРОДАТЬ</button>
         </div>
 
         <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
@@ -547,32 +546,6 @@
         <button class="death-confirm-btn" onclick="confirmAddMoney()">ДОБАВИТЬ</button>
     </div>
 
-    <!-- МОДАЛЬНОЕ ОКНО РАСПЛАВЛЕНИЯ (MELT) -->
-    <div id="melt-item-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 450px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #d4af37; box-shadow: 0 0 50px #000; padding: 25px; text-align: center; font-family: 'Cinzel', serif; color: #e0e0e0; z-index: 7000;">
-        <h3 style="color: #ff4444; margin-top: 0; font-size: 1.5rem;">🔥 РАСПЛАВЛЕНИЕ</h3>
-        <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0; text-align: left;">
-            <label style="display: flex; justify-content: space-between;">Уровень: 
-                <input type="number" id="melt-level" value="1" min="1" style="width: 60px; background: #000; border: 1px solid #444; color: #fff; text-align: center;">
-            </label>
-            <label style="display: flex; justify-content: space-between;">Грейд: 
-                <select id="melt-grade" style="background: #000; color: #fff; border: 1px solid #444; width: 100px;">
-                    <option value="N">N</option><option value="DC">D/C</option><option value="B">B</option>
-                    <option value="A">A</option><option value="S">S</option><option value="S+">S+</option><option value="Spectrum">Spectrum</option>
-                </select>
-            </label>
-            <label style="display: flex; justify-content: space-between;">Тип: 
-                <select id="melt-type" style="background: #000; color: #fff; border: 1px solid #444; width: 120px;">
-                    <option value="normal">Обычный</option>
-                    <option value="ancient">Древний</option>
-                    <option value="primal">Первозданный</option>
-                </select>
-            </label>
-        </div>
-        <div style="display: flex; justify-content: center; gap: 15px;">
-            <button class="death-confirm-btn" onclick="window.confirmMeltItem()">Расплавить</button>
-            <button class="death-cancel-btn" onclick="document.getElementById('melt-item-modal').style.display='none'">Отмена</button>
-        </div>
-    </div>
     
 
     <!-- МОДАЛЬНОЕ ОКНО УСЛУГ ЮВЕЛИРА -->
@@ -734,6 +707,7 @@
                     <div class="stat-row">Убито мобов: <input type="number" id="input-kills" class="char-input" value="0" onchange="savePlayerData()"> 💀</div>
                     <div class="stat-row">Элита (соло): <input type="number" id="input-elites-solo" class="char-input" value="0" onchange="savePlayerData()"> ☠️</div>
                     <div class="stat-row">Боссы: <input type="number" id="input-bosses" class="char-input" value="0" onchange="savePlayerData()"> 👹</div>
+                    <div class="stat-row" style="font-size: 0.7rem; color: #888;">Изначально: <input type="number" id="input-base-kills" class="char-input" style="width: 40px;" value="0" onchange="savePlayerData()">💀 / <input type="number" id="input-base-elites" class="char-input" style="width: 40px;" value="0" onchange="savePlayerData()">☠️</div>
                     <div class="stat-row">Гоблины: <input type="number" id="input-gobs-solo" class="char-input" value="0" onchange="savePlayerData()">(С) / <input type="number" id="input-gobs-assist" class="char-input" value="0" onchange="savePlayerData()">(П)</div>
                     <div class="stat-row" style="font-size: 0.7rem;">Портал 70: <input type="text" id="input-lvl70-portal" class="char-input" style="width: 60px;" onchange="savePlayerData()"></div>
                     <div class="stat-row">Сложность: <span id="view-difficulty" class="stat-value">T1</span></div>

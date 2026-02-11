@@ -20,7 +20,8 @@ body, html {
 #randomizer-btn,
 #breadcrumb,
 #learned-skills-widget,
-#widgets-container {
+#widgets-container,
+#inventory-widget {
     opacity: 0;
     animation: fadeIn 5s ease-in forwards;
 }
@@ -67,6 +68,21 @@ body::after {
     background-color: #1a0505; /* Цвет фона, если картинка не грузится */
     background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('bg.jpg');
     background-size: cover; background-position: center; z-index: -1;
+    transform: scale(1.1);
+    animation: diabloShake 20s ease-in-out infinite;
+}
+
+@keyframes diabloShake {
+    0%, 90% { transform: scale(1.1); }
+    91% { transform: scale(1.11) translate(1px, 1px) rotate(0.5deg); }
+    92% { transform: scale(1.1) translate(-1px, -2px) rotate(-0.5deg); }
+    93% { transform: scale(1.11) translate(-2px, 0px) rotate(0.5deg); }
+    94% { transform: scale(1.1) translate(2px, 2px) rotate(-0.5deg); }
+    95% { transform: scale(1.11) translate(1px, -1px) rotate(0.5deg); }
+    96% { transform: scale(1.1) translate(-1px, 2px) rotate(-0.5deg); }
+    97% { transform: scale(1.11) translate(-2px, 1px) rotate(0.5deg); }
+    98% { transform: scale(1.1) translate(1px, 1px) rotate(0deg); }
+    100% { transform: scale(1.1); }
 }
 
 /* ПУТЬ (BREADCRUMBS) */
@@ -501,7 +517,7 @@ th { color: #d4af37; }
     color: #fff;
     font-family: inherit;
     font-weight: bold;
-    width: 50px;
+    width: 70px;
     text-align: center;
     padding: 0;
 }

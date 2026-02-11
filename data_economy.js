@@ -45,7 +45,8 @@ window.economyData = {
                         <label>Грейд: 
                             <select id="buy-item-grade-input" style="background: #000; color: #fff; border: 1px solid #444; width: 60px; cursor: pointer;">
                                 <option value="N">N</option>
-                                <option value="DC">D/C</option>
+                                <option value="D">D</option>
+                                <option value="C">C</option>
                                 <option value="B">B</option>
                                 <option value="A">A</option>
                             </select>

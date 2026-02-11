@@ -100,7 +100,7 @@ window.selectProfileItem = function(title, path, bypassConditions = false) {
         window.attemptLeaveGuild(() => {
             checkEntryConditions();
         });
-
+        
         function checkEntryConditions() {
             if (newGuild.includes('торговц')) {
                 if (window.playerData.stat_vit < 1000) {
@@ -131,21 +131,21 @@ window.selectProfileItem = function(title, path, bypassConditions = false) {
                     window.showCustomAlert("❌ Для вступления нужно 85 репутации (Ранг 1).");
                     return;
                 }
-                // Далее идет стандартная логика с условием убийства, она ниже по коду
+                // Логика ниже
             }
             else if (newGuild.includes('искатель приключений')) {
                 if (window.playerData.found_legs < 5) {
                     window.showCustomAlert("❌ Для вступления нужно найти 5 легендарок (Ранг 1).");
                     return;
                 }
-                // Далее стандартная логика
+                // Логика ниже
             }
             else if (newGuild.includes('искатель богатства')) {
                 if (window.playerData.found_legs < 8) {
                     window.showCustomAlert("❌ Для вступления нужно найти 8 легендарок (Ранг 1).");
                     return;
                 }
-                // Далее стандартная логика
+                // Логика ниже
             }
             
             else if (newGuild.includes('вампир')) {
@@ -171,6 +171,11 @@ window.selectProfileItem = function(title, path, bypassConditions = false) {
                 window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?`, () => applySelection());
             }
             else if (newGuild.includes('охотник')) {
+                // For Hunters, we use the tracking system for the kill requirement
+                // Goblin Hunter: Kill 1 goblin (gobs_solo)
+                // Elite Hunter: Kill 5 elites (elites_solo)
+                // Helper: Kill 5 elites (elites_solo)
+
                 let condition = "";
                 let rewardMsg = "";
                 let rewardYen = 0;
@@ -192,17 +197,11 @@ window.selectProfileItem = function(title, path, bypassConditions = false) {
                     rewardMsg = `Награда: ${(5 * 0.5 * window.playerData.level).toFixed(1)}🥉, 15🎭`;
                     rewardYen = 5 * 50 * window.playerData.level; rewardRep = 15;
                 }
-
+                
                 window.showCustomConfirm(
                     `Условие: ${condition}.<br>${rewardMsg}<br>Выполнено?`,
                     () => {
-                        if (rewardYen > 0) {
-                            window.playerData.gold_y += rewardYen;
-                            while (window.playerData.gold_y >= 100) { window.playerData.gold_y -= 100; window.playerData.gold_c++; }
-                            while (window.playerData.gold_c >= 100) { window.playerData.gold_c -= 100; window.playerData.gold_s++; }
-                            while (window.playerData.gold_s >= 100) { window.playerData.gold_s -= 100; window.playerData.gold_g++; }
-                            if (window.coinSound) { window.coinSound.currentTime = 0; window.coinSound.play().catch(e => {}); }
-                        }
+                        if (rewardYen > 0) window.addYen(rewardYen);
                         window.playerData.reputation += rewardRep;
                         window.playerData.runes += rewardRunes;
                         applySelection();
@@ -259,14 +258,7 @@ window.selectProfileItem = function(title, path, bypassConditions = false) {
                     `Условие: Убить ${kills} мобов.<br>Выполнено?`,
                     () => {
                         let reward = kills * mult * window.playerData.level;
-                        // Начисление денег
-                        window.playerData.gold_y += reward;
-                        while (window.playerData.gold_y >= 100) { window.playerData.gold_y -= 100; window.playerData.gold_c++; }
-                        while (window.playerData.gold_c >= 100) { window.playerData.gold_c -= 100; window.playerData.gold_s++; }
-                        while (window.playerData.gold_s >= 100) { window.playerData.gold_s -= 100; window.playerData.gold_g++; }
-                        
-                        if (window.coinSound) { window.coinSound.currentTime = 0; window.coinSound.play().catch(e => {}); }
-                        
+                        window.addYen(reward);
                         applySelection();
                         window.showCustomAlert(`Добро пожаловать!<br>Награда: ${window.formatCurrency(Math.floor(reward))}`);
                     }
@@ -1170,6 +1162,16 @@ window.confirmDeath = function() {
             window.playerData.forgottenSkills[randomSkill] = (window.playerData.forgottenSkills[randomSkill] || 0) + 1;
             finalMessage += `🧠 Амнезия! Вы забыли навык:<br><br><span style="color:#ff4444; font-size: 1.2rem; font-weight: bold;">${randomSkill}</span><br><br>`;
         }
+    }
+
+    // Потеря предмета из инвентаря
+    if (window.playerData.inventory && window.playerData.inventory.length > 0) {
+        const randomIndex = Math.floor(Math.random() * window.playerData.inventory.length);
+        const lostItem = window.playerData.inventory[randomIndex];
+        window.playerData.inventory.splice(randomIndex, 1);
+        finalMessage += `🎒 Потерян предмет из инвентаря:<br><span style="color:#ff4444; font-weight:bold;">${lostItem.name}</span><br><br>`;
+    } else {
+        finalMessage += `🎒 Инвентарь пуст, предметы не потеряны.<br><br>`;
     }
 
     window.updateUI();

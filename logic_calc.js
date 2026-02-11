@@ -545,24 +545,29 @@ window.calculateExp = function() {
     const elites = parseInt(document.getElementById('exp-elites').value) || 0;
     const bosses = parseInt(document.getElementById('exp-bosses').value) || 0;
 
-    let runesBase = (mobs * 0.01) + (elites * 0.1) + (bosses * 3);
-    let paraBase = (mobs * 0.01) + (elites * 0.1) + (bosses * 3);
+    // Считаем разницу от последнего введенного
+    const dMobs = Math.max(0, mobs - (window.playerData.last_input_mobs || 0));
+    const dElites = Math.max(0, elites - (window.playerData.last_input_elites || 0));
+    // Боссы считаются как есть (вводятся за раз)
+
+    let runesBase = (dMobs * 0.01) + (dElites * 0.1) + (bosses * 3);
+    let paraBase = (dMobs * 0.01) + (dElites * 0.1) + (bosses * 3);
 
     const g = (window.playerData.guild || "").toLowerCase();
     let runesMod = 1;
     let paraMod = 1;
 
     if (g.includes('торговц')) {
-        runesBase = (elites * 0.1) + (bosses * 3);
-        paraBase = (elites * 0.1) + (bosses * 3);
+        runesBase = (dElites * 0.1) + (bosses * 3);
+        paraBase = (dElites * 0.1) + (bosses * 3);
     } else if (g.includes('охотник на гоблинов')) {
         runesMod += 0.2; paraMod += 0.2;
     } else if (g.includes('охотник на ☠️')) {
-        const eliteBossBase = (elites * 0.1) + (bosses * 3);
+        const eliteBossBase = (dElites * 0.1) + (bosses * 3);
         const bonus = eliteBossBase * 0.33;
         runesBase += bonus; paraBase += bonus;
     } else if (g.includes('помощник охотника')) {
-        const eliteBossBase = (elites * 0.1) + (bosses * 3);
+        const eliteBossBase = (dElites * 0.1) + (bosses * 3);
         const bonus = eliteBossBase * 0.15;
         runesBase += bonus; paraBase += bonus;
     } else if (g.includes('ученик чародея')) {
@@ -594,10 +599,11 @@ window.calculateExp = function() {
     const totalRunes = (runesBase * runesMod).toFixed(2);
     const totalPara = (paraBase * paraMod).toFixed(2);
 
+    const diffText = (dMobs > 0 || dElites > 0) ? `<br><span style="font-size:0.8rem; color:#aaa;">(+${dMobs}💀, +${dElites}☠️)</span>` : "";
     document.getElementById('exp-result-display').innerHTML = `
         <span style="color:#fff">Награда:</span><br>
         <span style="color:#66ccff; font-size:1.2rem;">${totalRunes} 📖</span> | 
-        <span style="color:#d4af37; font-size:1.2rem;">${totalPara} ⏳</span>
+        <span style="color:#d4af37; font-size:1.2rem;">${totalPara} ⏳</span>${diffText}
     `;
 }
 
@@ -606,6 +612,10 @@ window.applyExpCalculation = function() {
     const elites = parseInt(document.getElementById('exp-elites').value) || 0;
     const bosses = parseInt(document.getElementById('exp-bosses').value) || 0;
     
+    // Считаем разницу для статистики
+    const dMobs = Math.max(0, mobs - (window.playerData.last_input_mobs || 0));
+    const dElites = Math.max(0, elites - (window.playerData.last_input_elites || 0));
+
     window.calculateExp();
     const resHTML = document.getElementById('exp-result-display').innerHTML;
     const runesMatch = resHTML.match(/([\d\.]+) 📖/);
@@ -616,14 +626,33 @@ window.applyExpCalculation = function() {
 
     window.playerData.runes = parseFloat((window.playerData.runes + addRunes).toFixed(2));
     window.playerData.para = parseFloat((window.playerData.para + addPara).toFixed(2));
-    window.playerData.kills += mobs;
-    window.playerData.elites_solo += elites;
+    window.playerData.kills += dMobs;
+    window.playerData.elites_solo += dElites;
     window.playerData.bosses += bosses;
-
+    
     window.saveToStorage();
     window.updateUI();
     document.getElementById('exp-calc-modal').style.display = 'none';
     window.showCustomAlert(`✅ Получено: ${addRunes} 📖 и ${addPara} ⏳<br>Статистика обновлена.`);
+}
+
+window.setBaseStats = function() {
+    window.showCustomPrompt("Изначальные параметры", "Введите изначальное кол-во убитых мобов:", "0", (mobs) => {
+        window.showCustomPrompt("Изначальные параметры", "Введите изначальное кол-во убитых элиток:", "0", (elites) => {
+            window.playerData.base_kills = parseInt(mobs) || 0;
+            window.playerData.base_elites = parseInt(elites) || 0;
+            window.playerData.last_input_mobs = parseInt(mobs) || 0;
+            window.playerData.last_input_elites = parseInt(elites) || 0;
+            
+            document.getElementById('exp-mobs').value = window.playerData.last_input_mobs;
+            document.getElementById('exp-elites').value = window.playerData.last_input_elites;
+            
+            window.saveToStorage();
+            window.updateUI();
+            window.calculateExp();
+            window.showCustomAlert("✅ Изначальные параметры установлены.");
+        });
+    });
 }
 
 window.addMoney = function(g, s, c, y) {
@@ -710,6 +739,7 @@ window.updateZakenTotalCost = function() {
 window.confirmBuyZakens = function() {
     const count = parseInt(document.getElementById('zaken-count-input').value);
     let priceYen = window.getZakenPrice(window.playerData.level);
+    let bonuses = [];
     
     if (isNaN(count) || count <= 0) {
         window.showCustomAlert("Некорректное число.");
@@ -719,6 +749,7 @@ window.confirmBuyZakens = function() {
     // Применяем скидку гильдии (Гэмблер)
     if (window.playerData.zaken_discount_val) {
         priceYen = priceYen * (1 + window.playerData.zaken_discount_val);
+        bonuses.push(`Гэмблер ${Math.round(window.playerData.zaken_discount_val*100)}%`);
     }
 
     const totalCostYen = priceYen * count;
@@ -732,7 +763,8 @@ window.confirmBuyZakens = function() {
         document.getElementById('zaken-buy-modal').style.display = 'none';
         window.showCustomAlert(`✅ Куплено ${count} 🔖 за ${window.formatCurrency(totalCostYen)}.`);
     } else {
-        window.showCustomAlert(`❌ Недостаточно средств!<br>Нужно: ${window.formatCurrency(totalCostYen)}`);
+        const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
+        window.showCustomAlert(`❌ Недостаточно средств!<br>Нужно: ${window.formatCurrency(totalCostYen)}${bonusText}`);
     }
 }
 
@@ -807,21 +839,37 @@ window.sellDeathBreath = function() {
         if (playerData.death_breath < quantity) {
             showCustomAlert(`❌ Недостаточно Дыханий Смерти!`);
             return;
-        }
+                }
+
         const g = (window.playerData.guild || "").toLowerCase();
+        const playerRank = window.playerData.rank || 0;
         const pricePerUnit = 50000; // 5 silver = 50000 yen
-        let totalGain = pricePerUnit * quantity;
-        
-        playerData.death_breath -= quantity;
-        if (g.includes('вампир')) {
-            totalGain *= 0.5;
+        let sellMult = 1.0;
+        let bonuses = [];
+
+        if (g.includes('торговц')) {
+             const sellPercents = [10, 13, 15, 17, 19, 21, 23, 25, 28, 32, 35];
+             const p = sellPercents[playerRank] || 10;
+             sellMult = p / 5;
+             bonuses.push(`Торговцы x${sellMult.toFixed(2)}`);
         }
+        if (g.includes('вампир')) {
+            sellMult *= 0.5;
+            bonuses.push(`Вампир -50%`);
+        }
+        
+        let totalGain = pricePerUnit * quantity * sellMult;
+        playerData.death_breath -= quantity;
+        
         const currentMoney = getAllMoneyInYen();
         setMoneyFromYen(currentMoney + totalGain);
         updateUI();
-        showCustomAlert(`✅ Продано ${quantity} 🧪 за ${window.formatCurrency(totalGain)}.`);
+        const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
+        showCustomAlert(`✅ Продано ${quantity} 🧪 за ${window.formatCurrency(totalGain)}.${bonusText}`);
     });
 }
+
+
 
 window.craftHealthPotion = function() {
     showCustomPrompt("Крафт зелий здоровья", `Нужно: 1🧪 и 1 реагент за зелье.`, "1", (quantity) => {
@@ -892,6 +940,7 @@ window.buyPotion = function() {
         }
         const lvl = playerData.level;
         let pricePerPotion = 0;
+        let bonuses = [];
 
         if (lvl < 70) {
             if (lvl <= 20) pricePerPotion = 1000; // 10c
@@ -909,6 +958,7 @@ window.buyPotion = function() {
         // Применяем скидку гильдии
         if (window.playerData.potion_discount_val) {
             pricePerPotion = pricePerPotion * (1 + window.playerData.potion_discount_val);
+            bonuses.push(`Гильдия ${Math.round(window.playerData.potion_discount_val*100)}%`);
         }
 
         const totalCost = Math.floor(pricePerPotion * quantity);
@@ -917,7 +967,8 @@ window.buyPotion = function() {
         if (currentMoney >= totalCost) {
             setMoneyFromYen(currentMoney - totalCost);
             updateUI();
-            showCustomAlert(`✅ Куплено и выпито ${quantity} 💊. Списано: ${window.formatCurrency(totalCost)}.`);
+            const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
+            showCustomAlert(`✅ Куплено и выпито ${quantity} 💊. Списано: ${window.formatCurrency(totalCost)}.${bonusText}`);
         } else {
             showCustomAlert(`❌ Недостаточно средств!`);
         }
@@ -957,7 +1008,7 @@ window.sellResources = function() {
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
     levelInput.value = (window.lastResourceSellLevel && window.lastResourceSellLevel >= 5) ? window.lastResourceSellLevel : 5;
-    if (levelInput.previousElementSibling) levelInput.previousElementSibling.innerText = "Уровень ресурсов:";
+    document.getElementById('multi-sell-label-text').innerText = "Уровень ресурсов:";
 
     document.getElementById('multi-sell-title').innerText = "Продажа ресурсов";
     const resources = [
@@ -979,13 +1030,30 @@ window.sellResources = function() {
         const level = parseInt(levelInput.value) || 1;
         window.lastResourceSellLevel = level;
         const basePrice = getSmithSellPrice(level);
+        
+        const g = (window.playerData.guild || "").toLowerCase();
+        const playerRank = window.playerData.rank || 0;
+        let sellMult = 1.0;
+        let bonuses = [];
+
+        if (g.includes('торговц')) {
+             const sellPercents = [10, 13, 15, 17, 19, 21, 23, 25, 28, 32, 35];
+             const p = sellPercents[playerRank] || 10;
+             sellMult = p / 5;
+             bonuses.push(`Торговцы x${sellMult.toFixed(2)}`);
+        }
+        if (g.includes('вампир')) {
+            sellMult *= 0.5;
+            bonuses.push(`Вампир -50%`);
+        }
 
         inputsContainer.querySelectorAll('.multi-sell-input').forEach(input => {
             const quantity = parseInt(input.value) || 0;
             const mult = parseFloat(input.dataset.mult);
-            totalYen += quantity * basePrice * mult;
+            totalYen += quantity * basePrice * mult * sellMult;
         });
-        totalDisplay.innerHTML = `Итого: ${window.formatCurrency(Math.floor(totalYen))}`;
+        const bonusText = bonuses.length ? ` <span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
+        totalDisplay.innerHTML = `Итого: ${window.formatCurrency(Math.floor(totalYen))}${bonusText}`;
     };
 
     levelInput.oninput = updateTotal;
@@ -1001,9 +1069,15 @@ window.sellResources = function() {
         const level = parseInt(levelInput.value) || 1;
         const basePrice = getSmithSellPrice(level);
 
-        let sellMultiplier = 1.0;
+        const playerRank = window.playerData.rank || 0;
+        let sellMult = 1.0;
+        if (g.includes('торговц')) {
+             const sellPercents = [10, 13, 15, 17, 19, 21, 23, 25, 28, 32, 35];
+             const p = sellPercents[playerRank] || 10;
+             sellMult = p / 5;
+        }
         if (g.includes('вампир')) {
-            sellMultiplier = 0.5;
+            sellMult *= 0.5;
         }
 
         inputsContainer.querySelectorAll('.multi-sell-input').forEach(input => {
@@ -1014,9 +1088,9 @@ window.sellResources = function() {
             if (quantity > (window.playerData[`res_${resType}`] || 0)) {
                 error = true;
             }
-            totalGain += quantity * basePrice * parseFloat(input.dataset.mult);
+            totalGain += quantity * basePrice * parseFloat(input.dataset.mult) * sellMult;
         });
-        totalGain *= sellMultiplier;
+        
         if (error) {
             showCustomAlert("❌ Недостаточно ресурсов одного из типов!");
             return;
@@ -1060,13 +1134,10 @@ window.sellRunes = function(guildType) {
     } else if (g.includes('ученик')) {
         pricePerRune = 1500; // Фикс 15 бронзы
     } else if (g.includes('вампир')) {
-         if (rank === 1) {
-            pricePerRune = 1500;
-        } else {
-            const wizardPrices = [0, 2000, 3700, 6000, 9000, 13500, 18000, 22500, 27000, 32000, 45000];
-            const wizardPrice = wizardPrices[rank] || 2000;
-            pricePerRune = wizardPrice * 0.84;
-        }
+        // Вампир: Уроки стоят на 30% больше за каждые 100 Интеллекта
+        const basePrice = 1500;
+        const bonusPercent = 30 * (window.playerData.stat_int / 100);
+        pricePerRune = basePrice * (1 + bonusPercent / 100);
     }
 
     window.showCustomPrompt("Продажа Рун", `Цена за 1 📖: ${window.formatCurrency(pricePerRune)}<br>У вас: ${window.playerData.runes} 📖`, "1", (quantity) => {
@@ -1228,6 +1299,7 @@ window.executeGemService = function(operation) {
     let singleCost = 0;
     let operationText = "";
     let isIncome = false;
+    let bonuses = [];
 
     const g = (window.playerData.guild || "").toLowerCase();
     const playerRank = window.playerData.rank || 0;
@@ -1246,11 +1318,13 @@ window.executeGemService = function(operation) {
             const sellPercents = [10, 13, 15, 17, 19, 21, 23, 25, 28, 32, 35];
             const p = sellPercents[playerRank] || 10;
             sellMult = p / 5; // Отношение к базовым 5%
+            bonuses.push(`Торговцы x${sellMult.toFixed(2)}`);
         }
         singleCost = priceData.sell * sellMult;
         // Вампирский штраф
         if (g.includes('вампир')) {
             singleCost *= 0.5;
+            bonuses.push(`Вампир -50%`);
         }
         operationText = `Продать ${quantity} 💎 ${gemRank} ранга`;
         isIncome = true;
@@ -1262,8 +1336,9 @@ window.executeGemService = function(operation) {
     let totalCost = singleCost * quantity;
     if (operation === 'rent') totalCost *= rentDuration;
     const costFormatted = formatCurrency(totalCost);
+    const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
     const confirmMsg = isIncome 
-        ? `${operationText}?<br>Вы получите: ${costFormatted}`
+        ? `${operationText}?<br>Вы получите: ${costFormatted}${bonusText}`
         : `${operationText}?<br>Стоимость: ${costFormatted}`;
 
     showCustomConfirm(confirmMsg, () => {
@@ -1341,6 +1416,8 @@ function getCraftedItemBasePrice(level, grade) {
     let baseVal = 0;
     switch(grade) {
         case 'N': baseVal = 300; break; // 3 copper
+        case 'D': baseVal = 900; break; // 9 copper
+        case 'C': baseVal = 900; break; // 9 copper
         case 'DC': baseVal = 900; break; // 9 copper
         case 'B': baseVal = 1200; break; // 12 copper
         case 'A': baseVal = 3200; break; // 32 copper
@@ -1402,8 +1479,8 @@ window.sellItemsBulk = function() {
     const updateTotal = () => {
         let totalYen = 0;
         const level = parseInt(levelInput.value) || 1;
-        // Change label to "Уровень предметов"
-        levelInput.previousElementSibling.innerText = "Уровень предметов:";
+        const labelText = document.getElementById('multi-sell-label-text');
+        if (labelText) labelText.innerText = "Уровень предметов:";
         window.lastResourceSellLevel = level; // Запоминаем уровень (общий с ресурсами)
         const basePrice = getBulkItemPrice(level);
 
@@ -1496,6 +1573,7 @@ window.sellCraftedItemFromModal = function() {
 
     // 1. Получаем базовую 100% цену
     let price = getCraftedItemBasePrice(level, grade);
+    let bonuses = [];
 
     // 2. Считаем бонус от выбранных свойств
     let totalPercent = 0;
@@ -1514,14 +1592,16 @@ window.sellCraftedItemFromModal = function() {
     // 3. Применяем бонус/штраф гильдии
     const g = (window.playerData.guild || "").toLowerCase();
     let guildMultiplier = 1.0; // Базовая продажа 100%
-    if (g.includes('салага') || g.includes('громила') || g.includes('лорд войны')) guildMultiplier = 0.9;
-    if (g.includes('вампир')) guildMultiplier = 0.5;
+    if (g.includes('салага') || g.includes('громила') || g.includes('лорд войны')) { guildMultiplier = 0.9; bonuses.push(`Соратники -10%`); }
+    if (g.includes('вампир')) { guildMultiplier = 0.5; bonuses.push(`Вампир -50%`); }
     
     price = price * guildMultiplier;
     const totalYen = Math.floor(price);
+    
+    const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
 
     window.showCustomConfirm(
-        `Продать предмет (Lvl ${level}, ${grade})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(totalYen)}`,
+        `Продать предмет (Lvl ${level}, ${grade})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(totalYen)}${bonusText}`,
         () => {
             const currentMoney = window.getAllMoneyInYen();
             window.setMoneyFromYen(currentMoney + totalYen);
@@ -1581,56 +1661,94 @@ window.confirmBuySellAGrade = function() {
     const mode = modal.dataset.mode;
     const classMult = parseFloat(modal.dataset.classMult);
     const level = parseInt(document.getElementById('agrade-level-input').value) || window.playerData.level;
-    
-    // Base price A grade: 3200 * 1.1^(level - 1)
+
     const basePrice = 3200 * Math.pow(1.1, level - 1);
-    
-    // Grade Penalty Logic for Buying
-    let gradePenaltyMult = 1;
-    if (mode === 'buy') {
-        const itemGradeIdx = 4; // A grade
-        const playerGradeIdx = window.getPlayerGradeIndex(window.playerData.level);
-        const diff = Math.max(0, itemGradeIdx - playerGradeIdx);
-        gradePenaltyMult = 1 + (diff * 0.2);
-    }
+    let bonuses = [];
 
     let totalPercent = 0;
     const selectedProps = modal.querySelectorAll('.buy-prop-item.selected');
-    
+
     if (selectedProps.length === 0) {
         window.showCustomAlert("❌ Выберите хотя бы одно свойство.");
         return;
     }
-    
+
     selectedProps.forEach(el => totalPercent += parseFloat(el.dataset.percent));
+
+    let finalPrice = basePrice * classMult * (totalPercent / 100);
+
+    if (mode === 'buy') {
+        // Grade Penalty Logic for Buying
+        const itemGradeIdx = 4; // A grade
+        const playerGradeIdx = window.getPlayerGradeIndex(window.playerData.level);
+        const diff = Math.max(0, itemGradeIdx - playerGradeIdx);
+        const gradePenaltyMult = 1 + (diff * 0.2);
+        finalPrice *= gradePenaltyMult;
+        if (gradePenaltyMult > 1) bonuses.push(`Грейд +${Math.round((gradePenaltyMult-1)*100)}%`);
+
+        // Guild Bonus
+        let isWeapon = false;
+        selectedProps.forEach(el => {
+            if (el.innerText.includes("Основа оружия")) isWeapon = true;
+        });
+        const g = (window.playerData.guild || "").toLowerCase();
+        let buyMult = 1.0;
+        if (g.includes('торговц')) {
+            const rank = window.playerData.rank || 0;
+            const buyPercents = [95, 93.5, 92.5, 91.5, 90.5, 89.5, 88.5, 87.5, 86, 84, 82.5];
+            const p = buyPercents[rank] || 95;
+            buyMult = p / 100;
+            bonuses.push(`Торговцы ${Math.round((buyMult-1)*100)}%`);
+        }
+        if (isWeapon) {
+            if (g.includes('охотник на гоблинов')) { buyMult += 0.5; bonuses.push(`Охотник +50%`); }
+            else if (g.includes('охотник на ☠️')) { buyMult += 0.25; bonuses.push(`Охотник +25%`); }
+            else if (g.includes('помощник охотника')) { buyMult += 0.10; bonuses.push(`Охотник +10%`); }
+        }
+        finalPrice *= buyMult;
+    }
     
-    const finalPrice = Math.floor(basePrice * classMult * (totalPercent / 100) * gradePenaltyMult);
+    if (mode === 'sell') {
+        // Vampire Penalty for selling
+        if (g.includes('вампир')) {
+            finalPrice *= 0.5;
+            bonuses.push(`Вампир -50%`);
+        }
+        // Traders bonus is already in base price? No, traders usually have bonus on sell too.
+        // Adding Trader bonus for selling A-grade if applicable (assuming standard 5% base logic applies or custom)
+        // The prompt didn't specify Trader bonus for A-grade sell, but usually it exists. 
+        // Let's stick to the requested Vampire penalty fix for now.
+    }
+
+    const cost = Math.floor(finalPrice);
+    const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
     const currentMoney = window.getAllMoneyInYen();
 
     if (mode === 'buy') {
-        if (currentMoney >= finalPrice) {
-            window.setMoneyFromYen(currentMoney - finalPrice);
+        if (currentMoney >= cost) {
+            window.setMoneyFromYen(currentMoney - cost);
             
-            // Add to inventory
-            window.playerData.inventory.push({
-                id: Date.now(),
-                name: window.selectedAGradeItemName || "A-Grade Item",
-                grade: "A",
-                level: level,
-                buyPrice: finalPrice
-            });
+            window.showCustomPrompt("Название предмета", "Введите название:", window.selectedAGradeItemName || "A-Grade Item", (name) => {
+                window.playerData.inventory.push({
+                    id: Date.now(),
+                    name: name,
+                    grade: "A",
+                    level: level,
+                    buyPrice: cost
+                });
+                window.updateUI();
+                window.showCustomAlert(`✅ Предмет куплен! Списано: ${window.formatCurrency(cost)}${bonusText}`);
+            }, true);
 
-            window.updateUI();
-            window.showCustomAlert(`✅ Предмет куплен! Списано: ${window.formatCurrency(finalPrice)}`);
             modal.style.display = 'none';
             selectedProps.forEach(el => el.classList.remove('selected'));
         } else {
-            window.showCustomAlert(`❌ Недостаточно средств! Нужно: ${window.formatCurrency(finalPrice)}`);
+            window.showCustomAlert(`❌ Недостаточно средств! Нужно: ${window.formatCurrency(cost)}`);
         }
     } else {
-        window.setMoneyFromYen(currentMoney + finalPrice);
+        window.setMoneyFromYen(currentMoney + cost);
         window.updateUI();
-        window.showCustomAlert(`✅ Предмет продан! Получено: ${window.formatCurrency(finalPrice)}`);
+        window.showCustomAlert(`✅ Предмет продан! Получено: ${window.formatCurrency(cost)}${bonusText}`);
         modal.style.display = 'none';
         selectedProps.forEach(el => el.classList.remove('selected'));
     }
@@ -1642,6 +1760,28 @@ window.openBuyAncientModal = function() {
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
     document.getElementById('ancient-level-input').value = window.playerData.level;
+    window.updateAncientInputs(); // Initial check
+    modal.style.display = 'block';
+}
+
+window.updateAncientInputs = function() {
+    const grade = document.getElementById('ancient-grade-input').value;
+    const classSelect = document.getElementById('ancient-item-class');
+    if (!classSelect) return;
+    
+    if (grade === 'B') {
+        classSelect.value = "1.0";
+        classSelect.disabled = true;
+        classSelect.style.opacity = "0.5";
+    } else {
+        classSelect.disabled = false;
+        classSelect.style.opacity = "1";
+    }
+}
+
+window.openBuySetModal = function() {
+    const modal = document.getElementById('buy-set-modal');
+    modal.style.top = '50%';
     modal.style.display = 'block';
 }
 
@@ -1655,14 +1795,21 @@ window.openBuySetModal = function() {
 }
 
 window.buyAncientImmediate = function() {
-    const level = parseInt(document.getElementById('ancient-level-input').value) || 1;
+        const level = parseInt(document.getElementById('ancient-level-input').value) || 1;
     const grade = document.getElementById('ancient-grade-input').value;
     const type = document.getElementById('ancient-type-input').value;
+    const itemClassMult = parseFloat(document.getElementById('ancient-item-class').value) || 1.0;
     
     // New Formula: Base * 1.1^(level - 1)
     // B grade: 12 copper (1200 yen), A grade: 32 copper (3200 yen)
     let baseVal = (grade === 'B') ? 1200 : 3200;
     let basePrice = baseVal * Math.pow(1.1, level - 1);
+    let bonuses = [];
+
+    if (grade === 'A' && itemClassMult !== 1.0) {
+        basePrice *= itemClassMult;
+        bonuses.push(`Класс x${itemClassMult}`);
+    }
     
     let typeMult = 1;
     if (type === 'ancient') typeMult = 1.5;
@@ -1677,6 +1824,7 @@ window.buyAncientImmediate = function() {
     const playerGradeIdx = window.getPlayerGradeIndex(window.playerData.level);
     const diff = Math.max(0, itemGradeIdx - playerGradeIdx);
     const gradePenaltyMult = 1 + (diff * 0.2);
+    if (gradePenaltyMult > 1) bonuses.push(`Грейд +${Math.round((gradePenaltyMult-1)*100)}%`);
 
     let totalPercent = 0;
     const modal = document.getElementById('buy-ancient-modal');
@@ -1703,34 +1851,37 @@ window.buyAncientImmediate = function() {
         const buyPercents = [95, 93.5, 92.5, 91.5, 90.5, 89.5, 88.5, 87.5, 86, 84, 82.5];
         const p = buyPercents[rank] || 95;
         buyMult = p / 100;
+        bonuses.push(`Торговцы ${Math.round((buyMult-1)*100)}%`);
     }
     if (isWeapon) {
-        if (g.includes('охотник на гоблинов')) buyMult += 0.5;
-        else if (g.includes('охотник на ☠️')) buyMult += 0.25;
-        else if (g.includes('помощник охотника')) buyMult += 0.10;
+        if (g.includes('охотник на гоблинов')) { buyMult += 0.5; bonuses.push(`Охотник +50%`); }
+        else if (g.includes('охотник на ☠️')) { buyMult += 0.25; bonuses.push(`Охотник +25%`); }
+        else if (g.includes('помощник охотника')) { buyMult += 0.10; bonuses.push(`Охотник +10%`); }
     }
     
     finalPrice *= buyMult;
     const cost = Math.floor(finalPrice);
-    
+    const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
+
     window.showCustomConfirm(
-        `Купить ${type === 'ancient' ? 'Древний' : 'Первозданный'} ${grade}-grade?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}`,
+        `Купить ${type === 'ancient' ? 'Древний' : 'Первозданный'} ${grade}-grade?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}${bonusText}`,
         () => {
             const currentMoney = window.getAllMoneyInYen();
             if (currentMoney >= cost) {
                 window.setMoneyFromYen(currentMoney - cost);
-                
-                // Add to inventory
-                window.playerData.inventory.push({
-                    id: Date.now(),
-                    name: `${type === 'ancient' ? 'Древний' : 'Первозданный'} ${grade}`,
-                    grade: grade,
-                    level: level,
-                    buyPrice: cost
-                });
+                const defName = `${type === 'ancient' ? 'Древний' : 'Первозданный'} ${grade}`;
+                window.showCustomPrompt("Название предмета", "Введите название:", defName, (name) => {
+                    window.playerData.inventory.push({
+                        id: Date.now(),
+                        name: name,
+                        grade: grade,
+                        level: level,
+                        buyPrice: cost
+                    });
+                    window.updateUI();
+                    window.showCustomAlert(`✅ Предмет куплен!`);
+                }, true);
 
-                window.updateUI();
-                window.showCustomAlert(`✅ Предмет куплен!`);
                 selectedProps.forEach(el => el.classList.remove('selected'));
                 modal.style.display = 'none';
             } else {
@@ -1745,6 +1896,7 @@ window.buySetImmediate = function() {
     const grade = document.getElementById('set-grade-input').value;
     const type = document.getElementById('set-type-input').value;
     const countVal = parseInt(document.getElementById('set-count-input').value);
+    let bonuses = [];
     
     // Base price is A grade: 32 copper (3200 yen) * 1.1^(level - 1)
     const baseAPrice = 3200 * Math.pow(1.1, level - 1);
@@ -1757,6 +1909,7 @@ window.buySetImmediate = function() {
     const playerGradeIdx = window.getPlayerGradeIndex(window.playerData.level);
     const diff = Math.max(0, itemGradeIdx - playerGradeIdx);
     const gradePenaltyMult = 1 + (diff * 0.2);
+    if (gradePenaltyMult > 1) bonuses.push(`Грейд +${Math.round((gradePenaltyMult-1)*100)}%`);
 
     let countMult = 1;
     if (grade === 'S+') {
@@ -1783,26 +1936,50 @@ window.buySetImmediate = function() {
     selectedProps.forEach(el => totalPercent += parseFloat(el.dataset.percent));
     
     let finalPrice = baseAPrice * gradeMult * typeMult * countMult * (totalPercent / 100) * gradePenaltyMult;
+
+    // Guild bonuses
+    let isWeapon = false; // Set items are not weapons, but let's check just in case.
+    selectedProps.forEach(el => {
+        if (el.innerText.includes("Основа оружия")) isWeapon = true;
+    });
+    const g = (window.playerData.guild || "").toLowerCase();
+    let buyMult = 1.0;
+    if (g.includes('торговц')) {
+        const rank = window.playerData.rank || 0;
+        const buyPercents = [95, 93.5, 92.5, 91.5, 90.5, 89.5, 88.5, 87.5, 86, 84, 82.5];
+        const p = buyPercents[rank] || 95;
+        buyMult = p / 100;
+        bonuses.push(`Торговцы ${Math.round((buyMult-1)*100)}%`);
+    }
+    if (isWeapon) {
+        if (g.includes('охотник на гоблинов')) { buyMult += 0.5; bonuses.push(`Охотник +50%`); }
+        else if (g.includes('охотник на ☠️')) { buyMult += 0.25; bonuses.push(`Охотник +25%`); }
+        else if (g.includes('помощник охотника')) { buyMult += 0.10; bonuses.push(`Охотник +10%`); }
+    }
+    finalPrice *= buyMult;
+
     const cost = Math.floor(finalPrice);
-    
+    const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
+
     window.showCustomConfirm(
-        `Купить ${grade} (${type})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}`,
+        `Купить ${grade} (${type})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}${bonusText}`,
         () => {
             const currentMoney = window.getAllMoneyInYen();
             if (currentMoney >= cost) {
                 window.setMoneyFromYen(currentMoney - cost);
-                
-                // Add to inventory
-                window.playerData.inventory.push({
-                    id: Date.now(),
-                    name: `Set ${grade} (${type})`,
-                    grade: grade,
-                    level: level,
-                    buyPrice: cost
-                });
+                const defName = `Set ${grade} (${type})`;
+                window.showCustomPrompt("Название предмета", "Введите название:", defName, (name) => {
+                    window.playerData.inventory.push({
+                        id: Date.now(),
+                        name: name,
+                        grade: grade,
+                        level: level,
+                        buyPrice: cost
+                    });
+                    window.updateUI();
+                    window.showCustomAlert(`✅ Комплект куплен!`);
+                }, true);
 
-                window.updateUI();
-                window.showCustomAlert(`✅ Комплект куплен!`);
                 selectedProps.forEach(el => el.classList.remove('selected'));
                 modal.style.display = 'none';
             } else {
@@ -2092,6 +2269,11 @@ window.manageLegendaryGem = function(classType, action) {
     else if (classType === 2) cost = 4500000; // 4.5g
     else if (classType === 1) cost = 7000000; // 7g
 
+    const g = (window.playerData.guild || "").toLowerCase();
+    if (g.includes('торговц') && (action === 'insert' || action === 'remove')) {
+        cost = 0;
+    }
+
     const actionName = action === 'insert' ? "Вставить" : "Убрать";
     
     window.showCustomConfirm(
@@ -2127,6 +2309,7 @@ window.toggleBuyProperty = function(el, percent) {
 window.buyItemImmediate = function() {
     const level = parseInt(document.getElementById('buy-item-level-input').value) || 1;
     const grade = document.getElementById('buy-item-grade-input').value;
+    let bonuses = [];
     
     const basePrice = getCraftedItemBasePrice(level, grade); 
     
@@ -2135,6 +2318,7 @@ window.buyItemImmediate = function() {
     const playerGradeIdx = window.getPlayerGradeIndex(window.playerData.level);
     const diff = Math.max(0, itemGradeIdx - playerGradeIdx);
     const gradePenaltyMult = 1 + (diff * 0.2);
+    if (gradePenaltyMult > 1) bonuses.push(`Грейд +${Math.round((gradePenaltyMult-1)*100)}%`);
 
     let totalPercent = 0;
     const selectedProps = document.querySelectorAll('.buy-prop-item.selected');
@@ -2159,35 +2343,38 @@ window.buyItemImmediate = function() {
         const buyPercents = [95, 93.5, 92.5, 91.5, 90.5, 89.5, 88.5, 87.5, 86, 84, 82.5];
         const p = buyPercents[rank] || 95;
         buyMult = p / 100;
+        bonuses.push(`Торговцы ${Math.round((buyMult-1)*100)}%`);
     }
     
     if (isWeapon) {
-        if (g.includes('охотник на гоблинов')) buyMult += 0.5;
-        else if (g.includes('охотник на ☠️')) buyMult += 0.25;
-        else if (g.includes('помощник охотника')) buyMult += 0.10;
+        if (g.includes('охотник на гоблинов')) { buyMult += 0.5; bonuses.push(`Охотник +50%`); }
+        else if (g.includes('охотник на ☠️')) { buyMult += 0.25; bonuses.push(`Охотник +25%`); }
+        else if (g.includes('помощник охотника')) { buyMult += 0.10; bonuses.push(`Охотник +10%`); }
     }
     
     finalPrice *= buyMult;
     const cost = Math.floor(finalPrice);
-    
+    const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
+
     window.showCustomConfirm(
-        `Купить предмет (Lvl ${level}, ${grade})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}`,
+        `Купить предмет (Lvl ${level}, ${grade})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}${bonusText}`,
         () => {
             const currentMoney = window.getAllMoneyInYen();
             if (currentMoney >= cost) {
                 window.setMoneyFromYen(currentMoney - cost);
-                
-                // Add to inventory
-                window.playerData.inventory.push({
-                    id: Date.now(),
-                    name: `Item ${grade}-Grade`,
-                    grade: grade,
-                    level: level,
-                    buyPrice: cost
-                });
+                const defName = `Item ${grade}-Grade`;
+                window.showCustomPrompt("Название предмета", "Введите название:", defName, (name) => {
+                    window.playerData.inventory.push({
+                        id: Date.now(),
+                        name: name,
+                        grade: grade,
+                        level: level,
+                        buyPrice: cost
+                    });
+                    window.updateUI();
+                    window.showCustomAlert(`✅ Предмет куплен!`);
+                }, true);
 
-                window.updateUI();
-                window.showCustomAlert(`✅ Предмет куплен!`);
                 selectedProps.forEach(el => el.classList.remove('selected'));
             } else {
                 window.showCustomAlert(`❌ Недостаточно средств!`);
@@ -2210,11 +2397,28 @@ window.confirmSellLegendaryGem = function() {
     else if (classType === 2) baseVal = 4500000 * 0.05; // 4.5g
     else if (classType === 1) baseVal = 7000000 * 0.05; // 7g
     
-    const sellPrice = baseVal * Math.pow(1.1, level);
+    const g = (window.playerData.guild || "").toLowerCase();
+    const playerRank = window.playerData.rank || 0;
+    let sellMult = 1.0;
+    let bonuses = [];
+
+    if (g.includes('торговц')) {
+         const sellPercents = [10, 13, 15, 17, 19, 21, 23, 25, 28, 32, 35];
+         const p = sellPercents[playerRank] || 10;
+         sellMult = p / 5;
+         bonuses.push(`Торговцы x${sellMult.toFixed(2)}`);
+    }
+    if (g.includes('вампир')) {
+        sellMult *= 0.5;
+        bonuses.push(`Вампир -50%`);
+    }
+
+    const sellPrice = baseVal * Math.pow(1.1, level) * sellMult;
     const totalYen = Math.floor(sellPrice);
+    const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
 
     window.showCustomConfirm(
-        `Продать Лег. камень (Кл. ${classType}, Ур. ${level})?<br>Цена: ${window.formatCurrency(totalYen)}`,
+        `Продать Лег. камень (Кл. ${classType}, Ур. ${level})?<br>Цена: ${window.formatCurrency(totalYen)}${bonusText}`,
         () => {
             const currentMoney = window.getAllMoneyInYen();
             window.setMoneyFromYen(currentMoney + totalYen);
@@ -2253,6 +2457,7 @@ window.openCraftModal = function() {
 window.craftItemFromModal = function() {
     const level = parseInt(document.getElementById('modal-sell-level').value) || 1;
     const grade = document.getElementById('modal-sell-grade').value;
+    let bonuses = [];
     
     // Base Price
     let price = getCraftedItemBasePrice(level, grade);
@@ -2276,6 +2481,7 @@ window.craftItemFromModal = function() {
     const playerGradeIdx = window.getPlayerGradeIndex(window.playerData.level);
     const diff = Math.max(0, itemGradeIdx - playerGradeIdx);
     const gradePenaltyMult = 1 + (diff * 0.2);
+    if (gradePenaltyMult > 1) bonuses.push(`Грейд +${Math.round((gradePenaltyMult-1)*100)}%`);
 
     // Guild Bonuses (Same as Buy)
     const g = (window.playerData.guild || "").toLowerCase();
@@ -2285,39 +2491,42 @@ window.craftItemFromModal = function() {
         const buyPercents = [95, 93.5, 92.5, 91.5, 90.5, 89.5, 88.5, 87.5, 86, 84, 82.5];
         const p = buyPercents[rank] || 95;
         buyMult = p / 100;
+        bonuses.push(`Торговцы ${Math.round((buyMult-1)*100)}%`);
     }
     if (isWeapon) {
-        if (g.includes('охотник на гоблинов')) buyMult += 0.5;
-        else if (g.includes('охотник на ☠️')) buyMult += 0.25;
-        else if (g.includes('помощник охотника')) buyMult += 0.10;
+        if (g.includes('охотник на гоблинов')) { buyMult += 0.5; bonuses.push(`Охотник +50%`); }
+        else if (g.includes('охотник на ☠️')) { buyMult += 0.25; bonuses.push(`Охотник +25%`); }
+        else if (g.includes('помощник охотника')) { buyMult += 0.10; bonuses.push(`Охотник +10%`); }
     }
 
     // Crafting Multiplier (150%)
     let craftMult = 1.5;
-    if (g.includes('салага')) craftMult = 1.3;
-    if (g.includes('громила')) craftMult = 1.15;
-    if (g.includes('лорд войны')) craftMult = 1.05;
+    if (g.includes('салага')) { craftMult = 1.3; bonuses.push(`Соратники (130%)`); }
+    else if (g.includes('громила')) { craftMult = 1.15; bonuses.push(`Соратники (115%)`); }
+    else if (g.includes('лорд войны')) { craftMult = 1.05; bonuses.push(`Соратники (105%)`); }
 
     const finalPrice = Math.floor(price * (totalPercent / 100) * gradePenaltyMult * buyMult * craftMult);
-
+    const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
+    
     window.showCustomConfirm(
-        `Скрафтить предмет (Lvl ${level}, ${grade})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(finalPrice)}`,
+        `Скрафтить предмет (Lvl ${level}, ${grade})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(finalPrice)}${bonusText}`,
         () => {
             const currentMoney = window.getAllMoneyInYen();
             if (currentMoney >= finalPrice) {
                 window.setMoneyFromYen(currentMoney - finalPrice);
-                
-                // Add to inventory
-                window.playerData.inventory.push({
-                    id: Date.now(),
-                    name: `Crafted ${grade}-Grade`,
-                    grade: grade,
-                    level: level,
-                    buyPrice: finalPrice
-                });
+                const defName = `Crafted ${grade}-Grade`;
+                window.showCustomPrompt("Название предмета", "Введите название:", defName, (name) => {
+                    window.playerData.inventory.push({
+                        id: Date.now(),
+                        name: name,
+                        grade: grade,
+                        level: level,
+                        buyPrice: finalPrice
+                    });
+                    window.updateUI();
+                    window.showCustomAlert(`✅ Предмет скрафчен!`);
+                }, true);
 
-                window.updateUI();
-                window.showCustomAlert(`✅ Предмет скрафчен!`);
                 document.getElementById('sell-craft-modal').style.display = 'none';
                 selectedProps.forEach(el => el.classList.remove('selected'));
             } else {
@@ -2339,6 +2548,7 @@ window.confirmMeltItem = function() {
     const level = parseInt(document.getElementById('melt-level').value) || 1;
     const grade = document.getElementById('melt-grade').value;
     const type = document.getElementById('melt-type').value;
+    let bonuses = [];
 
     // Calculate "Buy Price" to determine melt value
     // Base
@@ -2374,15 +2584,18 @@ window.confirmMeltItem = function() {
         const vit = window.playerData.stat_vit || 0;
         const bonusMult = 1 + (Math.floor(vit / 100) * 0.02);
         finalMeltValue = Math.floor(meltValue * bonusMult);
+        if (bonusMult > 1) bonuses.push(`Торговцы +${Math.round((bonusMult-1)*100)}%`);
     }
+    const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
 
     window.showCustomConfirm(
-        `Расплавить предмет?<br>Получите: ${window.formatCurrency(finalMeltValue)}`,
+        `Расплавить предмет?<br>Получите: ${window.formatCurrency(finalMeltValue)}${bonusText}`,
         () => {
             const currentMoney = window.getAllMoneyInYen();
             window.setMoneyFromYen(currentMoney + finalMeltValue);
             window.updateUI();
-            document.getElementById('melt-item-modal').style.display = 'none';
+            const m = document.getElementById('melt-item-modal');
+            if(m) m.style.display = 'none';
             window.showCustomAlert(`✅ Предмет расплавлен!`);
         }
     );

@@ -398,6 +398,12 @@ window.updateUI = function() {
     
     document.getElementById('input-kills').value = window.playerData.kills;
     document.getElementById('input-elites-solo').value = window.playerData.elites_solo;
+    
+    const baseKillsInput = document.getElementById('input-base-kills');
+    const baseElitesInput = document.getElementById('input-base-elites');
+    baseKillsInput.value = window.playerData.base_kills || 0;
+    baseElitesInput.value = window.playerData.base_elites || 0;
+    
     document.getElementById('input-bosses').value = window.playerData.bosses;
     document.getElementById('input-gobs-solo').value = window.playerData.gobs_solo;
     document.getElementById('input-gobs-assist').value = window.playerData.gobs_assist;
@@ -557,7 +563,8 @@ window.savePlayerData = function() {
         }
     }
     
-    // base_kills и base_elites удалены из HTML, не читаем их
+    const baseKills = getVal('input-base-kills'); if (baseKills !== null) window.playerData.base_kills = baseKills;
+    const baseElites = getVal('input-base-elites'); if (baseElites !== null) window.playerData.base_elites = baseElites;
     
     const gg = getVal('input-gold-g', true); if (gg !== null) window.playerData.gold_g = gg;
     const gs = getVal('input-gold-s', true); if (gs !== null) window.playerData.gold_s = gs;
@@ -613,6 +620,7 @@ window.savePlayerData = function() {
     window.checkGuildProgression(); // Проверка на повышение
     window.saveToStorage();
     // checkGuildExitConditions теперь также проверяет аренду, так как она вызывается здесь
+    window.initInputTooltips(); // Инициализация подсказок для длинных чисел
 
     window.updateUI();
 }
@@ -623,12 +631,13 @@ window.renderLearnedSkillsWidget = function() {
     if (!container || !content) return;
 
     const skills = window.playerData.learnedSkills || {};
+    container.style.display = 'block';
+    
     if (Object.keys(skills).length === 0) {
-        container.style.display = 'none';
+        content.innerHTML = '<div style="color: #888; font-size: 0.7rem; text-align: center;">Нет навыков</div>';
         return;
     }
 
-    container.style.display = 'block';
     let html = '';
     for (const [skill, runes] of Object.entries(skills)) {
         html += `<div style="margin-bottom: 4px; line-height: 1.2;"><span style="color: #fff; font-weight: bold;">${skill}</span><br><span style="color: #888; font-size: 0.7rem;">${runes.join(', ')}</span></div>`;
@@ -640,14 +649,15 @@ window.renderInventoryWidget = function() {
     const container = document.getElementById('inventory-widget');
     const content = document.getElementById('inventory-content');
     if (!container || !content) return;
-
+    
     const inv = window.playerData.inventory || [];
+    container.style.display = 'block';
+    
     if (inv.length === 0) {
-        container.style.display = 'none';
+        content.innerHTML = '<div style="color: #888; font-size: 0.7rem; text-align: center;">Пусто</div>';
         return;
     }
 
-    container.style.display = 'block';
     let html = '';
     inv.forEach(item => {
         html += `<div style="margin-bottom: 4px; line-height: 1.2; border-bottom: 1px dashed #333; padding-bottom: 2px;">
@@ -656,6 +666,49 @@ window.renderInventoryWidget = function() {
         </div>`;
     });
     content.innerHTML = html;
+}
+
+window.initInputTooltips = function() {
+    const inputs = document.querySelectorAll('.char-input');
+    let tooltip = document.getElementById('input-tooltip');
+    
+    if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.id = 'input-tooltip';
+        tooltip.style.position = 'fixed';
+        tooltip.style.background = 'rgba(0, 0, 0, 0.9)';
+        tooltip.style.border = '1px solid #d4af37';
+        tooltip.style.color = '#fff';
+        tooltip.style.padding = '2px 5px';
+        tooltip.style.fontSize = '0.8rem';
+        tooltip.style.borderRadius = '3px';
+        tooltip.style.pointerEvents = 'none';
+        tooltip.style.zIndex = '10000';
+        tooltip.style.display = 'none';
+        document.body.appendChild(tooltip);
+    }
+
+    inputs.forEach(input => {
+        input.onmouseenter = function(e) {
+            if (this.value.length > 3) { // Показываем только если число длинное
+                // Форматируем число с разделителями (точками)
+                const val = this.value.replace(/\D/g, ''); // Убираем все нецифровые символы на всякий случай
+                const formatted = val.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                
+                tooltip.innerText = formatted;
+                tooltip.style.display = 'block';
+                tooltip.style.top = (e.clientY - 25) + 'px';
+                tooltip.style.left = (e.clientX + 10) + 'px';
+            }
+        };
+        input.onmousemove = function(e) {
+            tooltip.style.top = (e.clientY - 25) + 'px';
+            tooltip.style.left = (e.clientX + 10) + 'px';
+        };
+        input.onmouseleave = function() {
+            tooltip.style.display = 'none';
+        };
+    });
 }
 
 window.filterItems = function(inputElement) {

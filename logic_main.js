@@ -20,6 +20,7 @@ window.onload = function() {
     // Восстановление состояния
     window.restorePanels();
     window.updateUI();
+    window.initInputTooltips();
     window.renderMenu('main', 'ГЛАВНАЯ', true);
 
     // Настройка и попытка автозапуска музыки
@@ -98,7 +99,7 @@ window.onload = function() {
     startRandomGlitches();
 
     // Инициализация перетаскивания для всех модальных окон
-    const draggableIds = ['text-window', 'death-modal', 'skill-calc-modal', 'exp-calc-modal', 'difficulty-calc-modal', 'zaken-buy-modal', 'sell-craft-modal', 'gem-service-modal', 'multi-sell-modal', 'custom-confirm-modal', 'custom-prompt-modal', 'add-money-modal', 'sell-leg-gem-modal', 'buy-ancient-modal', 'buy-set-modal', 'buy-sell-agrade-modal', 'melt-item-modal'];
+    const draggableIds = ['text-window', 'death-modal', 'skill-calc-modal', 'exp-calc-modal', 'difficulty-calc-modal', 'zaken-buy-modal', 'sell-craft-modal', 'gem-service-modal', 'multi-sell-modal', 'custom-confirm-modal', 'custom-prompt-modal', 'add-money-modal', 'sell-leg-gem-modal', 'buy-ancient-modal', 'buy-set-modal', 'buy-sell-agrade-modal', 'melt-item-modal', 'learned-skills-widget', 'inventory-widget'];
     draggableIds.forEach(id => {
         window.makeDraggable(document.getElementById(id));
     });

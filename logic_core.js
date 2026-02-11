@@ -125,6 +125,13 @@ window.setMoneyFromYen = function(totalYen) {
     }
 }
 
+window.addYen = function(yenAmount) {
+    if (isNaN(yenAmount) || yenAmount === 0) return;
+    const currentYen = window.getAllMoneyInYen();
+    window.setMoneyFromYen(currentYen + Math.floor(yenAmount));
+    // setMoneyFromYen уже включает звук, так что дополнительный вызов не нужен
+}
+
 window.getZakenPrice = function(level) {
     if (level < 20) return 12000;
     if (level < 25) return 12000;
@@ -199,7 +206,7 @@ window.closeWindow = function() {
     document.getElementById('text-window').style.display = 'none'; 
 }
 
-window.showCustomPrompt = function(title, text, defaultValue, onOk) {
+window.showCustomPrompt = function(title, text, defaultValue, onOk, isText = false) {
     const modal = document.getElementById('custom-prompt-modal');
     // Сброс позиции
     modal.style.top = '50%';
@@ -209,6 +216,12 @@ window.showCustomPrompt = function(title, text, defaultValue, onOk) {
     document.getElementById('prompt-title').innerText = title;
     document.getElementById('prompt-text').innerHTML = text;
     const input = document.getElementById('prompt-input');
+    
+    if (isText) {
+        input.type = 'text';
+    } else {
+        input.type = 'number';
+    }
     input.value = defaultValue;
 
     const okBtn = document.getElementById('prompt-ok-btn');
@@ -217,7 +230,10 @@ window.showCustomPrompt = function(title, text, defaultValue, onOk) {
     const close = () => modal.style.display = 'none';
 
     okBtn.onclick = () => {
-        const value = parseInt(input.value);
+        let value = input.value;
+        if (!isText) {
+            value = parseInt(value);
+        }
         if (onOk) {
             onOk(value);
         }
