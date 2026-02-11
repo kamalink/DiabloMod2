@@ -627,3 +627,10 @@ th { color: #d4af37; }
 .buy-prop-item.selected {
     background: rgba(102, 255, 102, 0.2); color: #66ff66; text-shadow: 0 0 5px #66ff66; border: 1px solid #66ff66;
 }
+.sell-prop-item {
+    cursor: pointer; padding: 2px 5px; border-radius: 3px; transition: all 0.2s; display: inline-block;
+}
+.sell-prop-item:hover { background: rgba(255, 255, 255, 0.1); }
+.sell-prop-item.selected {
+    background: rgba(255, 102, 102, 0.2); color: #ff6666; text-shadow: 0 0 5px #ff6666; border: 1px solid #ff6666;
+}

@@ -39,9 +39,27 @@ window.economyData = {
             content: `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 10px; border: 1px solid #444;">
                     <div style="display:flex; flex-direction:column; gap:5px;">
-                        <label>Уровень: <input type="number" id="buy-item-level-input" value="1" min="1" style="width: 50px; padding: 2px; background: #000; border: 1px solid #444; color: #fff; text-align: center;"></label>
+                        <label>Уровень: 
+                            <select id="buy-item-level-input" style="background: #000; color: #fff; border: 1px solid #444; width: 70px; cursor: pointer;">
+                                <option value="5">1-5</option>
+                                <option value="10">6-10</option>
+                                <option value="15">11-15</option>
+                                <option value="20">16-20</option>
+                                <option value="25">21-25</option>
+                                <option value="30">26-30</option>
+                                <option value="35">31-35</option>
+                                <option value="40">36-40</option>
+                                <option value="45">41-45</option>
+                                <option value="50">46-50</option>
+                                <option value="55">51-55</option>
+                                <option value="60">56-60</option>
+                                <option value="65">61-65</option>
+                                <option value="69">66-69</option>
+                                <option value="70">70</option>
+                            </select>
+                        </label>
                         <label>Грейд: 
-                            <select id="buy-item-grade-input" style="background: #000; color: #fff; border: 1px solid #444; width: 60px;">
+                            <select id="buy-item-grade-input" style="background: #000; color: #fff; border: 1px solid #444; width: 60px; cursor: pointer;">
                                 <option value="N">N</option>
                                 <option value="DC">D/C</option>
                                 <option value="B">B</option>
@@ -96,7 +114,64 @@ window.economyData = {
             id: 'smith_only', 
             title: 'Кузница', 
             content:  `
-                <div class="craft-row"><p>🔹 Продажа Крафта — 100%</p><button class="craft-btn buy" onclick="openSellCraftedModal()">Продать предмет</button></div>
+                 <div style="background: rgba(0,0,0,0.3); padding: 10px; border: 1px solid #333; margin-bottom: 15px;">
+                    <p style="color: #d4af37; margin: 0 0 10px 0; text-align: center;">🔹 Продажа Крафта — 100%</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display:flex; flex-direction:column; gap:5px;">
+                            <label>Уровень: 
+                                <select id="sell-item-level-input" style="background: #000; color: #fff; border: 1px solid #444; width: 70px; cursor: pointer;">
+                                    <option value="5">1-5</option>
+                                    <option value="10">6-10</option>
+                                    <option value="15">11-15</option>
+                                    <option value="20">16-20</option>
+                                    <option value="25">21-25</option>
+                                    <option value="30">26-30</option>
+                                    <option value="35">31-35</option>
+                                    <option value="40">36-40</option>
+                                    <option value="45">41-45</option>
+                                    <option value="50">46-50</option>
+                                    <option value="55">51-55</option>
+                                    <option value="60">56-60</option>
+                                    <option value="65">61-65</option>
+                                    <option value="69">66-69</option>
+                                    <option value="70">70</option>
+                                </select>
+                            </label>
+                            <label>Грейд: 
+                                <select id="sell-item-grade-input" style="background: #000; color: #fff; border: 1px solid #444; width: 60px; cursor: pointer;">
+                                    <option value="N">N</option>
+                                    <option value="DC">D/C</option>
+                                    <option value="B">B</option>
+                                    <option value="A">A</option>
+                                    <option value="S">S</option>
+                                    <option value="S+">S+</option>
+                                    <option value="Spectrum">Spec</option>
+                                </select>
+                            </label>
+                        </div>
+                        <button class="craft-btn smith-sell" onclick="sellCraftedItemImmediate()">ПРОДАТЬ</button>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 10px;">
+                        <div style="flex: 1 1 45%; background: rgba(255, 255, 255, 0.05); padding: 5px; border-radius: 3px;">
+                            <div style="font-size: 0.75rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 40)">Основа оружия (40%)</span></div>
+                        </div>
+                        <div style="flex: 1 1 45%; background: rgba(255, 255, 255, 0.05); padding: 5px; border-radius: 3px;">
+                            <div style="font-size: 0.75rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 30)">Основа брони (30%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 30)">Живучесть (30%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 30)">Осн.Хар. (30%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 30)">Гнездо (30%)</span></div>
+                        </div>
+                        <div style="flex: 1 1 45%; background: rgba(255, 255, 255, 0.05); padding: 5px; border-radius: 3px;">
+                            <div style="font-size: 0.75rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 20)">Восстановление (20%)</span></div>
+                        </div>
+                        <div style="flex: 1 1 45%; background: rgba(255, 255, 255, 0.05); padding: 5px; border-radius: 3px;">
+                            <div style="font-size: 0.75rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 15)">Все сопр. (15%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 15)">Крит урон (15%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 15)">Крит шанс (15%)</span></div>
+                        </div>
+                        <div style="flex: 1 1 100%; background: rgba(255, 255, 255, 0.05); padding: 5px; border-radius: 3px;">
+                            <div style="font-size: 0.75rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Не Осн.Хар. (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Броня (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Здоровье (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Ур. в биже (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Скор. атак (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Гнездо (бр) (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Стихия (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Умение (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">+Ур. скил (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">КДР/Рес (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Область (10%)</span></div>
+                        </div>
+                        <div style="flex: 1 1 100%; background: rgba(255, 255, 255, 0.05); padding: 5px; border-radius: 3px;">
+                            <div style="font-size: 0.75rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 5)">Одно сопрот. (5%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 5)">Скор. бега (5%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 5)">Урон уменьш (5%)</span></div>
+                        </div>
+                    </div>
+                </div>
                 <p>🔹 Крафт предмета — 150% от цены покупки (см. "Предметы и цены").</p>
                 <p>🔹 Расплавление предмета — 4.4% от его цены.</p>
                 <div class="craft-row" style="border-top: 1px solid #333; padding-top: 10px; margin-top: 10px;">

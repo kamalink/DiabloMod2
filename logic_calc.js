@@ -1326,107 +1326,51 @@ function getCraftedItemBasePrice(level, grade) {
     return finalPrice5 * 20;
 }
 
-window.openSellCraftedModal = function() {
-    const modal = document.getElementById('sell-craft-modal');
-
-    // Сброс позиции
-    modal.style.top = '50%';
-    modal.style.left = '50%';
-    modal.style.transform = 'translate(-50%, -50%)';
-
-    const propertiesContainer = document.getElementById('craft-sell-properties');
-
-    // Данные о свойствах, взятые из раздела "Покупка предметов"
-    const itemPropertiesData = [
-        { percent: 40, items: ["Основа оружия"] },
-        { percent: 30, items: ["Основа брони", "Живучесть", "Осн.Хар.", "Гнездо (голова/оруж)"] },
-        { percent: 20, items: ["Восстановление"] },
-        { percent: 15, items: ["Все сопротивления", "Крит урон", "Крит шанс"] },
-        { percent: 10, items: ["Не Осн.Хар.", "Броня", "Здоровье", "Ур. в бижутерии", "Скор. атак", "Гнездо (броня)", "Урон стихии", "Урон умения", "+ Ур. к скилу", "Сниж. затрат / КДР", "Урон по области"]},
-        { percent: 5, items: ["Одно сопрот.", "Скор. передвижения", "Урон уменьшен"] }
-    ];
-
-    // Генерируем чекбоксы для свойств
-    propertiesContainer.innerHTML = '';
-    itemPropertiesData.forEach(group => {
-        group.items.forEach(item => {
-            const label = document.createElement('label');
-            label.style.fontSize = '0.8rem';
-            label.innerHTML = `<input type="checkbox" class="craft-prop-check" data-percent="${group.percent}" onchange="calculateCraftedSellPrice()"> ${item} (+${group.percent}%)`;
-            propertiesContainer.appendChild(label);
-        });
-    });
-
-    // Отображаем бонус гильдии к продаже
-    const g = (window.playerData.guild || "").toLowerCase();
-    let guildBonusText = "Продажа: 100%";
-    let guildBonusColor = "#fff";
-    if (g.includes('салага') || g.includes('громила') || g.includes('лорд войны')) { 
-        guildBonusText = "Продажа: 90%"; 
-        guildBonusColor = "#66ff66"; 
-    }
-    else if (g.includes('лорд войны')) { guildBonusText = "Продажа: 90%"; guildBonusColor = "#66ff66"; }
-    const bonusSpan = document.getElementById('craft-sell-guild-bonus');
-    bonusSpan.innerText = `(${guildBonusText})`;
-    bonusSpan.style.color = guildBonusColor;
-
-    // Сбрасываем значения и показываем окно
-    document.getElementById('craft-sell-level').value = window.lastCraftSellLevel || 1;
-    document.getElementById('craft-sell-grade').value = 'N';
-    calculateCraftedSellPrice();
-    modal.style.display = 'block';
+ window.toggleSellProperty = function(el, percent) {
+    el.classList.toggle('selected');
+    el.dataset.percent = percent;
 }
 
-window.calculateCraftedSellPrice = function() {
-    const level = parseInt(document.getElementById('craft-sell-level').value) || 1;
-    window.lastCraftSellLevel = level;
-    const grade = document.getElementById('craft-sell-grade').value;
-
+window.sellCraftedItemImmediate = function() {
+    const level = parseInt(document.getElementById('sell-item-level-input').value) || 1;
+    const grade = document.getElementById('sell-item-grade-input').value;
+    
     // 1. Получаем базовую 100% цену
     let price = getCraftedItemBasePrice(level, grade);
 
     // 2. Считаем бонус от выбранных свойств
-    let propertiesBonusPercent = 0;
-    document.querySelectorAll('.craft-prop-check:checked').forEach(checkbox => {
-        propertiesBonusPercent += parseFloat(checkbox.dataset.percent);
+    let totalPercent = 0;
+    const selectedProps = document.querySelectorAll('.sell-prop-item.selected');
+    if (selectedProps.length === 0) {
+        window.showCustomAlert("❌ Выберите хотя бы одно свойство.");
+        return;
+    }
+    
+    selectedProps.forEach(el => {
+        totalPercent += parseFloat(el.dataset.percent);
     });
 
-    price = price * (propertiesBonusPercent / 100);
+    price = price * (totalPercent / 100);
 
     // 3. Применяем бонус/штраф гильдии
     const g = (window.playerData.guild || "").toLowerCase();
     let guildMultiplier = 1.0; // Базовая продажа 100%
     if (g.includes('салага') || g.includes('громила') || g.includes('лорд войны')) guildMultiplier = 0.9;
-    // Вампирский штраф
-    if (g.includes('вампир')) {
-        guildMultiplier = 0.5;
-    }
+    if (g.includes('вампир')) guildMultiplier = 0.5;
+    
     price = price * guildMultiplier;
+    const totalYen = Math.floor(price);
 
-    // 4. Отображаем результат
-    const totalDisplay = document.getElementById('craft-sell-total');
-    totalDisplay.innerHTML = `Итоговая цена: ${window.formatCurrency(Math.floor(price))}`;
-    totalDisplay.dataset.totalYen = Math.floor(price); // Сохраняем для кнопки
-}
-
-window.confirmSellCraftedItem = function() {
-    let totalYen = parseInt(document.getElementById('craft-sell-total').dataset.totalYen) || 0;
-
-    if (totalYen <= 0) {
-        showCustomAlert("❌ Цена предмета равна нулю.");
-        return;
-    }
-    // Доп. проверка на вампира, т.к. цена уже посчитана с бонусом
-    // Но если логика поменяется, лучше пересчитать тут
-    // const g = (window.playerData.guild || "").toLowerCase();
-    // if (g.includes('вампир')) totalYen *= 0.5;
-
-    const currentMoney = getAllMoneyInYen();
-    setMoneyFromYen(currentMoney + totalYen);
-    updateUI();
-
-    document.getElementById('sell-craft-modal').style.display = 'none';
-    showCustomAlert(`✅ Предмет продан! Получено: ${window.formatCurrency(totalYen)}`);
+    window.showCustomConfirm(
+        `Продать предмет (Lvl ${level}, ${grade})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(totalYen)}`,
+        () => {
+            const currentMoney = window.getAllMoneyInYen();
+            window.setMoneyFromYen(currentMoney + totalYen);
+            window.updateUI();
+            window.showCustomAlert(`✅ Предмет продан! Получено: ${window.formatCurrency(totalYen)}`);
+            selectedProps.forEach(el => el.classList.remove('selected'));
+        }
+    );
 }
 
 window.openAddMoneyModal = function() {
