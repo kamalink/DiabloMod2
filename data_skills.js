@@ -13,7 +13,7 @@ window.skillsData = {
             <small>(сюжетные 👹 — только 1 раз за акт)</small></p>
             <hr>
             <p style="color: #ff4444;">❗ Чтобы узнать количество убитых, нужно перезайти в мир. Ищи 💀☠️ в статистике аккаунта.</p>
-            <p style="color: #66ff66;">❗ Можно обменять 1.5 📖 на 1 ⌛</p>
+            <p style="color: #66ff66;">❗ Можно обменять 1.5 📖 на 1 ⌛ <button class="calc-nav-btn" onclick="exchangeRunesForPara()" style="padding: 2px 8px; font-size: 0.7rem;">ОБМЕНЯТЬ</button></p>
             <div style="background: rgba(255,255,255,0.05); padding: 10px; border: 1px solid #444;">
                 <strong>Пример:</strong> 375 💀 и 14 ☠️<br>
                 375 / 100 + 14 / 10 = <b>5.15 📖</b>

@@ -1116,6 +1116,8 @@ window.resetProgress = function() {
                 lvl70_portal: "", active_rents: [], forgottenSkills: {},
                 professions: { 1: false, 2: false, 3: false }, claimed_torments: [], claimed_ranks: [],
                 refused_wizard_promotion: false,
+                difficulty: "Высокий", // Текущий уровень сложности
+                
                 
                 // Куб и навыки
                 penta_1: false, penta_2: false, penta_3: false,
@@ -1637,4 +1639,189 @@ window.applyDifficulty = function() {
     window.updateUI();
     document.getElementById('difficulty-calc-modal').style.display = 'none';
     window.showCustomAlert(`✅ Уровень сложности обновлен: ${tier}`);
+}
+
+// --- НОВЫЕ ФУНКЦИИ (ПОКУПКА ЛОКАЦИЙ, ОБМЕН, КАМНИ) ---
+
+const npCosts = {
+    "Высокий": 230000, "Эксперт": 290000, "Мастер": 370000,
+    "T1": 440000, "T2": 550000, "T3": 690000, "T4": 860000,
+    "T5": 1080000, "T6": 1350000, "T7": 1550000, "T8": 1790000,
+    "T9": 2060000, "T10": 2360000, "T11": 2720000, "T12": 3290000,
+    "T13": 3610000, "T14": 3980000, "T15": 4380000, "T16": 4810000
+};
+
+window.buyLocationEntry = function(type) {
+    const diff = window.playerData.difficulty || "Высокий";
+    let baseCost = npCosts[diff] || 440000;
+    let cost = baseCost;
+    let name = "НП Локация";
+
+    if (type === 'act') {
+        cost = baseCost * 0.5;
+        name = "Актовая Локация";
+    } else if (type === 'vp') {
+        cost = baseCost * 2.5;
+        name = "Великий Портал";
+    }
+
+    // Охотник на гоблинов: НП на 20% дешевле (только НП и Акт, ВП обычно не скидывается, но по логике "от НП" может и скидываться. Оставим скидку на базу)
+    const g = (window.playerData.guild || "").toLowerCase();
+    if (g.includes('охотник на гоблинов') && type !== 'vp') {
+        cost *= 0.8;
+    }
+
+    window.showCustomConfirm(
+        `Купить вход: ${name} (${diff})?<br>Стоимость: ${window.formatCurrency(Math.floor(cost))}`,
+        () => {
+            const currentMoney = window.getAllMoneyInYen();
+            if (currentMoney >= cost) {
+                window.setMoneyFromYen(currentMoney - Math.floor(cost));
+                window.updateUI();
+                window.showCustomAlert(`✅ Вход оплачен!`);
+            } else {
+                window.showCustomAlert(`❌ Недостаточно средств!`);
+            }
+        }
+    );
+}
+
+window.exchangeRunesForPara = function() {
+    window.showCustomPrompt("Обмен Рун на Парагон", "Курс: 1.5 📖 = 1 ⏳<br>Сколько ⏳ хотите получить?", "1", (amount) => {
+        if (isNaN(amount) || amount <= 0) return;
+        const cost = amount * 1.5;
+        
+        if (window.playerData.runes >= cost) {
+            window.playerData.runes = parseFloat((window.playerData.runes - cost).toFixed(2));
+            window.playerData.para = parseFloat((window.playerData.para + amount).toFixed(2));
+            window.saveToStorage();
+            window.updateUI();
+            window.showCustomAlert(`✅ Обменяно ${cost} 📖 на ${amount} ⏳`);
+        } else {
+            window.showCustomAlert(`❌ Недостаточно рун! Нужно: ${cost}`);
+        }
+    });
+}
+
+window.manageLegendaryGem = function(classType, action) {
+    let cost = 0;
+    if (classType === 3) cost = 1500000; // 1.5g
+    else if (classType === 2) cost = 4500000; // 4.5g
+    else if (classType === 1) cost = 7000000; // 7g
+
+    const actionName = action === 'insert' ? "Вставить" : "Убрать";
+    
+    window.showCustomConfirm(
+        `${actionName} Легендарный камень (${classType} кл.)?<br>Стоимость: ${window.formatCurrency(cost)}`,
+        () => {
+            const currentMoney = window.getAllMoneyInYen();
+            if (currentMoney >= cost) {
+                window.setMoneyFromYen(currentMoney - cost);
+                window.updateUI();
+                window.showCustomAlert(`✅ Оплачено: ${window.formatCurrency(cost)}`);
+            } else {
+                window.showCustomAlert(`❌ Недостаточно средств!`);
+            }
+        }
+    );
+}
+
+window.sellLegendaryGem = function() {
+    const modal = document.getElementById('sell-leg-gem-modal');
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+    modal.style.display = 'block';
+}
+
+// --- ПОКУПКА ПРЕДМЕТОВ (MODAL) ---
+
+window.toggleBuyProperty = function(el, percent) {
+    el.classList.toggle('selected');
+    el.dataset.percent = percent;
+}
+
+window.buyItemImmediate = function() {
+    const level = parseInt(document.getElementById('buy-item-level-input').value) || 1;
+    const grade = document.getElementById('buy-item-grade-input').value;
+    
+    const basePrice = getCraftedItemBasePrice(level, grade); 
+    
+    let totalPercent = 0;
+    const selectedProps = document.querySelectorAll('.buy-prop-item.selected');
+    if (selectedProps.length === 0) {
+        window.showCustomAlert("❌ Выберите хотя бы одно свойство.");
+        return;
+    }
+    
+    let isWeapon = false;
+    selectedProps.forEach(el => {
+        totalPercent += parseFloat(el.dataset.percent);
+        if (el.innerText.includes("Основа оружия")) isWeapon = true;
+    });
+    
+    let finalPrice = basePrice * (totalPercent / 100);
+    
+    const g = (window.playerData.guild || "").toLowerCase();
+    let buyMult = 1.0;
+    
+    if (g.includes('торговц')) {
+        const rank = window.playerData.rank || 0;
+        const buyPercents = [95, 93.5, 92.5, 91.5, 90.5, 89.5, 88.5, 87.5, 86, 84, 82.5];
+        const p = buyPercents[rank] || 95;
+        buyMult = p / 100;
+    }
+    
+    if (isWeapon) {
+        if (g.includes('охотник на гоблинов')) buyMult += 0.5;
+        else if (g.includes('охотник на ☠️')) buyMult += 0.25;
+        else if (g.includes('помощник охотника')) buyMult += 0.10;
+    }
+    
+    finalPrice *= buyMult;
+    const cost = Math.floor(finalPrice);
+    
+    window.showCustomConfirm(
+        `Купить предмет (Lvl ${level}, ${grade})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}`,
+        () => {
+            const currentMoney = window.getAllMoneyInYen();
+            if (currentMoney >= cost) {
+                window.setMoneyFromYen(currentMoney - cost);
+                window.updateUI();
+                window.showCustomAlert(`✅ Предмет куплен!`);
+                selectedProps.forEach(el => el.classList.remove('selected'));
+            } else {
+                window.showCustomAlert(`❌ Недостаточно средств!`);
+            }
+        }
+    );
+}
+
+window.confirmSellLegendaryGem = function() {
+    const classType = parseInt(document.getElementById('sell-gem-class').value);
+    const level = parseInt(document.getElementById('sell-gem-level').value);
+    
+    if (isNaN(level) || level < 0) {
+        window.showCustomAlert("❌ Некорректный уровень.");
+        return;
+    }
+    
+    let baseVal = 0;
+    if (classType === 3) baseVal = 1500000 * 0.05; // 1.5g
+    else if (classType === 2) baseVal = 4500000 * 0.05; // 4.5g
+    else if (classType === 1) baseVal = 7000000 * 0.05; // 7g
+    
+    const sellPrice = baseVal * Math.pow(1.1, level);
+    const totalYen = Math.floor(sellPrice);
+
+    window.showCustomConfirm(
+        `Продать Лег. камень (Кл. ${classType}, Ур. ${level})?<br>Цена: ${window.formatCurrency(totalYen)}`,
+        () => {
+            const currentMoney = window.getAllMoneyInYen();
+            window.setMoneyFromYen(currentMoney + totalYen);
+            window.updateUI();
+            document.getElementById('sell-leg-gem-modal').style.display = 'none';
+            window.showCustomAlert(`✅ Камень продан! Получено: ${window.formatCurrency(totalYen)}`);
+        }
+    );
 }

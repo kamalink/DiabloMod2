@@ -413,7 +413,7 @@ window.updateUI = function() {
     document.getElementById('input-gobs-solo').value = window.playerData.gobs_solo;
     document.getElementById('input-gobs-assist').value = window.playerData.gobs_assist;
     document.getElementById('input-max-vp').value = window.playerData.maxVp;
-    document.getElementById('view-difficulty').innerText = window.playerData.difficulty || "T1";
+    document.getElementById('view-difficulty').innerText = window.playerData.difficulty || "Высокий";
     document.getElementById('input-lvl70-portal').value = window.playerData.lvl70_portal || "";
 
     document.getElementById('input-found-legs').value = window.playerData.found_legs;
@@ -541,7 +541,19 @@ window.savePlayerData = function() {
     if (name !== null) window.playerData.name = name;
     
     const lvl = getVal('input-lvl', true);
-    if (lvl !== null) window.playerData.level = lvl;
+    if (lvl !== null) {
+        window.playerData.level = lvl;
+        // Автоматическое изменение сложности до 70 уровня
+        if (lvl < 70) {
+            let tier = "Высокий";
+            if (lvl <= 19) tier = "Высокий";
+            else if (lvl <= 39) tier = "Эксперт";
+            else if (lvl <= 60) tier = "Мастер";
+            else if (lvl <= 65) tier = "T1";
+            else if (lvl <= 69) tier = "T2";
+            window.playerData.difficulty = tier;
+        }
+    }
     
     // base_kills и base_elites удалены из HTML, не читаем их
     

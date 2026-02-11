@@ -207,6 +207,27 @@
         <button class="exp-apply-btn" onclick="applyDifficulty()">✅ ПРИМЕНИТЬ СЛОЖНОСТЬ</button>
     </div>
 
+    <!-- МОДАЛЬНОЕ ОКНО ПРОДАЖИ ЛЕГ КАМНЯ -->
+    <div id="sell-leg-gem-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 350px; background: #1a1a1a; border: 2px solid #d4af37; z-index: 6000; padding: 25px; box-shadow: 0 0 50px #000; font-family: 'Lora', serif; color: #e0e0e0; text-align: center;">
+        <span class="close-x" onclick="document.getElementById('sell-leg-gem-modal').style.display='none'">[X]</span>
+        <h3 style="color: #ff4444; font-family: 'Cinzel', serif; margin-top: 0;">📉 ПРОДАЖА ЛЕГ. КАМНЯ</h3>
+        
+        <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+            <label>Класс камня:
+                <select id="sell-gem-class" style="width: 100%; padding: 5px; background: #000; border: 1px solid #444; color: #fff;">
+                    <option value="3">3 Класс (1.5🥇)</option>
+                    <option value="2">2 Класс (4.5🥇)</option>
+                    <option value="1">1 Класс (7🥇)</option>
+                </select>
+            </label>
+            <label>Уровень камня:
+                <input type="number" id="sell-gem-level" value="0" min="0" style="width: 80px; padding: 5px; background: #000; border: 1px solid #444; color: #fff; text-align: center;">
+            </label>
+        </div>
+
+        <button class="death-confirm-btn" onclick="confirmSellLegendaryGem()">ПРОДАТЬ</button>
+    </div>
+
     <!-- МОДАЛЬНОЕ ОКНО ПОКУПКИ ЗАКЕНОВ -->
     <div id="zaken-buy-modal">
         <span class="close-x" onclick="document.getElementById('zaken-buy-modal').style.display='none'">[X]</span>

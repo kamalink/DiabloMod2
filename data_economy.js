@@ -37,37 +37,54 @@ window.economyData = {
             id: 'buy', 
             title: 'Покупка предметов', 
             content: `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 10px; border: 1px solid #444;">
+                    <div style="display:flex; flex-direction:column; gap:5px;">
+                        <label>Уровень: <input type="number" id="buy-item-level-input" value="1" min="1" style="width: 50px; padding: 2px; background: #000; border: 1px solid #444; color: #fff; text-align: center;"></label>
+                        <label>Грейд: 
+                            <select id="buy-item-grade-input" style="background: #000; color: #fff; border: 1px solid #444; width: 60px;">
+                                <option value="N">N</option>
+                                <option value="DC">D/C</option>
+                                <option value="B">B</option>
+                                <option value="A">A</option>
+                                <option value="S">S</option>
+                                <option value="S+">S+</option>
+                                <option value="Spectrum">Spec</option>
+                            </select>
+                        </label>
+                    </div>
+                    <button class="craft-btn buy" onclick="buyItemImmediate()">КУПИТЬ</button>
+                </div>
                 <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
                     <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
                         <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">40%</div>
-                        <div style="font-size: 0.85rem; text-align: center;">Основа оружия</div>
+                        <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 40)">Основа оружия</span></div>
                     </div>
                     <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
                         <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">30%</div>
-                        <div style="font-size: 0.85rem; text-align: center;">Основа брони<br>Живучесть<br>Осн.Хар.<br>Гнездо (голова/оруж)</div>
+                        <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Основа брони</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Живучесть</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Осн.Хар.</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Гнездо (голова/оруж)</span></div>
                     </div>
                     <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
                         <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">20%</div>
-                        <div style="font-size: 0.85rem; text-align: center;">Восстановление</div>
+                        <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 20)">Восстановление</span></div>
                     </div>
                     <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
                         <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">15%</div>
-                        <div style="font-size: 0.85rem; text-align: center;">Все сопротивления<br>Крит урон<br>Крит шанс</div>
+                        <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 15)">Все сопротивления</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 15)">Крит урон</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 15)">Крит шанс</span></div>
                     </div>
                     <div style="flex: 1 1 100%; background: rgba(212, 175, 55, 0.05); border: 1px solid #888; padding: 8px; border-radius: 4px;">
                         <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">10%</div>
                         <div style="font-size: 0.85rem; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; text-align: center;">
-                            <span>Не Осн.Хар.</span><span>Броня</span>
-                            <span>Здоровье</span><span>Ур. в бижутерии</span>
-                            <span>Скор. атак</span><span>Гнездо (броня)</span>
-                            <span>Урон стихии</span><span>Урон умения</span>
-                            <span>+ Ур. к скилу</span><span>Сниж. затрат / КДР</span>
-                            <span style="grid-column: span 2;">Урон по области</span>
+                            <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Не Осн.Хар.</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Броня</span>
+                            <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Здоровье</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Ур. в бижутерии</span>
+                            <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Скор. атак</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Гнездо (броня)</span>
+                            <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Урон стихии</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Урон умения</span>
+                            <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">+ Ур. к скилу</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Сниж. затрат / КДР</span>
+                            <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)" style="grid-column: span 2;">Урон по области</span>
                         </div>
                     </div>
                     <div style="flex: 1 1 100%; background: rgba(212, 175, 55, 0.05); border: 1px solid #888; padding: 8px; border-radius: 4px;">
                         <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">5%</div>
-                        <div style="font-size: 0.85rem; text-align: center;">Одно сопрот. | Скор. передвижения | Урон уменьшен</div>
+                        <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 5)">Одно сопрот.</span> | <span class="buy-prop-item" onclick="toggleBuyProperty(this, 5)">Скор. передвижения</span> | <span class="buy-prop-item" onclick="toggleBuyProperty(this, 5)">Урон уменьшен</span></div>
                     </div>
                 </div>
             `
@@ -148,14 +165,14 @@ window.economyData = {
             title: 'Легендарные 💎', 
             content: `
                 <table>
-                    <tr style="color: #d4af37;"><th>Класс</th><th>Вставить</th><th>Убрать</th></tr>
-                    <tr><td>3 кл.</td><td>1🥇50🥈</td><td>1🥇50🥈</td></tr>
-                    <tr><td>2 кл.</td><td>4🥇50🥈</td><td>4🥇50🥈</td></tr>
-                    <tr><td>1 кл.</td><td>7🥇</td><td>7🥇</td></tr>
+                    <tr style="color: #d4af37;"><th>Класс</th><th>Действие</th></tr>
+                    <tr><td>3 кл. (1.5🥇)</td><td><button class="craft-btn buy" style="font-size:0.7rem; padding:2px 5px;" onclick="manageLegendaryGem(3, 'insert')">Вставить</button> <button class="craft-btn sell" style="font-size:0.7rem; padding:2px 5px;" onclick="manageLegendaryGem(3, 'remove')">Убрать</button></td></tr>
+                    <tr><td>2 кл. (4.5🥇)</td><td><button class="craft-btn buy" style="font-size:0.7rem; padding:2px 5px;" onclick="manageLegendaryGem(2, 'insert')">Вставить</button> <button class="craft-btn sell" style="font-size:0.7rem; padding:2px 5px;" onclick="manageLegendaryGem(2, 'remove')">Убрать</button></td></tr>
+                    <tr><td>1 кл. (7🥇)</td><td><button class="craft-btn buy" style="font-size:0.7rem; padding:2px 5px;" onclick="manageLegendaryGem(1, 'insert')">Вставить</button> <button class="craft-btn sell" style="font-size:0.7rem; padding:2px 5px;" onclick="manageLegendaryGem(1, 'remove')">Убрать</button></td></tr>
                 </table>
                 <hr>
-                <p style="color: #ff4444;">❗ Продажа лег. камней:</p>
-                <p style="font-size: 1.1rem; text-align: center;">5%💰 * 1.1<sup>Ур. Камня</sup></p>
+                <p style="color: #ff4444;">❗ Продажа лег. камней: <button class="calc-nav-btn" onclick="sellLegendaryGem()" style="padding: 2px 8px; font-size: 0.7rem;">ПРОДАТЬ</button></p>
+                <p style="font-size: 0.9rem; text-align: center;">5%💰 * 1.1<sup>Ур. Камня</sup></p>
                 <p style="color: #d4af37;"><strong>Класс самоцветов:</strong></p>
                 <p><strong>1🔹</strong> Наследие снов, Тхегык, Чип боярски, Сила простоты, Гогок, Желудок дикого зверя, Трансформация, Зеев камень, Головорез, Проклятие плененных.</p>
                 <p><strong>2🔹</strong> Действенный токсин, Проклятие сильных, Проклятие пораженных, Усилитель боли, Мораторий.</p>
@@ -165,7 +182,6 @@ window.economyData = {
     ],
     items_menu: [
         { id: 'bulk_sale', title: 'Продажа предметов оптом 5%', content: `
-            <p style="text-align: center; color: #d4af37; font-size: 1.2rem;"><strong>Продажа оптом 5%</strong></p>
             <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: center;">
                 <tr style="color: #d4af37; border-bottom: 2px solid #5a0000;">
                     <th>📜 LVL</th><th>📓 (N)</th><th>📘,📒 х3</th><th>📙 х4</th>

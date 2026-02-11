@@ -47,7 +47,7 @@ window.playerData = savedData ? JSON.parse(savedData) : {
     refused_wizard_promotion: false,
     claimed_torments: [], // Полученные награды за Torment
     claimed_ranks: [], // Полученные награды за ранг
-    difficulty: "T1", // Текущий уровень сложности
+    difficulty: "Высокий", // Текущий уровень сложности
     
     // Пентограмма (чекбоксы)
     penta_1: false, penta_2: false, penta_3: false,
@@ -74,6 +74,7 @@ if (!window.playerData.forgottenSkills) window.playerData.forgottenSkills = {};
 if (!window.playerData.professions) window.playerData.professions = { 1: false, 2: false, 3: false };
 if (!window.playerData.claimed_torments) window.playerData.claimed_torments = [];
 if (!window.playerData.claimed_ranks) window.playerData.claimed_ranks = [];
+if (!window.playerData.difficulty) window.playerData.difficulty = "Высокий";
 if (typeof window.playerData.refused_wizard_promotion === 'undefined') window.playerData.refused_wizard_promotion = false;
 
 // Глобальные переменные состояния

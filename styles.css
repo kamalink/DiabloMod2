@@ -99,6 +99,10 @@ body::after {
     border-image-repeat: stretch;
     box-shadow: 0 5px 15px #000;
 
+    /* Форма: шире к центру, уже по бокам */
+    clip-path: polygon(5% 0%, 95% 0%, 100% 50%, 95% 100%, 5% 100%, 0% 50%);
+    padding-left: 20px; padding-right: 20px; /* Отступы чтобы текст не обрезался */
+
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     z-index: 1;
@@ -614,4 +618,12 @@ th { color: #d4af37; }
 }
 .rpg-entry-effect {
     animation: rpg-entry 3.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.buy-prop-item {
+    cursor: pointer; padding: 2px 5px; border-radius: 3px; transition: all 0.2s; display: inline-block;
+}
+.buy-prop-item:hover { background: rgba(255, 255, 255, 0.1); }
+.buy-prop-item.selected {
+    background: rgba(102, 255, 102, 0.2); color: #66ff66; text-shadow: 0 0 5px #66ff66; border: 1px solid #66ff66;
 }

@@ -65,7 +65,7 @@ window.worldData = {
     },
     portals_vp: {
         content: `
-            <p>🔹 <b>Стоимость входа:</b> 💰 х2.5 от НП</p>
+            <p>🔹 <b>Стоимость входа:</b> 💰 х2.5 от НП <button class="calc-nav-btn" onclick="buyLocationEntry('vp')" style="padding: 2px 8px; font-size: 0.7rem;">КУПИТЬ ВХОД</button></p>
             <p style="color: #ff4444; border: 1px solid #5a0000; padding: 10px;">
                 ‼️ В ВП не считаются 📖, ⏳ и 💀, ☠️ пока портал не закрыт. Если завалили — ничего не засчитывается.
             </p>
@@ -96,7 +96,10 @@ window.worldData = {
     },
     portals_np: {
         content: `
-            <p style="color: #d4af37; text-align: center;">💰 <b>СТОИМОСТЬ 1 ЛОКАЦИИ:</b></p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="color: #d4af37; font-weight: bold;">💰 СТОИМОСТЬ 1 ЛОКАЦИИ:</span>
+                <div style="display:flex; flex-direction:column; gap:5px;"><button class="calc-nav-btn" onclick="buyLocationEntry('np')" style="padding: 4px 8px; font-size: 0.7rem;">КУПИТЬ (НП)</button><button class="calc-nav-btn" onclick="buyLocationEntry('act')" style="padding: 4px 8px; font-size: 0.7rem;">КУПИТЬ (АКТ)</button></div>
+            </div>
             <div style="column-count: 2; font-size: 0.85rem; line-height: 1.5;">
                 Высокий: 23🥈<br>Эксперт: 29🥈<br>Мастер: 37🥈<br>Т1: 44🥈<br>Т2: 55🥈<br>
                 Т3: 69🥈<br>Т4: 86🥈<br>Т5: 1.08🥇<br>Т6: 1.35🥇<br>Т7: 1.55🥇<br>
@@ -168,10 +171,10 @@ window.worldData = {
     },
     difficulty_table: {
         content: `
-            <p style="text-align: center; color: #ff4444; font-weight: bold;">👥 РАСЧЕТ ДЛЯ 2 ИГРОКОВ</p>
+            <p style="text-align: center; color: #ff4444; font-weight: bold;">👥 РАСЧЕТ ДЛЯ 2 ИГРОКОВ <button class="calc-nav-btn" onclick="openDifficultyCalculator()" style="padding: 2px 8px; font-size: 0.7rem;">🧮 РАСЧЕТ</button></p>
             <p style="font-size: 0.9rem;">🌒 01-19: Высокий | 🌒 20-39: Эксперт<br>🌒 40-60: Мастер | 🌒 61-65: Т1 | 🌒 66-69: Т2</p>
             <hr>
-            <p style="font-size: 0.85rem; color: #d4af37;"><b>Как считается УРОН (🔹 Умножение):</b> <button class="calc-nav-btn" onclick="openDifficultyCalculator()" style="padding: 2px 8px; font-size: 0.7rem;">🧮 РАСЧЕТ</button><br>
+            <p style="font-size: 0.85rem; color: #d4af37;"><b>Как считается УРОН (🔹 Умножение):</b><br>
             Урон героя 🔹 % Умения на вещах 🔹 % Умения (Авто) 🔹 % Стихии 🔹 Лег.камни 🔹 Куб</p>
             <hr>
             <p style="color: #66ff66;"><b>🛡️ КАК СЧИТАЕТСЯ ЖИВУЧЕСТЬ:</b></p>
