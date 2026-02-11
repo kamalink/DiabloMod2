@@ -41,7 +41,7 @@ window.onload = function() {
         // --- ESC to close modals ---
         if (event.key === 'Escape') {
             const modals = [
-                'add-money-modal', 'sell-leg-gem-modal',
+                'add-money-modal', 'sell-leg-gem-modal', 'sell-craft-modal', 'buy-ancient-modal', 'buy-set-modal', 'buy-sell-agrade-modal',
                 'custom-prompt-modal', 'custom-confirm-modal', 'iframe-modal', 
                 'multi-sell-modal', 'gem-service-modal', 'sell-craft-modal', 
                 'zaken-buy-modal', 'skill-calc-modal', 'exp-calc-modal', 'difficulty-calc-modal',
@@ -98,7 +98,7 @@ window.onload = function() {
     startRandomGlitches();
 
     // Инициализация перетаскивания для всех модальных окон
-    const draggableIds = ['text-window', 'death-modal', 'skill-calc-modal', 'exp-calc-modal', 'difficulty-calc-modal', 'zaken-buy-modal', 'sell-craft-modal', 'gem-service-modal', 'multi-sell-modal', 'custom-confirm-modal', 'custom-prompt-modal', 'add-money-modal', 'sell-leg-gem-modal'];
+    const draggableIds = ['text-window', 'death-modal', 'skill-calc-modal', 'exp-calc-modal', 'difficulty-calc-modal', 'zaken-buy-modal', 'sell-craft-modal', 'gem-service-modal', 'multi-sell-modal', 'custom-confirm-modal', 'custom-prompt-modal', 'add-money-modal', 'sell-leg-gem-modal', 'buy-ancient-modal', 'buy-set-modal', 'buy-sell-agrade-modal', 'melt-item-modal'];
     draggableIds.forEach(id => {
         window.makeDraggable(document.getElementById(id));
     });

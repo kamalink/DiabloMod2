@@ -454,12 +454,20 @@ window.checkGuildProgression = function() {
         yesBtn.onclick = function() {
             modal.style.display = 'none';
             yesBtn.style.background = ''; yesBtn.style.borderColor = ''; // Сброс
+            const data = window.gameData['comp_brute'];
+            if (data && data.content) {
+                document.getElementById('window-content').innerHTML = data.content;
+            }
             window.selectProfileItem('Громила', 'Гильдии > Соратники', true);
         };
         
         noBtn.onclick = function() {
             modal.style.display = 'none';
             noBtn.style.background = ''; noBtn.style.borderColor = ''; // Сброс
+            const data = window.gameData['comp_warlord'];
+            if (data && data.content) {
+                document.getElementById('window-content').innerHTML = data.content;
+            }
             window.selectProfileItem('Лорд Войны', 'Гильдии > Соратники', true);
         };
         
@@ -900,6 +908,7 @@ window.calculateRank = function() {
 
     // Сохраняем числовое значение скидки на зелья
     window.playerData.potion_discount_val = potion_mod;
+    window.playerData.zaken_discount_val = zaken_mod;
 
     if (xp_bonus_val !== 0 && xp_bonus_val !== "-") {
         if (typeof xp_bonus_val === 'string') {

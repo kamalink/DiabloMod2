@@ -12,7 +12,7 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
         infoMsg.style.color = '#d4af37';
         infoMsg.style.textAlign = 'center';
         infoMsg.style.marginBottom = '15px';
-        infoMsg.innerHTML = `<p>🔹 Продажа купленного — 50%</p><p>🔹 Каждый следующий грейд предметов выше 🌖 гг стоит на 20% дороже.</p>`;
+        infoMsg.innerHTML = `<button class="d2-button sub-btn" onclick="window.openSellPurchasedModal()">ПРОДАЖА КУПЛЕННОГО (50%)</button>`;
         area.appendChild(infoMsg);
     }
     if (menuId === 'hunters_guild_menu') {
@@ -71,17 +71,6 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
         infoMsg.style.padding = '10px';
         infoMsg.style.marginBottom = '15px';
         infoMsg.innerHTML = '❗ ☠️ считаются также как и 💀 при подсчёте убитых';
-        area.appendChild(infoMsg);
-    }
-    if (menuId === 'grades_abc_menu') {
-        const infoMsg = document.createElement('div');
-        infoMsg.style.color = '#d4af37';
-        infoMsg.style.textAlign = 'center';
-        infoMsg.style.fontSize = '0.9rem';
-        infoMsg.style.marginBottom = '15px';
-        infoMsg.style.padding = '10px';
-        infoMsg.style.border = '1px double #5a0000';
-        infoMsg.innerHTML = `<p>📓 grade: 3🥉 * 1.1<sup>(🌒 вещи - 1)</sup></p><p>📘, 📒 grade: 9🥉 * 1.1<sup>(🌒 вещи - 1)</sup></p><p>📙 grade: 12🥉 * 1.1<sup>(🌒 вещи - 1)</sup></p><p style="font-size: 0.8rem; color: #ccc;">🔹 Любое легендарное зелье здоровья.</p><p>📕 grade: 32🥉 * 1.1<sup>(🌒 вещи - 1)</sup></p><hr><p style="text-align: left; font-size: 0.85rem;"><strong>Примеры:</strong><br>1) 📘 44🌒: 9 * 1.1<sup>43</sup> = 54🥉<br>2) 📒 25🌒: 12 * 1.1<sup>24</sup> = 11.8🥉</p>`;
         area.appendChild(infoMsg);
     }
     if (menuId === 'skills_study_menu') {
@@ -454,6 +443,7 @@ window.updateUI = function() {
     window.updatePentaSlot('slot-penta-3', window.playerData.penta_3);
 
     window.renderLearnedSkillsWidget();
+    window.renderInventoryWidget();
     localStorage.setItem('d3mod_player', JSON.stringify(window.playerData));
 
     // Обновляем состояние кнопок профессий в открытом окне (если оно открыто)
@@ -464,6 +454,18 @@ window.updateUI = function() {
     const currentTitle = window.pathNames[window.pathNames.length - 1];
     if (currentMenuId && window.gameData && window.gameData[currentMenuId] && currentMenuId !== 'skills_study_menu') {
          window.renderMenu(currentMenuId, currentTitle, true, true);
+    }
+}
+
+window.toggleStatGroup = function(btn) {
+    const group = btn.closest('.stat-group');
+    const content = group.querySelector('.stat-group-content');
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        btn.innerText = '[-]';
+    } else {
+        content.style.display = 'none';
+        btn.innerText = '[+]';
     }
 }
 
@@ -631,6 +633,28 @@ window.renderLearnedSkillsWidget = function() {
     for (const [skill, runes] of Object.entries(skills)) {
         html += `<div style="margin-bottom: 4px; line-height: 1.2;"><span style="color: #fff; font-weight: bold;">${skill}</span><br><span style="color: #888; font-size: 0.7rem;">${runes.join(', ')}</span></div>`;
     }
+    content.innerHTML = html;
+}
+
+window.renderInventoryWidget = function() {
+    const container = document.getElementById('inventory-widget');
+    const content = document.getElementById('inventory-content');
+    if (!container || !content) return;
+
+    const inv = window.playerData.inventory || [];
+    if (inv.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'block';
+    let html = '';
+    inv.forEach(item => {
+        html += `<div style="margin-bottom: 4px; line-height: 1.2; border-bottom: 1px dashed #333; padding-bottom: 2px;">
+            <span style="color: #fff; font-weight: bold;">${item.name}</span><br>
+            <span style="color: #888; font-size: 0.7rem;">${item.grade} | Lvl ${item.level} | ${window.formatCurrency(item.buyPrice)}</span>
+        </div>`;
+    });
     content.innerHTML = html;
 }
 

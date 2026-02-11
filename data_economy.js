@@ -40,23 +40,7 @@ window.economyData = {
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 10px; border: 1px solid #444;">
                     <div style="display:flex; flex-direction:column; gap:5px;">
                         <label>Уровень: 
-                            <select id="buy-item-level-input" style="background: #000; color: #fff; border: 1px solid #444; width: 70px; cursor: pointer;">
-                                <option value="5">1-5</option>
-                                <option value="10">6-10</option>
-                                <option value="15">11-15</option>
-                                <option value="20">16-20</option>
-                                <option value="25">21-25</option>
-                                <option value="30">26-30</option>
-                                <option value="35">31-35</option>
-                                <option value="40">36-40</option>
-                                <option value="45">41-45</option>
-                                <option value="50">46-50</option>
-                                <option value="55">51-55</option>
-                                <option value="60">56-60</option>
-                                <option value="65">61-65</option>
-                                <option value="69">66-69</option>
-                                <option value="70">70</option>
-                            </select>
+                            <input type="number" id="buy-item-level-input" value="1" min="1" style="width: 60px; padding: 5px; background: #000; border: 1px solid #444; color: #fff; text-align: center;">
                         </label>
                         <label>Грейд: 
                             <select id="buy-item-grade-input" style="background: #000; color: #fff; border: 1px solid #444; width: 60px; cursor: pointer;">
@@ -64,9 +48,6 @@ window.economyData = {
                                 <option value="DC">D/C</option>
                                 <option value="B">B</option>
                                 <option value="A">A</option>
-                                <option value="S">S</option>
-                                <option value="S+">S+</option>
-                                <option value="Spectrum">Spec</option>
                             </select>
                         </label>
                     </div>
@@ -114,66 +95,9 @@ window.economyData = {
             id: 'smith_only', 
             title: 'Кузница', 
             content:  `
-                 <div style="background: rgba(0,0,0,0.3); padding: 10px; border: 1px solid #333; margin-bottom: 15px;">
-                    <p style="color: #d4af37; margin: 0 0 10px 0; text-align: center;">🔹 Продажа Крафта — 100%</p>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display:flex; flex-direction:column; gap:5px;">
-                            <label>Уровень: 
-                                <select id="sell-item-level-input" style="background: #000; color: #fff; border: 1px solid #444; width: 70px; cursor: pointer;">
-                                    <option value="5">1-5</option>
-                                    <option value="10">6-10</option>
-                                    <option value="15">11-15</option>
-                                    <option value="20">16-20</option>
-                                    <option value="25">21-25</option>
-                                    <option value="30">26-30</option>
-                                    <option value="35">31-35</option>
-                                    <option value="40">36-40</option>
-                                    <option value="45">41-45</option>
-                                    <option value="50">46-50</option>
-                                    <option value="55">51-55</option>
-                                    <option value="60">56-60</option>
-                                    <option value="65">61-65</option>
-                                    <option value="69">66-69</option>
-                                    <option value="70">70</option>
-                                </select>
-                            </label>
-                            <label>Грейд: 
-                                <select id="sell-item-grade-input" style="background: #000; color: #fff; border: 1px solid #444; width: 60px; cursor: pointer;">
-                                    <option value="N">N</option>
-                                    <option value="DC">D/C</option>
-                                    <option value="B">B</option>
-                                    <option value="A">A</option>
-                                    <option value="S">S</option>
-                                    <option value="S+">S+</option>
-                                    <option value="Spectrum">Spec</option>
-                                </select>
-                            </label>
-                        </div>
-                        <button class="craft-btn smith-sell" onclick="sellCraftedItemImmediate()">ПРОДАТЬ</button>
-                    </div>
-                    <div style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 10px;">
-                        <div style="flex: 1 1 45%; background: rgba(255, 255, 255, 0.05); padding: 5px; border-radius: 3px;">
-                            <div style="font-size: 0.75rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 40)">Основа оружия (40%)</span></div>
-                        </div>
-                        <div style="flex: 1 1 45%; background: rgba(255, 255, 255, 0.05); padding: 5px; border-radius: 3px;">
-                            <div style="font-size: 0.75rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 30)">Основа брони (30%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 30)">Живучесть (30%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 30)">Осн.Хар. (30%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 30)">Гнездо (30%)</span></div>
-                        </div>
-                        <div style="flex: 1 1 45%; background: rgba(255, 255, 255, 0.05); padding: 5px; border-radius: 3px;">
-                            <div style="font-size: 0.75rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 20)">Восстановление (20%)</span></div>
-                        </div>
-                        <div style="flex: 1 1 45%; background: rgba(255, 255, 255, 0.05); padding: 5px; border-radius: 3px;">
-                            <div style="font-size: 0.75rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 15)">Все сопр. (15%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 15)">Крит урон (15%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 15)">Крит шанс (15%)</span></div>
-                        </div>
-                        <div style="flex: 1 1 100%; background: rgba(255, 255, 255, 0.05); padding: 5px; border-radius: 3px;">
-                            <div style="font-size: 0.75rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Не Осн.Хар. (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Броня (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Здоровье (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Ур. в биже (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Скор. атак (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Гнездо (бр) (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Стихия (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Умение (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">+Ур. скил (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">КДР/Рес (10%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Область (10%)</span></div>
-                        </div>
-                        <div style="flex: 1 1 100%; background: rgba(255, 255, 255, 0.05); padding: 5px; border-radius: 3px;">
-                            <div style="font-size: 0.75rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 5)">Одно сопрот. (5%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 5)">Скор. бега (5%)</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 5)">Урон уменьш (5%)</span></div>
-                        </div>
-                    </div>
-                </div>
-                <p>🔹 Крафт предмета — 150% от цены покупки (см. "Предметы и цены").</p>
-                <p>🔹 Расплавление предмета — 4.4% от его цены.</p>
+                <div class="craft-row"><p>🔹 Продажа Крафта — 100%</p><button class="craft-btn smith-sell" onclick="openSellCraftedModal()">ПРОДАТЬ ПРЕДМЕТ</button></div>
+                <div class="craft-row"><p>🔹 Крафт предмета — 150%</p><button class="craft-btn craft" onclick="window.openCraftModal()">СКРАФТИТЬ</button></div>
+                <div class="craft-row"><p>🔹 Расплавление — 4.4%</p><button class="craft-btn sell" onclick="window.openMeltModal()">РАСПЛАВИТЬ</button></div>
                 <div class="craft-row" style="border-top: 1px solid #333; padding-top: 10px; margin-top: 10px;">
                     <p>🔹 Продажа ресурсов (5%):</p>
                     <button class="craft-btn smith-sell" onclick="sellResources()">Продать ресурсы</button>
@@ -257,6 +181,9 @@ window.economyData = {
     ],
     items_menu: [
         { id: 'bulk_sale', title: 'Продажа предметов оптом 5%', content: `
+            <div class="craft-row">
+                <button class="craft-btn smith-sell" onclick="sellItemsBulk()">ПРОДАТЬ ПРЕДМЕТЫ</button>
+            </div>
             <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: center;">
                 <tr style="color: #d4af37; border-bottom: 2px solid #5a0000;">
                     <th>📜 LVL</th><th>📓 (N)</th><th>📘,📒 х3</th><th>📙 х4</th>
@@ -280,30 +207,10 @@ window.economyData = {
         ` },
         { id: 'grades_abc_menu', title: 'A grade' },
         { id: 'grade_ssplus', title: 'S, S+, Spectrum grade', content: `
-            <p style="color: #ff4444;">❗ S grade (Древние и первозд. <span class="grade-b">B</span>, <span class="grade-a">A</span> grade)</p>
-            🔹 <span class="frame-drev">Древний</span> х1.5 <span class="grade-b">B grade</span><br><br>
-            🔹 <span class="frame-drev">Древний</span> х1.5 <span class="grade-a">A grade</span><br><br>
-            🔹 <span class="frame-perv">Первозд.</span> х2.5 <span class="grade-b">B grade</span><br><br>
-            🔹 <span class="frame-perv">Первозд.</span> х2.5 <span class="grade-a">A grade</span>
-            <hr>
-            <p style="color: #ff4444;">❗ Любые комплекты, кроме Spectrum, являются S+ grade.</p>
-            🔹 S+ об. х1.56 <span class="grade-a">A grade</span><br><br>
-            🔹 S+ <span class="frame-drev">древний</span> x1.56 <span class="grade-a">A др.</span><br><br>
-            🔹 S+ <span class="frame-perv">первозд.</span> х1.56 <span class="grade-a">A перв.</span>
-            <hr>
-            <p style="color: #ff4444;">❗ Ультимативные комплекты и Литания — Spectrum grade.</p>
-            🔹 Spectrum обычный = х4.875💰 от 📕 grade обычного<br><br>
-            🔹 Spectrum древний = х4.875💰 от 📕 grade древний<br><br>
-            🔹 Spectrum первозданный = х4.875💰 от 📕 grade первозданного
-            <hr>
-            <p style="color: #d4af37; text-align: center;"><strong>💰 S+ и Spectrum:</strong></p>
-            <table style="width: 100%; font-size: 0.9rem;">
-                <tr><th>Предм.</th><th>S+</th><th>Spectrum</th></tr>
-                <tr><td>1</td><td>х1</td><td>х1</td></tr>
-                <tr><td>2-3</td><td>х1.5</td><td>х2</td></tr>
-                <tr><td>4-5</td><td>х2</td><td>х4</td></tr>
-                <tr><td>6</td><td>х4</td><td>х8</td></tr>
-            </table>
+            <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                <button class="d2-button sub-btn" onclick="openBuyAncientModal()">КУПИТЬ ДРЕВНИЙ / ПЕРВОЗДАННЫЙ</button>
+                <button class="d2-button sub-btn" onclick="openBuySetModal()">КУПИТЬ КОМПЛЕКТ (S+ / SPECTRUM)</button>
+            </div>
         ` }
     ],
     grades_abc_menu: [

@@ -19,7 +19,8 @@ body, html {
 #music-btn,
 #randomizer-btn,
 #breadcrumb,
-#learned-skills-widget {
+#learned-skills-widget,
+#widgets-container {
     opacity: 0;
     animation: fadeIn 5s ease-in forwards;
 }
@@ -472,6 +473,14 @@ th { color: #d4af37; }
     text-align: center;
 }
 
+.group-toggle {
+    cursor: pointer;
+    color: #888;
+    margin-right: 5px;
+    font-family: monospace;
+}
+.group-toggle:hover { color: #fff; }
+
 .add-money-btn {
     cursor: pointer;
     color: #66ff66;
@@ -649,4 +658,20 @@ th { color: #d4af37; }
 .sell-prop-item:hover { background: rgba(255, 255, 255, 0.1); }
 .sell-prop-item.selected {
     background: rgba(255, 102, 102, 0.2); color: #ff6666; text-shadow: 0 0 5px #ff6666; border: 1px solid #ff6666;
+}
+
+.selectable-item {
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 1px dotted transparent;
+}
+.selectable-item:hover {
+    color: #fff;
+    text-shadow: 0 0 5px #d4af37;
+}
+.selectable-item.selected {
+    color: #66ff66;
+    text-shadow: 0 0 8px #66ff66;
+    font-weight: bold;
+    border-bottom: 1px dashed #66ff66;
 }

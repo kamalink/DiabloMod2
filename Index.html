@@ -42,10 +42,16 @@
     <input type="range" id="volume-slider" min="0" max="1" step="0.01" oninput="setVolume(this.value)" style="display: none; position: fixed; top: 55px; right: 310px; width: 100px; z-index: 1001;">
     <a href="#" onclick="event.preventDefault(); window.openIframe('https://randstuff.ru/number/');" id="randomizer-btn">🎲 РАНДОМ</a>
 
-    <!-- Виджет изученных навыков -->
-    <div id="learned-skills-widget" style="position: fixed; top: 110px; right: 310px; width: 180px; max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.8); border: 1px solid #444; padding: 10px; color: #ccc; font-size: 0.75rem; z-index: 900; display: none; border-radius: 4px;">
-        <div style="color: #d4af37; border-bottom: 1px solid #555; margin-bottom: 5px; font-weight: bold; text-align: center;">ИЗУЧЕНО</div>
-        <div id="learned-skills-content"></div>
+    <!-- Контейнер виджетов (Навыки + Инвентарь) -->
+    <div id="widgets-container" style="position: fixed; top: 110px; right: 310px; width: 180px; z-index: 900; display: flex; flex-direction: column; gap: 10px; pointer-events: none;">
+        <div id="learned-skills-widget" style="pointer-events: auto; max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.8); border: 1px solid #444; padding: 10px; color: #ccc; font-size: 0.75rem; display: none; border-radius: 4px;">
+            <div style="color: #d4af37; border-bottom: 1px solid #555; margin-bottom: 5px; font-weight: bold; text-align: center;">ИЗУЧЕНО</div>
+            <div id="learned-skills-content"></div>
+        </div>
+        <div id="inventory-widget" style="pointer-events: auto; max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.8); border: 1px solid #444; padding: 10px; color: #ccc; font-size: 0.75rem; display: none; border-radius: 4px;">
+            <div style="color: #d4af37; border-bottom: 1px solid #555; margin-bottom: 5px; font-weight: bold; text-align: center;">ИНВЕНТАРЬ</div>
+            <div id="inventory-content"></div>
+        </div>
     </div>
 
     <!-- Окно смерти -->
@@ -228,6 +234,264 @@
         <button class="death-confirm-btn" onclick="confirmSellLegendaryGem()">ПРОДАТЬ</button>
     </div>
 
+    <!-- МОДАЛЬНОЕ ОКНО ПРОДАЖИ КРАФТА (НОВОЕ) -->
+    <div id="sell-craft-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; max-width: 600px; max-height: 90vh; background: #1a1a1a; border: 2px solid #d4af37; z-index: 6000; padding: 20px; overflow-y: auto; box-shadow: 0 0 50px #000;">
+        <span class="close-x" onclick="document.getElementById('sell-craft-modal').style.display='none'">[X]</span>
+        <h3 style="color: #d4af37; text-align: center; font-family: 'Cinzel', serif; margin-top: 0;">⚒️ ПРОДАЖА КРАФТА</h3>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 10px; border: 1px solid #444;">
+            <div style="display:flex; flex-direction:column; gap:5px;">
+                <label>Уровень: 
+                    <select id="modal-sell-level" style="background: #000; color: #fff; border: 1px solid #444; width: 70px; cursor: pointer;">
+                        <option value="5">1-5</option>
+                        <option value="10">6-10</option>
+                        <option value="15">11-15</option>
+                        <option value="20">16-20</option>
+                        <option value="25">21-25</option>
+                        <option value="30">26-30</option>
+                        <option value="35">31-35</option>
+                        <option value="40">36-40</option>
+                        <option value="45">41-45</option>
+                        <option value="50">46-50</option>
+                        <option value="55">51-55</option>
+                        <option value="60">56-60</option>
+                        <option value="65">61-65</option>
+                        <option value="69">66-69</option>
+                        <option value="70">70</option>
+                    </select>
+                </label>
+                <label>Грейд: 
+                    <select id="modal-sell-grade" style="background: #000; color: #fff; border: 1px solid #444; width: 60px; cursor: pointer;">
+                        <option value="N">N</option>
+                        <option value="DC">D/C</option>
+                        <option value="B">B</option>
+                        <option value="A">A</option>
+                        <option value="S">S</option>
+                        <option value="S+">S+</option>
+                        <option value="Spectrum">Spec</option>
+                    </select>
+                </label>
+            </div>
+            <button id="craft-sell-action-btn" class="craft-btn smith-sell" onclick="sellCraftedItemFromModal()">ПРОДАТЬ</button>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">40%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 40)">Основа оружия</span></div>
+            </div>
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">30%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 30)">Основа брони</span><br><span class="sell-prop-item" onclick="toggleSellProperty(this, 30)">Живучесть</span><br><span class="sell-prop-item" onclick="toggleSellProperty(this, 30)">Осн.Хар.</span><br><span class="sell-prop-item" onclick="toggleSellProperty(this, 30)">Гнездо (голова/оруж)</span></div>
+            </div>
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">20%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 20)">Восстановление</span></div>
+            </div>
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">15%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 15)">Все сопротивления</span><br><span class="sell-prop-item" onclick="toggleSellProperty(this, 15)">Крит урон</span><br><span class="sell-prop-item" onclick="toggleSellProperty(this, 15)">Крит шанс</span></div>
+            </div>
+            <div style="flex: 1 1 100%; background: rgba(212, 175, 55, 0.05); border: 1px solid #888; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">10%</div>
+                <div style="font-size: 0.85rem; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; text-align: center;">
+                    <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Не Осн.Хар.</span><span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Броня</span>
+                    <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Здоровье</span><span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Ур. в бижутерии</span>
+                    <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Скор. атак</span><span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Гнездо (броня)</span>
+                    <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Урон стихии</span><span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Урон умения</span>
+                    <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">+ Ур. к скилу</span><span class="sell-prop-item" onclick="toggleSellProperty(this, 10)">Сниж. затрат / КДР</span>
+                    <span class="sell-prop-item" onclick="toggleSellProperty(this, 10)" style="grid-column: span 2;">Урон по области</span>
+                </div>
+            </div>
+            <div style="flex: 1 1 100%; background: rgba(212, 175, 55, 0.05); border: 1px solid #888; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">5%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 5)">Одно сопрот.</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 5)">Скор. передвижения</span> | <span class="sell-prop-item" onclick="toggleSellProperty(this, 5)">Урон уменьшен</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО ПОКУПКИ ДРЕВНИХ/ПЕРВОЗДАННЫХ -->
+    <div id="buy-ancient-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; max-width: 600px; max-height: 90vh; background: #1a1a1a; border: 2px solid #d4af37; z-index: 6000; padding: 20px; overflow-y: auto; box-shadow: 0 0 50px #000;">
+        <span class="close-x" onclick="document.getElementById('buy-ancient-modal').style.display='none'">[X]</span>
+        <h3 style="color: #d4af37; text-align: center; font-family: 'Cinzel', serif; margin-top: 0;">КУПИТЬ ДРЕВНИЙ / ПЕРВОЗДАННЫЙ</h3>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 10px; border: 1px solid #444;">
+            <div style="display:flex; flex-direction:column; gap:5px;">
+                <label>Уровень: 
+                    <input type="number" id="ancient-level-input" value="1" min="1" style="width: 60px; padding: 5px; background: #000; border: 1px solid #444; color: #fff; text-align: center;">
+                </label>
+                <label>Грейд: 
+                    <select id="ancient-grade-input" style="background: #000; color: #fff; border: 1px solid #444; width: 70px; cursor: pointer;">
+                        <option value="B">B</option>
+                        <option value="A">A</option>
+                    </select>
+                </label>
+                <label>Тип: 
+                    <select id="ancient-type-input" style="background: #000; color: #fff; border: 1px solid #444; width: 100px; cursor: pointer;">
+                        <option value="ancient">Древний</option>
+                        <option value="primal">Первозданный</option>
+                    </select>
+                </label>
+            </div>
+            <button class="craft-btn buy" onclick="buyAncientImmediate()">КУПИТЬ</button>
+        </div>
+
+        <div class="ancient-props-container" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+            <!-- Properties will be cloned here by JS or hardcoded -->
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">40%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 40)">Основа оружия</span></div>
+            </div>
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">30%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Основа брони</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Живучесть</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Осн.Хар.</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Гнездо (голова/оруж)</span></div>
+            </div>
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">20%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 20)">Восстановление</span></div>
+            </div>
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">15%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 15)">Все сопротивления</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 15)">Крит урон</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 15)">Крит шанс</span></div>
+            </div>
+            <div style="flex: 1 1 100%; background: rgba(212, 175, 55, 0.05); border: 1px solid #888; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">10%</div>
+                <div style="font-size: 0.85rem; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; text-align: center;">
+                    <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Не Осн.Хар.</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Броня</span>
+                    <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Здоровье</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Ур. в бижутерии</span>
+                    <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Скор. атак</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Гнездо (броня)</span>
+                    <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Урон стихии</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Урон умения</span>
+                    <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">+ Ур. к скилу</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Сниж. затрат / КДР</span>
+                    <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)" style="grid-column: span 2;">Урон по области</span>
+                </div>
+            </div>
+            <div style="flex: 1 1 100%; background: rgba(212, 175, 55, 0.05); border: 1px solid #888; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">5%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 5)">Одно сопрот.</span> | <span class="buy-prop-item" onclick="toggleBuyProperty(this, 5)">Скор. передвижения</span> | <span class="buy-prop-item" onclick="toggleBuyProperty(this, 5)">Урон уменьшен</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО ПОКУПКИ КОМПЛЕКТОВ (S+/SPECTRUM) -->
+    <div id="buy-set-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; max-width: 600px; max-height: 90vh; background: #1a1a1a; border: 2px solid #d4af37; z-index: 6000; padding: 20px; overflow-y: auto; box-shadow: 0 0 50px #000;">
+        <span class="close-x" onclick="document.getElementById('buy-set-modal').style.display='none'">[X]</span>
+        <h3 style="color: #d4af37; text-align: center; font-family: 'Cinzel', serif; margin-top: 0;">КУПИТЬ КОМПЛЕКТ</h3>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 10px; border: 1px solid #444;">
+            <div style="display:flex; flex-direction:column; gap:5px;">
+                <label>Уровень: 
+                    <input type="number" id="set-level-input" value="1" min="1" style="width: 60px; padding: 5px; background: #000; border: 1px solid #444; color: #fff; text-align: center;">
+                </label>
+                <label>Грейд: 
+                    <select id="set-grade-input" style="background: #000; color: #fff; border: 1px solid #444; width: 100px; cursor: pointer;">
+                        <option value="S+">S+</option>
+                        <option value="Spectrum">Spectrum</option>
+                    </select>
+                </label>
+                <label>Тип: 
+                    <select id="set-type-input" style="background: #000; color: #fff; border: 1px solid #444; width: 100px; cursor: pointer;">
+                        <option value="normal">Обычный</option>
+                        <option value="ancient">Древний</option>
+                        <option value="primal">Первозданный</option>
+                    </select>
+                </label>
+                <label>Предмет по счету: 
+                    <select id="set-count-input" style="background: #000; color: #fff; border: 1px solid #444; width: 100px; cursor: pointer;">
+                        <option value="1">1-й</option>
+                        <option value="2">2-й или 3-й</option>
+                        <option value="4">4-й или 5-й</option>
+                        <option value="6">6-й</option>
+                    </select>
+                </label>
+            </div>
+            <button class="craft-btn buy" onclick="buySetImmediate()">КУПИТЬ</button>
+        </div>
+
+        <div class="set-props-container" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">40%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 40)">Основа оружия</span></div>
+            </div>
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">30%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Основа брони</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Живучесть</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Осн.Хар.</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Гнездо (голова/оруж)</span></div>
+            </div>
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">20%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 20)">Восстановление</span></div>
+            </div>
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">15%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 15)">Все сопротивления</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 15)">Крит урон</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 15)">Крит шанс</span></div>
+            </div>
+            <div style="flex: 1 1 100%; background: rgba(212, 175, 55, 0.05); border: 1px solid #888; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">10%</div>
+                <div style="font-size: 0.85rem; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; text-align: center;">
+                    <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Не Осн.Хар.</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Броня</span>
+                    <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Здоровье</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Ур. в бижутерии</span>
+                    <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Скор. атак</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Гнездо (броня)</span>
+                    <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Урон стихии</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Урон умения</span>
+                    <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">+ Ур. к скилу</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Сниж. затрат / КДР</span>
+                    <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)" style="grid-column: span 2;">Урон по области</span>
+                </div>
+            </div>
+            <div style="flex: 1 1 100%; background: rgba(212, 175, 55, 0.05); border: 1px solid #888; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">5%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 5)">Одно сопрот.</span> | <span class="buy-prop-item" onclick="toggleBuyProperty(this, 5)">Скор. передвижения</span> | <span class="buy-prop-item" onclick="toggleBuyProperty(this, 5)">Урон уменьшен</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО ПОКУПКИ/ПРОДАЖИ A-GRADE (КЛАССЫ) -->
+    <div id="buy-sell-agrade-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; max-width: 600px; max-height: 90vh; background: #1a1a1a; border: 2px solid #d4af37; z-index: 6000; padding: 20px; overflow-y: auto; box-shadow: 0 0 50px #000;">
+        <span class="close-x" onclick="document.getElementById('buy-sell-agrade-modal').style.display='none'">[X]</span>
+        <h3 id="agrade-modal-title" style="color: #d4af37; text-align: center; font-family: 'Cinzel', serif; margin-top: 0;">ОПЕРАЦИЯ С ПРЕДМЕТОМ</h3>
+        <p id="agrade-item-name" style="text-align: center; color: #66ccff; font-weight: bold; margin-bottom: 15px;"></p>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 10px; border: 1px solid #444;">
+            <div style="display:flex; flex-direction:column; gap:5px;">
+                <label>Уровень: 
+                    <input type="number" id="agrade-level-input" value="1" min="1" style="width: 60px; padding: 5px; background: #000; border: 1px solid #444; color: #fff; text-align: center;">
+                </label>
+            </div>
+            <button id="agrade-action-btn" class="craft-btn buy" onclick="confirmBuySellAGrade()">ВЫПОЛНИТЬ</button>
+        </div>
+
+        <div class="agrade-props-container" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">40%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 40)">Основа оружия</span></div>
+            </div>
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">30%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Основа брони</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Живучесть</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Осн.Хар.</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Гнездо (голова/оруж)</span></div>
+            </div>
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">20%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 20)">Восстановление</span></div>
+            </div>
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">15%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 15)">Все сопротивления</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 15)">Крит урон</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 15)">Крит шанс</span></div>
+            </div>
+            <div style="flex: 1 1 100%; background: rgba(212, 175, 55, 0.05); border: 1px solid #888; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">10%</div>
+                <div style="font-size: 0.85rem; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; text-align: center;">
+                    <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Не Осн.Хар.</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Броня</span>
+                    <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Здоровье</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Ур. в бижутерии</span>
+                    <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Скор. атак</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Гнездо (броня)</span>
+                    <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Урон стихии</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Урон умения</span>
+                    <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">+ Ур. к скилу</span><span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)">Сниж. затрат / КДР</span>
+                    <span class="buy-prop-item" onclick="toggleBuyProperty(this, 10)" style="grid-column: span 2;">Урон по области</span>
+                </div>
+            </div>
+            <div style="flex: 1 1 100%; background: rgba(212, 175, 55, 0.05); border: 1px solid #888; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">5%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 5)">Одно сопрот.</span> | <span class="buy-prop-item" onclick="toggleBuyProperty(this, 5)">Скор. передвижения</span> | <span class="buy-prop-item" onclick="toggleBuyProperty(this, 5)">Урон уменьшен</span></div>
+            </div>
+        </div>
+    </div>
+
     <!-- МОДАЛЬНОЕ ОКНО ПОКУПКИ ЗАКЕНОВ -->
     <div id="zaken-buy-modal">
         <span class="close-x" onclick="document.getElementById('zaken-buy-modal').style.display='none'">[X]</span>
@@ -283,6 +547,32 @@
         <button class="death-confirm-btn" onclick="confirmAddMoney()">ДОБАВИТЬ</button>
     </div>
 
+    <!-- МОДАЛЬНОЕ ОКНО РАСПЛАВЛЕНИЯ (MELT) -->
+    <div id="melt-item-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 450px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #d4af37; box-shadow: 0 0 50px #000; padding: 25px; text-align: center; font-family: 'Cinzel', serif; color: #e0e0e0; z-index: 7000;">
+        <h3 style="color: #ff4444; margin-top: 0; font-size: 1.5rem;">🔥 РАСПЛАВЛЕНИЕ</h3>
+        <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0; text-align: left;">
+            <label style="display: flex; justify-content: space-between;">Уровень: 
+                <input type="number" id="melt-level" value="1" min="1" style="width: 60px; background: #000; border: 1px solid #444; color: #fff; text-align: center;">
+            </label>
+            <label style="display: flex; justify-content: space-between;">Грейд: 
+                <select id="melt-grade" style="background: #000; color: #fff; border: 1px solid #444; width: 100px;">
+                    <option value="N">N</option><option value="DC">D/C</option><option value="B">B</option>
+                    <option value="A">A</option><option value="S">S</option><option value="S+">S+</option><option value="Spectrum">Spectrum</option>
+                </select>
+            </label>
+            <label style="display: flex; justify-content: space-between;">Тип: 
+                <select id="melt-type" style="background: #000; color: #fff; border: 1px solid #444; width: 120px;">
+                    <option value="normal">Обычный</option>
+                    <option value="ancient">Древний</option>
+                    <option value="primal">Первозданный</option>
+                </select>
+            </label>
+        </div>
+        <div style="display: flex; justify-content: center; gap: 15px;">
+            <button class="death-confirm-btn" onclick="window.confirmMeltItem()">Расплавить</button>
+            <button class="death-cancel-btn" onclick="document.getElementById('melt-item-modal').style.display='none'">Отмена</button>
+        </div>
+    </div>
     
 
     <!-- МОДАЛЬНОЕ ОКНО УСЛУГ ЮВЕЛИРА -->
@@ -309,7 +599,25 @@
         <div style="width: 90%; max-width: 450px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #d4af37; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); padding: 25px; text-align: center; font-family: 'Cinzel', serif; color: #e0e0e0;">
             <h3 id="multi-sell-title" style="color: #d4af37; margin-top: 0; font-size: 1.5rem;">Продажа ресурсов</h3>
             <div style="margin-bottom: 15px;">
-                <label>Уровень ресурсов: <input type="number" id="multi-sell-level" value="1" min="1" style="width: 80px; padding: 5px; background: #000; border: 1px solid #444; color: #fff;"></label>
+                <label>Уровень ресурсов: 
+                    <select id="multi-sell-level" style="background: #000; color: #fff; border: 1px solid #444; width: 80px; padding: 5px; cursor: pointer;">
+                        <option value="5">1-5</option>
+                        <option value="10">6-10</option>
+                        <option value="15">11-15</option>
+                        <option value="20">16-20</option>
+                        <option value="25">21-25</option>
+                        <option value="30">26-30</option>
+                        <option value="35">31-35</option>
+                        <option value="40">36-40</option>
+                        <option value="45">41-45</option>
+                        <option value="50">46-50</option>
+                        <option value="55">51-55</option>
+                        <option value="60">56-60</option>
+                        <option value="65">61-65</option>
+                        <option value="69">66-69</option>
+                        <option value="70">70</option>
+                    </select>
+                </label>
             </div>
             <div id="multi-sell-inputs" style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0; text-align: left;">
                 <!-- Inputs will be generated here by JS -->
@@ -349,6 +657,12 @@
         <button class="mobile-nav-btn" onclick="toggleEditModal()">✍️ КНИГА</button>
     </div>
 
+    <div id="save-load-controls" class="ui-element" style="position: fixed; left: 10px; top: 65px; z-index: 1000; display: flex; gap: 5px;">
+        <button class="mobile-nav-btn" onclick="exportSaveFile()" style="background: #1a0505; font-size: 0.7rem; padding: 5px 10px;">💾 СОХРАНИТЬ</button>
+        <button class="mobile-nav-btn" onclick="importSaveFile()" style="background: #1a0505; font-size: 0.7rem; padding: 5px 10px;">📂 ЗАГРУЗИТЬ</button>
+        <input type="file" id="load-file-input" style="display: none;" onchange="handleFileSelect(this)" accept=".txt,.json">
+    </div>
+
 <div id="char-sheet">
     <input type="text" id="input-name" class="char-input name-input" value="НЕФАЛЕМ" onchange="savePlayerData()">
     <div id="view-ladder-rank" style="text-align: center; color: #ff4444; font-size: 0.9rem; margin-bottom: 10px; font-weight: bold; display: none;"></div>
@@ -357,72 +671,84 @@
         <!-- Левая колонка -->
         <div class="char-sheet-col">
             <div class="stat-group">
-                <div class="stat-group-title">Герой</div>
-                <div class="stat-row"><span id="view-class">Класс не выбран</span> <span id="view-build" style="font-size:0.7rem;"></span></div>
-                <div class="stat-row">Уровень: <input type="number" id="input-lvl" class="char-input" value="1" onchange="savePlayerData()"> 🌒 <span id="view-xp-bonus" style="font-size:0.7rem; color:#aaa;"></span></div>
-                <div class="stat-row">Зелья: <input type="number" id="input-potions" class="char-input" value="5" onchange="savePlayerData()"> 💊 <span id="view-potion-price" style="font-size: 0.7rem;"></span></div>
-                <div class="stat-row">Макс ВП: <input type="number" id="input-max-vp" class="char-input" value="0" onchange="savePlayerData()"> 🏛️</div>
-                <div style="text-align: center; margin-top: 5px; display: flex; justify-content: center; gap: 5px; border-top: 1px solid #333; padding-top: 5px;">
-                    <div id="slot-penta-1" class="penta-slot" title="Слот 1 (25 ВП)"></div>
-                    <div id="slot-penta-2" class="penta-slot" title="Слот 2 (60 ВП)"></div>
-                    <div id="slot-penta-3" class="penta-slot" title="Слот 3 (100 ВП)"></div>
+                <div class="stat-group-title"><span class="group-toggle" onclick="window.toggleStatGroup(this)">[-]</span> Герой</div>
+                <div class="stat-group-content">
+                    <div class="stat-row"><span id="view-class">Класс не выбран</span> <span id="view-build" style="font-size:0.7rem;"></span></div>
+                    <div class="stat-row">Уровень: <input type="number" id="input-lvl" class="char-input" value="1" onchange="savePlayerData()"> 🌒 <span id="view-xp-bonus" style="font-size:0.7rem; color:#aaa;"></span></div>
+                    <div class="stat-row">Зелья: <input type="number" id="input-potions" class="char-input" value="5" onchange="savePlayerData()"> 💊 <span id="view-potion-price" style="font-size: 0.7rem;"></span></div>
+                    <div class="stat-row">Макс ВП: <input type="number" id="input-max-vp" class="char-input" value="0" onchange="savePlayerData()"> 🏛️</div>
+                    <div style="text-align: center; margin-top: 5px; display: flex; justify-content: center; gap: 5px; border-top: 1px solid #333; padding-top: 5px;">
+                        <div id="slot-penta-1" class="penta-slot" title="Слот 1 (25 ВП)"></div>
+                        <div id="slot-penta-2" class="penta-slot" title="Слот 2 (60 ВП)"></div>
+                        <div id="slot-penta-3" class="penta-slot" title="Слот 3 (100 ВП)"></div>
+                    </div>
                 </div>
             </div>
 
             <div class="stat-group">
-                <div class="stat-group-title">Финансы <span class="add-money-btn" onclick="openAddMoneyModal()" title="Добавить средства">[+]</span></div>
-                <div class="money-row">
-                    <span class="money-unit"><input type="number" id="input-gold-g" class="char-input money-input" value="0" onchange="savePlayerData()">🥇</span>
-                    <span class="money-unit"><input type="number" id="input-gold-s" class="char-input money-input" value="0" onchange="savePlayerData()">🥈</span>
-                    <span class="money-unit"><input type="number" id="input-gold-c" class="char-input money-input" value="0" onchange="savePlayerData()">🥉</span>
-                    <span class="money-unit"><input type="number" id="input-gold-y" class="char-input money-input" value="0" onchange="savePlayerData()">🧧</span>
+                <div class="stat-group-title"><span class="group-toggle" onclick="window.toggleStatGroup(this)">[-]</span> Финансы <span class="add-money-btn" onclick="openAddMoneyModal()" title="Добавить средства">[+]</span></div>
+                <div class="stat-group-content">
+                    <div class="money-row">
+                        <span class="money-unit"><input type="number" id="input-gold-g" class="char-input money-input" value="0" onchange="savePlayerData()">🥇</span>
+                        <span class="money-unit"><input type="number" id="input-gold-s" class="char-input money-input" value="0" onchange="savePlayerData()">🥈</span>
+                        <span class="money-unit"><input type="number" id="input-gold-c" class="char-input money-input" value="0" onchange="savePlayerData()">🥉</span>
+                        <span class="money-unit"><input type="number" id="input-gold-y" class="char-input money-input" value="0" onchange="savePlayerData()">🧧</span>
+                    </div>
+                    <div class="stat-row" style="margin-top:8px;">Руны: <input type="number" id="input-runes" class="char-input" value="0" step="0.1" onchange="savePlayerData()"> 📖</div>
+                    <div class="stat-row">Парагон: <input type="number" id="input-para" class="char-input" value="0" step="0.1" onchange="savePlayerData()"> ⏳</div>
+                    <div class="stat-row">Закены: <input type="number" id="input-zakens" class="char-input" value="0" onchange="savePlayerData()"> 🔖 <span id="view-zaken-discount" style="font-size: 0.7rem;"></span></div>
                 </div>
-                <div class="stat-row" style="margin-top:8px;">Руны: <input type="number" id="input-runes" class="char-input" value="0" step="0.1" onchange="savePlayerData()"> 📖</div>
-                <div class="stat-row">Парагон: <input type="number" id="input-para" class="char-input" value="0" step="0.1" onchange="savePlayerData()"> ⏳</div>
-                <div class="stat-row">Закены: <input type="number" id="input-zakens" class="char-input" value="0" onchange="savePlayerData()"> 🔖 <span id="view-zaken-discount" style="font-size: 0.7rem;"></span></div>
             </div>
 
             <div class="stat-group">
-                <div class="stat-group-title">Гильдия</div>
-                <div class="stat-row">Профессия: <span id="view-profession" class="stat-value">Нет</span></div>
-                <div class="stat-row">Орден: <span id="view-guild" class="stat-value">Нет</span></div>
-                <div class="stat-row">Ранг: <span id="view-rank" class="stat-value">0</span> 🧾</div>
-                <div class="stat-row">Продано рун: <input type="number" id="input-runes-sold" class="char-input" value="0" onchange="savePlayerData()"> 📖</div>
-                <div class="stat-row">Репутация: <input type="number" id="input-reputation" class="char-input" value="0" onchange="savePlayerData()"> 🎭</div>
-                <div class="stat-row">Сделки: <input type="number" id="input-deals" class="char-input" value="0" onchange="savePlayerData()"> 🤝</div>
-                <div class="stat-row">Сундуки: <input type="number" id="input-chests" class="char-input" value="0" onchange="savePlayerData()"> 📦</div>
-                <div class="stat-row">Куплено на ЧР: <input type="number" id="input-black-market" class="char-input" value="0" onchange="savePlayerData()"> 🕶️</div>
-                <div class="stat-row">Украдено: <input type="number" id="input-steals" class="char-input" value="0" onchange="savePlayerData()"> <span id="view-theft-fine" style="font-size: 0.6rem;"></span></div>
+                <div class="stat-group-title"><span class="group-toggle" onclick="window.toggleStatGroup(this)">[-]</span> Гильдия</div>
+                <div class="stat-group-content">
+                    <div class="stat-row">Профессия: <span id="view-profession" class="stat-value">Нет</span></div>
+                    <div class="stat-row">Орден: <span id="view-guild" class="stat-value">Нет</span></div>
+                    <div class="stat-row">Ранг: <span id="view-rank" class="stat-value">0</span> 🧾</div>
+                    <div class="stat-row">Продано рун: <input type="number" id="input-runes-sold" class="char-input" value="0" onchange="savePlayerData()"> 📖</div>
+                    <div class="stat-row">Репутация: <input type="number" id="input-reputation" class="char-input" value="0" onchange="savePlayerData()"> 🎭</div>
+                    <div class="stat-row">Сделки: <input type="number" id="input-deals" class="char-input" value="0" onchange="savePlayerData()"> 🤝</div>
+                    <div class="stat-row">Сундуки: <input type="number" id="input-chests" class="char-input" value="0" onchange="savePlayerData()"> 📦</div>
+                    <div class="stat-row">Куплено на ЧР: <input type="number" id="input-black-market" class="char-input" value="0" onchange="savePlayerData()"> 🕶️</div>
+                    <div class="stat-row">Украдено: <input type="number" id="input-steals" class="char-input" value="0" onchange="savePlayerData()"> <span id="view-theft-fine" style="font-size: 0.6rem;"></span></div>
+                </div>
             </div>
 
             <div class="stat-group">
-                <div class="stat-group-title">Атрибуты</div>
-                <div class="stat-row" id="input-stat-str-box">Сила: <input type="number" id="input-stat-str" class="char-input" value="0" onchange="savePlayerData()"> 🏮</div>
-                <div class="stat-row" id="input-stat-dex-box">Ловкость: <input type="number" id="input-stat-dex" class="char-input" value="0" onchange="savePlayerData()"> 🥢</div>
-                <div class="stat-row" id="input-stat-int-box">Интеллект: <input type="number" id="input-stat-int" class="char-input" value="0" onchange="savePlayerData()"> 🔮</div>
-                <div class="stat-row" id="input-stat-vit-box">Живучесть: <input type="number" id="input-stat-vit" class="char-input" value="0" onchange="savePlayerData()"> ⛑️</div>
+                <div class="stat-group-title"><span class="group-toggle" onclick="window.toggleStatGroup(this)">[-]</span> Атрибуты</div>
+                <div class="stat-group-content">
+                    <div class="stat-row" id="input-stat-str-box">Сила: <input type="number" id="input-stat-str" class="char-input" value="0" onchange="savePlayerData()"> 🏮</div>
+                    <div class="stat-row" id="input-stat-dex-box">Ловкость: <input type="number" id="input-stat-dex" class="char-input" value="0" onchange="savePlayerData()"> 🥢</div>
+                    <div class="stat-row" id="input-stat-int-box">Интеллект: <input type="number" id="input-stat-int" class="char-input" value="0" onchange="savePlayerData()"> 🔮</div>
+                    <div class="stat-row" id="input-stat-vit-box">Живучесть: <input type="number" id="input-stat-vit" class="char-input" value="0" onchange="savePlayerData()"> ⛑️</div>
+                </div>
             </div>
         </div>
 
         <!-- Правая колонка -->
         <div class="char-sheet-col">
             <div class="stat-group">
-                <div class="stat-group-title">Бой и Прогресс</div>
-                <div class="stat-row">Убито мобов: <input type="number" id="input-kills" class="char-input" value="0" onchange="savePlayerData()"> 💀</div>
-                <div class="stat-row">Элита (соло): <input type="number" id="input-elites-solo" class="char-input" value="0" onchange="savePlayerData()"> ☠️</div>
-                <div class="stat-row">Боссы: <input type="number" id="input-bosses" class="char-input" value="0" onchange="savePlayerData()"> 👹</div>
-                <div class="stat-row">Гоблины: <input type="number" id="input-gobs-solo" class="char-input" value="0" onchange="savePlayerData()">(С) / <input type="number" id="input-gobs-assist" class="char-input" value="0" onchange="savePlayerData()">(П)</div>
-                <div class="stat-row" style="font-size: 0.7rem;">Портал 70: <input type="text" id="input-lvl70-portal" class="char-input" style="width: 60px;" onchange="savePlayerData()"></div>
-                <div class="stat-row">Сложность: <span id="view-difficulty" class="stat-value">T1</span></div>
+                <div class="stat-group-title"><span class="group-toggle" onclick="window.toggleStatGroup(this)">[-]</span> Бой и Прогресс</div>
+                <div class="stat-group-content">
+                    <div class="stat-row">Убито мобов: <input type="number" id="input-kills" class="char-input" value="0" onchange="savePlayerData()"> 💀</div>
+                    <div class="stat-row">Элита (соло): <input type="number" id="input-elites-solo" class="char-input" value="0" onchange="savePlayerData()"> ☠️</div>
+                    <div class="stat-row">Боссы: <input type="number" id="input-bosses" class="char-input" value="0" onchange="savePlayerData()"> 👹</div>
+                    <div class="stat-row">Гоблины: <input type="number" id="input-gobs-solo" class="char-input" value="0" onchange="savePlayerData()">(С) / <input type="number" id="input-gobs-assist" class="char-input" value="0" onchange="savePlayerData()">(П)</div>
+                    <div class="stat-row" style="font-size: 0.7rem;">Портал 70: <input type="text" id="input-lvl70-portal" class="char-input" style="width: 60px;" onchange="savePlayerData()"></div>
+                    <div class="stat-row">Сложность: <span id="view-difficulty" class="stat-value">T1</span></div>
+                </div>
             </div>
 
             <div class="stat-group">
-                <div class="stat-group-title">Лут и Крафт</div>
-                <div class="stat-row">Найдено Лег: <input type="number" id="input-found-legs" class="char-input" value="0" onchange="savePlayerData()"> 📙</div>
-                <div class="stat-row">Найдено Желтых: <input type="number" id="input-found-yellows" class="char-input" value="0" onchange="savePlayerData()"> 📒</div>
-                <div class="stat-row">Ресурсы: <input type="number" id="input-res-n" class="char-input" value="0" style="width:30px;" onchange="savePlayerData()">📓 <input type="number" id="input-res-dc" class="char-input" value="0" style="width:30px;" onchange="savePlayerData()">📘📒 <input type="number" id="input-res-b" class="char-input" value="0" style="width:30px;" onchange="savePlayerData()">📙 <input type="number" id="input-res-a" class="char-input" value="0" style="width:30px;" onchange="savePlayerData()">📕</div>
-                <div class="stat-row">Реагенты: <input type="number" id="input-reagents" class="char-input" value="0" onchange="savePlayerData()"></div>
-                <div class="stat-row">Дыхание смерти: <input type="number" id="input-death-breath" class="char-input" value="0" onchange="savePlayerData()"> 🧪</div>
+                <div class="stat-group-title"><span class="group-toggle" onclick="window.toggleStatGroup(this)">[-]</span> Лут и Крафт</div>
+                <div class="stat-group-content">
+                    <div class="stat-row">Найдено Лег: <input type="number" id="input-found-legs" class="char-input" value="0" onchange="savePlayerData()"> 📙</div>
+                    <div class="stat-row">Найдено Желтых: <input type="number" id="input-found-yellows" class="char-input" value="0" onchange="savePlayerData()"> 📒</div>
+                    <div class="stat-row">Ресурсы: <input type="number" id="input-res-n" class="char-input" value="0" style="width:30px;" onchange="savePlayerData()">📓 <input type="number" id="input-res-dc" class="char-input" value="0" style="width:30px;" onchange="savePlayerData()">📘📒 <input type="number" id="input-res-b" class="char-input" value="0" style="width:30px;" onchange="savePlayerData()">📙 <input type="number" id="input-res-a" class="char-input" value="0" style="width:30px;" onchange="savePlayerData()">📕</div>
+                    <div class="stat-row">Реагенты: <input type="number" id="input-reagents" class="char-input" value="0" onchange="savePlayerData()"></div>
+                    <div class="stat-row">Дыхание смерти: <input type="number" id="input-death-breath" class="char-input" value="0" onchange="savePlayerData()"> 🧪</div>
+                </div>
             </div>
         </div>
     </div>
