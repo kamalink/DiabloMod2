@@ -199,7 +199,7 @@ window.loadCalcSkillData = function() {
                             // Фильтрация по КД (для Ускоренного восстановления)
                             if (runeData.synergyCD) {
                                 const desc = (r.desc || "").toLowerCase();
-                                if (!desc.includes("время восстановления")) return;
+                                if (!desc.includes("время восстановления") && !desc.includes("кд")) return;
                             }
 
                             synSelect.innerHTML += `<option value="${i}-${ri}">${s.name} - ${r.name} (${r.dmg}%)</option>`;
@@ -282,11 +282,26 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
         details.push(`Эфф. от сниж. затрат (${mainSkillCost} -> ${newCost}): +${addedEff.toFixed(1)}%`);
     }
 
+    // Парсинг КД для скидки на урон
+    let cooldown = 0;
+    const descText = runeData.desc || "";
+    const cdMatch = descText.match(/(?:Время восстановления|КД)[^0-9]*(\d+(?:\.\d+)?) сек/i);
+    if (cdMatch) {
+        cooldown = parseFloat(cdMatch[1]);
+    }
+    const cdDiscount = 1 + (cooldown * 0.1);
+
     if (dmg > 0) {
         let baseDmgCost = (dmg / 100) * 2 * aoeMult;
+        
+        // Применяем скидку за КД
+        if (cooldown > 0) baseDmgCost /= cdDiscount;
+
         let finalDmgCost = baseDmgCost;
         let formula = `Урон (${dmg}% / 100 * 2 [База] * ${aoeMult} [AOE])`;
         
+        if (cooldown > 0) formula += ` / ${cdDiscount.toFixed(1)} [КД]`;
+
         if (totalEffInc > 0) {
             formula += ` * (1 + ${totalEffInc.toFixed(0)}%/100 [Эфф])`;
             finalDmgCost = baseDmgCost * (1 + totalEffInc / 100);
@@ -303,12 +318,15 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
         }
 
         let dmg2Cost = (dmg2 / 100) * 2 * aoe2;
+
+        // Применяем скидку за КД и ко второму урону
+        if (cooldown > 0) dmg2Cost /= cdDiscount;
         
         if (totalEffInc > 0) {
             dmg2Cost = dmg2Cost * (1 + totalEffInc / 100);
-            details.push(`Доп. Урон (${dmg2}% / 100 * 2 [База] * ${aoe2} [AOE]) * (1 + ${totalEffInc.toFixed(0)}%/100 [Эфф]) = ${dmg2Cost.toFixed(2)}`);
+            details.push(`Доп. Урон (${dmg2}%${cooldown > 0 ? ' / ' + cdDiscount.toFixed(1) + ' [КД]' : ''}) * (1 + ${totalEffInc.toFixed(0)}% [Эфф]) = ${dmg2Cost.toFixed(2)}`);
         } else {
-            details.push(`Доп. Урон (${dmg2}% / 100 * 2 [База] * ${aoe2} [AOE]) = ${dmg2Cost.toFixed(2)}`);
+            details.push(`Доп. Урон (${dmg2}% / 100 * 2 [База] * ${aoe2} [AOE]${cooldown > 0 ? ' / ' + cdDiscount.toFixed(1) + ' [КД]' : ''}) = ${dmg2Cost.toFixed(2)}`);
         }
         
         cost += dmg2Cost;
