@@ -1155,7 +1155,16 @@ window.confirmDeath = function() {
     // 5% шанс забыть навык
     if (Math.random() < 0.05) {
         const learned = window.playerData.learnedSkills;
-        const skillNames = Object.keys(learned);
+        let skillNames = Object.keys(learned);
+
+        // Фильтруем только активные навыки (исключаем пассивные)
+        const cls = window.playerData.className;
+        if (cls && window.skillDB && window.skillDB[cls]) {
+            skillNames = skillNames.filter(sName => {
+                const skillObj = window.skillDB[cls].find(s => s.name === sName);
+                return skillObj && skillObj.category !== "Пассивные";
+            });
+        }
         if (skillNames.length > 0) {
             const randomSkill = skillNames[Math.floor(Math.random() * skillNames.length)];
             delete window.playerData.learnedSkills[randomSkill];
@@ -1285,4 +1294,51 @@ window.togglePentagram = function(id) {
         window.playerData[id] = el.checked;
         window.updateUI();
     }
+}
+
+window.handleSecondLifeClick = function(skillName) {
+    // Проверка наличия средств
+    if (window.playerData.runes < 10 && window.playerData.para < 10) {
+        window.showCustomAlert(`❌ Недостаточно средств для оплаты Второй Жизни!<br>Нужно 10 📖 или 10 ⏳.<br><br><b style="color:#ff4444">СМЕРТЬ НЕИЗБЕЖНА.</b>`);
+        window.confirmDeath(); // Автоматическая смерть
+        return;
+    }
+
+    window.showCustomConfirm(
+        `Сработала пассивка "${skillName}"?<br>Необходимо оплатить 10 📖 или 10 ⏳.`,
+        () => {
+            const modal = document.getElementById('custom-confirm-modal');
+            const msg = document.getElementById('confirm-message');
+            const btn1 = document.getElementById('confirm-yes-btn');
+            const btn2 = document.getElementById('confirm-no-btn');
+
+            msg.innerHTML = "Выберите валюту для оплаты:";
+            
+            btn1.innerText = "10 📖 (Руны)";
+            btn1.onclick = function() {
+                if (window.playerData.runes >= 10) {
+                    window.playerData.runes = parseFloat((window.playerData.runes - 10).toFixed(2));
+                    window.updateUI();
+                    modal.style.display = 'none';
+                    window.showCustomAlert("✅ Оплачено 10 📖.");
+                } else {
+                    window.showCustomAlert("❌ Недостаточно рун!");
+                }
+            };
+
+            btn2.innerText = "10 ⏳ (Парагон)";
+            btn2.onclick = function() {
+                if (window.playerData.para >= 10) {
+                    window.playerData.para = parseFloat((window.playerData.para - 10).toFixed(2));
+                    window.updateUI();
+                    modal.style.display = 'none';
+                    window.showCustomAlert("✅ Оплачено 10 ⏳.");
+                } else {
+                    window.showCustomAlert("❌ Недостаточно парагона!");
+                }
+            };
+
+            modal.style.display = 'block';
+        }
+    );
 }

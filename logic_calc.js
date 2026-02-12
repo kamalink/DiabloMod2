@@ -34,54 +34,50 @@ window.updateCalcSkills = function() {
     skillSelect.innerHTML = '';
     
     if (window.skillDB[cls]) {
-        // --- Изменено: убрана группировка, добавлено форматирование для выравнивания ---
-        // Сортируем навыки по категориям, чтобы они шли вместе, сохраняя исходный индекс
+        const allSkills = window.skillDB[cls].map((skill, index) => ({ ...skill, originalIndex: index }));
         
-        // Определяем логический порядок категорий для сортировки
+        const activeSkills = allSkills.filter(s => s.category !== "Пассивные");
+        const passiveSkills = allSkills.filter(s => s.category === "Пассивные");
+
+        // Сортировка активных навыков по категориям
         const categoryOrder = {
-            "Основное": 1,
-            "Вспомогательное": 2,
-            "Сила": 3,
-            "Мастерство": 4,
-            "Защита": 5,
-            "Чары": 6,
-            "Другое": 99
+            "Основное": 1, "Вспомогательное": 2, "Сила": 3, 
+            "Мастерство": 4, "Защита": 5, "Чары": 6, "Другое": 99
         };
-
-        const sortedSkills = [...window.skillDB[cls]]
-            .map((skill, index) => ({...skill, originalIndex: index}))
-            .sort((a, b) => {
-                const orderA = categoryOrder[a.category || "Другое"] || 99;
-                const orderB = categoryOrder[b.category || "Другое"] || 99;
-                
-                // Сначала сортируем по порядку категорий
-                if (orderA !== orderB) {
-                    return orderA - orderB;
-                }
-                // Если категории одинаковые, сортируем по имени навыка
-                return a.name.localeCompare(b.name, 'ru');
-            });
-
-        let lastCategory = null;
-        sortedSkills.forEach((skill) => {
-            const cat = skill.category || "Другое";
-            const name = skill.name;
-            let displayString = '';
-            
-            if (cat !== lastCategory) {
-                const catString = `[${cat}]`;
-                const maxCatWidth = 18; // Примерная ширина для "[Вспомогательное] "
-                const paddingNeeded = maxCatWidth - catString.length;
-                const padding = '&nbsp;'.repeat(Math.max(2, paddingNeeded));
-                displayString = `${catString}${padding}${name}`;
-                lastCategory = cat;
-            } else {
-                const padding = '&nbsp;'.repeat(18 + 2); // Отступ для навыков той же категории
-                displayString = `${padding}${name}`;
-            }
-
-            skillSelect.innerHTML += `<option value="${skill.originalIndex}">${displayString}</option>`;
+        activeSkills.sort((a, b) => {
+            const orderA = categoryOrder[a.category || "Другое"] || 99;
+            const orderB = categoryOrder[b.category || "Другое"] || 99;
+            if (orderA !== orderB) return orderA - orderB;
+            return a.name.localeCompare(b.name, 'ru');
         });
+
+        let html = '';
+
+        // Группа активных навыков
+        if (activeSkills.length > 0) {
+            html += `<optgroup label="АКТИВНЫЕ НАВЫКИ">`;
+            let lastCategory = null;
+            activeSkills.forEach(skill => {
+                const cat = skill.category || "Другое";
+                if (cat !== lastCategory) {
+                    html += `<option disabled>&nbsp;&nbsp;[${cat}]</option>`;
+                    lastCategory = cat;
+                }
+                html += `<option value="${skill.originalIndex}">&nbsp;&nbsp;&nbsp;&nbsp;${skill.name}</option>`;
+            });
+            html += `</optgroup>`;
+        }
+
+        // Группа пассивных навыков
+        if (passiveSkills.length > 0) {
+            html += `<optgroup label="ПАССИВНЫЕ НАВЫКИ">`;
+            passiveSkills.sort((a, b) => a.name.localeCompare(b.name, 'ru')).forEach(skill => {
+                html += `<option value="${skill.originalIndex}">${skill.name}</option>`;
+            });
+            html += `</optgroup>`;
+        }
+
+        skillSelect.innerHTML = html;
     }
     window.updateCalcRunes();
 }
@@ -199,6 +195,13 @@ window.loadCalcSkillData = function() {
                         if (r.dmg > 0) {
                             // Фильтрация по стихии, если указана в elemSynergy
                             if (runeData.elemSynergy && !r.name.includes(runeData.elemSynergy)) return;
+                            
+                            // Фильтрация по КД (для Ускоренного восстановления)
+                            if (runeData.synergyCD) {
+                                const desc = (r.desc || "").toLowerCase();
+                                if (!desc.includes("время восстановления")) return;
+                            }
+
                             synSelect.innerHTML += `<option value="${i}-${ri}">${s.name} - ${r.name} (${r.dmg}%)</option>`;
                         }
                     });
@@ -221,9 +224,17 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
     const runeData = window.skillDB[className][skillIdx].runes[runeIdx];
     if (!runeData) return { cost: 0, details: [] };
 
+    const isPassive = window.skillDB[className][skillIdx].category === "Пассивные";
+
     const dmg = runeData.dmg || 0;
     let aoeMult = runeData.aoe || 1;
-    if (aoeMult === 2.5) {
+    
+    // Если пассивка, принудительно ставим AOE "В любую точку"
+    if (isPassive) {
+        if (className === 'Чародей' || className === 'Колдун') aoeMult = 1.6;
+        else if (className === 'Охотник на демонов') aoeMult = 1.9;
+        else aoeMult = 2.5;
+    } else if (aoeMult === 2.5) {
         if (className === 'Чародей' || className === 'Колдун') aoeMult = 1.6;
         else if (className === 'Охотник на демонов') aoeMult = 1.9;
     }
@@ -241,6 +252,8 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
     const costRedFlat = runeData.costRedFlat || 0;
     const dmg2 = runeData.dmg2 || 0;
     let aoe2 = runeData.aoe2 || 1;
+    const isSynergyCD = runeData.synergyCD || false;
+    const isBuffAoe = runeData.buffIsAoe || false;
     
     // Для синергии и снижения затрат берем значения из UI, так как они зависят от выбора пользователя
     const mainSkillCost = parseFloat(document.getElementById('calc-main-skill-cost').value) || 0;
@@ -322,14 +335,28 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
     if (heal > 0) { 
         let val = (heal / 5) * 2;
         cost += val; 
-        details.push(`Лечение (${heal}% / 5 [База] * 2 [Множ]) = ${val.toFixed(2)}`); 
+        details.push(`Лечение/Щит (${heal}% / 5 [База] * 2 [Множ]) = ${val.toFixed(2)}`); 
     }
 
     if (buffDmg > 0) { 
         let multiplier = isBuffPerm ? 4 : 2;
+        
+        // Спец. правило для пассивок: 20% = 10 рун (1% = 0.5 рун)
+        // Базовая формула (buffDmg / 10) * X. Значит X = 5.
+        if (isPassive) multiplier = 5;
+
         let val = (buffDmg / 10) * multiplier;
+        // Для пассивок применяем AOE множитель к баффу урона
+        if (isPassive) val *= aoeMult;
         cost += val; 
-        details.push(`Бафф Урона (${buffDmg}% / 10 [База] * ${multiplier} [Тип]) = ${val.toFixed(2)}`); 
+        let formula = "";
+        if (isPassive) {
+            formula = `Бафф Урона (${buffDmg}% * 0.5 [Пассивка])`;
+        } else {
+            formula = `Бафф Урона (${buffDmg}% / 10 [База] * ${multiplier} [Тип])`;
+        }
+        if (isPassive) formula += ` * ${aoeMult} [AOE]`;
+        details.push(`${formula} = ${val.toFixed(2)}`); 
     }
     if (buffDef > 0) { 
         let multiplier = 1;
@@ -337,9 +364,23 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
         else if (buffDuration >= 10 && buffDuration <= 20) multiplier = 2;
         else multiplier = 1;
 
+        // Спец. правило для пассивок: 20% = 15 рун (1% = 0.75 рун)
+        // Базовая формула (buffDef / 5) * X. Значит X = 3.75.
+        if (isPassive) multiplier = 3.75;
+
         let val = (buffDef / 5) * multiplier;
+        
+        // Если бафф защиты массовый (или дебафф врагов), применяем AOE
+        if (isBuffAoe) val *= aoeMult;
+
         cost += val; 
-        let desc = `Бафф Защиты (${buffDef}% / 5 [База] * ${multiplier} [Тип])`;
+        let desc = "";
+        if (isPassive) {
+            desc = `Бафф Защиты (${buffDef}% * 0.75 [Пассивка])`;
+        } else {
+            desc = `Бафф Защиты (${buffDef}% / 5 [База] * ${multiplier} [Тип])`;
+        }
+        if (isBuffAoe) desc += ` * ${aoeMult} [AOE]`;
         details.push(`${desc} = ${val.toFixed(2)}`); 
     }
 
@@ -359,10 +400,12 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
         details.push(`Восст. ресурса (${resGain} / ${maxRes} [Макс] / 5% [База]) = ${val.toFixed(2)}`);
     }
 
-    if (window.skillDB[className] && window.skillDB[className][skillIdx] && window.skillDB[className][skillIdx].runes[runeIdx].customCost) {
-        let cc = window.skillDB[className][skillIdx].runes[runeIdx].customCost;
+    const runeDB = window.skillDB[className] && window.skillDB[className][skillIdx] && window.skillDB[className][skillIdx].runes[runeIdx];
+    if (runeDB && runeDB.customCost !== undefined) {
+        let cc = runeDB.customCost;
         cost += cc;
-        details.push(`Доп. эффект: ${cc}`);
+        let desc = runeDB.customCostDesc || `Доп. эффект`;
+        details.push(`${desc}: ${cc}`);
     }
 
     // Специальная логика для Архонта - Замедление времени
@@ -391,16 +434,24 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
             if (tDmg > 0) {
                 const targetCost = (tDmg / 100) * 2 * tAoe;
                 
-                let multiplier = 1;
-                if (isBuffPerm) multiplier = 4;
-                else if (buffDuration >= 10 && buffDuration <= 20) multiplier = 2;
+                if (isSynergyCD) {
+                    // Расчет для Ускоренного восстановления (только эффективность)
+                    const addedCost = targetCost * (dmgAmp / 100);
+                    cost += addedCost;
+                    details.push(`Эффективность КД: ${targetCost.toFixed(2)} [Цена цели] * ${dmgAmp}% = ${addedCost.toFixed(2)}`);
+                } else {
+                    // Стандартная синергия (Урон + Бафф)
+                    let multiplier = 1;
+                    if (isBuffPerm) multiplier = 4;
+                    else if (buffDuration >= 10 && buffDuration <= 20) multiplier = 2;
 
-                const part1 = targetCost * (dmgAmp / 100);
-                const part2 = (dmgAmp / 10) * multiplier * aoeMult;
-                const addedCost = part1 + part2;
-                
-                cost += addedCost;
-                details.push(`Синергия: (${targetCost.toFixed(2)} [Цена цели] * ${dmgAmp}% [Усил]) + (${(dmgAmp/10*multiplier).toFixed(1)} [Бафф] * ${aoeMult} [AOE]) = ${addedCost.toFixed(2)}`);
+                    const part1 = targetCost * (dmgAmp / 100);
+                    const part2 = (dmgAmp / 10) * multiplier * aoeMult;
+                    const addedCost = part1 + part2;
+                    
+                    cost += addedCost;
+                    details.push(`Синергия: (${targetCost.toFixed(2)} [Цена цели] * ${dmgAmp}% [Усил]) + (${(dmgAmp/10*multiplier).toFixed(1)} [Бафф] * ${aoeMult} [AOE]) = ${addedCost.toFixed(2)}`);
+                }
             }
         } else {
             details.push(`<span style="color:#ff4444">⚠️ Выберите навык для расчета синергии!</span>`);

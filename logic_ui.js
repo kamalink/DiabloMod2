@@ -353,6 +353,25 @@ window.openIframe = function(url) {
     modal.style.display = 'flex';
 }
 
+window.applyTheme = function(className) {
+    document.body.className = ''; // Сброс классов
+    if (!className) return;
+    
+    const map = {
+        "Варвар": "theme-barbarian",
+        "Чародей": "theme-wizard",
+        "Монах": "theme-monk",
+        "Колдун": "theme-wd",
+        "Охотник на демонов": "theme-dh",
+        "Крестоносец": "theme-crusader",
+        "Некромант": "theme-necromancer"
+    };
+    
+    if (map[className]) {
+        document.body.classList.add(map[className]);
+    }
+}
+
 window.updateUI = function() {
     if (!window.playerData || !window.playerData.name) return;
     
@@ -451,6 +470,8 @@ window.updateUI = function() {
     window.renderLearnedSkillsWidget();
     window.renderInventoryWidget();
     localStorage.setItem('d3mod_player', JSON.stringify(window.playerData));
+    
+    window.applyTheme(window.playerData.className);
 
     // Обновляем состояние кнопок профессий в открытом окне (если оно открыто)
     if (window.updateProfessionButtonState) window.updateProfessionButtonState();
@@ -638,9 +659,17 @@ window.renderLearnedSkillsWidget = function() {
         return;
     }
 
+    const secondLifeSkills = ["Нестабильная аномалия"];
+
     let html = '';
     for (const [skill, runes] of Object.entries(skills)) {
-        html += `<div style="margin-bottom: 4px; line-height: 1.2;"><span style="color: #fff; font-weight: bold;">${skill}</span><br><span style="color: #888; font-size: 0.7rem;">${runes.join(', ')}</span></div>`;
+        let skillNameHtml = `<span style="color: #fff; font-weight: bold;">${skill}</span>`;
+        
+        if (secondLifeSkills.includes(skill)) {
+            skillNameHtml = `<span style="color: #ff7979; font-weight: bold; cursor: pointer; border-bottom: 1px dashed #ff7979;" onclick="window.handleSecondLifeClick('${skill}')" title="Нажмите для оплаты срабатывания">${skill} (2-я жизнь)</span>`;
+        }
+
+        html += `<div style="margin-bottom: 4px; line-height: 1.2;">${skillNameHtml}<br><span style="color: #888; font-size: 0.7rem;">${runes.join(', ')}</span></div>`;
     }
     content.innerHTML = html;
 }

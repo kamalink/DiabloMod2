@@ -11,6 +11,20 @@ body, html {
     scrollbar-width: none; /* Firefox: скрываем скроллбар */
     -ms-overflow-style: none; /* IE/Edge */
 }
+
+:root {
+    --theme-border: #d4af37;
+    --theme-highlight: #d4af37;
+    --theme-bg-tint: rgba(212, 175, 55, 0.05);
+}
+
+body.theme-barbarian { --theme-border: #8a0000; --theme-highlight: #ff4444; --theme-bg-tint: rgba(138, 0, 0, 0.1); }
+body.theme-wizard { --theme-border: #4834d4; --theme-highlight: #a29bfe; --theme-bg-tint: rgba(72, 52, 212, 0.1); }
+body.theme-monk { --theme-border: #b8860b; --theme-highlight: #ffd700; --theme-bg-tint: rgba(184, 134, 11, 0.1); }
+body.theme-wd { --theme-border: #006400; --theme-highlight: #32cd32; --theme-bg-tint: rgba(0, 100, 0, 0.1); }
+body.theme-dh { --theme-border: #444; --theme-highlight: #bdc3c7; --theme-bg-tint: rgba(68, 68, 68, 0.2); }
+body.theme-crusader { --theme-border: #77aaff; --theme-highlight: #add8e6; --theme-bg-tint: rgba(119, 170, 255, 0.1); }
+
 /* Контейнеры, которые будут плавно появляться */
 .menu-container,
 #char-sheet,
@@ -100,7 +114,7 @@ body::after {
 .header-title {
     font-family: 'Cinzel', serif; font-weight: 700;
     font-size: 2rem; margin-bottom: 40px;
-    color: #d4af37; text-shadow: 2px 2px 5px #000;
+    color: var(--theme-highlight); text-shadow: 2px 2px 5px #000;
 }
 
 /* КНОПКИ */
@@ -202,7 +216,7 @@ body::after {
     padding: 10px; font-size: 0.9rem; background: #1a1a1a; border-color: #444; 
 }
 
-#window-title { font-family: 'Cinzel', serif; font-weight: 700; color: #d4af37; text-align: center; border-bottom: 1px solid #5a0000; padding-bottom: 10px; }
+#window-title { font-family: 'Cinzel', serif; font-weight: 700; color: var(--theme-highlight); text-align: center; border-bottom: 1px solid #5a0000; padding-bottom: 10px; }
 #window-content { font-size: 1.15rem; line-height: 1.6; color: #ccc; margin-top: 20px; }
 .close-x { position: absolute; top: 15px; right: 15px; color: #ff4444; cursor: pointer; font-size: 1.5rem; text-shadow: 0 0 5px #000; }
 
@@ -215,7 +229,7 @@ body::after {
 
 table { width: 100%; border-collapse: collapse; margin: 15px 0; }
 th, td { border: 1px solid #333; padding: 8px; text-align: center; }
-th { color: #d4af37; }
+th { color: var(--theme-highlight); }
 
 /* АДАПТАЦИЯ ПОД ТЕЛЕФОН */
 @media (max-width: 768px) {
@@ -448,7 +462,7 @@ th { color: #d4af37; }
     width: 550px; /* Увеличена ширина для 2 колонок */
     /* Новый темный стиль */
     background: linear-gradient(180deg, #1a1a1a 0%, #050505 100%);
-    border: 1px solid #d4af37;
+    border: 1px solid var(--theme-border);
     border-radius: 2px;
     padding: 15px;
     color: #b8a078;
@@ -480,7 +494,7 @@ th { color: #d4af37; }
 
 .stat-group-title {
     font-size: 0.75rem;
-    color: #d4af37;
+    color: var(--theme-highlight);
     text-transform: uppercase;
     letter-spacing: 1px;
     font-weight: bold;
@@ -523,17 +537,17 @@ th { color: #d4af37; }
 }
 .char-input:focus {
     outline: none;
-    border-bottom: 1px solid #d4af37;
+    border-bottom: 1px solid var(--theme-highlight);
     background: rgba(255,255,255,0.05);
 }
-.name-input { width: 100%; text-align: center; font-size: 1.2rem; color: #d4af37; border-bottom: none; }
+.name-input { width: 100%; text-align: center; font-size: 1.2rem; color: var(--theme-highlight); border-bottom: none; }
 .money-input { width: 35px; text-align: right; }
 
 /* Переопределение цветов для темного фона */
 #view-class { color: #66ccff !important; font-weight: bold; }
 #view-build { color: #888 !important; }
 #view-potion-price, #view-xp-bonus, #view-zaken-discount, #view-theft-fine { color: #aaa !important; }
-#view-guild { color: #d4af37 !important; font-weight: bold; }
+#view-guild { color: var(--theme-highlight) !important; font-weight: bold; }
 
 .money-row { display: flex; justify-content: space-around; font-size: 0.8rem; margin-top: 5px; }
 .money-unit { display: flex; align-items: center; gap: 3px; }
@@ -639,7 +653,7 @@ th { color: #d4af37; }
 
 /* Подсветка поиска */
 .search-highlight {
-    background-color: #d4af37;
+    background-color: var(--theme-highlight);
     color: #000;
     font-weight: bold;
 }
@@ -683,7 +697,7 @@ th { color: #d4af37; }
 }
 .selectable-item:hover {
     color: #fff;
-    text-shadow: 0 0 5px #d4af37;
+    text-shadow: 0 0 5px var(--theme-highlight);
 }
 .selectable-item.selected {
     color: #66ff66;
