@@ -69,7 +69,7 @@ body::after {
     background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('bg.jpg');
     background-size: cover; background-position: center; z-index: -1;
     transform: scale(1.1);
-    animation: diabloShake 20s ease-in-out infinite;
+    animation: diabloShake 40s ease-in-out infinite;
 }
 
 @keyframes diabloShake {

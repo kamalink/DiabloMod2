@@ -9,9 +9,19 @@ window.openSkillCalculator = function() {
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
 
-    classSelect.innerHTML = '<option value="" disabled selected>Выберите класс</option>';
-    for (let cls in window.skillDB) {
-        classSelect.innerHTML += `<option value="${cls}">${cls}</option>`;
+    classSelect.innerHTML = '';
+    const playerClass = window.playerData.className;
+
+    // Если у игрока выбран класс и он есть в базе навыков
+    if (playerClass && window.skillDB[playerClass] && playerClass !== "Класс не выбран") {
+        classSelect.innerHTML = `<option value="${playerClass}">${playerClass}</option>`;
+        classSelect.value = playerClass;
+    } else {
+        // Иначе показываем все (например, для тестов или если класс не выбран)
+        classSelect.innerHTML = '<option value="" disabled selected>Выберите класс</option>';
+        for (let cls in window.skillDB) {
+            classSelect.innerHTML += `<option value="${cls}">${cls}</option>`;
+        }
     }
     
     window.updateCalcSkills();
@@ -182,15 +192,17 @@ window.loadCalcSkillData = function() {
             if (runeData.dmgAmp > 0) {
                 synergyBox.style.display = 'block';
                 const synSelect = document.getElementById('calc-synergy-skill');
-                if (synSelect.dataset.class !== cls) {
-                    synSelect.innerHTML = '<option value="">-- Выберите навык --</option>';
-                    window.skillDB[cls].forEach((s, i) => {
-                        s.runes.forEach((r, ri) => {
-                            if (r.dmg > 0) synSelect.innerHTML += `<option value="${i}-${ri}">${s.name} - ${r.name} (${r.dmg}%)</option>`;
-                        });
+                
+                synSelect.innerHTML = '<option value="">-- Выберите навык --</option>';
+                window.skillDB[cls].forEach((s, i) => {
+                    s.runes.forEach((r, ri) => {
+                        if (r.dmg > 0) {
+                            // Фильтрация по стихии, если указана в elemSynergy
+                            if (runeData.elemSynergy && !r.name.includes(runeData.elemSynergy)) return;
+                            synSelect.innerHTML += `<option value="${i}-${ri}">${s.name} - ${r.name} (${r.dmg}%)</option>`;
+                        }
                     });
-                    synSelect.dataset.class = cls;
-                }
+                });
             } else {
                 synergyBox.style.display = 'none';
             }
@@ -260,10 +272,10 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
     if (dmg > 0) {
         let baseDmgCost = (dmg / 100) * 2 * aoeMult;
         let finalDmgCost = baseDmgCost;
-        let formula = `Урон (${dmg}% * 2 * ${aoeMult})`;
+        let formula = `Урон (${dmg}% / 100 * 2 [База] * ${aoeMult} [AOE])`;
         
         if (totalEffInc > 0) {
-            formula += ` * (1 + ${totalEffInc.toFixed(1)}%)`;
+            formula += ` * (1 + ${totalEffInc.toFixed(0)}%/100 [Эфф])`;
             finalDmgCost = baseDmgCost * (1 + totalEffInc / 100);
         }
         
@@ -281,9 +293,9 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
         
         if (totalEffInc > 0) {
             dmg2Cost = dmg2Cost * (1 + totalEffInc / 100);
-            details.push(`Доп. Урон (${dmg2}% * 2 * ${aoe2}) * (1 + ${totalEffInc.toFixed(1)}%) = ${dmg2Cost.toFixed(2)}`);
+            details.push(`Доп. Урон (${dmg2}% / 100 * 2 [База] * ${aoe2} [AOE]) * (1 + ${totalEffInc.toFixed(0)}%/100 [Эфф]) = ${dmg2Cost.toFixed(2)}`);
         } else {
-            details.push(`Доп. Урон (${dmg2}% * 2 * ${aoe2}) = ${dmg2Cost.toFixed(2)}`);
+            details.push(`Доп. Урон (${dmg2}% / 100 * 2 [База] * ${aoe2} [AOE]) = ${dmg2Cost.toFixed(2)}`);
         }
         
         cost += dmg2Cost;
@@ -293,31 +305,31 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
         let baseSlowCost = slow / 20;
         let val = baseSlowCost * aoeMult * slowMult;
         cost += val; 
-        let formula = `Замедл (${slow}% / 20)`;
-        if (aoeMult !== 1) formula += ` * ${aoeMult}(AOE)`;
-        if (slowMult !== 1) formula += ` * ${slowMult}(Класс)`;
+        let formula = `Замедл (${slow}% / 20 [База])`;
+        if (aoeMult !== 1) formula += ` * ${aoeMult} [AOE]`;
+        if (slowMult !== 1) formula += ` * ${slowMult} [Класс]`;
         details.push(`${formula} = ${val.toFixed(2)}`); 
     }
     if (stun > 0) { 
         let val = stun * aoeMult * controlMult;
         cost += val; 
-        let formula = `Стан (${stun}с)`;
-        if (aoeMult !== 1) formula += ` * ${aoeMult}(AOE)`;
-        if (controlMult !== 1) formula += ` * ${controlMult}(Класс)`;
+        let formula = `Стан (${stun}с * 1 [Цена/с])`;
+        if (aoeMult !== 1) formula += ` * ${aoeMult} [AOE]`;
+        if (controlMult !== 1) formula += ` * ${controlMult} [Класс]`;
         details.push(`${formula} = ${val.toFixed(2)}`); 
     }
 
     if (heal > 0) { 
         let val = (heal / 5) * 2;
         cost += val; 
-        details.push(`Лечение (${heal}% / 5 * 2) = ${val.toFixed(2)}`); 
+        details.push(`Лечение (${heal}% / 5 [База] * 2 [Множ]) = ${val.toFixed(2)}`); 
     }
 
     if (buffDmg > 0) { 
         let multiplier = isBuffPerm ? 4 : 2;
         let val = (buffDmg / 10) * multiplier;
         cost += val; 
-        details.push(`Бафф Урона (${buffDmg}% / 10 * ${multiplier}) = ${val.toFixed(2)}`); 
+        details.push(`Бафф Урона (${buffDmg}% / 10 [База] * ${multiplier} [Тип]) = ${val.toFixed(2)}`); 
     }
     if (buffDef > 0) { 
         let multiplier = 1;
@@ -327,7 +339,7 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
 
         let val = (buffDef / 5) * multiplier;
         cost += val; 
-        let desc = `Бафф Защиты (${buffDef}% / 5 * ${multiplier})`;
+        let desc = `Бафф Защиты (${buffDef}% / 5 [База] * ${multiplier} [Тип])`;
         details.push(`${desc} = ${val.toFixed(2)}`); 
     }
 
@@ -344,13 +356,24 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
         const resGainPercent = (resGain / maxRes) * 100;
         const val = (resGainPercent / 5) * 1;
         cost += val;
-        details.push(`Восст. ресурса (${resGain} / ${maxRes} / 5%) = ${val.toFixed(2)}`);
+        details.push(`Восст. ресурса (${resGain} / ${maxRes} [Макс] / 5% [База]) = ${val.toFixed(2)}`);
     }
 
     if (window.skillDB[className] && window.skillDB[className][skillIdx] && window.skillDB[className][skillIdx].runes[runeIdx].customCost) {
         let cc = window.skillDB[className][skillIdx].runes[runeIdx].customCost;
         cost += cc;
         details.push(`Доп. эффект: ${cc}`);
+    }
+
+    // Специальная логика для Архонта - Замедление времени
+    const skillName = window.skillDB[className][skillIdx].name;
+    const runeName = window.skillDB[className][skillIdx].runes[runeIdx].name;
+    if (skillName === "Архонт" && runeName.includes("Замедление времени")) {
+        const slowTimeLearned = window.playerData.learnedSkills["Замедление времени"];
+        if (!slowTimeLearned || slowTimeLearned.length === 0) {
+            cost += 7.20;
+            details.push(`Вкл. навык "Замедление времени" (не изучен): 7.20`);
+        }
     }
 
     if (dmgAmp > 0) {
@@ -377,7 +400,7 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
                 const addedCost = part1 + part2;
                 
                 cost += addedCost;
-                details.push(`Синергия: (${targetCost.toFixed(2)} * ${dmgAmp}%) + (${(dmgAmp/10*multiplier).toFixed(1)} * ${aoeMult}) = ${addedCost.toFixed(2)}`);
+                details.push(`Синергия: (${targetCost.toFixed(2)} [Цена цели] * ${dmgAmp}% [Усил]) + (${(dmgAmp/10*multiplier).toFixed(1)} [Бафф] * ${aoeMult} [AOE]) = ${addedCost.toFixed(2)}`);
             }
         } else {
             details.push(`<span style="color:#ff4444">⚠️ Выберите навык для расчета синергии!</span>`);
@@ -387,7 +410,7 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
     if (dmg === 0 && dmg2 === 0 && totalEffInc > 0) {
         let oldCost = cost;
         cost = cost * (1 + totalEffInc / 100);
-        details.push(`Общая Эфф. (+${totalEffInc.toFixed(1)}%): ${oldCost.toFixed(2)} -> ${cost.toFixed(2)}`);
+        details.push(`Общая Эфф.: ${oldCost.toFixed(2)} * (1 + ${totalEffInc.toFixed(0)}%/100 [Эфф]) = ${cost.toFixed(2)}`);
     }
 
     return { cost: cost, details: details };
@@ -434,6 +457,16 @@ window.buySkill = function() {
     if (!className || skillIdx === '' || runeIdx === '') {
         window.showCustomAlert("⚠️ Сначала выберите класс, навык и руну.");
         return;
+    }
+
+    // Проверка синергии
+    const runeData = window.skillDB[className][skillIdx].runes[runeIdx];
+    if (runeData.dmgAmp > 0) {
+        const synVal = document.getElementById('calc-synergy-skill').value;
+        if (!synVal) {
+            window.showCustomAlert("⚠️ Выберите навык для синергии!");
+            return;
+        }
     }
 
     if (!window.playerData.className || window.playerData.className === "Класс не выбран") {

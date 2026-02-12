@@ -158,7 +158,7 @@ window.makeDraggable = function(elmnt) {
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
     
     // Ищем заголовок для перетаскивания
-    const header = elmnt.querySelector('h2') || elmnt.querySelector('h3') || elmnt.querySelector('#window-title') || elmnt.querySelector('#prompt-title') || elmnt.querySelector('#confirm-title');
+    const header = elmnt.querySelector('h2') || elmnt.querySelector('h3') || elmnt.querySelector('#window-title') || elmnt.querySelector('#prompt-title') || elmnt.querySelector('#confirm-title') || elmnt.querySelector('#learned-skills-title') || elmnt.querySelector('#inventory-title');
     
     if (header) {
         header.onmousedown = dragMouseDown;
