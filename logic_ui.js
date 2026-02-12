@@ -7,14 +7,6 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
     area.innerHTML = '';
     
     // Текстовые вставки для разделов
-    if (menuId === 'items_menu') {
-        const infoMsg = document.createElement('div');
-        infoMsg.style.color = '#d4af37';
-        infoMsg.style.textAlign = 'center';
-        infoMsg.style.marginBottom = '15px';
-        infoMsg.innerHTML = `<button class="d2-button sub-btn" onclick="window.openSellPurchasedModal()">ПРОДАЖА КУПЛЕННОГО (50%)</button>`;
-        area.appendChild(infoMsg);
-    }
     if (menuId === 'hunters_guild_menu') {
         const infoMsg = document.createElement('p');
         infoMsg.style.color = '#ff4444';
@@ -689,12 +681,57 @@ window.renderInventoryWidget = function() {
 
     let html = '';
     inv.forEach(item => {
-        html += `<div style="margin-bottom: 4px; line-height: 1.2; border-bottom: 1px dashed #333; padding-bottom: 2px;">
+        const propsStr = (item.properties || []).join(', ').replace(/'/g, "&apos;");
+        const safeName = item.name.replace(/'/g, "&apos;");
+        
+        html += `<div style="margin-bottom: 4px; line-height: 1.2; border-bottom: 1px dashed #333; padding-bottom: 2px; cursor: help;" onmousemove="window.showItemTooltip(event, '${safeName}', '${item.grade}', ${item.level}, ${item.buyPrice}, ${item.isCrafted}, '${propsStr}')" onmouseleave="window.hideItemTooltip()">
             <span style="color: #fff; font-weight: bold;">${item.name}</span><br>
             <span style="color: #888; font-size: 0.7rem;">${item.grade} | Lvl ${item.level} | ${window.formatCurrency(item.buyPrice)}</span>
         </div>`;
     });
     content.innerHTML = html;
+}
+
+window.showItemTooltip = function(e, name, grade, level, price, isCrafted, props) {
+    let tooltip = document.getElementById('item-tooltip');
+    if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.id = 'item-tooltip';
+        tooltip.style.position = 'fixed';
+        tooltip.style.background = 'rgba(0, 0, 0, 0.95)';
+        tooltip.style.border = '1px solid #d4af37';
+        tooltip.style.color = '#fff';
+        tooltip.style.padding = '10px';
+        tooltip.style.fontSize = '0.85rem';
+        tooltip.style.borderRadius = '4px';
+        tooltip.style.pointerEvents = 'none';
+        tooltip.style.zIndex = '10000';
+        tooltip.style.boxShadow = '0 0 10px #000';
+        tooltip.style.maxWidth = '250px';
+        document.body.appendChild(tooltip);
+    }
+    
+    const typeText = isCrafted ? "<span style='color:#a29bfe'>Создано (Крафт)</span>" : "<span style='color:#66ff66'>Куплено</span>";
+    let propsHtml = "";
+    if (props) {
+        propsHtml = `<div style="margin-top:5px; border-top:1px solid #555; padding-top:5px; color:#ccc; font-style:italic;">${props}</div>`;
+    }
+    
+    tooltip.innerHTML = `<strong style="color:#d4af37; font-size:1rem;">${name}</strong><br>
+                         Грейд: ${grade}<br>
+                         Уровень: ${level}<br>
+                         Цена: ${window.formatCurrency(price)}<br>
+                         ${typeText}
+                         ${propsHtml}`;
+    
+    tooltip.style.display = 'block';
+    tooltip.style.top = (e.clientY + 15) + 'px';
+    tooltip.style.left = (e.clientX + 15) + 'px';
+}
+
+window.hideItemTooltip = function() {
+    const tooltip = document.getElementById('item-tooltip');
+    if (tooltip) tooltip.style.display = 'none';
 }
 
 window.initInputTooltips = function() {
@@ -739,6 +776,8 @@ window.initInputTooltips = function() {
         };
     });
 }
+
+
 
 window.filterItems = function(inputElement) {
     const searchTerm = inputElement.value;

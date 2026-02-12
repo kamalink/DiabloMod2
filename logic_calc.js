@@ -254,6 +254,7 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
     let aoe2 = runeData.aoe2 || 1;
     const isSynergyCD = runeData.synergyCD || false;
     const isBuffAoe = runeData.buffIsAoe || false;
+    const defType = runeData.defType || "";
     
     // Для синергии и снижения затрат берем значения из UI, так как они зависят от выбора пользователя
     const mainSkillCost = parseFloat(document.getElementById('calc-main-skill-cost').value) || 0;
@@ -376,31 +377,73 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
         if (isPassive) formula += ` * ${aoeMult} [AOE]`;
         details.push(`${formula} = ${val.toFixed(2)}`); 
     }
-    if (buffDef > 0) { 
-        let multiplier = 1;
-        if (isBuffPerm) multiplier = 4;
-        else if (buffDuration >= 10 && buffDuration <= 20) multiplier = 2;
-        else multiplier = 1;
 
-        // Спец. правило для пассивок: 20% = 15 рун (1% = 0.75 рун)
-        // Базовая формула (buffDef / 5) * X. Значит X = 3.75.
-        if (isPassive) multiplier = 3.75;
+    // Обработка нескольких баффов защиты (buffDef, buffDef2, buffDef3)
+    const defBuffs = [
+        { val: runeData.buffDef || 0, type: runeData.defType || "" },
+        { val: runeData.buffDef2 || 0, type: runeData.defType2 || "" },
+        { val: runeData.buffDef3 || 0, type: runeData.defType3 || "" }
+    ];
 
-        let val = (buffDef / 5) * multiplier;
-        
-        // Если бафф защиты массовый (или дебафф врагов), применяем AOE
-        if (isBuffAoe) val *= aoeMult;
+    defBuffs.forEach((buff, idx) => {
+        if (buff.val > 0) {
+            let multiplier = 1;
+            if (isBuffPerm) multiplier = 4;
+            else if (buffDuration >= 10 && buffDuration <= 20) multiplier = 2;
+            else multiplier = 1;
 
-        cost += val; 
-        let desc = "";
-        if (isPassive) {
-            desc = `Бафф Защиты (${buffDef}% * 0.75 [Пассивка])`;
-        } else {
-            desc = `Бафф Защиты (${buffDef}% / 5 [База] * ${multiplier} [Тип])`;
+            // Спец. правило для пассивок: 20% = 15 рун (1% = 0.75 рун)
+            if (isPassive) multiplier = 3.75;
+
+            let val = (buff.val / 5) * multiplier;
+
+            // Множители типа защиты
+            let typeMult = 1;
+            let typeName = "";
+            
+            if (buff.type === "res") {
+                if (className === "Чародей" || className === "Колдун") typeMult = 1;
+                else typeMult = 1.5;
+                typeName = " [Сопрот]";
+            } else if (buff.type === "armor") {
+                if (className === "Варвар" || className === "Крестоносец") typeMult = 1;
+                else typeMult = 1.5;
+                typeName = " [Броня]";
+            } else if (buff.type === "dodge") {
+                if (className === "Монах" || className === "Охотник на демонов") typeMult = 1;
+                else typeMult = 1.5;
+                typeName = " [Уклон]";
+            }
+
+            val *= typeMult;
+            
+            // Если бафф защиты массовый (или дебафф врагов), применяем AOE
+            if (isBuffAoe) {
+                val *= aoeMult;
+                // Правило 75/25: Владелец платит 75%
+                val *= 0.75;
+            }
+
+            cost += val; 
+            let desc = "";
+            if (isPassive) {
+                desc = `Бафф Защиты ${idx+1} (${buff.val}% * 0.75 [Пассивка]${typeMult > 1 ? ' * ' + typeMult + typeName : ''})`;
+            } else {
+                desc = `Бафф Защиты ${idx+1} (${buff.val}% / 5 [База] * ${multiplier} [Тип]${typeMult > 1 ? ' * ' + typeMult + typeName : ''})`;
+            }
+            if (isBuffAoe) {
+                desc += ` * ${aoeMult} [AOE] * 0.75 [Командный]`;
+                
+                // Расчет стоимости для второго игрока (25%)
+                // val - это 75%. Полная цена = val / 0.75. 2-й игрок платит 25% от полной (или 1/3 от val).
+                const costFor2nd = val / 3;
+                details.push(`${desc} = ${val.toFixed(2)}`);
+                details.push(`<span style="color:#ff7979; font-weight:bold; margin-left:10px;">👤 2-й игрок платит: ${costFor2nd.toFixed(2)} 📖</span>`);
+            } else {
+                details.push(`${desc} = ${val.toFixed(2)}`); 
+            }
         }
-        if (isBuffAoe) desc += ` * ${aoeMult} [AOE]`;
-        details.push(`${desc} = ${val.toFixed(2)}`); 
-    }
+    });
 
     const maxResources = {
         "Чародей": 100,
@@ -1131,6 +1174,8 @@ window.sellResources = function() {
         let totalYen = 0;
         const level = parseInt(levelInput.value) || 1;
         window.lastResourceSellLevel = level;
+        const labelText = document.getElementById('multi-sell-label-text');
+        if (labelText) labelText.innerText = "Уровень ресурсов:";
         const basePrice = getSmithSellPrice(level);
         
         const g = (window.playerData.guild || "").toLowerCase();
@@ -1647,7 +1692,8 @@ window.sellItemsBulk = function() {
 window.openSellCraftedModal = function() {
     const modal = document.getElementById('sell-craft-modal');
     const title = modal.querySelector('h3');
-    const btn = document.getElementById('craft-sell-action-btn');
+    let btn = document.getElementById('craft-sell-action-btn');
+    if (!btn) btn = modal.querySelector('.craft-btn'); // Доп. поиск кнопки
     
     // Сброс интерфейса в режим продажи
     title.innerText = "⚒️ ПРОДАЖА КРАФТА";
@@ -1768,6 +1814,7 @@ window.confirmBuySellAGrade = function() {
     let bonuses = [];
 
     let totalPercent = 0;
+    let propsList = [];
     const selectedProps = modal.querySelectorAll('.buy-prop-item.selected');
 
     if (selectedProps.length === 0) {
@@ -1775,7 +1822,10 @@ window.confirmBuySellAGrade = function() {
         return;
     }
 
-    selectedProps.forEach(el => totalPercent += parseFloat(el.dataset.percent));
+    selectedProps.forEach(el => {
+        totalPercent += parseFloat(el.dataset.percent);
+        propsList.push(el.innerText);
+    });
 
     let finalPrice = basePrice * classMult * (totalPercent / 100);
 
@@ -1836,7 +1886,9 @@ window.confirmBuySellAGrade = function() {
                     name: name,
                     grade: "A",
                     level: level,
-                    buyPrice: cost
+                    buyPrice: cost,
+                    isCrafted: false,
+                    properties: propsList
                 });
                 window.updateUI();
                 window.showCustomAlert(`✅ Предмет куплен! Списано: ${window.formatCurrency(cost)}${bonusText}`);
@@ -1929,6 +1981,7 @@ window.buyAncientImmediate = function() {
     if (gradePenaltyMult > 1) bonuses.push(`Грейд +${Math.round((gradePenaltyMult-1)*100)}%`);
 
     let totalPercent = 0;
+    let propsList = [];
     const modal = document.getElementById('buy-ancient-modal');
     const selectedProps = modal.querySelectorAll('.buy-prop-item.selected');
     
@@ -1941,6 +1994,7 @@ window.buyAncientImmediate = function() {
     selectedProps.forEach(el => {
         totalPercent += parseFloat(el.dataset.percent);
         if (el.innerText.includes("Основа оружия")) isWeapon = true;
+        propsList.push(el.innerText);
     });
     
     let finalPrice = basePrice * typeMult * (totalPercent / 100) * gradePenaltyMult;
@@ -1978,7 +2032,9 @@ window.buyAncientImmediate = function() {
                         name: name,
                         grade: grade,
                         level: level,
-                        buyPrice: cost
+                        buyPrice: cost,
+                    isCrafted: false,
+                    properties: propsList
                     });
                     window.updateUI();
                     window.showCustomAlert(`✅ Предмет куплен!`);
@@ -2027,6 +2083,7 @@ window.buySetImmediate = function() {
     }
     
     let totalPercent = 0;
+    let propsList = [];
     const modal = document.getElementById('buy-set-modal');
     const selectedProps = modal.querySelectorAll('.buy-prop-item.selected');
     
@@ -2035,7 +2092,10 @@ window.buySetImmediate = function() {
         return;
     }
     
-    selectedProps.forEach(el => totalPercent += parseFloat(el.dataset.percent));
+    selectedProps.forEach(el => {
+        totalPercent += parseFloat(el.dataset.percent);
+        propsList.push(el.innerText);
+    });
     
     let finalPrice = baseAPrice * gradeMult * typeMult * countMult * (totalPercent / 100) * gradePenaltyMult;
 
@@ -2076,7 +2136,9 @@ window.buySetImmediate = function() {
                         name: name,
                         grade: grade,
                         level: level,
-                        buyPrice: cost
+                        buyPrice: cost,
+                        isCrafted: false,
+                        properties: propsList
                     });
                     window.updateUI();
                     window.showCustomAlert(`✅ Комплект куплен!`);
@@ -2536,7 +2598,8 @@ window.confirmSellLegendaryGem = function() {
 window.openCraftModal = function() {
     const modal = document.getElementById('sell-craft-modal');
     const title = modal.querySelector('h3');
-    const btn = document.getElementById('craft-sell-action-btn');
+    let btn = document.getElementById('craft-sell-action-btn');
+    if (!btn) btn = modal.querySelector('.craft-btn'); // Доп. поиск кнопки, если ID не найден
     
     // Change UI for Crafting
     title.innerText = "⚒️ КРАФТ ПРЕДМЕТА";
@@ -2548,7 +2611,7 @@ window.openCraftModal = function() {
     }
     
     // Set level default
-    document.getElementById('modal-sell-level').value = window.playerData.level;
+    document.getElementById('modal-sell-level').value = window.playerData.level || 1;
 
     modal.style.top = '50%';
     modal.style.left = '50%';
@@ -2566,6 +2629,7 @@ window.craftItemFromModal = function() {
 
     // Properties
     let totalPercent = 0;
+    let propsList = [];
     const selectedProps = document.querySelectorAll('.sell-prop-item.selected');
     if (selectedProps.length === 0) {
         window.showCustomAlert("❌ Выберите хотя бы одно свойство.");
@@ -2576,6 +2640,7 @@ window.craftItemFromModal = function() {
     selectedProps.forEach(el => {
         totalPercent += parseFloat(el.dataset.percent);
         if (el.innerText.includes("Основа оружия")) isWeapon = true;
+        propsList.push(el.innerText);
     });
 
     // Grade Penalty
@@ -2623,9 +2688,16 @@ window.craftItemFromModal = function() {
                         name: name,
                         grade: grade,
                         level: level,
-                        buyPrice: finalPrice
+                        buyPrice: finalPrice,
+                        isCrafted: true,
+                        properties: propsList
                     });
                     window.updateUI();
+                    
+                    if (window.craftSound) {
+                        window.craftSound.currentTime = 0;
+                        window.craftSound.play().catch(() => {});
+                    }
                     window.showCustomAlert(`✅ Предмет скрафчен!`);
                 }, true);
 
@@ -2703,35 +2775,68 @@ window.confirmMeltItem = function() {
     );
 }
 
-window.openSellPurchasedModal = function() {
+window.openSellInventory = function(mode) {
     const inv = window.playerData.inventory || [];
-    if (inv.length === 0) {
-        window.showCustomAlert("🎒 Инвентарь пуст.");
+    
+    // Фильтрация
+    let itemsToShow = [];
+    let title = "";
+    
+    if (mode === 'smith') {
+        title = "⚒️ ПРОДАЖА КРАФТА (100%)";
+        itemsToShow = inv.filter(i => i.isCrafted);
+    } else {
+        title = "💰 ПРОДАЖА ПРЕДМЕТОВ (50%)";
+        itemsToShow = inv; // Вендор покупает всё
+    }
+
+    if (itemsToShow.length === 0) {
+        window.showCustomAlert(mode === 'smith' ? "🎒 Нет скрафченных предметов." : "🎒 Инвентарь пуст.");
         return;
     }
 
     // Create a prompt-like list
-    let html = `<div style="max-height: 300px; overflow-y: auto; text-align: left;">`;
-    inv.forEach((item, index) => {
-        const sellPrice = Math.floor(item.buyPrice * 0.5);
+    let html = `<h3 style="color:${mode === 'smith' ? '#d4af37' : '#ff4444'}; margin-top:0; text-align:center;">${title}</h3>`;
+    html += `<div style="max-height: 300px; overflow-y: auto; text-align: left;">`;
+    
+    itemsToShow.forEach((item) => {
+        // Расчет цены
+        let sellPrice = 0;
+        if (mode === 'smith') {
+            // Продажа крафта: 100% от БАЗОВОЙ цены (независимо от того, за сколько купили)
+            const basePrice = getCraftedItemBasePrice(item.level, item.grade);
+            sellPrice = Math.floor(basePrice);
+            
+            // Бонус/Штраф гильдии для крафта (репликация логики sellCraftedItemFromModal)
+            const g = (window.playerData.guild || "").toLowerCase();
+            if (g.includes('салага') || g.includes('громила') || g.includes('лорд войны')) sellPrice = Math.floor(sellPrice * 0.9);
+            if (g.includes('вампир')) sellPrice = Math.floor(sellPrice * 0.5);
+        } else {
+            // Вендор: 50% от цены покупки
+            sellPrice = Math.floor(item.buyPrice * 0.5);
+            
+            // Штраф вампира на продажу
+            const g = (window.playerData.guild || "").toLowerCase();
+            if (g.includes('вампир')) sellPrice = Math.floor(sellPrice * 0.5);
+        }
+
         html += `<div style="border-bottom: 1px solid #333; padding: 5px; display: flex; justify-content: space-between; align-items: center;">
-            <span>${item.name} (${item.grade})</span>
-            <button class="craft-btn sell" style="font-size: 0.7rem; padding: 2px 5px;" onclick="window.sellInventoryItem(${index})">Продать (${window.formatCurrency(sellPrice)})</button>
+            <span style="font-size:0.9rem;">${item.name} <span style="color:#888">(${item.grade})</span></span>
+            <button class="craft-btn sell" style="font-size: 0.7rem; padding: 2px 5px;" onclick="window.processSellItem(${item.id}, ${sellPrice})">Продать (${window.formatCurrency(sellPrice)})</button>
         </div>`;
     });
     html += `</div>`;
+    html += `<div style="text-align:center; margin-top:10px;"><button class="death-cancel-btn" onclick="document.getElementById('custom-confirm-modal').style.display='none'">ЗАКРЫТЬ</button></div>`;
 
     window.showCustomAlert(html); // Reusing alert modal for list, but buttons inside work
     // Need to hide the OK button of alert
     document.getElementById('confirm-yes-btn').style.display = 'none';
-    document.getElementById('confirm-message').style.margin = '0';
 }
 
-window.sellInventoryItem = function(index) {
+window.processSellItem = function(itemId, sellPrice) {
+    const index = window.playerData.inventory.findIndex(i => i.id === itemId);
+    if (index === -1) return;
     const item = window.playerData.inventory[index];
-    if (!item) return;
-
-    const sellPrice = Math.floor(item.buyPrice * 0.5);
     
     window.playerData.inventory.splice(index, 1);
     const currentMoney = window.getAllMoneyInYen();
@@ -2740,4 +2845,85 @@ window.sellInventoryItem = function(index) {
     window.updateUI();
     document.getElementById('custom-confirm-modal').style.display = 'none'; // Close list
     window.showCustomAlert(`✅ Продано: ${item.name} за ${window.formatCurrency(sellPrice)}`);
+}
+
+window.buyItemImmediate = function() {
+    const level = parseInt(document.getElementById('buy-item-level-input').value) || 1;
+    const grade = document.getElementById('buy-item-grade-input').value;
+    let bonuses = [];
+    
+    const basePrice = getCraftedItemBasePrice(level, grade); 
+    
+    // Grade Penalty
+    const itemGradeIdx = window.getGradeIndex(grade);
+    const playerGradeIdx = window.getPlayerGradeIndex(window.playerData.level);
+    const diff = Math.max(0, itemGradeIdx - playerGradeIdx);
+    const gradePenaltyMult = 1 + (diff * 0.2);
+    if (gradePenaltyMult > 1) bonuses.push(`Грейд +${Math.round((gradePenaltyMult-1)*100)}%`);
+
+    let totalPercent = 0;
+    const selectedProps = document.querySelectorAll('.buy-prop-item.selected');
+    if (selectedProps.length === 0) {
+        window.showCustomAlert("❌ Выберите хотя бы одно свойство.");
+        return;
+    }
+    
+    let isWeapon = false;
+    let propsList = [];
+    selectedProps.forEach(el => {
+        totalPercent += parseFloat(el.dataset.percent);
+        if (el.innerText.includes("Основа оружия")) isWeapon = true;
+        propsList.push(el.innerText);
+    });
+    
+    let finalPrice = basePrice * (totalPercent / 100) * gradePenaltyMult;
+    
+    const g = (window.playerData.guild || "").toLowerCase();
+    let buyMult = 1.0;
+    
+    if (g.includes('торговц')) {
+        const rank = window.playerData.rank || 0;
+        const buyPercents = [95, 93.5, 92.5, 91.5, 90.5, 89.5, 88.5, 87.5, 86, 84, 82.5];
+        const p = buyPercents[rank] || 95;
+        buyMult = p / 100;
+        bonuses.push(`Торговцы ${Math.round((buyMult-1)*100)}%`);
+    }
+    
+    if (isWeapon) {
+        if (g.includes('охотник на гоблинов')) { buyMult += 0.5; bonuses.push(`Охотник +50%`); }
+        else if (g.includes('охотник на ☠️')) { buyMult += 0.25; bonuses.push(`Охотник +25%`); }
+        else if (g.includes('помощник охотника')) { buyMult += 0.10; bonuses.push(`Охотник +10%`); }
+    }
+    
+    finalPrice *= buyMult;
+    const cost = Math.floor(finalPrice);
+    const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
+
+    window.showCustomConfirm(
+        `Купить предмет (Lvl ${level}, ${grade})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}${bonusText}`,
+        () => {
+            const currentMoney = window.getAllMoneyInYen();
+            if (currentMoney >= cost) {
+                window.setMoneyFromYen(currentMoney - cost);
+                const defName = `Item ${grade}-Grade`;
+                window.showCustomPrompt("Название предмета", "Введите название:", defName, (name) => {
+                    window.playerData.inventory.push({
+                        id: Date.now(),
+                        name: name,
+                        grade: grade,
+                        level: level,
+                        buyPrice: cost,
+                        isCrafted: false,
+                        properties: propsList
+                    });
+                    window.updateUI();
+                    window.showCustomAlert(`✅ Предмет куплен!`);
+                }, true);
+
+                selectedProps.forEach(el => el.classList.remove('selected'));
+            } else {
+                window.showCustomAlert(`❌ Недостаточно средств!`);
+            }
+        }
+    );
 }

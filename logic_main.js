@@ -1,5 +1,8 @@
 // --- ИНИЦИАЛИЗАЦИЯ ---
 
+window.screamerSound = new Audio('screamer.mp3');
+window.craftSound = new Audio('diablo-3-craft-done.mp3');
+
 window.onload = function() {
     // Агрегация данных
     window.gameData = {
@@ -112,20 +115,22 @@ window.onload = function() {
             clickSound.play().catch(() => {});
         }
     });
+
+    // Проверка и создание недостающих модальных окон (фиксы ошибок)
+    window.ensureModalsExist();
 };
 
 // Функция для случайных глитч-эффектов
 window.startRandomGlitches = function() {
-    const screamer = document.getElementById('screamer-sound');
-
     // 1. Таймер для Скримера (Звук) - Ровно каждые 30 секунд
     setInterval(() => {
-        if (!screamer) return;
         // 40% шанс на звук
         if (Math.random() < 0.40) {
-            screamer.currentTime = 0;
-            screamer.volume = 0.104; // 0.08 * 1.3
-            screamer.play().catch(() => {});
+            if (window.screamerSound) {
+                window.screamerSound.currentTime = 0;
+                window.screamerSound.volume = 0.1;
+                window.screamerSound.play().catch(() => {});
+            }
         }
     }, 30000);
 }
@@ -201,5 +206,66 @@ window.makeDraggable = function(elmnt) {
     function closeDragElement() {
         document.onmouseup = null;
         document.onmousemove = null;
+    }
+}
+
+// Функция для создания недостающих элементов интерфейса (фиксы ошибок)
+window.ensureModalsExist = function() {
+    // 1. Фикс ошибки продажи ресурсов (отсутствующий заголовок)
+    const multiSellModal = document.getElementById('multi-sell-modal');
+    if (multiSellModal && !document.getElementById('multi-sell-label-text')) {
+        const inputContainer = document.getElementById('multi-sell-inputs');
+        if (inputContainer) {
+            const label = document.createElement('p');
+            label.id = 'multi-sell-label-text';
+            label.style.color = '#d4af37';
+            label.style.marginBottom = '5px';
+            label.innerText = 'Уровень:';
+            inputContainer.parentNode.insertBefore(label, inputContainer);
+        }
+    }
+
+    // 2. Фикс ошибки расплавки (отсутствующее окно)
+    if (!document.getElementById('melt-item-modal')) {
+        const div = document.createElement('div');
+        div.id = 'melt-item-modal';
+        div.className = 'modal'; // Используем класс для стилей, если есть, или инлайн
+        div.style.display = 'none';
+        div.style.position = 'fixed';
+        div.style.zIndex = '6000';
+        div.style.left = '50%';
+        div.style.top = '50%';
+        div.style.transform = 'translate(-50%, -50%)';
+        div.style.background = '#1a1a1a';
+        div.style.border = '2px solid #ff4444';
+        div.style.padding = '20px';
+        div.style.width = '300px';
+        div.style.textAlign = 'center';
+        div.style.boxShadow = '0 0 20px #000';
+        
+        div.innerHTML = `
+            <h3 style="color:#ff4444; margin-top:0; font-family:'Cinzel',serif;">🔥 РАСПЛАВИТЬ</h3>
+            <label style="display:block; margin:10px 0; color:#ccc;">Уровень: <input type="number" id="melt-level" class="char-input" style="width:50px; background:transparent; color:#fff; border:none; border-bottom:1px solid #555; text-align:center;"></label>
+            <label style="display:block; margin:10px 0; color:#ccc;">Грейд: 
+                <select id="melt-grade" style="background:#000; color:#fff; border:1px solid #555; padding:5px;">
+                    <option value="N">N</option><option value="D">D</option><option value="C">C</option>
+                    <option value="B">B</option><option value="A">A</option><option value="S">S</option>
+                    <option value="S+">S+</option><option value="Spectrum">Spectrum</option>
+                </select>
+            </label>
+            <label style="display:block; margin:10px 0; color:#ccc;">Тип: 
+                <select id="melt-type" style="background:#000; color:#fff; border:1px solid #555; padding:5px;">
+                    <option value="normal">Обычный</option>
+                    <option value="ancient">Древний</option>
+                    <option value="primal">Первозданный</option>
+                </select>
+            </label>
+            <div style="margin-top:20px;">
+                <button class="craft-btn sell" onclick="window.confirmMeltItem()">РАСПЛАВИТЬ</button>
+                <button class="death-cancel-btn" onclick="document.getElementById('melt-item-modal').style.display='none'">ОТМЕНА</button>
+            </div>
+        `;
+        document.body.appendChild(div);
+        window.makeDraggable(div);
     }
 }

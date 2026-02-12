@@ -52,7 +52,10 @@ window.economyData = {
                             </select>
                         </label>
                     </div>
-                    <button class="craft-btn buy" onclick="buyItemImmediate()">КУПИТЬ</button>
+                    <div style="display:flex; gap:5px;">
+                        <button class="craft-btn sell" onclick="window.openSellInventory('vendor')">ПРОДАТЬ</button>
+                        <button class="craft-btn buy" onclick="buyItemImmediate()">КУПИТЬ</button>
+                    </div>
                 </div>
                 <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
                     <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
@@ -96,7 +99,7 @@ window.economyData = {
             id: 'smith_only', 
             title: 'Кузница', 
             content:  `
-                <div class="craft-row"><p>🔹 Продажа Крафта — 100%</p><button class="craft-btn smith-sell" onclick="openSellCraftedModal()">ПРОДАТЬ ПРЕДМЕТ</button></div>
+                <div class="craft-row"><p>🔹 Продажа Крафта — 100%</p><button class="craft-btn smith-sell" onclick="window.openSellInventory('smith')">ПРОДАТЬ КРАФТ</button></div>
                 <div class="craft-row"><p>🔹 Крафт предмета — 150%</p><button class="craft-btn craft" onclick="window.openCraftModal()">СКРАФТИТЬ</button></div>
                 <div class="craft-row"><p>🔹 Расплавление — 4.4%</p><button class="craft-btn sell" onclick="window.openMeltModal()">РАСПЛАВИТЬ</button></div>
                 <div class="craft-row" style="border-top: 1px solid #333; padding-top: 10px; margin-top: 10px;">
