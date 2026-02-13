@@ -255,6 +255,8 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
     const isSynergyCD = runeData.synergyCD || false;
     const isBuffAoe = runeData.buffIsAoe || false;
     const defType = runeData.defType || "";
+    const passiveDmg = runeData.passiveDmg || 0;
+    const passiveSlow = runeData.passiveSlow || 0;
     
     // Для синергии и снижения затрат берем значения из UI, так как они зависят от выбора пользователя
     const mainSkillCost = parseFloat(document.getElementById('calc-main-skill-cost').value) || 0;
@@ -285,10 +287,21 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
 
     // Парсинг КД для скидки на урон
     let cooldown = 0;
-    const descText = runeData.desc || "";
-    const cdMatch = descText.match(/(?:Время восстановления|КД)[^0-9]*(\d+(?:\.\d+)?) сек/i);
-    if (cdMatch) {
-        cooldown = parseFloat(cdMatch[1]);
+    if (!runeData.noCdDiscount) {
+        const descText = runeData.desc || "";
+        let cdMatch = descText.match(/(?:Время восстановления|КД)[^0-9]*(\d+(?:\.\d+)?) сек/i);
+        
+        // Fallback: если в текущей руне нет КД, ищем в базовой (индекс 0)
+        if (!cdMatch && runeIdx != 0) {
+            const baseRune = window.skillDB[className][skillIdx].runes[0];
+            if (baseRune && baseRune.desc) {
+                cdMatch = baseRune.desc.match(/(?:Время восстановления|КД)[^0-9]*(\d+(?:\.\d+)?) сек/i);
+            }
+        }
+
+        if (cdMatch) {
+            cooldown = parseFloat(cdMatch[1]);
+        }
     }
     const cdDiscount = 1 + (cooldown * 0.1);
 
@@ -333,6 +346,23 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
         cost += dmg2Cost;
     }
 
+    // Пассивный урон (без скидки за КД)
+    if (passiveDmg > 0) {
+        let val = (passiveDmg / 100) * 2; // Считаем как одиночную цель (питомец)
+        cost += val;
+        details.push(`Пассивный Урон (${passiveDmg}% / 100 * 2) = ${val.toFixed(2)}`);
+    }
+
+    // Пассивное замедление (без скидки за КД, считается как постоянная аура)
+    if (passiveSlow > 0) {
+        let baseVal = (passiveSlow / 20) * 4; // x4 за постоянство
+        let val = baseVal * slowMult; // Учитываем классовый множитель (0 для мили)
+        cost += val;
+        let formula = `Пассивное Замедл. (${passiveSlow}% / 20 * 4 [Пост])`;
+        if (slowMult !== 1) formula += ` * ${slowMult} [Класс]`;
+        details.push(`${formula} = ${val.toFixed(2)}`);
+    }
+
     if (slow > 0) { 
         let baseSlowCost = slow / 20;
         let val = baseSlowCost * aoeMult * slowMult;
@@ -353,8 +383,30 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
 
     if (heal > 0) { 
         let val = (heal / 5) * 2;
-        cost += val; 
-        details.push(`Лечение/Щит (${heal}% / 5 [База] * 2 [Множ]) = ${val.toFixed(2)}`); 
+        
+        // Применяем скидку за КД к лечению (для активных навыков типа Выносливого союзника)
+        if (cooldown > 0) val /= cdDiscount;
+
+        let desc = `Лечение/Щит (${heal}% / 5 [База] * 2 [Множ])`;
+        
+        if (cooldown > 0) desc += ` / ${cdDiscount.toFixed(1)} [КД]`;
+
+        if (isBuffAoe) {
+            val *= 0.75;
+            desc += ` * 0.75 [Командный]`;
+            
+            let costFor2nd = val / 3;
+            if (dmg === 0 && dmg2 === 0 && totalEffInc > 0) {
+                costFor2nd *= (1 + totalEffInc / 100);
+            }
+            
+            cost += val;
+            details.push(`${desc} = ${val.toFixed(2)}`);
+            details.push(`<span style="color:#ff7979; font-weight:bold; margin-left:10px;">👤 2-й игрок платит: ${costFor2nd.toFixed(2)} 📖</span>`);
+        } else {
+            cost += val; 
+            details.push(`${desc} = ${val.toFixed(2)}`); 
+        }
     }
 
     if (buffDmg > 0) { 
@@ -418,8 +470,8 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
             val *= typeMult;
             
             // Если бафф защиты массовый (или дебафф врагов), применяем AOE
+            // Множитель AOE для стоимости защиты отключен по просьбе (только разделение цены)
             if (isBuffAoe) {
-                val *= aoeMult;
                 // Правило 75/25: Владелец платит 75%
                 val *= 0.75;
             }
@@ -432,11 +484,17 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
                 desc = `Бафф Защиты ${idx+1} (${buff.val}% / 5 [База] * ${multiplier} [Тип]${typeMult > 1 ? ' * ' + typeMult + typeName : ''})`;
             }
             if (isBuffAoe) {
-                desc += ` * ${aoeMult} [AOE] * 0.75 [Командный]`;
+                desc += ` * 0.75 [Командный]`;
                 
                 // Расчет стоимости для второго игрока (25%)
                 // val - это 75%. Полная цена = val / 0.75. 2-й игрок платит 25% от полной (или 1/3 от val).
-                const costFor2nd = val / 3;
+                let costFor2nd = val / 3;
+
+                // Если будет применена общая эффективность (нет урона), учитываем её и для второго игрока
+                if (dmg === 0 && dmg2 === 0 && totalEffInc > 0) {
+                    costFor2nd *= (1 + totalEffInc / 100);
+                }
+
                 details.push(`${desc} = ${val.toFixed(2)}`);
                 details.push(`<span style="color:#ff7979; font-weight:bold; margin-left:10px;">👤 2-й игрок платит: ${costFor2nd.toFixed(2)} 📖</span>`);
             } else {
@@ -456,17 +514,29 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
     if (resGain > 0 && maxResources[className]) {
         const maxRes = maxResources[className];
         const resGainPercent = (resGain / maxRes) * 100;
-        const val = (resGainPercent / 5) * 1;
+        const val = (resGainPercent / 2) * 1;
         cost += val;
-        details.push(`Восст. ресурса (${resGain} / ${maxRes} [Макс] / 5% [База]) = ${val.toFixed(2)}`);
+        details.push(`Восст. ресурса (${resGain} / ${maxRes} [Макс] / 2% [База]) = ${val.toFixed(2)}`);
     }
 
-    const runeDB = window.skillDB[className] && window.skillDB[className][skillIdx] && window.skillDB[className][skillIdx].runes[runeIdx];
-    if (runeDB && runeDB.customCost !== undefined) {
-        let cc = runeDB.customCost;
-        cost += cc;
-        let desc = runeDB.customCostDesc || `Доп. эффект`;
-        details.push(`${desc}: ${cc}`);
+    if (runeData.customCost !== undefined) {
+        let cc = runeData.customCost;
+        let desc = runeData.customCostDesc || `Доп. эффект`;
+        
+        if (isBuffAoe && cc > 0) {
+            let val = cc * 0.75;
+            cost += val;
+            details.push(`${desc}: ${cc} * 0.75 [Командный] = ${val.toFixed(2)}`);
+            
+            let costFor2nd = val / 3;
+            if (dmg === 0 && dmg2 === 0 && totalEffInc > 0) {
+                costFor2nd *= (1 + totalEffInc / 100);
+            }
+            details.push(`<span style="color:#ff7979; font-weight:bold; margin-left:10px;">👤 2-й игрок платит: ${costFor2nd.toFixed(2)} 📖</span>`);
+        } else {
+            cost += cc;
+            details.push(`${desc}: ${cc}`);
+        }
     }
 
     // Специальная логика для Архонта - Замедление времени
@@ -507,11 +577,11 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
                     else if (buffDuration >= 10 && buffDuration <= 20) multiplier = 2;
 
                     const part1 = targetCost * (dmgAmp / 100);
-                    const part2 = (dmgAmp / 10) * multiplier * aoeMult;
+                    const part2 = (dmgAmp / 10) * multiplier;
                     const addedCost = part1 + part2;
                     
                     cost += addedCost;
-                    details.push(`Синергия: (${targetCost.toFixed(2)} [Цена цели] * ${dmgAmp}% [Усил]) + (${(dmgAmp/10*multiplier).toFixed(1)} [Бафф] * ${aoeMult} [AOE]) = ${addedCost.toFixed(2)}`);
+                    details.push(`Синергия: (${targetCost.toFixed(2)} [Цена цели] * ${dmgAmp}% [Усил]) + (${(dmgAmp/10*multiplier).toFixed(1)} [Бафф]) = ${addedCost.toFixed(2)}`);
                 }
             }
         } else {
@@ -656,14 +726,17 @@ window.buySkill = function() {
 
 // Вспомогательная функция для форматирования валюты
 window.formatCurrency = function(yen) {
-    let g = Math.floor(yen / 1000000);
-    let remainder = yen % 1000000;
+    let m = Math.floor(yen / 100000000);
+    let remainder = yen % 100000000;
+    let g = Math.floor(remainder / 1000000);
+    remainder = remainder % 1000000;
     let s = Math.floor(remainder / 10000);
     remainder = remainder % 10000;
     let c = Math.floor(remainder / 100);
     let y = remainder % 100;
 
     let parts = [];
+    if (m > 0) parts.push(`${m}💠`);
     if (g > 0) parts.push(`${g}🥇`);
     if (s > 0) parts.push(`${s}🥈`);
     if (c > 0) parts.push(`${c}🥉`);
@@ -2803,10 +2876,32 @@ window.openSellInventory = function(mode) {
         // Расчет цены
         let sellPrice = 0;
         if (mode === 'smith') {
-            // Продажа крафта: 100% от БАЗОВОЙ цены (независимо от того, за сколько купили)
+            // Продажа крафта: 100% от стоимости (База * Свойства)
             const basePrice = getCraftedItemBasePrice(item.level, item.grade);
-            sellPrice = Math.floor(basePrice);
             
+            // Восстанавливаем процент от свойств
+            let totalPercent = 0;
+            if (item.properties && item.properties.length > 0) {
+                const propMap = {
+                    "Основа оружия": 40,
+                    "Основа брони": 30, "Живучесть": 30, "Осн.Хар.": 30, "Гнездо (голова/оруж)": 30,
+                    "Восстановление": 20,
+                    "Все сопротивления": 15, "Крит урон": 15, "Крит шанс": 15,
+                    "Не Осн.Хар.": 10, "Броня": 10, "Здоровье": 10, "Ур. в бижутерии": 10,
+                    "Скор. атак": 10, "Гнездо (броня)": 10, "Урон стихии": 10, "Урон умения": 10,
+                    "+ Ур. к скилу": 10, "Сниж. затрат / КДР": 10, "Урон по области": 10,
+                    "Одно сопрот.": 5, "Скор. передвижения": 5, "Урон уменьшен": 5
+                };
+                item.properties.forEach(p => {
+                    totalPercent += (propMap[p] || 0);
+                });
+            } else {
+                // Если свойств нет (старый предмет), берем приблизительно из цены покупки
+                totalPercent = 100; 
+            }
+            
+            sellPrice = Math.floor(basePrice * (totalPercent / 100));
+
             // Бонус/Штраф гильдии для крафта (репликация логики sellCraftedItemFromModal)
             const g = (window.playerData.guild || "").toLowerCase();
             if (g.includes('салага') || g.includes('громила') || g.includes('лорд войны')) sellPrice = Math.floor(sellPrice * 0.9);

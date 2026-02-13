@@ -7,6 +7,7 @@ window.playerData = savedData ? JSON.parse(savedData) : {
     name: "НЕФАЛЕМ",
     level: 1,
     gold_g: 0, gold_s: 0, gold_c: 0, gold_y: 0,
+    mithril: 0,
     runes: 0,
     para: 0,
     zakens: 0,
@@ -99,7 +100,7 @@ window.saveToStorage = function() {
 }
 
 window.getAllMoneyInYen = function() {
-    return (window.playerData.gold_g * 1000000) + (window.playerData.gold_s * 10000) + (window.playerData.gold_c * 100) + window.playerData.gold_y;
+    return ((window.playerData.mithril || 0) * 100000000) + (window.playerData.gold_g * 1000000) + (window.playerData.gold_s * 10000) + (window.playerData.gold_c * 100) + window.playerData.gold_y;
 }
 
 window.setMoneyFromYen = function(totalYen) {
@@ -115,7 +116,10 @@ window.setMoneyFromYen = function(totalYen) {
     window.playerData.gold_s = (absYen % 100) * sign;
     absYen = Math.floor(absYen / 100);
     
-    window.playerData.gold_g = absYen * sign;
+    window.playerData.gold_g = (absYen % 100) * sign;
+    absYen = Math.floor(absYen / 100);
+
+    window.playerData.mithril = absYen * sign;
 
     if (window.coinSound && window.playerData.gold_y !== undefined) {
         window.coinSound.currentTime = 0;

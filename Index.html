@@ -645,11 +645,12 @@
             <div class="stat-group">
                 <div class="stat-group-title"><span class="group-toggle" onclick="window.toggleStatGroup(this)">[-]</span> Финансы <span class="add-money-btn" onclick="openAddMoneyModal()" title="Добавить средства">[+]</span></div>
                 <div class="stat-group-content">
-                    <div class="money-row">
-                        <span class="money-unit"><input type="number" id="input-gold-g" class="char-input money-input" value="0" onchange="savePlayerData()">🥇</span>
-                        <span class="money-unit"><input type="number" id="input-gold-s" class="char-input money-input" value="0" onchange="savePlayerData()">🥈</span>
-                        <span class="money-unit"><input type="number" id="input-gold-c" class="char-input money-input" value="0" onchange="savePlayerData()">🥉</span>
-                        <span class="money-unit"><input type="number" id="input-gold-y" class="char-input money-input" value="0" onchange="savePlayerData()">🧧</span>
+                    <div class="money-row" style="justify-content: center; gap: 2px;">
+                        <span class="money-unit"><input type="number" id="input-mithril" class="char-input money-input" value="0" style="width: 25px; color: #00ffff;" onchange="savePlayerData()">💠</span>
+                        <span class="money-unit"><input type="number" id="input-gold-g" class="char-input money-input" value="0" style="width: 30px;" onchange="savePlayerData()">🥇</span>
+                        <span class="money-unit"><input type="number" id="input-gold-s" class="char-input money-input" value="0" style="width: 30px;" onchange="savePlayerData()">🥈</span>
+                        <span class="money-unit"><input type="number" id="input-gold-c" class="char-input money-input" value="0" style="width: 30px;" onchange="savePlayerData()">🥉</span>
+                        <span class="money-unit"><input type="number" id="input-gold-y" class="char-input money-input" value="0" style="width: 30px;" onchange="savePlayerData()">🧧</span>
                     </div>
                     <div class="stat-row" style="margin-top:8px;">Руны: <input type="number" id="input-runes" class="char-input" value="0" step="0.1" onchange="savePlayerData()"> 📖</div>
                     <div class="stat-row">Парагон: <input type="number" id="input-para" class="char-input" value="0" step="0.1" onchange="savePlayerData()"> ⏳</div>

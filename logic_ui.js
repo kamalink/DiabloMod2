@@ -397,6 +397,8 @@ window.updateUI = function() {
     document.getElementById('input-gold-g').value = window.playerData.gold_g;
     document.getElementById('input-gold-s').value = window.playerData.gold_s;
     document.getElementById('input-gold-c').value = window.playerData.gold_c;
+    const mithrilEl = document.getElementById('input-mithril');
+    if (mithrilEl) mithrilEl.value = window.playerData.mithril || 0;
     document.getElementById('input-gold-y').value = window.playerData.gold_y;
     document.getElementById('input-runes').value = window.playerData.runes;
     document.getElementById('input-para').value = window.playerData.para;
@@ -583,6 +585,7 @@ window.savePlayerData = function() {
     const gs = getVal('input-gold-s', true); if (gs !== null) window.playerData.gold_s = gs;
     const gc = getVal('input-gold-c', true); if (gc !== null) window.playerData.gold_c = gc;
     const gy = getVal('input-gold-y', true); if (gy !== null) window.playerData.gold_y = gy;
+    const mithril = getVal('input-mithril'); if (mithril !== null) window.playerData.mithril = mithril;
     
     const runes = getVal('input-runes', true); if (runes !== null) window.playerData.runes = runes;
     const para = getVal('input-para', true); if (para !== null) window.playerData.para = para;
@@ -678,17 +681,43 @@ window.renderInventoryWidget = function() {
         content.innerHTML = '<div style="color: #888; font-size: 0.7rem; text-align: center;">Пусто</div>';
         return;
     }
+    let weapons = [];
+    let armors = [];
+    let others = [];
+
+    inv.forEach(item => {
+        const props = item.properties || [];
+        const isWeapon = props.some(p => p.includes('Основа оружия'));
+        const isArmor = props.some(p => p.includes('Основа брони'));
+        
+        if (isWeapon) weapons.push(item);
+        else if (isArmor) armors.push(item);
+        else others.push(item);
+    });
 
     let html = '';
-    inv.forEach(item => {
+    const renderItem = (item) => {
         const propsStr = (item.properties || []).join(', ').replace(/'/g, "&apos;");
         const safeName = item.name.replace(/'/g, "&apos;");
         
-        html += `<div style="margin-bottom: 4px; line-height: 1.2; border-bottom: 1px dashed #333; padding-bottom: 2px; cursor: help;" onmousemove="window.showItemTooltip(event, '${safeName}', '${item.grade}', ${item.level}, ${item.buyPrice}, ${item.isCrafted}, '${propsStr}')" onmouseleave="window.hideItemTooltip()">
+        return `<div style="margin-bottom: 4px; line-height: 1.2; border-bottom: 1px dashed #333; padding-bottom: 2px; cursor: help;" onmousemove="window.showItemTooltip(event, '${safeName}', '${item.grade}', ${item.level}, ${item.buyPrice}, ${item.isCrafted}, '${propsStr}')" onmouseleave="window.hideItemTooltip()">
             <span style="color: #fff; font-weight: bold;">${item.name}</span><br>
             <span style="color: #888; font-size: 0.7rem;">${item.grade} | Lvl ${item.level} | ${window.formatCurrency(item.buyPrice)}</span>
         </div>`;
-    });
+    };
+
+    if (weapons.length > 0) {
+        html += `<div style="color: #ff9900; font-size: 0.75rem; font-weight: bold; margin: 5px 0 2px 0; border-bottom: 1px solid #555;">⚔️ ОРУЖИЕ</div>`;
+        weapons.forEach(i => html += renderItem(i));
+    }
+    if (armors.length > 0) {
+        html += `<div style="color: #66ccff; font-size: 0.75rem; font-weight: bold; margin: 5px 0 2px 0; border-bottom: 1px solid #555;">🛡️ БРОНЯ</div>`;
+        armors.forEach(i => html += renderItem(i));
+    }
+    if (others.length > 0) {
+        html += `<div style="color: #aaa; font-size: 0.75rem; font-weight: bold; margin: 5px 0 2px 0; border-bottom: 1px solid #555;">📦 РАЗНОЕ</div>`;
+        others.forEach(i => html += renderItem(i));
+    }
     content.innerHTML = html;
 }
 

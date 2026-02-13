@@ -216,6 +216,7 @@ window.worldData = {
                     <p>👹 — Любой босс | ⭐ — Гоблин</p>
                     <p style="color: #ffd700; border-bottom: 1px solid #333; margin-top: 15px;"><b>💰 ЭКОНОМИКА:</b></p>
                     <p>🥇 Золото | 🥈 Серебро | 🥉 Медь | 🧧 Йена</p>
+                    <p>💠 Мифрил (Редкая валюта)</p>
                     <p>💰 Баланс | 💴 Заработок | 💊 Банка HP | 🧪 Дыхание Смерти</p>
                 </div>
                 <div style="flex: 1; min-width: 200px;">

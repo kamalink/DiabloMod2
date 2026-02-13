@@ -35,7 +35,7 @@ window.economyData = {
         { id: 'smith_jewel', title: 'Ювелирка и Кузница' },
         { 
             id: 'buy', 
-            title: 'Покупка предметов', 
+            title: 'Покупка/Продажа предметов', 
             content: `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 10px; border: 1px solid #444;">
                     <div style="display:flex; flex-direction:column; gap:5px;">
