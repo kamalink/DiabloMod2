@@ -148,6 +148,7 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
     } else {
         menuTitle.innerText = "Diablo III Mod";
     }
+    menuTitle.style.display = 'block';
 
     // Специальная отрисовка для меню навыков (Сетка 2x3)
     if (menuId === 'skills_study_menu') {
@@ -282,6 +283,7 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
                 window.showText(item.title, item.content);
             }
         };
+
         area.appendChild(btn);
     });
 }
@@ -324,9 +326,23 @@ window.showText = function(title, content) {
     contentArea.innerHTML = btnHtml + html;
     
     if (title.includes('Пентограмма')) {
-        if (document.getElementById('penta_1')) document.getElementById('penta_1').checked = window.playerData.penta_1;
-        if (document.getElementById('penta_2')) document.getElementById('penta_2').checked = window.playerData.penta_2;
-        if (document.getElementById('penta_3')) document.getElementById('penta_3').checked = window.playerData.penta_3;
+        const vp = window.playerData.maxVp || 0;
+        
+        const p1 = document.getElementById('penta_1');
+        if (p1) {
+            p1.checked = window.playerData.penta_1;
+            if (vp >= 25) { p1.checked = true; p1.disabled = true; }
+        }
+        const p2 = document.getElementById('penta_2');
+        if (p2) {
+            p2.checked = window.playerData.penta_2;
+            if (vp >= 60) { p2.checked = true; p2.disabled = true; }
+        }
+        const p3 = document.getElementById('penta_3');
+        if (p3) {
+            p3.checked = window.playerData.penta_3;
+            if (vp >= 100) { p3.checked = true; p3.disabled = true; }
+        }
     }
 
     // Обновляем состояние кнопок профессий, если это меню профессий
@@ -396,6 +412,10 @@ window.updateUI = function() {
     document.getElementById('input-lvl').value = window.playerData.level;
     document.getElementById('view-xp-bonus').innerText = xpBonusText;
     
+    // Блокировка ввода уровня после 70
+    const lvlInput = document.getElementById('input-lvl');
+    if (lvlInput) lvlInput.disabled = (window.playerData.level >= 70);
+
     document.getElementById('input-gold-g').value = window.playerData.gold_g;
     document.getElementById('input-gold-s').value = window.playerData.gold_s;
     document.getElementById('input-gold-c').value = window.playerData.gold_c;
@@ -698,6 +718,36 @@ window.toggleMusic = function() {
     }
 }
 
+// Вспомогательные функции для маппинга ВП <-> Сложность
+window.getMinVPForDifficulty = function(diff) {
+    switch(diff) {
+        case "Высокий": return 1;
+        case "Эксперт": return 4;
+        case "Мастер": return 7;
+        case "T1": return 10;
+        case "T2": return 13;
+        case "T3": return 16;
+        case "T4": return 19;
+        case "T5": return 22;
+        case "T6": return 26;
+        default: return 1;
+    }
+};
+
+window.getDifficultyFromVP = function(vp) {
+    if (vp < 4) return "Высокий"; // 1-3
+    if (vp < 7) return "Эксперт"; // 4-6
+    if (vp < 10) return "Мастер"; // 7-9 (исправлено с 19, т.к. Т1 с 10)
+    if (vp < 13) return "T1";     // 10-12
+    if (vp < 16) return "T2";     // 13-15
+    if (vp < 19) return "T3";     // 16-18
+    if (vp < 22) return "T4";     // 19-21
+    if (vp < 26) return "T5";     // 22-25
+    if (vp <= 30) return "T6";    // 26-30
+    // Далее стандартная прогрессия D3 (примерная)
+    if (vp < 35) return "T7"; else if (vp < 40) return "T8"; else if (vp < 45) return "T9"; else if (vp < 50) return "T10"; else if (vp < 55) return "T11"; else if (vp < 60) return "T12"; else if (vp < 65) return "T13"; else if (vp < 70) return "T14"; else if (vp < 75) return "T15"; else return "T16";
+};
+
 window.savePlayerData = function() {
     // 1. Сохраняем старые данные для сравнения
     const oldData = { ...window.playerData };
@@ -730,6 +780,8 @@ window.savePlayerData = function() {
             else if (lvl <= 65) tier = "T1";
             else if (lvl <= 69) tier = "T2";
             window.playerData.difficulty = tier;
+        } else {
+            // После 70 сложность зависит от ВП (см. ниже)
         }
     }
     
@@ -766,7 +818,27 @@ window.savePlayerData = function() {
     const gobsA = getVal('input-gobs-assist'); if (gobsA !== null) window.playerData.gobs_assist = gobsA;
     const maxVp = getVal('input-max-vp'); if (maxVp !== null) window.playerData.maxVp = maxVp;
     
+    // Автоматическое открытие вкладок Пентограммы от ВП
+    if ((window.playerData.maxVp || 0) >= 25) window.playerData.penta_1 = true;
+    if ((window.playerData.maxVp || 0) >= 60) window.playerData.penta_2 = true;
+    if ((window.playerData.maxVp || 0) >= 100) window.playerData.penta_3 = true;
+
     const portal70 = getStr('input-lvl70-portal'); if (portal70 !== null) window.playerData.lvl70_portal = portal70;
+
+    // Логика перехода на 70 уровень: Установка начального ВП
+    if (oldData.level < 70 && window.playerData.level >= 70) {
+        const currentDiff = window.playerData.difficulty || "Высокий";
+        const startVp = window.getMinVPForDifficulty(currentDiff);
+        window.playerData.maxVp = Math.max(window.playerData.maxVp || 0, startVp);
+        window.playerData.base_vp_at_70 = window.playerData.maxVp; // Фиксируем базу ВП
+    }
+
+    // Логика после 70 уровня: Уровень зависит от ВП (База + (Текущий - База))
+    if (window.playerData.level >= 70) {
+        const base = window.playerData.base_vp_at_70 || 0;
+        const current = window.playerData.maxVp || 0;
+        window.playerData.level = 70 + Math.max(0, current - base);
+    }
 
     const legs = getVal('input-found-legs'); if (legs !== null) window.playerData.found_legs = legs;
     const yellows = getVal('input-found-yellows'); if (yellows !== null) window.playerData.found_yellows = yellows;

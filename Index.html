@@ -141,6 +141,14 @@
             <label>👹 Боссы:</label>
             <input type="number" id="exp-bosses" value="0" oninput="calculateExp()">
         </div>
+        <div class="exp-input-row" id="exp-chests-row" style="display:none;">
+            <label>📦 Сундуки:</label>
+            <input type="number" id="exp-chests" value="0" oninput="calculateExp()">
+        </div>
+        <div class="exp-input-row" id="exp-big-chests-row" style="display:none;">
+            <label>🧰 Большие:</label>
+            <input type="number" id="exp-big-chests" value="0" oninput="calculateExp()">
+        </div>
 
         <div class="exp-result-box" id="exp-result-display">Введите данные...</div>
         <button class="exp-apply-btn" onclick="applyExpCalculation()">✅ ПРИМЕНИТЬ</button>
@@ -195,9 +203,10 @@
         <div id="diff-calc-toughness-section" style="margin-top: 20px;">
             <h4 style="color: #66ff66; border-bottom: 1px solid #555; padding-bottom: 5px;">🛡️ ЖИВУЧЕСТЬ</h4>
             <div class="exp-input-row"><label>⛑️ + Восст.:</label><input type="number" id="diff-base-tough" value="0"></div>
-            <div class="exp-input-row"><label>Легендарки (х):</label><input type="number" id="diff-leg-tough" value="1"></div>
-            <div class="exp-input-row"><label>Навыки (х):</label><input type="number" id="diff-skill-tough" value="1"></div>
-            <div class="exp-input-row"><label>Пассивки (х):</label><input type="number" id="diff-pass-tough" value="1"></div>
+            <div class="exp-input-row"><label>Легендарки (%):</label><input type="number" id="diff-leg-tough" value="0"></div>
+            <div class="exp-input-row"><label>Навыки (%):</label><input type="number" id="diff-skill-tough" value="0"></div>
+            <div class="exp-input-row"><label>Пассивки (%):</label><input type="number" id="diff-pass-tough" value="0"></div>
+            <div class="exp-input-row"><label>Живучесть напарника:</label><input type="number" id="diff-partner-tough" value="0"></div>
             <div style="text-align: right; color: #66ff66; font-weight: bold; margin-top: 5px;">
                 Итого Живучесть: <span id="diff-total-tough">0</span>
             </div>

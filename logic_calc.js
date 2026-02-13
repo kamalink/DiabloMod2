@@ -775,6 +775,28 @@ window.openExpCalculator = function() {
     document.getElementById('exp-mobs').value = 0;
     document.getElementById('exp-elites').value = 0;
     document.getElementById('exp-bosses').value = 0;
+    
+    // Сброс и настройка полей сундуков
+    const chestRow = document.getElementById('exp-chests-row');
+    const bigChestRow = document.getElementById('exp-big-chests-row');
+    if (chestRow) { chestRow.style.display = 'none'; document.getElementById('exp-chests').value = 0; }
+    if (bigChestRow) { bigChestRow.style.display = 'none'; document.getElementById('exp-big-chests').value = 0; }
+
+    const g = (window.playerData.guild || "").toLowerCase();
+    
+    // Логика отображения полей
+    const mobsRow = document.getElementById('exp-mobs').parentNode;
+    if (g.includes('торговц')) {
+        mobsRow.style.display = 'none';
+    } else {
+        mobsRow.style.display = 'flex';
+    }
+
+    if (g.includes('искатель') || g.includes('джимми')) {
+        if (chestRow) chestRow.style.display = 'flex';
+        if (bigChestRow) bigChestRow.style.display = 'flex';
+    }
+
     window.calculateExp();
 }
 
@@ -782,14 +804,19 @@ window.calculateExp = function() {
     const mobs = parseInt(document.getElementById('exp-mobs').value) || 0;
     const elites = parseInt(document.getElementById('exp-elites').value) || 0;
     const bosses = parseInt(document.getElementById('exp-bosses').value) || 0;
+    const chests = parseInt(document.getElementById('exp-chests') ? document.getElementById('exp-chests').value : 0) || 0;
+    const bigChests = parseInt(document.getElementById('exp-big-chests') ? document.getElementById('exp-big-chests').value : 0) || 0;
 
     // Считаем разницу от последнего введенного
     const dMobs = Math.max(0, mobs - (window.playerData.last_input_mobs || 0));
     const dElites = Math.max(0, elites - (window.playerData.last_input_elites || 0));
     // Боссы считаются как есть (вводятся за раз)
+    // Сундуки считаются как есть (вводятся за раз)
 
     let runesBase = (dMobs * 0.01) + (dElites * 0.1) + (bosses * 3);
     let paraBase = (dMobs * 0.01) + (dElites * 0.1) + (bosses * 3);
+    let chestsRunes = 0;
+    let chestsPara = 0;
 
     // Применяем множитель рифта
     if (window.activeRiftMultiplier && window.activeRiftMultiplier !== 1) {
@@ -841,10 +868,19 @@ window.calculateExp = function() {
         runesMod -= 0.2; paraMod -= 0.2;
     } else if (g.includes('лорд войны')) {
         runesMod += 0.07;
+    } else if (g.includes('искатель приключений')) {
+        chestsRunes = (chests * 0.5) + (bigChests * 1.5);
+        chestsPara = (chests * 0.5) + (bigChests * 1.5);
+    } else if (g.includes('искатель богатства')) {
+        chestsRunes = (chests * 0.7) + (bigChests * 2.0);
+        chestsPara = (chests * 0.7) + (bigChests * 2.0);
+    } else if (g.includes('джимми')) {
+        chestsRunes = (chests * 0.3) + (bigChests * 1.0);
+        chestsPara = (chests * 0.3) + (bigChests * 1.0);
     }
 
-    const totalRunes = (runesBase * runesMod).toFixed(2);
-    const totalPara = (paraBase * paraMod).toFixed(2);
+    const totalRunes = ((runesBase * runesMod) + chestsRunes).toFixed(2);
+    const totalPara = ((paraBase * paraMod) + chestsPara).toFixed(2);
 
     let riftMsg = "";
     if (window.activeRiftMultiplier && window.activeRiftMultiplier !== 1) {
@@ -863,6 +899,8 @@ window.applyExpCalculation = function() {
     const mobs = parseInt(document.getElementById('exp-mobs').value) || 0;
     const elites = parseInt(document.getElementById('exp-elites').value) || 0;
     const bosses = parseInt(document.getElementById('exp-bosses').value) || 0;
+    const chests = parseInt(document.getElementById('exp-chests') ? document.getElementById('exp-chests').value : 0) || 0;
+    const bigChests = parseInt(document.getElementById('exp-big-chests') ? document.getElementById('exp-big-chests').value : 0) || 0;
     
     // Считаем разницу для статистики
     const dMobs = Math.max(0, mobs - (window.playerData.last_input_mobs || 0));
@@ -881,6 +919,7 @@ window.applyExpCalculation = function() {
     window.playerData.kills += dMobs;
     window.playerData.elites_solo += dElites;
     window.playerData.bosses += bosses;
+    window.playerData.chests_found += (chests + bigChests);
     
     if (window.playerData.kills > (window.playerData.highest_kills || 0)) {
         window.playerData.highest_kills = window.playerData.kills;
@@ -2107,6 +2146,7 @@ window.confirmBuySellAGrade = function() {
     const mode = modal.dataset.mode;
     const classMult = parseFloat(modal.dataset.classMult);
     const level = parseInt(document.getElementById('agrade-level-input').value) || window.playerData.level;
+    const g = (window.playerData.guild || "").toLowerCase(); // Defined here for both scopes
 
     const basePrice = 3200 * Math.pow(1.1, level - 1);
     let bonuses = [];
@@ -2141,7 +2181,6 @@ window.confirmBuySellAGrade = function() {
         selectedProps.forEach(el => {
             if (el.innerText.includes("Основа оружия")) isWeapon = true;
         });
-        const g = (window.playerData.guild || "").toLowerCase();
         let buyMult = 1.0;
         if (g.includes('торговц')) {
             const rank = window.playerData.rank || 0;
@@ -2553,7 +2592,7 @@ window.openDifficultyCalculator = function() {
     // Reset inputs
     const inputs = modal.querySelectorAll('input');
     inputs.forEach(inp => {
-        if (inp.id.includes('mult') || (inp.id.includes('tough') && !inp.id.includes('base'))) inp.value = 1;
+        if (inp.id.includes('mult')) inp.value = 1;
         else inp.value = 0;
     });
 
@@ -2654,11 +2693,12 @@ window.calculateDifficulty = function() {
 
     // Toughness
     const baseTough = parseFloat(document.getElementById('diff-base-tough').value) || 0;
-    const legTough = parseFloat(document.getElementById('diff-leg-tough').value) || 1;
-    const skillTough = parseFloat(document.getElementById('diff-skill-tough').value) || 1;
-    const passTough = parseFloat(document.getElementById('diff-pass-tough').value) || 1;
+    const legToughPct = parseFloat(document.getElementById('diff-leg-tough').value) || 0;
+    const skillToughPct = parseFloat(document.getElementById('diff-skill-tough').value) || 0;
+    const passToughPct = parseFloat(document.getElementById('diff-pass-tough').value) || 0;
+    const partnerTough = parseFloat(document.getElementById('diff-partner-tough').value) || 0;
 
-    const totalTough = baseTough * legTough * skillTough * passTough * cubeToughMult;
+    const totalTough = (baseTough * (1 + legToughPct / 100) * (1 + skillToughPct / 100) * (1 + passToughPct / 100) * cubeToughMult) + partnerTough;
 
     document.getElementById('diff-total-tough').innerText = totalTough.toLocaleString('ru-RU', { maximumFractionDigits: 0 });
 
@@ -3388,8 +3428,8 @@ window.openSellInventory = function(mode) {
             let totalPercent = 0;
             if (item.properties && item.properties.length > 0) {
                 const propMap = {
-                   "Основа оружия": 40, "Гнездо (бижутерия)": 40,
-                    "Основа брони": 30, "Живучесть": 30, "Осн.Хар.": 30, "Гнездо (голова/оруж)": 30,
+                   "Основа оружия": 40,
+                    "Основа брони": 30, "Основа бижы": 30, "Живучесть": 30, "Осн.Хар.": 30, "Гнездо (голова/оруж)": 30,
                     "Восстановление": 20,
                     "Все сопротивления": 15, "Крит урон": 15, "Крит шанс": 15,
                     "Не Осн.Хар.": 10, "Броня": 10, "Здоровье": 10, "Ур. в бижутерии": 10,
@@ -3861,6 +3901,9 @@ window.finalizeTheft = function() {
             } else {
                 window.showCustomAlert(`✅ Предмет украден и добавлен в инвентарь!`);
             }
+
+            // Проверка на повышение ранга/гильдии после кражи
+            if (window.checkGuildProgression) window.checkGuildProgression();
         }, true);
     } else {
         // Штраф

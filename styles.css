@@ -173,6 +173,26 @@ body::after {
     color: #a0a0a0;
 }
 
+/* Эффект Shimmer (Блик) */
+.d2-button::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 150%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+    pointer-events: none;
+    transition: none;
+}
+.d2-button:hover::after {
+    animation: shimmer 0.6s ease-in-out;
+}
+@keyframes shimmer {
+    0% { left: -150%; }
+    100% { left: 150%; }
+}
+
 .d2-button:hover {
     color: #fff;
     text-shadow: 0 0 10px #ff4444; /* Красное свечение текста */

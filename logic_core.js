@@ -43,6 +43,7 @@ window.playerData = savedData ? JSON.parse(savedData) : {
     theft_attempts_count: 0, // Количество попыток на текущем уровне
     black_market: 0,
     zaken_discount: "",
+    base_vp_at_70: 0, // ВП, зафиксированный при получении 70 уровня
     xp_bonus: "",
     potion_price: "",
     lvl70_portal: "",
@@ -95,6 +96,13 @@ if (typeof window.playerData.gambler_bm_purchases_count === 'undefined') window.
 if (typeof window.playerData.gambler_bonus_sales_left === 'undefined') window.playerData.gambler_bonus_sales_left = 0;
 if (typeof window.playerData.theft_attempts_level === 'undefined') window.playerData.theft_attempts_level = window.playerData.level || 1;
 if (typeof window.playerData.theft_attempts_count === 'undefined') window.playerData.theft_attempts_count = 0;
+if (typeof window.playerData.base_vp_at_70 === 'undefined') {
+    if (window.playerData.level >= 70) {
+        window.playerData.base_vp_at_70 = window.playerData.maxVp || 0;
+    } else {
+        window.playerData.base_vp_at_70 = 0;
+    }
+}
 
 // Глобальные переменные состояния
 window.historyStack = ['main'];

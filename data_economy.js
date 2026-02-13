@@ -61,11 +61,11 @@ window.economyData = {
                 <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
                     <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
                         <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">40%</div>
-                        <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 40)">Основа оружия</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 40)">Гнездо (бижутерия)</span></div>
+                        <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 40)">Основа оружия</span></div>
                     </div>
                     <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
                         <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">30%</div>
-                        <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Основа брони</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Живучесть</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Осн.Хар.</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Гнездо (голова/оруж)</span></div>
+                        <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Основа брони</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Основа бижы</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Живучесть</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Осн.Хар.</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 30)">Гнездо (голова/оруж)</span></div>
                     </div>
                     <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
                         <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">20%</div>

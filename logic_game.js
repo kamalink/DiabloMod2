@@ -215,6 +215,13 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                 return;
             }
             else if (newGuild.includes('вор') || newGuild.includes('воришка')) {
+                // Для Вора (не воришки) нужно сначала проверить 7 краж
+                 if (newGuild.includes('вор') && !newGuild.includes('воришка')) {
+                    if (window.playerData.steals < 7) {
+                        window.showCustomAlert("❌ Для вступления нужно минимум 7 успешных краж (Ранг 1).");
+                        return;
+                    }
+                 }
                  let count = newGuild.includes('воришка') ? 1 : 3;
                  
                  // Устанавливаем состояние ожидания вступления
