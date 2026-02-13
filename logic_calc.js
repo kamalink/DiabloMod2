@@ -514,9 +514,11 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
     if (resGain > 0 && maxResources[className]) {
         const maxRes = maxResources[className];
         const resGainPercent = (resGain / maxRes) * 100;
-        const val = (resGainPercent / 2) * 1;
+        let val = (resGainPercent / 2) * 1;
+
         cost += val;
-        details.push(`Восст. ресурса (${resGain} / ${maxRes} [Макс] / 2% [База]) = ${val.toFixed(2)}`);
+        let formula = `Восст. ресурса (${resGain} / ${maxRes} [Макс] / 2% [База])`;
+        details.push(`${formula} = ${val.toFixed(2)}`);
     }
 
     if (runeData.customCost !== undefined) {
@@ -663,6 +665,24 @@ window.buySkill = function() {
         }
     }
 
+    // --- DEBUG VALIDATION ---
+    const validationError = window.validateSkillCost(className, skillIdx, runeIdx);
+    if (validationError) {
+        window.showCustomConfirm(
+            `⚠️ Обнаружена потенциальная ошибка в расчетах!<br><br><span style="color:#ffcc00;">${validationError}</span><br><br>Продолжить покупку?`,
+            () => proceedWithPurchase()
+        );
+    } else {
+        proceedWithPurchase();
+    }
+}
+
+function proceedWithPurchase() {
+    const cost = parseFloat(document.getElementById('calc-result').innerText);
+    const className = document.getElementById('calc-class-select').value;
+    const skillIdx = document.getElementById('calc-skill-select').value;
+    const runeIdx = document.getElementById('calc-rune-select').value;
+
     const skillName = window.skillDB[className][skillIdx].name;
     const runeName = window.skillDB[className][skillIdx].runes[runeIdx].name;
 
@@ -771,6 +791,12 @@ window.calculateExp = function() {
     let runesBase = (dMobs * 0.01) + (dElites * 0.1) + (bosses * 3);
     let paraBase = (dMobs * 0.01) + (dElites * 0.1) + (bosses * 3);
 
+    // Применяем множитель рифта
+    if (window.activeRiftMultiplier && window.activeRiftMultiplier !== 1) {
+        runesBase *= window.activeRiftMultiplier;
+        paraBase *= window.activeRiftMultiplier;
+    }
+
     const g = (window.playerData.guild || "").toLowerCase();
     let runesMod = 1;
     let paraMod = 1;
@@ -799,7 +825,10 @@ window.calculateExp = function() {
         const ranks = [0.15, 0.20, 0.28, 0.35, 0.50, 0.75, 1.00, 1.25, 1.50, 2.00];
         const r = (window.playerData.rank || 1) - 1;
         const bonus = ranks[Math.min(r, 9)] || 0.15;
-        runesMod += bonus; paraMod += bonus;
+         // Бонус применяется только к опыту за обычных мобов (dMobs * 0.01)
+        const mobsExp = dMobs * 0.01;
+        runesBase += mobsExp * bonus;
+        paraBase += mobsExp * bonus;
     } else if (g.includes('гэмблер')) {
         runesMod -= 0.25; paraMod -= 0.25;
     } else if (g.includes('вор') && !g.includes('воришка')) {
@@ -817,11 +846,16 @@ window.calculateExp = function() {
     const totalRunes = (runesBase * runesMod).toFixed(2);
     const totalPara = (paraBase * paraMod).toFixed(2);
 
+    let riftMsg = "";
+    if (window.activeRiftMultiplier && window.activeRiftMultiplier !== 1) {
+        riftMsg = `<br><span style="color:#ffd700; font-size:0.8rem;">(Множитель НП: x${window.activeRiftMultiplier})</span>`;
+    }
+
     const diffText = (dMobs > 0 || dElites > 0) ? `<br><span style="font-size:0.8rem; color:#aaa;">(+${dMobs}💀, +${dElites}☠️)</span>` : "";
     document.getElementById('exp-result-display').innerHTML = `
         <span style="color:#fff">Награда:</span><br>
         <span style="color:#66ccff; font-size:1.2rem;">${totalRunes} 📖</span> | 
-        <span style="color:#d4af37; font-size:1.2rem;">${totalPara} ⏳</span>${diffText}
+        <span style="color:#d4af37; font-size:1.2rem;">${totalPara} ⏳</span>${diffText}${riftMsg}
     `;
 }
 
@@ -847,6 +881,22 @@ window.applyExpCalculation = function() {
     window.playerData.kills += dMobs;
     window.playerData.elites_solo += dElites;
     window.playerData.bosses += bosses;
+    
+    if (window.playerData.kills > (window.playerData.highest_kills || 0)) {
+        window.playerData.highest_kills = window.playerData.kills;
+    }
+
+    // Начисление золота Соратникам за убийства
+    const g = (window.playerData.guild || "").toLowerCase();
+    if (dMobs > 0 && (g.includes('салага') || g.includes('громила') || g.includes('лорд войны'))) {
+        let mult = 0;
+        if (g.includes('салага')) mult = 0.88;
+        else if (g.includes('громила')) mult = 1.75;
+        else if (g.includes('лорд войны')) mult = 1.23;
+        
+        const reward = Math.floor(dMobs * mult * window.playerData.level);
+        window.addYen(reward);
+    }
     
     window.saveToStorage();
     window.updateUI();
@@ -887,7 +937,6 @@ window.buyZakens = function(mode) {
     const modal = document.getElementById('zaken-buy-modal');
     const title = modal.querySelector('h3');
     const buyBtn = document.getElementById('btn-confirm-buy');
-    const sellBtn = document.getElementById('btn-confirm-sell');
     
     // Сброс позиции
     modal.style.top = '50%';
@@ -914,16 +963,9 @@ window.buyZakens = function(mode) {
         title.style.color = '#d4af37';
         modal.style.borderColor = '#d4af37';
         buyBtn.style.display = 'inline-block';
-        sellBtn.style.display = 'none';
+        
         document.getElementById('zaken-price-display').innerText = "";
-    } else {
-        title.innerText = '📉 ПРОДАЖА ЗАКЕНОВ';
-        title.style.color = '#ff4444';
-        modal.style.borderColor = '#ff4444';
-        buyBtn.style.display = 'none';
-        sellBtn.style.display = 'inline-block';
-        // Цена продажи рассчитывается в updateZakenTotalCost, здесь просто текст
-        document.getElementById('zaken-price-display').innerText = `Цена продажи зависит от уровня`;
+    
     }
     
     document.getElementById('zaken-count-input').value = 1;
@@ -941,13 +983,6 @@ window.updateZakenTotalCost = function() {
     const g = (window.playerData.guild || "").toLowerCase();
     let priceYen = window.getZakenPrice(lvl);
     
-    if (mode === 'sell') {
-        priceYen = priceYen * 0.8;
-        // Вампирский штраф
-        if (g.includes('вампир')) {
-            priceYen *= 0.5;
-        }
-    }
 
     const totalYen = priceYen * count;
     const label = mode === 'buy' ? 'Стоимость' : 'Получите';
@@ -969,14 +1004,27 @@ window.confirmBuyZakens = function() {
         priceYen = priceYen * (1 + window.playerData.zaken_discount_val);
         bonuses.push(`Гэмблер ${Math.round(window.playerData.zaken_discount_val*100)}%`);
     }
-
-    const totalCostYen = priceYen * count;
+const totalCostYen = priceYen * count;
+    const valError = window.validateGenericAction(totalCostYen, "Покупка Закенов");
+    if (valError) {
+        window.showCustomAlert(valError);
+        return;
+    }
+    
     const currentYen = window.getAllMoneyInYen();
 
     if (currentYen >= totalCostYen) {
         window.setMoneyFromYen(currentYen - totalCostYen);
         window.playerData.zakens += count;
-        window.playerData.black_market += count;
+        window.playerData.deals += count; // Используем сделки вместо black_market
+        // Логика бонуса Гэмблера: каждые 2 покупки дают 10 продаж по х5
+        if ((window.playerData.guild || "").toLowerCase().includes('гэмблер')) {
+            window.playerData.gambler_bm_purchases_count = (window.playerData.gambler_bm_purchases_count || 0) + count;
+            while (window.playerData.gambler_bm_purchases_count >= 2) {
+                window.playerData.gambler_bm_purchases_count -= 2;
+                window.playerData.gambler_bonus_sales_left = (window.playerData.gambler_bonus_sales_left || 0) + 10;
+            }
+        }
         window.updateUI();
         document.getElementById('zaken-buy-modal').style.display = 'none';
         window.showCustomAlert(`✅ Куплено ${count} 🔖 за ${window.formatCurrency(totalCostYen)}.`);
@@ -986,43 +1034,7 @@ window.confirmBuyZakens = function() {
     }
 }
 
-window.confirmSellZakens = function() {
-    const count = parseInt(document.getElementById('zaken-count-input').value);
-    const lvl = window.playerData.level;
-    
-    if (isNaN(count) || count <= 0) {
-        window.showCustomAlert("Некорректное число.");
-        return;
-    }
 
-    if (window.playerData.zakens < count) {
-        window.showCustomAlert(`❌ Недостаточно закенов!<br>У вас: ${window.playerData.zakens}`);
-        return;
-    }
-
-    // Расчет цены продажи
-    const g = (window.playerData.guild || "").toLowerCase();
-    let basePrice = window.getZakenPrice(lvl);
-    let sellPricePerUnit = basePrice * 0.8; // 80% от цены
-    // Вампирский штраф
-    if (g.includes('вампир')) {
-        sellPricePerUnit *= 0.5;
-    }
-    const totalSellYen = Math.floor(sellPricePerUnit * count);
-   
-
-    window.playerData.zakens -= count;
-    window.playerData.gold_y += totalSellYen;
-    // Нормализация валюты происходит в updateUI -> calculateRank -> но лучше сделать тут или использовать addMoney
-    // Проще добавить напрямую и нормализовать
-    while (window.playerData.gold_y >= 100) { window.playerData.gold_y -= 100; window.playerData.gold_c++; }
-    while (window.playerData.gold_c >= 100) { window.playerData.gold_c -= 100; window.playerData.gold_s++; }
-    while (window.playerData.gold_s >= 100) { window.playerData.gold_s -= 100; window.playerData.gold_g++; }
-
-    window.updateUI();
-    document.getElementById('zaken-buy-modal').style.display = 'none';
-    window.showCustomAlert(`✅ Продано ${count} 🔖 за ${window.formatCurrency(totalSellYen)}.`);
-}
 
 
 window.buyReagent = function() {
@@ -1071,10 +1083,7 @@ window.sellDeathBreath = function() {
              sellMult = p / 5;
              bonuses.push(`Торговцы x${sellMult.toFixed(2)}`);
         }
-        if (g.includes('вампир')) {
-            sellMult *= 0.5;
-            bonuses.push(`Вампир -50%`);
-        }
+        // Вампир: штраф только на предметы, здесь убран
         
         let totalGain = pricePerUnit * quantity * sellMult;
         playerData.death_breath -= quantity;
@@ -1180,6 +1189,11 @@ window.buyPotion = function() {
         }
 
         const totalCost = Math.floor(pricePerPotion * quantity);
+        const valError = window.validateGenericAction(totalCost, "Покупка Зелий");
+        if (valError) {
+            window.showCustomAlert(valError);
+            return;
+        }
         const currentMoney = getAllMoneyInYen();
 
         if (currentMoney >= totalCost) {
@@ -1222,8 +1236,7 @@ window.sellResources = function() {
     const levelInput = document.getElementById('multi-sell-level');
 
     // Сброс позиции
-    modal.style.top = '50%';
-    modal.style.left = '50%';
+   modal.style.top = '50%';    modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
     levelInput.value = (window.lastResourceSellLevel && window.lastResourceSellLevel >= 5) ? window.lastResourceSellLevel : 5;
     document.getElementById('multi-sell-label-text').innerText = "Уровень ресурсов:";
@@ -1264,13 +1277,17 @@ window.sellResources = function() {
         }
         if (g.includes('вампир')) {
             sellMult *= 0.5;
-            bonuses.push(`Вампир -50%`);
+            bonuses.push(`Вампир -50%`); // Возвращен штраф
+        }
+        const riftMult = window.activeRiftMultiplier || 1;
+        if (riftMult !== 1) {
+            bonuses.push(`НП x${riftMult}`);
         }
 
         inputsContainer.querySelectorAll('.multi-sell-input').forEach(input => {
             const quantity = parseInt(input.value) || 0;
             const mult = parseFloat(input.dataset.mult);
-            totalYen += quantity * basePrice * mult * sellMult;
+            totalYen += quantity * basePrice * mult * sellMult * riftMult;
         });
         const bonusText = bonuses.length ? ` <span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
         totalDisplay.innerHTML = `Итого: ${window.formatCurrency(Math.floor(totalYen))}${bonusText}`;
@@ -1299,16 +1316,18 @@ window.sellResources = function() {
         if (g.includes('вампир')) {
             sellMult *= 0.5;
         }
+        const riftMult = window.activeRiftMultiplier || 1;
+        const isRiftSequence = !!window.activeRiftMultiplier;
 
         inputsContainer.querySelectorAll('.multi-sell-input').forEach(input => {
             const resType = input.dataset.type;
             const quantity = parseInt(input.value) || 0;
             quantities[resType] = (quantities[resType] || 0) + quantity;
 
-            if (quantity > (window.playerData[`res_${resType}`] || 0)) {
+            if (!isRiftSequence && quantity > (window.playerData[`res_${resType}`] || 0)) {
                 error = true;
             }
-            totalGain += quantity * basePrice * parseFloat(input.dataset.mult) * sellMult;
+            totalGain += quantity * basePrice * parseFloat(input.dataset.mult) * sellMult * riftMult;
         });
         
         if (error) {
@@ -1317,8 +1336,10 @@ window.sellResources = function() {
         }
 
         if (totalGain > 0) {
-            for (const resType in quantities) {
-                window.playerData[`res_${resType}`] -= quantities[resType];
+            if (!isRiftSequence) {
+                for (const resType in quantities) {
+                    window.playerData[`res_${resType}`] -= quantities[resType];
+                }
             }
             const currentMoney = getAllMoneyInYen();
             setMoneyFromYen(currentMoney + Math.floor(totalGain));
@@ -1326,10 +1347,17 @@ window.sellResources = function() {
             showCustomAlert(`✅ Ресурсы проданы! Получено: ${window.formatCurrency(Math.floor(totalGain))}`);
         }
         modal.style.display = 'none';
+        // Цепочка НП: Ресурсы -> Камни
+        if (window.activeRiftMultiplier) {
+            setTimeout(() => window.openGemServices('sell'), 500);
+        }
     };
 
     cancelBtn.onclick = () => {
         modal.style.display = 'none';
+        if (window.activeRiftMultiplier) {
+            setTimeout(() => window.openGemServices('sell'), 500);
+        }
     };
 
     updateTotal();
@@ -1350,24 +1378,35 @@ window.sellRunes = function(guildType) {
     
     if (g.includes('чародей') && !g.includes('ученик')) {
         const prices = [0, 2000, 3700, 6000, 9000, 13500, 18000, 22500, 27000, 32000, 45000];
-        pricePerRune = prices[rank] || 2000;
+      const basePrice = prices[rank] || 2000;
+        const bonusPercent = 27.5 * (window.playerData.stat_int / 100);
+        pricePerRune = basePrice * (1 + bonusPercent / 100);
     } else if (g.includes('ученик')) {
         pricePerRune = 1500; // Фикс 15 бронзы
     } else if (g.includes('вампир')) {
         // Вампир: Уроки стоят на 30% больше за каждые 100 Интеллекта
         const basePrice = 1500;
-        const bonusPercent = 30 * (window.playerData.stat_int / 100);
+        // Штраф на продажу -50% (применяется к итоговой цене)
+       const bonusPercent = 30 * (window.playerData.stat_int / 100); // Штраф -50% применяется при продаже
         pricePerRune = basePrice * (1 + bonusPercent / 100);
     }
 
     window.showCustomPrompt("Продажа Рун", `Цена за 1 📖: ${window.formatCurrency(pricePerRune)}<br>У вас: ${window.playerData.runes} 📖`, "1", (quantity) => {
         if (isNaN(quantity) || quantity <= 0) return;
+        // Для Чародеев руны продаются только целыми числами
+        if (g.includes('чародей')) {
+            quantity = Math.floor(quantity);
+        }
         if (window.playerData.runes < quantity) { window.showCustomAlert("Недостаточно рун."); return; }
         
         window.playerData.runes -= quantity;
         window.playerData.runes_sold += quantity;
         
         const totalGain = Math.floor(pricePerRune * quantity);
+        // Вампирский штраф на продажу рун
+        if (g.includes('вампир')) {
+            totalGain = Math.floor(totalGain * 0.5);
+        }
         window.playerData.gold_y += totalGain;
         
         // Нормализация денег
@@ -1377,6 +1416,35 @@ window.sellRunes = function(guildType) {
         
         window.updateUI();
         window.showCustomAlert(`✅ Продано ${quantity} 📖 за ${window.formatCurrency(totalGain)}`);
+    });
+}
+
+window.buyRunes = function() {
+    const lvl = window.playerData.level;
+    // Формула: 2000 * Level^1.4
+    // Lvl 1: 2000
+    // Lvl 20: ~132,000
+    // Lvl 70: ~765,000
+    const pricePerRune = Math.floor(2000 * Math.pow(lvl, 1.4));
+
+    window.showCustomPrompt("Покупка Рун", `Цена за 1 📖: ${window.formatCurrency(pricePerRune)}<br>Ваш уровень: ${lvl}`, "1", (quantity) => {
+        if (isNaN(quantity) || quantity <= 0) return;
+        
+        const totalCost = pricePerRune * quantity;
+        window.showCustomConfirm(
+            `Купить ${quantity} 📖?<br>Итоговая стоимость: ${window.formatCurrency(totalCost)}`,
+            () => {
+                const currentYen = window.getAllMoneyInYen();
+                if (currentYen >= totalCost) {
+                    window.setMoneyFromYen(currentYen - totalCost);
+                    window.playerData.runes = parseFloat((window.playerData.runes + quantity).toFixed(2));
+                    window.updateUI();
+                    window.showCustomAlert(`✅ Куплено ${quantity} 📖 за ${window.formatCurrency(totalCost)}`);
+                } else {
+                    window.showCustomAlert(`❌ Недостаточно средств! Нужно: ${window.formatCurrency(totalCost)}`);
+                }
+            }
+        );
     });
 }
 
@@ -1406,7 +1474,7 @@ window.resetProgress = function() {
                 
                 // Статистика гильдий
                 runes_sold: 0, reputation: 0, deals: 0, chests_found: 0,
-                steals: 0, black_market: 0,
+                steals: 0,
                 
                 // Состояния и бонусы
                 theft_fine: "", zaken_discount: "", xp_bonus: "", potion_price: "",
@@ -1488,9 +1556,23 @@ window.openGemServices = function(mode) {
         `;
         itemTypeSelector.style.display = 'none';
         rentDurationBox.style.display = 'block';
+        } else if (mode === 'sell') {
+        title.innerText = 'Продажа Самоцветов';
+        buttonsContainer.innerHTML = `
+            <button class="craft-btn sell" onclick="executeGemService('sell')">Продать</button>
+        `;
+        itemTypeSelector.style.display = 'none';
+        rentDurationBox.style.display = 'none';
     }
     
     buttonsContainer.innerHTML += `<button class="death-cancel-btn" onclick="closeGemModal()">Отмена</button>`;
+    // Если это часть цепочки НП, меняем кнопку Отмена на Завершить
+    if (window.activeRiftMultiplier && mode === 'sell') {
+        const cancelBtn = buttonsContainer.querySelector('.death-cancel-btn');
+        cancelBtn.innerText = "ЗАВЕРШИТЬ";
+        cancelBtn.onclick = () => { closeGemModal(); window.activeRiftMultiplier = null; window.showCustomAlert("🏁 Цепочка НП завершена!"); };
+
+    }
     
     modal.style.display = 'flex';
 }
@@ -1541,7 +1623,7 @@ window.executeGemService = function(operation) {
             bonuses.push(`Торговцы x${sellMult.toFixed(2)}`);
         }
         singleCost = priceData.sell * sellMult;
-        // Вампирский штраф
+        // Вампирский штраф возвращен
         if (g.includes('вампир')) {
             singleCost *= 0.5;
             bonuses.push(`Вампир -50%`);
@@ -1554,8 +1636,18 @@ window.executeGemService = function(operation) {
     }
 
     let totalCost = singleCost * quantity;
+    // Множитель рифта для продажи
+    if (isIncome && window.activeRiftMultiplier) {
+        totalCost *= window.activeRiftMultiplier;
+        bonuses.push(`НП x${window.activeRiftMultiplier}`);
+    }
     if (operation === 'rent') totalCost *= rentDuration;
     const costFormatted = formatCurrency(totalCost);
+    const valError = window.validateGemAction(totalCost, gemRank, quantity, operation);
+    if (valError) {
+        window.showCustomAlert(valError);
+        return;
+    }
     const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
     const confirmMsg = isIncome 
         ? `${operationText}?<br>Вы получите: ${costFormatted}${bonusText}`
@@ -1649,24 +1741,27 @@ function getCraftedItemBasePrice(level, grade) {
     return baseVal * Math.pow(1.1, level - 1);
 }
 
-function getBulkItemPrice(level) {
-    if (level <= 5) return 25;
-    if (level <= 10) return 35;
-    if (level <= 15) return 50;
-    if (level <= 20) return 100;
-    if (level <= 25) return 140;
-    if (level <= 30) return 200;
-    if (level <= 35) return 300;
-    if (level <= 40) return 600;
-    if (level <= 45) return 900;
-    if (level <= 50) return 1400;
-    if (level <= 55) return 2300;
-    if (level <= 60) return 3500;
-    if (level <= 65) return 6000;
-    if (level <= 69) return 9300;
-    if (level >= 70) return 12000;
-    return 25;
+function getBulkItemPrice(level, multiplier = 1) {
+    let price = 25;
+    if (level <= 5) price = 25;
+    else if (level <= 10) price = 35;
+    else if (level <= 15) price = 50;
+    else if (level <= 20) price = 100;
+    else if (level <= 25) price = 140;
+    else if (level <= 30) price = 200;
+    else if (level <= 35) price = 300;
+    else if (level <= 40) price = 600;
+    else if (level <= 45) price = 900;
+    else if (level <= 50) price = 1400;
+    else if (level <= 55) price = 2300;
+    else if (level <= 60) price = 3500;
+    else if (level <= 65) price = 6000;
+    else if (level <= 69) price = 9300;
+    else if (level >= 70) price = 12000;
+    
+    return price * multiplier;
 }
+
 
 window.sellItemsBulk = function() {
     const modal = document.getElementById('multi-sell-modal');
@@ -1676,6 +1771,11 @@ window.sellItemsBulk = function() {
     const cancelBtn = document.getElementById('multi-sell-cancel-btn');
     const levelInput = document.getElementById('multi-sell-level');
 
+    // Если это не цепочка НП, сбрасываем множитель, чтобы не влиял на обычную продажу
+    if (!window.activeRiftMultiplier && document.getElementById('active-rift-modal').style.display === 'none') {
+        // window.activeRiftMultiplier = 0; // Не сбрасываем глобально, просто учитываем локально
+    }
+
     // Сброс позиции
     modal.style.top = '50%';
     modal.style.left = '50%';
@@ -1683,6 +1783,8 @@ window.sellItemsBulk = function() {
     levelInput.value = (window.lastResourceSellLevel && window.lastResourceSellLevel >= 5) ? window.lastResourceSellLevel : (window.playerData.level || 5);
 
     document.getElementById('multi-sell-title').innerText = "Продажа предметов";
+    const labelText = document.getElementById('multi-sell-label-text');
+    if (labelText) labelText.innerText = "Уровень предметов:";
     const items = [
         { type: 'n', name: 'N Grade 📓', mult: 1 },
         { type: 'dc', name: 'D/C Grade 📘/📒', mult: 3 },
@@ -1699,16 +1801,51 @@ window.sellItemsBulk = function() {
     const updateTotal = () => {
         let totalYen = 0;
         const level = parseInt(levelInput.value) || 1;
-        const labelText = document.getElementById('multi-sell-label-text');
-        if (labelText) labelText.innerText = "Уровень предметов:";
+        
         window.lastResourceSellLevel = level; // Запоминаем уровень (общий с ресурсами)
-        const basePrice = getBulkItemPrice(level);
+        const riftMult = window.activeRiftMultiplier || 1;
+        // Если окно открыто не в рамках цепочки (нет активного множителя), то riftMult = 1
+        // Но activeRiftMultiplier глобальный. Проверяем контекст вызова?
+        // В рамках текущей логики activeRiftMultiplier сбрасывается только в конце цепочки.
+        // Если игрок просто открыл меню, activeRiftMultiplier должен быть 0/undefined.
+        
+        const basePrice = getBulkItemPrice(level, riftMult);
+        const g = (window.playerData.guild || "").toLowerCase();
+        let gamblerBonusLeft = window.playerData.gambler_bonus_sales_left || 0;
+
+        // Расчет множителя продажи (без Гэмблера, он считается отдельно в цикле)
+        let sellMultiplier = 1.0;
+        if (g.includes('чародей') && !g.includes('ученик')) {
+            const wizPenalties = [0.90, 0.88, 0.86, 0.84, 0.82, 0.80, 0.78, 0.75, 0.72, 0.70];
+            const rank = window.playerData.rank || 0;
+            const mult = wizPenalties[Math.min(rank, 9)] || 0.9;
+            sellMultiplier *= mult;
+        } else if (g.includes('ученик чародея')) {
+            sellMultiplier *= 0.91;
+        }
+        if (g.includes('вор') && !g.includes('воришка')) sellMultiplier *= 1.5;
+        if (g.includes('воришка')) sellMultiplier *= 1.2;
+        if (g.includes('вампир')) sellMultiplier *= 0.5;
 
         inputsContainer.querySelectorAll('.multi-sell-input').forEach(input => {
             const quantity = parseInt(input.value) || 0;
             const mult = parseFloat(input.dataset.mult);
-            totalYen += quantity * basePrice * mult;
+           
+            // Если Гэмблер, показываем с учетом бонуса
+            if (g.includes('гэмблер')) {
+                let bonusCount = Math.min(quantity, gamblerBonusLeft);
+                let normalCount = quantity - bonusCount;
+               // Бонусные по х5, обычные по х1.25
+                totalYen += bonusCount * basePrice * mult * 5;
+                totalYen += normalCount * basePrice * mult * 1.25;
+                gamblerBonusLeft -= bonusCount;
+            } else if (g.includes('гэмблер')) {
+                totalYen += quantity * basePrice * mult * 1.25;
+            } else {
+                totalYen += quantity * basePrice * mult;
+            }
         });
+         totalYen *= sellMultiplier;
         totalDisplay.innerHTML = `Итого: ${window.formatCurrency(Math.floor(totalYen))}`;
     };
 
@@ -1725,18 +1862,51 @@ window.sellItemsBulk = function() {
         // Повторяем расчет для применения
         let totalGain = 0;
         const level = parseInt(levelInput.value) || 1;
-        const basePrice = getBulkItemPrice(level);
+        const riftMult = window.activeRiftMultiplier || 1;
+        const basePrice = getBulkItemPrice(level, riftMult);
+        let gamblerBonusLeft = window.playerData.gambler_bonus_sales_left || 0;
         const g = (window.playerData.guild || "").toLowerCase();
         let sellMultiplier = 1.0;
-        if (g.includes('вампир')) {
-            sellMultiplier = 0.5;
+        
+        if (g.includes('чародей') && !g.includes('ученик')) {
+            const wizPenalties = [0.90, 0.88, 0.86, 0.84, 0.82, 0.80, 0.78, 0.75, 0.72, 0.70];
+            const rank = window.playerData.rank || 0;
+            const mult = wizPenalties[Math.min(rank, 9)] || 0.9;
+            sellMultiplier *= mult;
+        } else if (g.includes('ученик чародея')) {
+            sellMultiplier *= 0.91;
+
         }
+        // Бонусы Воров
+        if (g.includes('вор') && !g.includes('воришка')) sellMultiplier *= 1.5;
+        if (g.includes('воришка')) sellMultiplier *= 1.2;
+        
+        // Вампир (штраф на предметы есть)
+        if (g.includes('вампир')) sellMultiplier *= 0.5;
+        
+
 
         inputsContainer.querySelectorAll('.multi-sell-input').forEach(input => {
             const quantity = parseInt(input.value) || 0;
             const mult = parseFloat(input.dataset.mult);
-            totalGain += quantity * basePrice * mult;
+            if (g.includes('гэмблер')) {
+                let bonusCount = Math.min(quantity, gamblerBonusLeft);
+                let normalCount = quantity - bonusCount;
+                
+                // Бонусные предметы по х5
+                totalGain += bonusCount * basePrice * mult * 5;
+                 // Обычные по х1.25
+                totalGain += normalCount * basePrice * mult * 1.25;
+                
+                gamblerBonusLeft -= bonusCount;
+            } else {
+                totalGain += quantity * basePrice * mult;
+            }
         });
+        // Сохраняем остаток бонусов Гэмблера
+        if (g.includes('гэмблер')) {
+            window.playerData.gambler_bonus_sales_left = gamblerBonusLeft;
+        }
 
         totalGain *= sellMultiplier;
 
@@ -1747,10 +1917,17 @@ window.sellItemsBulk = function() {
             showCustomAlert(`✅ Предметы проданы! Получено: ${window.formatCurrency(Math.floor(totalGain))}`);
         }
         modal.style.display = 'none';
+        // Если это часть цепочки НП
+        if (window.activeRiftMultiplier) {
+            setTimeout(() => window.openSellCraftedModal(), 500); // Следующий шаг: продажа штучных (крафт окно)
+        }
     };
 
     cancelBtn.onclick = () => {
         modal.style.display = 'none';
+         if (window.activeRiftMultiplier) {
+            setTimeout(() => window.openSellCraftedModal(), 500); // Пропускаем шаг, идем дальше
+        }
     };
 
     updateTotal();
@@ -1769,12 +1946,30 @@ window.openSellCraftedModal = function() {
     if (!btn) btn = modal.querySelector('.craft-btn'); // Доп. поиск кнопки
     
     // Сброс интерфейса в режим продажи
-    title.innerText = "⚒️ ПРОДАЖА КРАФТА";
+    if (window.activeRiftMultiplier) {
+        title.innerText = "💰 ПРОДАЖА ПРЕДМЕТОВ";
+    } else {
+        title.innerText = "⚒️ ПРОДАЖА КРАФТА";
+    }
     title.style.color = "#d4af37";
     if (btn) {
         btn.innerText = "ПРОДАТЬ";
         btn.className = "craft-btn smith-sell";
         btn.onclick = window.sellCraftedItemFromModal;
+    }
+
+    // Если это часть цепочки НП, добавляем кнопку "Далее"
+    if (window.activeRiftMultiplier) {
+        let nextBtn = document.getElementById('craft-next-btn');
+        if (!nextBtn) {
+            nextBtn = document.createElement('button');
+            nextBtn.id = 'craft-next-btn';
+            nextBtn.className = 'death-cancel-btn';
+            nextBtn.style.marginTop = '10px';
+            nextBtn.innerText = 'ДАЛЕЕ (Ресурсы) >>';
+            nextBtn.onclick = () => { modal.style.display = 'none'; window.sellResources(); };
+            modal.appendChild(nextBtn);
+        }
     }
 
     modal.style.top = '50%';
@@ -1786,7 +1981,7 @@ window.openSellCraftedModal = function() {
 window.sellCraftedItemFromModal = function() {
     const level = parseInt(document.getElementById('modal-sell-level').value) || 1;
     const grade = document.getElementById('modal-sell-grade').value;
-    
+    const playerRank = window.playerData.rank || 0;
     // Set level to player level by default if not set
     if (!document.getElementById('modal-sell-level').dataset.touched) {
          // Logic to auto-set level could go here, but input is manual
@@ -1796,9 +1991,15 @@ window.sellCraftedItemFromModal = function() {
     let price = getCraftedItemBasePrice(level, grade);
     let bonuses = [];
 
+    // Если это цепочка НП, базовая цена 5% (как вендор), а не 100%
+    if (window.activeRiftMultiplier) {
+        price = price * 0.05;
+    }
+
     // 2. Считаем бонус от выбранных свойств
     let totalPercent = 0;
-    const selectedProps = document.querySelectorAll('.sell-prop-item.selected');
+    const modal = document.getElementById('sell-craft-modal');
+    const selectedProps = modal.querySelectorAll('.sell-prop-item.selected');
     if (selectedProps.length === 0) {
         window.showCustomAlert("❌ Выберите хотя бы одно свойство.");
         return;
@@ -1811,12 +2012,33 @@ window.sellCraftedItemFromModal = function() {
     price = price * (totalPercent / 100);
 
     // 3. Применяем бонус/штраф гильдии
-    const g = (window.playerData.guild || "").toLowerCase();
-    let guildMultiplier = 1.0; // Базовая продажа 100%
-    if (g.includes('салага') || g.includes('громила') || g.includes('лорд войны')) { guildMultiplier = 0.9; bonuses.push(`Соратники -10%`); }
-    if (g.includes('вампир')) { guildMultiplier = 0.5; bonuses.push(`Вампир -50%`); }
-    
-    price = price * guildMultiplier;
+    // Бонусы гильдий применяются ТОЛЬКО если это не продажа лута из НП
+    if (!window.activeRiftMultiplier) {
+        const g = (window.playerData.guild || "").toLowerCase();
+        let guildMultiplier = 1.0; // Базовая продажа 100%
+        if (g.includes('салага') || g.includes('громила') || g.includes('лорд войны')) { guildMultiplier = 0.9; bonuses.push(`Соратники -10%`); }
+        if (g.includes('вампир')) { 
+            const vampMults = [0.50, 0.48, 0.46, 0.44, 0.42, 0.40, 0.38, 0.36, 0.34, 0.30];
+            guildMultiplier = vampMults[Math.min(playerRank, 9)] || 0.5;
+            bonuses.push(`Вампир ${Math.round((guildMultiplier-1)*100)}%`); 
+        }
+
+        if (g.includes('чародей') && !g.includes('ученик')) {
+            const wizPenalties = [0.90, 0.88, 0.86, 0.84, 0.82, 0.80, 0.78, 0.75, 0.72, 0.70];
+            guildMultiplier = wizPenalties[Math.min(playerRank, 9)] || 0.9;
+            bonuses.push(`Чародей ${Math.round((guildMultiplier-1)*100)}%`);
+        }
+        
+        price = price * guildMultiplier;
+    }
+    // Бонус Гэмблера (х1.25)
+    if ((window.playerData.guild || "").toLowerCase().includes('гэмблер')) {
+        sellPrice = Math.floor(sellPrice * 1.25);
+    }
+    // Множитель рифта
+    if (window.activeRiftMultiplier) {
+        price *= window.activeRiftMultiplier;
+    }
     const totalYen = Math.floor(price);
     
     const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
@@ -1828,7 +2050,10 @@ window.sellCraftedItemFromModal = function() {
             window.setMoneyFromYen(currentMoney + totalYen);
             window.updateUI();
             window.showCustomAlert(`✅ Предмет продан! Получено: ${window.formatCurrency(totalYen)}`);
-            document.getElementById('sell-craft-modal').style.display = 'none';
+            // Если это цепочка НП, не закрываем окно, чтобы можно было продать еще или нажать Далее
+            if (!window.activeRiftMultiplier) {
+                document.getElementById('sell-craft-modal').style.display = 'none';
+            }
             selectedProps.forEach(el => el.classList.remove('selected'));
         }
     );
@@ -1930,6 +2155,11 @@ window.confirmBuySellAGrade = function() {
             else if (g.includes('охотник на ☠️')) { buyMult += 0.25; bonuses.push(`Охотник +25%`); }
             else if (g.includes('помощник охотника')) { buyMult += 0.10; bonuses.push(`Охотник +10%`); }
         }
+        // Штраф Гэмблера
+        if (g.includes('гэмблер')) {
+            buyMult += 0.25;
+            bonuses.push(`Гэмблер +25%`);
+        }
         finalPrice *= buyMult;
     }
     
@@ -1938,6 +2168,11 @@ window.confirmBuySellAGrade = function() {
         if (g.includes('вампир')) {
             finalPrice *= 0.5;
             bonuses.push(`Вампир -50%`);
+            }
+        // Гэмблер (бонус х1.25)
+        if (g.includes('гэмблер')) {
+            finalPrice *= 1.25;
+            bonuses.push(`Гэмблер +25%`);
         }
         // Traders bonus is already in base price? No, traders usually have bonus on sell too.
         // Adding Trader bonus for selling A-grade if applicable (assuming standard 5% base logic applies or custom)
@@ -1946,6 +2181,11 @@ window.confirmBuySellAGrade = function() {
     }
 
     const cost = Math.floor(finalPrice);
+    const valError = window.validateItemAction(cost, level, "A", mode);
+    if (valError) {
+        window.showCustomAlert(valError);
+        return;
+    }
     const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
     const currentMoney = window.getAllMoneyInYen();
 
@@ -2086,10 +2326,20 @@ window.buyAncientImmediate = function() {
         if (g.includes('охотник на гоблинов')) { buyMult += 0.5; bonuses.push(`Охотник +50%`); }
         else if (g.includes('охотник на ☠️')) { buyMult += 0.25; bonuses.push(`Охотник +25%`); }
         else if (g.includes('помощник охотника')) { buyMult += 0.10; bonuses.push(`Охотник +10%`); }
+        }
+    // Штраф Гэмблера
+    if (g.includes('гэмблер')) {
+        buyMult += 0.25;
+        bonuses.push(`Гэмблер +25%`);
     }
     
     finalPrice *= buyMult;
     const cost = Math.floor(finalPrice);
+    const valError = window.validateItemAction(cost, level, grade, 'buy');
+    if (valError) {
+        window.showCustomAlert(valError);
+        return;
+    }
     const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
 
     window.showCustomConfirm(
@@ -2190,10 +2440,20 @@ window.buySetImmediate = function() {
         if (g.includes('охотник на гоблинов')) { buyMult += 0.5; bonuses.push(`Охотник +50%`); }
         else if (g.includes('охотник на ☠️')) { buyMult += 0.25; bonuses.push(`Охотник +25%`); }
         else if (g.includes('помощник охотника')) { buyMult += 0.10; bonuses.push(`Охотник +10%`); }
+        }
+    // Штраф Гэмблера
+    if (g.includes('гэмблер')) {
+        buyMult += 0.25;
+        bonuses.push(`Гэмблер +25%`);
     }
     finalPrice *= buyMult;
 
     const cost = Math.floor(finalPrice);
+    const valError = window.validateItemAction(cost, level, grade, 'buy');
+    if (valError) {
+        window.showCustomAlert(valError);
+        return;
+    }
     const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
 
     window.showCustomConfirm(
@@ -2447,6 +2707,11 @@ const npCosts = {
     "T9": 2060000, "T10": 2360000, "T11": 2720000, "T12": 3290000,
     "T13": 3610000, "T14": 3980000, "T15": 4380000, "T16": 4810000
 };
+const difficultyOrder = [
+    "Высокий", "Эксперт", "Мастер",
+    "T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8",
+    "T9", "T10", "T11", "T12", "T13", "T14", "T15", "T16"
+];
 
 window.buyLocationEntry = function(type) {
     const diff = window.playerData.difficulty || "Высокий";
@@ -2462,10 +2727,33 @@ window.buyLocationEntry = function(type) {
         name = "Великий Портал";
     }
 
+    // Скидка на НП (10% за каждый пройденный в акте, макс 50%)
+    if (type === 'np') {
+        const count = window.playerData.np_count || 0;
+        if (count >= 6) {
+            window.showCustomAlert("⚠️ В этом акте уже пройдено 6 НП (максимум).<br>Смените акт для сброса.");
+            return;
+        }
+        const discount = Math.min(0.5, count * 0.1);
+        cost = cost * (1 - discount);
+        if (discount > 0) name += ` (-${discount*100}%)`;
+    }
+
     // Охотник на гоблинов: НП на 20% дешевле (только НП и Акт, ВП обычно не скидывается, но по логике "от НП" может и скидываться. Оставим скидку на базу)
     const g = (window.playerData.guild || "").toLowerCase();
     if (g.includes('охотник на гоблинов') && type !== 'vp') {
         cost *= 0.8;
+    }
+    const valError = window.validateGenericAction(cost, name);
+    if (valError) {
+        window.showCustomAlert(valError);
+        return;
+    }
+
+    if (type === 'np') {
+        // Для НП открываем выбор сложности
+        window.selectRiftDifficulty(cost, name, diff);
+        return;
     }
 
     window.showCustomConfirm(
@@ -2482,6 +2770,199 @@ window.buyLocationEntry = function(type) {
         }
     );
 }
+
+window.selectRiftDifficulty = function(cost, name, diff) {
+    const modal = document.getElementById('rift-diff-modal');
+    // Сохраняем параметры для подтверждения
+    window.pendingRift = { cost: cost, name: name, diff: diff };
+    document.getElementById('rift-diff-cost-display').innerHTML = `Выберите уровень сложности относительно вашего текущего (${diff}):`;
+    
+    const container = document.getElementById('rift-diff-buttons-container');
+    
+    // Расчет скидки
+    const count = window.playerData.np_count || 0;
+    const discount = Math.min(0.5, count * 0.1);
+    const g = (window.playerData.guild || "").toLowerCase();
+    const isGoblinHunter = g.includes('охотник на гоблинов');
+
+    const currentIndex = difficultyOrder.indexOf(diff);
+    let html = '';
+
+    const offsets = [
+        { val: 1, mult: 1.5, bg: '#2d5a3a', border: '#66ff66' },
+        { val: 0, mult: 1.0, bg: '#444', border: '#888' },
+        { val: -1, mult: 0.66, bg: '#5a4a2d', border: '#d4af37' },
+        { val: -2, mult: 0.44, bg: '#5a2d2d', border: '#ff4444' }
+    ];
+
+    offsets.forEach(opt => {
+        const targetIndex = currentIndex + opt.val;
+        
+        if (targetIndex >= 0 && targetIndex < difficultyOrder.length) {
+            const targetDiff = difficultyOrder[targetIndex];
+            let base = npCosts[targetDiff] || 440000;
+            
+            // Применяем бонусы
+            if (isGoblinHunter) base *= 0.8;
+            const finalCost = Math.floor(base * (1 - discount));
+            const costStr = window.formatCurrency(finalCost);
+            const label = opt.val > 0 ? `+${opt.val}` : `${opt.val}`;
+
+            html += `<button class="death-confirm-btn" style="background: ${opt.bg}; border-color: ${opt.border};" onclick="window.confirmRiftEntry(${opt.val}, ${finalCost})">${label} (Награда х${opt.mult}) — ${costStr}</button>`;
+        } else {
+            const label = opt.val > 0 ? `+${opt.val}` : `${opt.val}`;
+            html += `<button class="death-confirm-btn" style="background: #333; border-color: #555; opacity: 0.5; cursor: not-allowed;" disabled>${label} — Недоступно</button>`;
+        }
+    });
+
+    container.innerHTML = html;
+    
+    modal.style.display = 'flex';
+}
+
+window.confirmRiftEntry = function(offset, specificCost) {
+    const params = window.pendingRift;
+    if (!params) return;
+
+    const finalCost = specificCost !== undefined ? specificCost : params.cost;
+
+    const currentMoney = window.getAllMoneyInYen();
+    if (currentMoney >= finalCost) {
+        window.setMoneyFromYen(currentMoney - Math.floor(finalCost));
+        
+        window.playerData.is_in_np = true;
+        window.playerData.np_count = (window.playerData.np_count || 0) + 1;
+        window.playerData.current_run_diff = offset; // Сохраняем смещение сложности
+        window.updateActiveRiftModal();
+        
+        window.updateUI();
+        document.getElementById('rift-diff-modal').style.display = 'none';
+        window.showCustomAlert(`✅ Вход в НП оплачен!<br>Сложность: ${offset > 0 ? '+' : ''}${offset}<br>Удачи, Нефалем!`);
+    } else {
+        window.showCustomAlert(`❌ Недостаточно средств!`);
+    }
+}
+
+window.buyExtraRiftLocation = function() {
+    const diff = window.playerData.difficulty || "Высокий";
+    const offset = window.playerData.current_run_diff || 0;
+    
+    // Calculate target difficulty based on offset
+    const currentIndex = difficultyOrder.indexOf(diff);
+    const targetIndex = currentIndex + offset;
+    
+    if (targetIndex < 0 || targetIndex >= difficultyOrder.length) {
+        window.showCustomAlert("Ошибка определения сложности.");
+        return;
+    }
+    
+    const targetDiff = difficultyOrder[targetIndex];
+    let baseCost = npCosts[targetDiff] || 440000;
+    
+    // Apply bonuses
+    const g = (window.playerData.guild || "").toLowerCase();
+    if (g.includes('охотник на гоблинов')) {
+        baseCost *= 0.8;
+    }
+    
+    // Apply Act Discount
+    // np_count is already incremented for this rift.
+    // So for the 1st rift, np_count is 1. We want 0 discount.
+    // For 2nd rift, np_count is 2. We want 10% discount.
+    // Discount = (np_count - 1) * 0.1
+    const count = window.playerData.np_count || 1;
+    const discount = Math.min(0.5, Math.max(0, (count - 1) * 0.1));
+    
+    const finalCost = Math.floor(baseCost * (1 - discount));
+    
+    const currentMoney = window.getAllMoneyInYen();
+    if (currentMoney >= finalCost) {
+        window.setMoneyFromYen(currentMoney - finalCost);
+        window.updateUI();
+        window.showCustomAlert(`✅ Доп. локация оплачена!<br>Списано: ${window.formatCurrency(finalCost)}`);
+    } else {
+        window.showCustomAlert(`❌ Недостаточно средств! Нужно: ${window.formatCurrency(finalCost)}`);
+    }
+}
+
+window.closeNephalemRift = function(success) {
+    if (!window.playerData.is_in_np) {
+        window.showCustomAlert("⚠️ Вы не находитесь в Нефалемском портале.");
+        return;
+    }
+
+     // Скрываем модальное окно блокировки
+    document.getElementById('active-rift-modal').style.display = 'none';
+
+    window.playerData.is_in_np = false;
+    window.saveToStorage();
+
+    if (!success) {
+        window.showCustomAlert("❌ Портал не закрыт. Награды не получены.");
+        return;
+    }
+
+    // Расчет множителя наград
+    const offset = window.playerData.current_run_diff || 0;
+    let multiplier = 1.0;
+    if (offset === 1) multiplier = 1.5;
+    else if (offset === 0) multiplier = 1.0;
+    else if (offset === -1) multiplier = 0.66;
+    else if (offset === -2) multiplier = 0.44;
+
+    window.activeRiftMultiplier = multiplier;
+
+    window.showCustomAlert(`✅ Портал закрыт!<br>Множитель наград: x${multiplier}<br>Приступаем к подсчету...`);
+    
+    // Запуск цепочки окон
+    setTimeout(() => {
+        window.nextRiftSequenceStep(1);
+    }, 1500);
+}
+
+window.nextRiftSequenceStep = function(step) {
+    // 1. Опыт -> 2. Опт. продажа -> 3. Штучная продажа -> 4. Ресурсы -> 5. Камни
+    switch(step) {
+        case 1: // Опыт
+            window.openExpCalculator();
+            
+            const expBtn = document.querySelector('#exp-calc-modal .exp-apply-btn');
+            expBtn.onclick = function() {
+                window.applyExpCalculation(); // Стандартная логика
+                // Переход только если активен рифт
+                if (window.activeRiftMultiplier) setTimeout(() => window.nextRiftSequenceStep(2), 500);
+            };
+            break;
+        case 2: // Опт продажа
+            window.sellItemsBulk();
+            
+            break;
+        // ... (остальные шаги реализуем через модификацию самих функций, чтобы они поддерживали callback)
+    }
+}
+
+window.updateActiveRiftModal = function() {
+    const modal = document.getElementById('active-rift-modal');
+    if (!window.playerData.is_in_np) {
+        modal.style.display = 'none';
+        return;
+    }
+    
+    const diff = window.playerData.difficulty || "Высокий";
+    const offset = window.playerData.current_run_diff || 0;
+    const act = window.playerData.act || 1;
+    const count = window.playerData.np_count || 1;
+    
+    const diffLabel = offset > 0 ? `+${offset}` : (offset < 0 ? `${offset}` : `+0`);
+    
+    document.getElementById('active-rift-info').innerHTML = `
+        Сложность: <span style="color:#fff">${diff} (${diffLabel})</span><br>
+        Акт: <span style="color:#d4af37">${act}</span> | Портал №: <span style="color:#d4af37">${count}</span>
+    `;
+    
+    modal.style.display = 'flex';
+}
+
 
 window.exchangeRunesForPara = function() {
     window.showCustomPrompt("Обмен Рун на Парагон", "Курс: 1.5 📖 = 1 ⏳<br>Сколько ⏳ хотите получить?", "1", (amount) => {
@@ -2558,7 +3039,8 @@ window.buyItemImmediate = function() {
     if (gradePenaltyMult > 1) bonuses.push(`Грейд +${Math.round((gradePenaltyMult-1)*100)}%`);
 
     let totalPercent = 0;
-    const selectedProps = document.querySelectorAll('.buy-prop-item.selected');
+    const container = document.getElementById('window-content');
+    const selectedProps = container ? container.querySelectorAll('.buy-prop-item.selected') : [];
     if (selectedProps.length === 0) {
         window.showCustomAlert("❌ Выберите хотя бы одно свойство.");
         return;
@@ -2587,10 +3069,22 @@ window.buyItemImmediate = function() {
         if (g.includes('охотник на гоблинов')) { buyMult += 0.5; bonuses.push(`Охотник +50%`); }
         else if (g.includes('охотник на ☠️')) { buyMult += 0.25; bonuses.push(`Охотник +25%`); }
         else if (g.includes('помощник охотника')) { buyMult += 0.10; bonuses.push(`Охотник +10%`); }
+          }
+
+    // Штраф Гэмблера на покупку выпавших (обычных) предметов
+    if (g.includes('гэмблер')) {
+        buyMult += 0.25;
+        bonuses.push(`Гэмблер +25%`);
+    
     }
     
     finalPrice *= buyMult;
     const cost = Math.floor(finalPrice);
+    const valError = window.validateItemAction(cost, level, grade, 'buy');
+    if (valError) {
+        window.showCustomAlert(valError);
+        return;
+    }
     const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
 
     window.showCustomConfirm(
@@ -2648,6 +3142,8 @@ window.confirmSellLegendaryGem = function() {
     if (g.includes('вампир')) {
         sellMult *= 0.5;
         bonuses.push(`Вампир -50%`);
+         // Гэмблер х1.25
+        if (g.includes('гэмблер')) { sellMult *= 1.25; bonuses.push(`Гэмблер +25%`); }
     }
 
     const sellPrice = baseVal * Math.pow(1.1, level) * sellMult;
@@ -2703,7 +3199,8 @@ window.craftItemFromModal = function() {
     // Properties
     let totalPercent = 0;
     let propsList = [];
-    const selectedProps = document.querySelectorAll('.sell-prop-item.selected');
+    const modal = document.getElementById('sell-craft-modal');
+    const selectedProps = modal.querySelectorAll('.sell-prop-item.selected');
     if (selectedProps.length === 0) {
         window.showCustomAlert("❌ Выберите хотя бы одно свойство.");
         return;
@@ -2746,6 +3243,11 @@ window.craftItemFromModal = function() {
     else if (g.includes('лорд войны')) { craftMult = 1.05; bonuses.push(`Соратники (105%)`); }
 
     const finalPrice = Math.floor(price * (totalPercent / 100) * gradePenaltyMult * buyMult * craftMult);
+    const valError = window.validateItemAction(finalPrice, level, grade, 'craft');
+    if (valError) {
+        window.showCustomAlert(valError);
+        return;
+    }
     const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
     
     window.showCustomConfirm(
@@ -2795,6 +3297,9 @@ window.confirmMeltItem = function() {
     const level = parseInt(document.getElementById('melt-level').value) || 1;
     const grade = document.getElementById('melt-grade').value;
     const type = document.getElementById('melt-type').value;
+    // Множитель рифта не влияет на расплавку (обычно), но если надо:
+    // const riftMult = window.activeRiftMultiplier || 1;
+    // Но в ТЗ про расплавку не сказано, только про продажу. Оставим как есть.
     let bonuses = [];
 
     // Calculate "Buy Price" to determine melt value
@@ -2850,7 +3355,7 @@ window.confirmMeltItem = function() {
 
 window.openSellInventory = function(mode) {
     const inv = window.playerData.inventory || [];
-    
+    const playerRank = window.playerData.rank || 0;
     // Фильтрация
     let itemsToShow = [];
     let title = "";
@@ -2883,7 +3388,7 @@ window.openSellInventory = function(mode) {
             let totalPercent = 0;
             if (item.properties && item.properties.length > 0) {
                 const propMap = {
-                    "Основа оружия": 40,
+                   "Основа оружия": 40, "Гнездо (бижутерия)": 40,
                     "Основа брони": 30, "Живучесть": 30, "Осн.Хар.": 30, "Гнездо (голова/оруж)": 30,
                     "Восстановление": 20,
                     "Все сопротивления": 15, "Крит урон": 15, "Крит шанс": 15,
@@ -2902,17 +3407,48 @@ window.openSellInventory = function(mode) {
             
             sellPrice = Math.floor(basePrice * (totalPercent / 100));
 
+            // Множитель рифта
+            if (window.activeRiftMultiplier) {
+                sellPrice = Math.floor(sellPrice * window.activeRiftMultiplier);
+            }
+
             // Бонус/Штраф гильдии для крафта (репликация логики sellCraftedItemFromModal)
             const g = (window.playerData.guild || "").toLowerCase();
             if (g.includes('салага') || g.includes('громила') || g.includes('лорд войны')) sellPrice = Math.floor(sellPrice * 0.9);
-            if (g.includes('вампир')) sellPrice = Math.floor(sellPrice * 0.5);
+        if (g.includes('вампир')) {
+                const vampMults = [0.50, 0.48, 0.46, 0.44, 0.42, 0.40, 0.38, 0.36, 0.34, 0.30];
+                const mult = vampMults[Math.min(playerRank, 9)] || 0.5;
+                sellPrice = Math.floor(sellPrice * mult);
+            }
+            if (g.includes('чародей') && !g.includes('ученик')) {
+                const wizPenalties = [0.90, 0.88, 0.86, 0.84, 0.82, 0.80, 0.78, 0.75, 0.72, 0.70];
+                const mult = wizPenalties[Math.min(playerRank, 9)] || 0.9;
+                sellPrice = Math.floor(sellPrice * mult);
+            }
         } else {
             // Вендор: 50% от цены покупки
             sellPrice = Math.floor(item.buyPrice * 0.5);
             
             // Штраф вампира на продажу
             const g = (window.playerData.guild || "").toLowerCase();
-            if (g.includes('вампир')) sellPrice = Math.floor(sellPrice * 0.5);
+            if (g.includes('вампир')) {
+                const vampMults = [0.50, 0.48, 0.46, 0.44, 0.42, 0.40, 0.38, 0.36, 0.34, 0.30];
+                const mult = vampMults[Math.min(playerRank, 9)] || 0.5;
+                sellPrice = Math.floor(sellPrice * mult); // Применяется к уже 50% базе? Или заменяет?
+                // Обычно штрафы мультипликативны. 50% база * 0.5 штраф = 25% итог.
+            }
+            if (g.includes('чародей') && !g.includes('ученик')) {
+                const wizPenalties = [0.90, 0.88, 0.86, 0.84, 0.82, 0.80, 0.78, 0.75, 0.72, 0.70];
+                const mult = wizPenalties[Math.min(playerRank, 9)] || 0.9;
+                sellPrice = Math.floor(sellPrice * mult);
+            }
+            // Бонусы Воров (х1.5 / х1.2)
+        if (g.includes('вор') && !g.includes('воришка')) sellPrice = Math.floor(sellPrice * 1.5);
+        if (g.includes('воришка')) sellPrice = Math.floor(sellPrice * 1.2);
+            // Множитель рифта
+            if (window.activeRiftMultiplier) {
+                sellPrice = Math.floor(sellPrice * window.activeRiftMultiplier);
+            }
         }
 
         html += `<div style="border-bottom: 1px solid #333; padding: 5px; display: flex; justify-content: space-between; align-items: center;">
@@ -2921,8 +3457,15 @@ window.openSellInventory = function(mode) {
         </div>`;
     });
     html += `</div>`;
-    html += `<div style="text-align:center; margin-top:10px;"><button class="death-cancel-btn" onclick="document.getElementById('custom-confirm-modal').style.display='none'">ЗАКРЫТЬ</button></div>`;
-
+    // Кнопка закрытия/далее
+    let closeAction = "document.getElementById('custom-confirm-modal').style.display='none'";
+    let closeText = "ЗАКРЫТЬ";
+    if (window.activeRiftMultiplier && mode === 'smith') {
+        // Если это часть цепочки, то после штучной продажи идем к ресурсам
+        closeAction = "document.getElementById('custom-confirm-modal').style.display='none'; window.sellResources();";
+        closeText = "ДАЛЕЕ (Ресурсы) >>";
+    }
+    html += `<div style="text-align:center; margin-top:10px;"><button class="death-cancel-btn" onclick="${closeAction}">${closeText}</button></div>`;
     window.showCustomAlert(html); // Reusing alert modal for list, but buttons inside work
     // Need to hide the OK button of alert
     document.getElementById('confirm-yes-btn').style.display = 'none';
@@ -3021,4 +3564,321 @@ window.buyItemImmediate = function() {
             }
         }
     );
+}
+// --- ЛОГИКА ЗАЧАРОВАНИЯ (ИЗМЕНЕНИЕ СВОЙСТВ) ---
+
+window.openEnchantModal = function() {
+    const modal = document.getElementById('enchant-item-modal');
+    const list = document.getElementById('enchant-inventory-list');
+    const selector = document.getElementById('enchant-properties-selector');
+    const subtitle = document.getElementById('enchant-subtitle');
+    // Сброс позиции
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+    list.style.display = 'block';
+    selector.style.display = 'none';
+    subtitle.innerText = "Выберите предмет (N и D грейды нельзя менять).";
+
+    const inv = window.playerData.inventory || [];
+    const validItems = inv.filter(i => i.grade !== 'N' && i.grade !== 'D');
+
+    if (validItems.length === 0) {
+        list.innerHTML = '<div style="color:#888; text-align:center; padding:10px;">Инвентарь пуст</div>';
+    } else {
+        list.innerHTML = validItems.map(item => {
+            const rerolls = item.rerollCount || 0;
+            // Определение процента стоимости
+            let percent = 0.2; // Default 20% (Yellow/Orange)
+            const g = (item.grade || "").toUpperCase();
+            if (['A', 'S', 'S+', 'SPECTRUM', 'ANCIENT', 'PRIMAL'].includes(g) || g.includes('ANCIENT') || g.includes('PRIMAL')) {
+                percent = 0.1;
+            }
+            
+            let cost = Math.floor(item.buyPrice * percent * Math.pow(1.25, rerolls));
+
+            // Скидки/Штрафы гильдий на зачарование
+            const guild = (window.playerData.guild || "").toLowerCase();
+            if (guild.includes('охотник на ☠️')) cost = Math.floor(cost * 0.8); // -20%
+            else if (guild.includes('помощник охотника')) cost = Math.floor(cost * 0.9); // -10%
+            else if (guild.includes('вор') && !guild.includes('воришка')) cost = Math.floor(cost * 0.75); // -25%
+            else if (guild.includes('воришка')) cost = Math.floor(cost * 0.85); // -15%
+            else if (guild.includes('громила')) cost = Math.floor(cost * 1.15); // +15%
+        
+            
+            return `
+                <div style="border-bottom: 1px solid #333; padding: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span style="color:#fff; font-weight:bold;">${item.name}</span> <span style="color:#888; font-size:0.8rem;">(${item.grade})</span><br>
+                        <span style="color:#aaa; font-size:0.7rem;">Изменений: ${rerolls}</span>
+                    </div>
+                    <button class="craft-btn craft" style="font-size:0.7rem; padding:4px 8px;" onclick="window.openEnchantPropertySelector(${item.id}, ${cost})">
+                        ${window.formatCurrency(cost)}
+                    </button>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    modal.style.display = 'flex';
+}
+
+window.openEnchantPropertySelector = function(itemId, cost) {
+    const item = window.playerData.inventory.find(i => i.id === itemId);
+    if (!item) return;
+
+    window.enchantTarget = { itemId: itemId, cost: cost, oldProp: null, newProp: null };
+
+    document.getElementById('enchant-inventory-list').style.display = 'none';
+    document.getElementById('enchant-properties-selector').style.display = 'block';
+    document.getElementById('enchant-subtitle').innerText = `Изменение: ${item.name} (Цена: ${window.formatCurrency(cost)})`;
+
+    // Рендер текущих свойств
+    const currentContainer = document.getElementById('enchant-current-props');
+    currentContainer.innerHTML = (item.properties || []).map(p => 
+        `<span class="sell-prop-item" onclick="window.selectOldEnchantProperty(this, '${p}')">${p}</span>`
+    ).join('');
+
+    // Рендер списка новых свойств (копируем из Buy/Sell логики)
+    // Для простоты берем HTML из скрытого buy-ancient-modal или генерируем заново
+    // Генерируем упрощенный список
+    const newPropsContainer = document.getElementById('enchant-new-props-list');
+    // Используем HTML из buy-ancient-modal как шаблон, но меняем onclick
+    const sourceHTML = document.querySelector('.ancient-props-container').innerHTML;
+    // Заменяем onclick="toggleBuyProperty..." на onclick="selectNewEnchantProperty..."
+    newPropsContainer.innerHTML = sourceHTML.replace(/toggleBuyProperty\(this, \d+\)/g, "window.selectNewEnchantProperty(this)");
+}
+
+window.selectOldEnchantProperty = function(el, propName) {
+    const container = document.getElementById('enchant-current-props');
+    container.querySelectorAll('.selected').forEach(i => i.classList.remove('selected'));
+    el.classList.add('selected');
+    window.enchantTarget.oldProp = propName;
+}
+
+window.selectNewEnchantProperty = function(el) {
+    const container = document.getElementById('enchant-new-props-list');
+    container.querySelectorAll('.selected').forEach(i => i.classList.remove('selected'));
+    el.classList.add('selected');
+    window.enchantTarget.newProp = el.innerText;
+}
+
+window.resetEnchantModal = function() {
+    window.openEnchantModal();
+}
+
+window.confirmEnchantSwap = function() {
+    const target = window.enchantTarget;
+    if (!target || !target.oldProp || !target.newProp) {
+        window.showCustomAlert("❌ Выберите старое и новое свойство.");
+        return;
+    }
+
+    const cost = target.cost;
+    const valError = window.validateGenericAction(cost, "Изменение свойства");
+    if (valError) {
+        window.showCustomAlert(valError);
+        return;
+    }
+    const currentMoney = window.getAllMoneyInYen();
+    if (currentMoney >= cost) {
+        window.setMoneyFromYen(currentMoney - cost);
+        const item = window.playerData.inventory.find(i => i.id === target.itemId);
+        if (item) {
+            item.rerollCount = (item.rerollCount || 0) + 1;
+             // Замена свойства
+            const idx = item.properties.indexOf(target.oldProp);
+            if (idx !== -1) {
+                item.properties[idx] = target.newProp;
+            }
+        }
+        window.updateUI();
+        window.openEnchantModal(); // Обновляем список (цены вырастут)
+        window.showCustomAlert(`✅ Свойство изменено! Списано: ${window.formatCurrency(cost)}`);
+    } else {
+        window.showCustomAlert(`❌ Недостаточно средств! Нужно: ${window.formatCurrency(cost)}`);
+    }
+}
+
+// --- ЛОГИКА КРАЖИ ---
+
+window.getMaxTheftAttempts = function(level) {
+    if (level < 10) return 5;
+    if (level < 20) return 6;
+    if (level < 30) return 7;
+    if (level < 40) return 8;
+    if (level < 50) return 10;
+    if (level < 60) return 11;
+    if (level < 70) return 13;
+    // С 70 уровня: 15 + 1 за каждые 5 уровней
+    // 70-74: 15, 75-79: 16, 80-84: 17...
+    return 15 + Math.floor((level - 70) / 5);
+}
+
+window.toggleTheftMode = function() {
+    const lvl = window.playerData.level;
+    let rowId = "";
+    if (lvl <= 19) rowId = "tr-theft-1";
+    else if (lvl <= 39) rowId = "tr-theft-2";
+    else rowId = "tr-theft-3";
+
+    // Сброс подсветки
+    document.querySelectorAll('.theft-row').forEach(r => r.classList.remove('active'));
+    
+    const row = document.getElementById(rowId);
+    if (row) {
+        row.classList.add('active');
+        
+    }
+}
+
+window.attemptTheft = function(grade, baseChance, rowNum) {
+    // Проверка: можно нажимать только на подсвеченную строку
+    const row = document.getElementById(`tr-theft-${rowNum}`);
+    if (!row || !row.classList.contains('active')) return;
+
+    // Проверка попыток
+    const currentLvl = window.playerData.level;
+    // Сброс счетчика, если уровень изменился
+    if (window.playerData.theft_attempts_level !== currentLvl) {
+        window.playerData.theft_attempts_level = currentLvl;
+        window.playerData.theft_attempts_count = 0;
+    }
+    
+    const maxAttempts = window.getMaxTheftAttempts(currentLvl);
+    if (window.playerData.theft_attempts_count >= maxAttempts) {
+        window.showCustomAlert(`❌ Попытки кражи на этом уровне исчерпаны (${maxAttempts}/${maxAttempts}).<br>Поднимите уровень, чтобы получить новые.`);
+        return;
+    }
+
+    const cell = document.getElementById(`td-theft-${grade.toLowerCase()}-${rowNum}`);
+    const chance = parseFloat(cell.dataset.chance); // Берем актуальный шанс с бонусом
+    const input = document.getElementById('theft-item-level');
+    const itemLvl = input ? parseInt(input.value) : window.playerData.level;
+    const roll = Math.random() * 100;
+    const isSuccess = roll <= chance;
+    
+    window.theftState = {
+        success: isSuccess,
+        grade: grade,
+        level: itemLvl
+    };
+
+    // Открываем модалку выбора свойств
+    const modal = document.getElementById('theft-modal');
+    const title = document.getElementById('theft-modal-title');
+    const status = document.getElementById('theft-modal-status');
+    const btn = document.getElementById('theft-action-btn');
+    
+    document.getElementById('theft-grade-display').innerText = grade;
+    document.getElementById('theft-level-display').innerText = itemLvl;
+
+    if (isSuccess) {
+        title.style.color = "#66ff66";
+        status.innerHTML = `✅ УСПЕХ! (Шанс: ${chance.toFixed(1)}%)<br>Выберите свойства украденного предмета.`;
+        btn.innerText = "ЗАБРАТЬ (БЕСПЛАТНО)";
+    } else {
+        title.style.color = "#ff4444";
+        status.innerHTML = `❌ НЕУДАЧА! (Шанс: ${chance.toFixed(1)}%)<br>Вас поймали. Выберите свойства для расчета штрафа.`;
+        btn.innerText = "ОПЛАТИТЬ ШТРАФ";
+    }
+
+    // Заполняем контейнер свойств (клонируем из Buy Ancient для простоты)
+    const propsContainer = document.getElementById('theft-props-container');
+    const sourceHTML = document.querySelector('.ancient-props-container').innerHTML;
+    propsContainer.innerHTML = sourceHTML; // Используем стандартные toggleBuyProperty
+
+    modal.style.display = 'block';
+    
+    // Сброс режима кражи
+    document.querySelectorAll('.theft-row').forEach(r => r.classList.remove('active'));
+}
+
+window.finalizeTheft = function() {
+    const state = window.theftState;
+    const modal = document.getElementById('theft-modal');
+    
+    // Расчет стоимости предмета
+    const basePrice = getCraftedItemBasePrice(state.level, state.grade);
+    let totalPercent = 0;
+    let propsList = [];
+    const selectedProps = modal.querySelectorAll('.buy-prop-item.selected');
+    
+    if (selectedProps.length === 0) {
+        window.showCustomAlert("❌ Выберите свойства.");
+        return;
+    }
+    
+    selectedProps.forEach(el => {
+        totalPercent += parseFloat(el.dataset.percent);
+        propsList.push(el.innerText);
+    });
+    
+    const price = Math.floor(basePrice * (totalPercent / 100));
+
+    // Списываем попытку
+    window.playerData.theft_attempts_count = (window.playerData.theft_attempts_count || 0) + 1;
+    window.playerData.theft_attempts_level = window.playerData.level;
+
+    if (state.success) {
+        // Добавляем предмет
+        window.showCustomPrompt("Название предмета", "Введите название:", `Stolen ${state.grade}-Grade`, (name) => {
+            window.playerData.inventory.push({
+                id: Date.now(),
+                name: name,
+                grade: state.grade,
+                level: state.level,
+                buyPrice: price,
+                isCrafted: false,
+                isStolen: true,
+                properties: propsList
+            });
+            window.playerData.steals++; // Увеличиваем счетчик краж
+            window.updateUI();
+            
+            // Проверка на вступление в гильдию Воров
+            if (window.pendingTheftJoin) {
+                window.pendingTheftJoin.done++;
+                const remaining = window.pendingTheftJoin.required - window.pendingTheftJoin.done;
+                
+                if (remaining <= 0) {
+                    const joinData = window.pendingTheftJoin;
+                    window.pendingTheftJoin = null;
+                    
+                    // Получаем правильный контент гильдии для виджета
+                    let guildId = "";
+                    if (joinData.guildTitle.toLowerCase().includes('воришка')) guildId = 'db_pickpocket';
+                    else if (joinData.guildTitle.toLowerCase().includes('вор')) guildId = 'db_thief';
+                    
+                    let content = null;
+                    if (guildId && window.gameData[guildId]) content = window.gameData[guildId].content;
+
+                    window.selectProfileItem(joinData.guildTitle, joinData.path, true, content);
+                    window.showCustomAlert(`✅ <b>Испытание пройдено!</b><br>Добро пожаловать в гильдию <b>${joinData.guildTitle}</b>.`);
+                } else {
+                    window.showCustomAlert(`✅ Предмет украден!<br>Осталось украсть для вступления: ${remaining}`);
+                }
+            } else {
+                window.showCustomAlert(`✅ Предмет украден и добавлен в инвентарь!`);
+            }
+        }, true);
+    } else {
+        // Штраф
+        let fineAmount = price;
+        const g = (window.playerData.guild || "").toLowerCase();
+        
+        // Применяем снижение штрафа для Воров
+        if (g.includes('вор') && !g.includes('воришка')) {
+            const rank = window.playerData.rank || 0;
+            const finePercents = [100, 98, 95, 92, 89, 86, 82, 80, 77, 75, 70];
+            const p = finePercents[Math.min(rank, 10)] || 100;
+            fineAmount = Math.floor(price * (p / 100));
+        }
+        const currentMoney = window.getAllMoneyInYen();
+        window.setMoneyFromYen(currentMoney - fineAmount);
+        window.updateUI();
+        window.showCustomAlert(`👮 Вас поймали! Оплачен штраф: ${window.formatCurrency(fineAmount)}`);
+    }
+    
+    modal.style.display = 'none';
 }

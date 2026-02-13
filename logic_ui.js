@@ -331,6 +331,8 @@ window.showText = function(title, content) {
 
     // Обновляем состояние кнопок профессий, если это меню профессий
     if (window.updateProfessionButtonState) window.updateProfessionButtonState();
+    
+    window.updateUI(); // Обновляем UI, чтобы применить динамические изменения (например, кнопку покупки рун)
 }
 
 window.openIframe = function(url) {
@@ -422,6 +424,14 @@ window.updateUI = function() {
     document.getElementById('input-gobs-assist').value = window.playerData.gobs_assist;
     document.getElementById('input-max-vp').value = window.playerData.maxVp;
     document.getElementById('view-difficulty').innerText = window.playerData.difficulty || "Высокий";
+    document.getElementById('input-act').value = window.playerData.act || 1;
+    
+    // Отображение скидки на НП
+    const npCount = window.playerData.np_count || 0;
+    const npDiscount = Math.min(50, npCount * 10);
+    const npDiscountEl = document.getElementById('view-np-discount');
+    if (npDiscountEl) npDiscountEl.innerText = npDiscount > 0 ? `(-${npDiscount}%)` : "";
+
     document.getElementById('input-lvl70-portal').value = window.playerData.lvl70_portal || "";
 
     document.getElementById('input-found-legs').value = window.playerData.found_legs;
@@ -438,9 +448,92 @@ window.updateUI = function() {
     document.getElementById('input-runes-sold').value = window.playerData.runes_sold;
     document.getElementById('input-reputation').value = window.playerData.reputation;
     document.getElementById('input-deals').value = window.playerData.deals;
+
+    // Отображение текущей цены продажи руны
+    const inputRunesSold = document.getElementById('input-runes-sold');
+    if (inputRunesSold) {
+        let runePriceEl = document.getElementById('view-rune-price');
+        if (!runePriceEl) {
+            runePriceEl = document.createElement('span');
+            runePriceEl.id = 'view-rune-price';
+            runePriceEl.style.marginLeft = '5px';
+            runePriceEl.style.color = '#d4af37';
+            runePriceEl.style.fontSize = '0.8rem';
+            if (inputRunesSold.parentNode) {
+                inputRunesSold.parentNode.appendChild(runePriceEl);
+            }
+        }
+        
+        let price = 0;
+        const g = (window.playerData.guild || "").toLowerCase();
+        const rank = window.playerData.rank || 1;
+        
+        if (g.includes('чародей') && !g.includes('ученик')) {
+             const prices = [0, 2000, 3700, 6000, 9000, 13500, 18000, 22500, 27000, 32000, 45000];
+             const basePrice = prices[rank] || 2000;
+             const bonusPercent = 27.5 * (window.playerData.stat_int / 100);
+             price = basePrice * (1 + bonusPercent / 100);
+        } else if (g.includes('ученик')) {
+             const basePrice = 1500;
+             const bonusPercent = 15 * (window.playerData.stat_int / 100);
+             price = basePrice * (1 + bonusPercent / 100);
+        } else if (g.includes('вампир')) {
+             const basePrice = 1500;
+             const bonusPercent = 30 * (window.playerData.stat_int / 100);
+             price = basePrice * (1 + bonusPercent / 100);
+        }
+        
+        runePriceEl.innerText = price > 0 ? `(${window.formatCurrency(Math.floor(price))})` : "";
+    }
+
     document.getElementById('input-chests').value = window.playerData.chests_found;
     document.getElementById('input-steals').value = window.playerData.steals;
-    document.getElementById('input-black-market').value = window.playerData.black_market;
+    
+    // Отображение оставшихся попыток кражи
+    const stealsInput = document.getElementById('input-steals');
+    if (stealsInput) {
+        let attemptsEl = document.getElementById('view-theft-attempts');
+        if (!attemptsEl) {
+            attemptsEl = document.createElement('span');
+            attemptsEl.id = 'view-theft-attempts';
+            attemptsEl.style.marginLeft = '5px';
+            attemptsEl.style.fontSize = '0.7rem';
+            if (stealsInput.parentNode) stealsInput.parentNode.appendChild(attemptsEl);
+        }
+        
+        const maxAttempts = window.getMaxTheftAttempts ? window.getMaxTheftAttempts(window.playerData.level) : 5;
+        const used = (window.playerData.theft_attempts_level === window.playerData.level) ? (window.playerData.theft_attempts_count || 0) : 0;
+        const remaining = Math.max(0, maxAttempts - used);
+        attemptsEl.innerText = `(Ост: ${remaining})`;
+        attemptsEl.style.color = remaining > 0 ? '#66ff66' : '#ff4444';
+    }
+
+    // Отображение шанса кражи (бонус от ловкости)
+    const theftChanceEl = document.getElementById('view-theft-chance');
+    if (theftChanceEl) {
+        let theftText = "";
+        const g = (window.playerData.guild || "").toLowerCase();
+        if (g.includes('вор') || g.includes('воришка')) {
+            const bonus = (window.playerData.stat_dex / 100) * 0.4;
+            if (bonus > 0) theftText = `(+${bonus.toFixed(1)}%)`;
+        }
+        theftChanceEl.innerText = theftText;
+    }
+
+    // Отображение зарядов Гэмблера
+    const dealsEl = document.getElementById('input-deals');
+    if (dealsEl && (window.playerData.guild || "").toLowerCase().includes('гэмблер')) {
+        const charges = window.playerData.gambler_bonus_sales_left || 0;
+        const chargesEl = document.getElementById('view-gambler-charges') || document.createElement('span');
+        chargesEl.id = 'view-gambler-charges';
+        chargesEl.style.color = '#66ff66';
+        chargesEl.style.fontSize = '0.7rem';
+        chargesEl.style.marginLeft = '5px';
+        chargesEl.innerText = charges > 0 ? `(x5: ${charges})` : "";
+        if (!document.getElementById('view-gambler-charges')) dealsEl.parentNode.appendChild(chargesEl);
+    }
+
+    window.updateTheftTable(); // Обновление таблицы краж
     document.getElementById('input-zakens').value = window.playerData.zakens;
     
     document.getElementById('view-potion-price').innerText = window.playerData.potion_price ? `(${window.playerData.potion_price})` : "";
@@ -461,6 +554,20 @@ window.updateUI = function() {
     window.updatePentaSlot('slot-penta-2', window.playerData.penta_2);
     window.updatePentaSlot('slot-penta-3', window.playerData.penta_3);
 
+    // Обновление цены на кнопке покупки рун (Гильдия Торговцев)
+    const traderBuyBtn = document.getElementById('btn-buy-runes-trader');
+    if (traderBuyBtn) {
+        const g = (window.playerData.guild || "").toLowerCase();
+        if (g.includes('торговц')) {
+            traderBuyBtn.style.display = 'inline-block';
+            const lvl = window.playerData.level;
+            const price = Math.floor(2000 * Math.pow(lvl, 1.4));
+            traderBuyBtn.innerHTML = `Купить 📖 (${window.formatCurrency(price)})`;
+        } else {
+            traderBuyBtn.style.display = 'none';
+        }
+    }
+
     window.renderLearnedSkillsWidget();
     window.renderInventoryWidget();
     localStorage.setItem('d3mod_player', JSON.stringify(window.playerData));
@@ -476,6 +583,54 @@ window.updateUI = function() {
     if (currentMenuId && window.gameData && window.gameData[currentMenuId] && currentMenuId !== 'skills_study_menu') {
          window.renderMenu(currentMenuId, currentTitle, true, true);
     }
+}
+
+window.updateTheftTable = function() {
+    // Проверяем, открыта ли вкладка с таблицей
+    const table = document.getElementById('tr-theft-1');
+    if (!table) return;
+
+    const dex = window.playerData.stat_dex || 0;
+    const bonus = (dex / 100) * 0.4;
+    
+    const input = document.getElementById('theft-item-level');
+    if (input && input.value === "") input.value = window.playerData.level;
+    
+    const itemLvl = input ? parseInt(input.value) : window.playerData.level;
+    const playerLvl = window.playerData.level;
+    
+    let lvlDiffBonus = 0;
+    const diff = itemLvl - playerLvl;
+    
+    if (diff > 0) {
+        lvlDiffBonus = -(diff * 1.5);
+    } else {
+        lvlDiffBonus = Math.abs(diff) * 1.0;
+    }
+
+    const updateCell = (id, base) => {
+        const el = document.getElementById(id);
+        if (el) {
+            let total = base + bonus + lvlDiffBonus;
+            total = Math.max(0, Math.min(90, total)); // Clamp 0-90%
+            el.innerText = total.toFixed(1) + '%';
+            // Сохраняем актуальный шанс в атрибут для использования при клике
+            el.dataset.chance = total;
+        }
+    };
+
+    // Row 1 (1-19)
+    updateCell('td-theft-n-1', 50);
+    updateCell('td-theft-d-1', 35);
+    updateCell('td-theft-c-1', 25);
+    // Row 2 (20-39)
+    updateCell('td-theft-n-2', 50);
+    updateCell('td-theft-d-2', 50);
+    updateCell('td-theft-c-2', 35);
+    // Row 3 (40-70)
+    updateCell('td-theft-n-3', 50);
+    updateCell('td-theft-d-3', 50);
+    updateCell('td-theft-c-3', 50);
 }
 
 window.toggleStatGroup = function(btn) {
@@ -578,6 +733,14 @@ window.savePlayerData = function() {
         }
     }
     
+    const act = getVal('input-act');
+    if (act !== null && act !== window.playerData.act) {
+        // Если акт изменился, сбрасываем счетчик НП
+        window.playerData.act = act;
+        window.playerData.np_count = 0;
+        window.showCustomAlert(`Акт изменен на ${act}.<br>Счетчик НП сброшен.`);
+    }
+
     const baseKills = getVal('input-base-kills'); if (baseKills !== null) window.playerData.base_kills = baseKills;
     const baseElites = getVal('input-base-elites'); if (baseElites !== null) window.playerData.base_elites = baseElites;
     
@@ -619,7 +782,7 @@ window.savePlayerData = function() {
     const deals = getVal('input-deals'); if (deals !== null) window.playerData.deals = deals;
     const chests = getVal('input-chests'); if (chests !== null) window.playerData.chests_found = chests;
     const steals = getVal('input-steals'); if (steals !== null) window.playerData.steals = steals;
-    const bm = getVal('input-black-market'); if (bm !== null) window.playerData.black_market = bm;
+    
     const zakens = getVal('input-zakens'); if (zakens !== null) window.playerData.zakens = zakens;
 
     // Проверка изменения денег для звука
@@ -628,6 +791,26 @@ window.savePlayerData = function() {
         oldData.gold_c !== window.playerData.gold_c || 
         oldData.gold_y !== window.playerData.gold_y) {
         if (window.coinSound) { window.coinSound.currentTime = 0; window.coinSound.play().catch(e => {}); }
+    }
+    // Начисление золота Соратникам за убийства (при ручном вводе)
+    const g = (window.playerData.guild || "").toLowerCase();
+    const currentKills = window.playerData.kills;
+    const maxKills = window.playerData.highest_kills || 0;
+    const dKills = Math.max(0, currentKills - maxKills);
+
+    if (dKills > 0 && (g.includes('салага') || g.includes('громила') || g.includes('лорд войны'))) {
+        let mult = 0;
+        if (g.includes('салага')) mult = 0.88;
+        else if (g.includes('громила')) mult = 1.75;
+        else if (g.includes('лорд войны')) mult = 1.23;
+        
+        const reward = Math.floor(dKills * mult * window.playerData.level);
+        window.addYen(reward);
+    }
+    
+    // Обновляем рекорд убийств, если текущее значение выше
+    if (currentKills > maxKills) {
+        window.playerData.highest_kills = currentKills;
     }
 
     window.calculateRank();
@@ -699,9 +882,12 @@ window.renderInventoryWidget = function() {
     const renderItem = (item) => {
         const propsStr = (item.properties || []).join(', ').replace(/'/g, "&apos;");
         const safeName = item.name.replace(/'/g, "&apos;");
-        
-        return `<div style="margin-bottom: 4px; line-height: 1.2; border-bottom: 1px dashed #333; padding-bottom: 2px; cursor: help;" onmousemove="window.showItemTooltip(event, '${safeName}', '${item.grade}', ${item.level}, ${item.buyPrice}, ${item.isCrafted}, '${propsStr}')" onmouseleave="window.hideItemTooltip()">
-            <span style="color: #fff; font-weight: bold;">${item.name}</span><br>
+        const isStolen = item.isStolen || false;
+        const nameColor = isStolen ? "#ff7979" : "#fff";
+        const icon = isStolen ? " 🧤" : "";
+
+        return `<div style="margin-bottom: 4px; line-height: 1.2; border-bottom: 1px dashed #333; padding-bottom: 2px; cursor: help;" onmousemove="window.showItemTooltip(event, '${safeName}', '${item.grade}', ${item.level}, ${item.buyPrice}, ${item.isCrafted}, '${propsStr}', ${isStolen})" onmouseleave="window.hideItemTooltip()">
+            <span style="color: ${nameColor}; font-weight: bold;">${item.name}${icon}</span><br>
             <span style="color: #888; font-size: 0.7rem;">${item.grade} | Lvl ${item.level} | ${window.formatCurrency(item.buyPrice)}</span>
         </div>`;
     };
@@ -721,7 +907,7 @@ window.renderInventoryWidget = function() {
     content.innerHTML = html;
 }
 
-window.showItemTooltip = function(e, name, grade, level, price, isCrafted, props) {
+window.showItemTooltip = function(e, name, grade, level, price, isCrafted, props, isStolen) {
     let tooltip = document.getElementById('item-tooltip');
     if (!tooltip) {
         tooltip = document.createElement('div');
@@ -740,7 +926,13 @@ window.showItemTooltip = function(e, name, grade, level, price, isCrafted, props
         document.body.appendChild(tooltip);
     }
     
-    const typeText = isCrafted ? "<span style='color:#a29bfe'>Создано (Крафт)</span>" : "<span style='color:#66ff66'>Куплено</span>";
+    let typeText = "";
+    if (isStolen) {
+        typeText = "<span style='color:#ff7979'>Украдено</span>";
+    } else {
+        typeText = isCrafted ? "<span style='color:#a29bfe'>Создано (Крафт)</span>" : "<span style='color:#66ff66'>Куплено</span>";
+    }
+
     let propsHtml = "";
     if (props) {
         propsHtml = `<div style="margin-top:5px; border-top:1px solid #555; padding-top:5px; color:#ccc; font-style:italic;">${props}</div>`;

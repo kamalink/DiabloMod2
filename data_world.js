@@ -98,7 +98,10 @@ window.worldData = {
         content: `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <span style="color: #d4af37; font-weight: bold;">💰 СТОИМОСТЬ 1 ЛОКАЦИИ:</span>
-                <div style="display:flex; flex-direction:column; gap:5px;"><button class="calc-nav-btn" onclick="buyLocationEntry('np')" style="padding: 4px 8px; font-size: 0.7rem;">КУПИТЬ (НП)</button><button class="calc-nav-btn" onclick="buyLocationEntry('act')" style="padding: 4px 8px; font-size: 0.7rem;">КУПИТЬ (АКТ)</button></div>
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <button class="calc-nav-btn" onclick="buyLocationEntry('np')" style="padding: 4px 8px; font-size: 0.7rem;">КУПИТЬ НП</button>
+                    <button class="calc-nav-btn" onclick="buyLocationEntry('act')" style="padding: 4px 8px; font-size: 0.7rem;">КУПИТЬ ЛОК</button>
+                </div>
             </div>
             <div style="column-count: 2; font-size: 0.85rem; line-height: 1.5;">
                 Высокий: 23🥈<br>Эксперт: 29🥈<br>Мастер: 37🥈<br>Т1: 44🥈<br>Т2: 55🥈<br>
@@ -255,7 +258,7 @@ window.worldData = {
                 <p>🔹 <b>Предметы:</b> Потеря 1 надетого предмета.</p>
                 <p>🔹 <b>Гильдии:</b> -10% ресурса ранга (Торговцы: -20%💰).</p>
                 <p>🔹 <b>Руны:</b> -10% 📖 от текущего количества ⏳.</p>
-                <p>🔹 <b>Навыки:</b> 5% шанс забыть рандомный скилл.</p>
+                <p>🔹 <b>Навыки:</b> 10% шанс забыть рандомный скилл.</p>
             </div>
             <div style="margin-top: 15px; font-size: 0.9rem; color: #bbb;">
                 <p>❗ <b>Группа:</b> Другие игроки теряют в 2 раза меньше и НЕ теряют предмет.</p>

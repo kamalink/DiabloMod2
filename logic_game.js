@@ -19,7 +19,7 @@ const guildRanksMap = {
     'лорд войны': ['Нет', 'Союзник', 'Начинающий', 'Странник', 'Меченосец', 'Протектор', 'Защитник', 'Охранитель', 'Страж', 'Победитель', 'Мастер']
 };
 
-window.selectProfileItem = function(title, path, bypassConditions = false) {
+window.selectProfileItem = function(title, path, bypassConditions = false, contentOverride = null) {
     const textWindow = document.getElementById('text-window');
     const pathStr = path || document.getElementById('breadcrumb').innerText;
     const segments = pathStr.split(' > ').map(s => s.trim());
@@ -28,7 +28,7 @@ window.selectProfileItem = function(title, path, bypassConditions = false) {
         textWindow.classList.add('fly-to-bonus'); 
         // Увеличено время для завершения анимации
         setTimeout(() => {
-            const fullHtml = document.getElementById('window-content').innerHTML;
+            const fullHtml = contentOverride || document.getElementById('window-content').innerHTML;
             const cleanHtml = fullHtml.replace(/<button.*?>.*?<\/button>/g, ''); 
 
             if (segments.includes('Гильдии')) {
@@ -216,13 +216,17 @@ window.selectProfileItem = function(title, path, bypassConditions = false) {
             }
             else if (newGuild.includes('вор') || newGuild.includes('воришка')) {
                  let count = newGuild.includes('воришка') ? 1 : 3;
-                 window.showCustomConfirm(
-                    `Условие: Украсть ${count} предмет(а).<br>Выполнено?`,
-                    () => {
-                        window.playerData.steals += count;
-                        applySelection();
-                        window.showCustomAlert(`Добро пожаловать!<br>Добавлено ${count} в украденное.`);
-                    }
+                 
+                 // Устанавливаем состояние ожидания вступления
+                 window.pendingTheftJoin = {
+                     guildTitle: title,
+                     path: pathStr,
+                     required: count,
+                     done: 0
+                 };
+
+                 window.showCustomAlert(
+                    `🔒 <b>Испытание вступления</b><br><br>Чтобы вступить в гильдию "${title}", докажите свое мастерство.<br>Украдите <b>${count}</b> предмет(а) в разделе "Экономика > Шанс кражи".<br><br>После успеха вы будете приняты автоматически.`
                  );
                  return;
             }
@@ -245,7 +249,8 @@ window.selectProfileItem = function(title, path, bypassConditions = false) {
             }
             else if (newGuild.includes('салага') || newGuild.includes('громила') || newGuild.includes('лорд')) {
                  let kills = 0;
-                 if ((newGuild.includes('громила') || newGuild.includes('лорд')) && window.playerData.stat_str < 1000 && window.playerData.kills < 1700) {
+                 const totalKills = window.playerData.kills + (window.playerData.base_kills || 0);
+                 if ((newGuild.includes('громила') || newGuild.includes('лорд')) && window.playerData.stat_str < 1000 && totalKills < 1700) {
                      window.showCustomAlert("❌ Для вступления нужно 1000 силы или 1700 убийств (Ранг 1).");
                      return;
                  }
@@ -424,13 +429,16 @@ window.checkGuildProgression = function() {
     }
 
     // 2. Салага -> Громила или Лорд Войны
-    else if (g.includes('салага') && window.playerData.kills >= 500) {
+    else if (g.includes('салага') && (window.playerData.stat_str >= 1000 || (window.playerData.kills + (window.playerData.base_kills || 0)) >= 1700)) {
+        if (window.playerData.refused_salaga_promotion) return;
+
         // Тут выбор из двух, поэтому просто уведомляем или открываем меню
         // Но по заданию нужно окно выбора. Реализуем через кастомное окно с 2 кнопками
         const modal = document.getElementById('custom-confirm-modal');
         document.getElementById('confirm-message').innerHTML = "Вы прошли обучение! Выберите путь:";
         const yesBtn = document.getElementById('confirm-yes-btn');
         const noBtn = document.getElementById('confirm-no-btn');
+        const extraBtn = document.getElementById('confirm-extra-btn');
         
         noBtn.className = 'death-confirm-btn'; // Делаем вторую кнопку красной
         yesBtn.style.background = '#5a0000';
@@ -442,9 +450,20 @@ window.checkGuildProgression = function() {
         noBtn.style.display = 'inline-block';
         yesBtn.innerText = 'Громила';
         noBtn.innerText = 'Лорд Войны';
+
+        if (extraBtn) {
+            extraBtn.style.display = 'inline-block';
+            extraBtn.innerText = 'Позже';
+            extraBtn.onclick = function() {
+                modal.style.display = 'none';
+                window.playerData.refused_salaga_promotion = true;
+                window.saveToStorage();
+            };
+        }
         
         yesBtn.onclick = function() {
             modal.style.display = 'none';
+            if (extraBtn) extraBtn.style.display = 'none';
             yesBtn.style.background = ''; yesBtn.style.borderColor = ''; // Сброс
             const data = window.gameData['comp_brute'];
             if (data && data.content) {
@@ -455,6 +474,7 @@ window.checkGuildProgression = function() {
         
         noBtn.onclick = function() {
             modal.style.display = 'none';
+            if (extraBtn) extraBtn.style.display = 'none';
             noBtn.style.background = ''; noBtn.style.borderColor = ''; // Сброс
             const data = window.gameData['comp_warlord'];
             if (data && data.content) {
@@ -701,24 +721,61 @@ window.applyGuildRewards = function(oldData) {
         }
     }
 
-    if (rewardYen > 0 || rewardRep > 0 || rewardRunes > 0 || rewardPara > 0) {
+    // --- NEW LOGIC FOR ITEM BREAKING ---
+    let brokenItems = [];
+    if (dKills > 0 && (g.includes('искатель') || g.includes('джимми'))) {
+        const oldKillCount = oldData.kills || 0;
+        const newKillCount = window.playerData.kills;
+        
+        const milestonesPassed = Math.floor(newKillCount / 100) - Math.floor(oldKillCount / 100);
+        
+        if (milestonesPassed > 0) {
+            let breakChance = 0;
+            if (g.includes('искатель приключений')) breakChance = 0.10;
+            else if (g.includes('искатель богатства')) breakChance = 0.15;
+            else if (g.includes('джимми')) breakChance = 0.05;
+
+            if (breakChance > 0) {
+                for (let i = 0; i < milestonesPassed; i++) {
+                    if (Math.random() < breakChance) {
+                        if (window.playerData.inventory && window.playerData.inventory.length > 0) {
+                            const randomIndex = Math.floor(Math.random() * window.playerData.inventory.length);
+                            const lostItem = window.playerData.inventory[randomIndex];
+                            brokenItems.push(lostItem.name);
+                            window.playerData.inventory.splice(randomIndex, 1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    const hasRewards = rewardYen > 0 || rewardRep > 0 || rewardRunes > 0 || rewardPara > 0;
+    const hasBrokenItems = brokenItems.length > 0;
+
+    if (hasRewards || hasBrokenItems) {
         let totalYen = Math.floor(rewardYen);
         window.playerData.gold_y += totalYen;
         while (window.playerData.gold_y >= 100) { window.playerData.gold_y -= 100; window.playerData.gold_c++; }
         while (window.playerData.gold_c >= 100) { window.playerData.gold_c -= 100; window.playerData.gold_s++; }
         while (window.playerData.gold_s >= 100) { window.playerData.gold_s -= 100; window.playerData.gold_g++; }
-        if (window.coinSound) { window.coinSound.currentTime = 0; window.coinSound.play().catch(e => {}); }
+        if (window.coinSound && totalYen > 0) { window.coinSound.currentTime = 0; window.coinSound.play().catch(e => {}); }
 
         window.playerData.reputation += rewardRep;
         window.playerData.runes = parseFloat((window.playerData.runes + rewardRunes).toFixed(2));
         window.playerData.para = parseFloat((window.playerData.para + rewardPara).toFixed(2));
 
-        msg = `<span style="color:#d4af37">Награда гильдии:</span><br>`;
+        msg = `<span style="color:#d4af37">Отчет гильдии:</span><br>`;
         if (totalYen > 0) msg += `💰 ${window.formatCurrency(totalYen)}<br>`;
         if (rewardRep > 0) msg += `🎭 +${rewardRep} реп.<br>`;
         if (rewardRunes > 0) msg += `📖 +${rewardRunes.toFixed(1)}<br>`;
         if (rewardPara > 0) msg += `⏳ +${rewardPara.toFixed(1)}<br>`;
         
+        if (hasBrokenItems) {
+            if (hasRewards) msg += `<br>`;
+            msg += `<span style="color:#ff4444">Сломаны предметы:</span><br>${brokenItems.join('<br>')}`;
+        }
+
         window.showCustomAlert(msg);
     }
 }
@@ -863,7 +920,9 @@ window.calculateRank = function() {
     } else if (g.includes('чародей') && !g.includes('ученик')) {
         const ranks = [0.15, 0.20, 0.28, 0.35, 0.50, 0.75, 1.00, 1.25, 1.50, 2.00];
         xp_bonus_val = (rank > 0) ? (ranks[Math.min(rank - 1, 9)] || 0.15) : 0.15;
-        potion_mod = -0.55;
+        const pot_ranks = [0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00];
+        const p_disc = (rank > 0) ? (pot_ranks[Math.min(rank - 1, 9)] || 0.55) : 0.55;
+        potion_mod = -p_disc;
     } else if (g.includes('ученик чародея')) {
         xp_bonus_val = 0.10;
         potion_mod = -0.30;
@@ -952,7 +1011,7 @@ window.processDeath = function() {
     if (g.includes('вампир')) {
         let pen = window.playerData.para * 0.1;
         if (pen > 0.5 && pen < 1) pen = 1; else pen = Math.floor(pen * 10) / 10;
-        guildPenaltyText = `С шансом 90% вы обманете смерть и не понесете потерь. <br>В противном случае (10%): изгнание из клана, потеря ${runePenalty} 📖, потеря ${pen.toFixed(1)} ⏳ и 5% шанс забыть навык.`;
+        guildPenaltyText = `С шансом 90% вы обманете смерть и не понесете потерь. <br>В противном случае (10%): изгнание из клана, потеря ${runePenalty} 📖, потеря ${pen.toFixed(1)} ⏳ и 10% шанс забыть навык.`;
     }
     else if (g.includes('торговц')) {
         const lostYen = Math.floor(window.getAllMoneyInYen() * 0.2);
@@ -1152,19 +1211,11 @@ window.confirmDeath = function() {
 
     let finalMessage = "";
 
-    // 5% шанс забыть навык
-    if (Math.random() < 0.05) {
+    // 10% шанс забыть навык (включая пассивные)
+    if (Math.random() < 0.10) {
         const learned = window.playerData.learnedSkills;
         let skillNames = Object.keys(learned);
 
-        // Фильтруем только активные навыки (исключаем пассивные)
-        const cls = window.playerData.className;
-        if (cls && window.skillDB && window.skillDB[cls]) {
-            skillNames = skillNames.filter(sName => {
-                const skillObj = window.skillDB[cls].find(s => s.name === sName);
-                return skillObj && skillObj.category !== "Пассивные";
-            });
-        }
         if (skillNames.length > 0) {
             const randomSkill = skillNames[Math.floor(Math.random() * skillNames.length)];
             delete window.playerData.learnedSkills[randomSkill];
@@ -1298,6 +1349,7 @@ window.togglePentagram = function(id) {
 
 window.handleSecondLifeClick = function(skillName) {
     // Проверка наличия средств
+    const g = (window.playerData.guild || "").toLowerCase();
     if (window.playerData.runes < 10 && window.playerData.para < 10) {
         window.showCustomAlert(`❌ Недостаточно средств для оплаты Второй Жизни!<br>Нужно 10 📖 или 10 ⏳.<br><br><b style="color:#ff4444">СМЕРТЬ НЕИЗБЕЖНА.</b>`);
         window.confirmDeath(); // Автоматическая смерть
@@ -1327,6 +1379,15 @@ window.handleSecondLifeClick = function(skillName) {
             };
 
             btn2.innerText = "10 ⏳ (Парагон)";
+            
+            // Торговцы не могут платить парагоном
+            if (g.includes('торговц')) {
+                btn2.disabled = true;
+                btn2.innerText = "10 ⏳ (Недоступно)";
+                btn2.style.opacity = "0.5";
+                btn2.title = "Торговцы не могут платить парагоном";
+            }
+
             btn2.onclick = function() {
                 if (window.playerData.para >= 10) {
                     window.playerData.para = parseFloat((window.playerData.para - 10).toFixed(2));

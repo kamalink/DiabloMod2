@@ -9,6 +9,7 @@ window.playerData = savedData ? JSON.parse(savedData) : {
     gold_g: 0, gold_s: 0, gold_c: 0, gold_y: 0,
     mithril: 0,
     runes: 0,
+    act: 1, // Текущий акт
     para: 0,
     zakens: 0,
     maxVp: 0,
@@ -24,6 +25,7 @@ window.playerData = savedData ? JSON.parse(savedData) : {
     
     // Новые поля
     kills: 0,
+    highest_kills: 0, // Максимальное кол-во убийств для предотвращения абуза наград
     base_kills: 0, // Изначально мобов
     base_elites: 0, // Изначально элиток
     elites_solo: 0,
@@ -37,6 +39,8 @@ window.playerData = savedData ? JSON.parse(savedData) : {
     deals: 0,
     chests_found: 0,
     steals: 0, theft_fine: "",
+    theft_attempts_level: 1, // Уровень, на котором были совершены попытки
+    theft_attempts_count: 0, // Количество попыток на текущем уровне
     black_market: 0,
     zaken_discount: "",
     xp_bonus: "",
@@ -49,7 +53,11 @@ window.playerData = savedData ? JSON.parse(savedData) : {
     claimed_torments: [], // Полученные награды за Torment
     claimed_ranks: [], // Полученные награды за ранг
     difficulty: "Высокий", // Текущий уровень сложности
-    
+    np_count: 0, // Количество НП в текущем акте
+    is_in_np: false, // Находится ли игрок в НП
+    gambler_bm_purchases_count: 0, // Счетчик покупок на ЧР для бонуса
+    gambler_bonus_sales_left: 0, // Количество предметов для продажи по х5
+    // Куб и навыки
     // Пентограмма (чекбоксы)
     penta_1: false, penta_2: false, penta_3: false,
     
@@ -66,6 +74,7 @@ window.playerData = savedData ? JSON.parse(savedData) : {
 // Исправление для старых сохранений
 if (!window.playerData.inventory) window.playerData.inventory = [];
 if (!window.playerData.learnedSkills) window.playerData.learnedSkills = {};
+if (typeof window.playerData.highest_kills === 'undefined') window.playerData.highest_kills = window.playerData.kills || 0;
 if (!window.playerData.joined_level) window.playerData.joined_level = window.playerData.level || 1;
 if (typeof window.playerData.reagents === 'undefined') window.playerData.reagents = 0;
 if (typeof window.playerData.res_n === 'undefined') window.playerData.res_n = 0;
@@ -80,6 +89,12 @@ if (!window.playerData.claimed_ranks) window.playerData.claimed_ranks = [];
 if (!window.playerData.difficulty) window.playerData.difficulty = "Высокий";
 if (typeof window.playerData.refused_wizard_promotion === 'undefined') window.playerData.refused_wizard_promotion = false;
 if (typeof window.playerData.saveCount === 'undefined') window.playerData.saveCount = 0;
+if (typeof window.playerData.act === 'undefined') window.playerData.act = 1;
+if (typeof window.playerData.np_count === 'undefined') window.playerData.np_count = 0;
+if (typeof window.playerData.gambler_bm_purchases_count === 'undefined') window.playerData.gambler_bm_purchases_count = 0;
+if (typeof window.playerData.gambler_bonus_sales_left === 'undefined') window.playerData.gambler_bonus_sales_left = 0;
+if (typeof window.playerData.theft_attempts_level === 'undefined') window.playerData.theft_attempts_level = window.playerData.level || 1;
+if (typeof window.playerData.theft_attempts_count === 'undefined') window.playerData.theft_attempts_count = 0;
 
 // Глобальные переменные состояния
 window.historyStack = ['main'];
@@ -91,6 +106,8 @@ window.lastCraftSellLevel = 1;
 window.audioTrack = new Audio('06 - The Slaughtered Calf Inn.mp3');
 window.audioTrack.loop = true;
 window.coinSound = new Audio('freesound_community-coin-clatter-6-87110.mp3');
+window.activeRiftMultiplier = 1; // Множитель наград за текущий рифт
+window.activeRiftMultiplier = null; // Множитель наград за текущий рифт (null если нет активной цепочки)
 window.idleTimer = null;
 
 // --- УТИЛИТЫ ---
@@ -315,4 +332,81 @@ window.handleFileSelect = function(input) {
         input.value = ''; // Сброс, чтобы можно было выбрать тот же файл снова
     };
     reader.readAsText(file);
+}
+
+// --- DEBUG AND VALIDATION FUNCTIONS ---
+
+/**
+ * Проверяет расчет стоимости навыка на наличие потенциальных ошибок или нелогичных значений.
+ */
+window.validateSkillCost = function(className, skillIdx, runeIdx) {
+    const runeData = window.skillDB[className]?.[skillIdx]?.runes?.[runeIdx];
+    if (!runeData) {
+        return "Данные о руне не найдены.";
+    }
+
+    // calculateRuneCostFromDB находится в logic_calc.js, который загружается позже.
+    // Это нормально, так как функция вызывается только при действии пользователя.
+    if (typeof window.calculateRuneCostFromDB !== 'function') return null;
+
+    const { cost } = window.calculateRuneCostFromDB(className, skillIdx, runeIdx);
+
+    // 1. Отрицательная стоимость
+    if (cost < 0) {
+        return `Критическая ошибка: Расчетная стоимость отрицательна (${cost.toFixed(2)}).`;
+    }
+
+    // 2. Проверка конвертации снижения урона в стойкость
+    if (runeData.buffDef && runeData.desc) {
+        const match = runeData.desc.match(/(-|снижени\w+)\s*(\d+)%/i);
+        if (match) {
+            const reduction = parseInt(match[2]);
+            if (reduction > 0 && reduction < 100) {
+                const expectedToughness = (1 / (1 - reduction / 100) - 1) * 100;
+                const actualToughness = runeData.buffDef;
+                // Допускаем погрешность в 1%
+                if (Math.abs(expectedToughness - actualToughness) > 1) {
+                    return `Несоответствие расчета стойкости. При снижении ${reduction}%, ожидаемая стойкость ~${expectedToughness.toFixed(0)}%, а указана ${actualToughness}%.`;
+                }
+            }
+        }
+    }
+
+    return null; // Нет ошибок
+}
+
+/**
+ * Проверяет стоимость предмета при покупке или крафте.
+ */
+window.validateItemAction = function(cost, level, grade, mode) {
+    if (typeof cost !== 'number' || isNaN(cost)) {
+        return "Критическая ошибка: Цена предмета не является числом (NaN).";
+    }
+    if (cost < 0) {
+        return "Критическая ошибка: Цена предмета отрицательная.";
+    }
+    
+    // Проверка на 0 (кроме продажи и Торговцев)
+    if (cost === 0 && mode !== 'sell' && level > 1) {
+        const g = (window.playerData.guild || "").toLowerCase();
+        if (!g.includes('торговц')) {
+             return "Внимание: Цена предмета равна 0. Проверьте расчеты.";
+        }
+    }
+    return null;
+}
+
+/**
+ * Проверяет стоимость операций с камнями.
+ */
+window.validateGemAction = function(cost, rank, quantity, operation) {
+    if (typeof cost !== 'number' || isNaN(cost)) return "Ошибка: Стоимость операции с камнями не является числом.";
+    if (cost < 0) return "Ошибка: Стоимость отрицательная.";
+    return null;
+}
+
+window.validateGenericAction = function(cost, actionName) {
+    if (typeof cost !== 'number' || isNaN(cost)) return `Ошибка: Стоимость "${actionName}" не является числом.`;
+    if (cost < 0) return `Ошибка: Стоимость "${actionName}" отрицательная.`;
+    return null;
 }

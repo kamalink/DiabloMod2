@@ -193,30 +193,30 @@ window.guildsData = {
             <button class="craft-btn smith-sell" onclick="sellRunes('чародей')" style="position: absolute; top: 55px; right: 20px; z-index: 100; font-size: 0.8rem; padding: 4px 8px;">Продать 📖</button>
             <div style="border: 1px solid #66ff66; padding: 10px; background: rgba(102, 255, 102, 0.05); margin-bottom: 10px;">
                 <b style="color: #66ff66;">Плюсы ⬆️:</b><br>
-                📜🔺 💊 на 55% ⏬<br>
+                📜🔺 💊 на 55-100% ⏬<br>
                 📜🔺 Уроки: +27.5% к цене за каждые 100 🔮<br>
                 📜🔺 Продажа 1 📖 за 20🥉 (Ранг 1)
             </div>
             <div style="border: 1px solid #ff4444; padding: 10px; background: rgba(255, 68, 68, 0.05); margin-bottom: 10px;">
                 <b style="color: #ff4444;">Минусы ⬇️:</b><br>
-                📜🔻 Продажи 💍 на 14% ⏬
+                📜🔻 Продажи 💍: Штраф растет с рангом
             </div>
             <p>📢 <b>Условие:</b> Обучить (продать) ≥ 25 📖 до выхода.</p>
             <hr>
             <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
                 <tr style="color: #d4af37; border-bottom: 1px solid #5a0000;">
-                    <th>Ранг</th><th>Условие</th><th>Бонус 📖⏳ / 💲 / 💊</th>
+                    <th>Ранг</th><th>Условие</th><th>📖⏳</th><th>💲 / 💊</th><th>Штраф 💍</th>
                 </tr>
-                <tr><td>🌊 Союзник</td><td>1к🔮 / 50⏳</td><td>+15% / 20🥉 / -</td></tr>
-                <tr><td>🔥 Нач-щий</td><td>2к🔮 / 100⏳</td><td>+20% / 37🥉 / 💊60</td></tr>
-                <tr><td>🌊 Странник</td><td>3к🔮 / 200⏳</td><td>+28% / 60🥉 / 💊65</td></tr>
-                <tr><td>🔥 Вызывающий</td><td>4к🔮 / 300⏳</td><td>+35% / 90🥉 / 💊70</td></tr>
-                <tr><td>🌊 Мистик</td><td>5к🔮 / 450⏳</td><td>+50% / 1.35🥈 / 💊75</td></tr>
-                <tr><td>🔥 Магиус</td><td>6к🔮 / 600⏳</td><td>+75% / 1.80🥈 / 💊80</td></tr>
-                <tr><td>🌊 Чернокниж.</td><td>7к🔮 / 700⏳</td><td>+100% / 2.25🥈 / 💊85</td></tr>
-                <tr><td>🔥 Волшебник</td><td>8к🔮 / 800⏳</td><td>+125% / 2.70🥈 / 💊90</td></tr>
-                <tr><td>🌊 Мастер В.</td><td>9к🔮 / 900⏳</td><td>+150% / 3.20🥈 / Беспл</td></tr>
-                <tr style="background: rgba(162, 155, 254, 0.1);"><td>🔥 Архимагиус</td><td>10к🔮 / 1000⏳</td><td>+200% / 4.50🥈 / Беспл</td></tr>
+                <tr><td>🌊 Союзник</td><td>1к🔮 / 50⏳</td><td>+15%</td><td>20🥉 / 55%</td><td>-10%</td></tr>
+                <tr><td>🔥 Нач-щий</td><td>2к🔮 / 100⏳</td><td>+20%</td><td>37🥉 / 60%</td><td>-12%</td></tr>
+                <tr><td>🌊 Странник</td><td>3к🔮 / 200⏳</td><td>+28%</td><td>60🥉 / 65%</td><td>-14%</td></tr>
+                <tr><td>🔥 Вызывающий</td><td>4к🔮 / 300⏳</td><td>+35%</td><td>90🥉 / 70%</td><td>-16%</td></tr>
+                <tr><td>🌊 Мистик</td><td>5к🔮 / 450⏳</td><td>+50%</td><td>1.35🥈 / 75%</td><td>-18%</td></tr>
+                <tr><td>🔥 Магиус</td><td>6к🔮 / 600⏳</td><td>+75%</td><td>1.80🥈 / 80%</td><td>-20%</td></tr>
+                <tr><td>🌊 Чернокниж.</td><td>7к🔮 / 700⏳</td><td>+100%</td><td>2.25🥈 / 85%</td><td>-22%</td></tr>
+                <tr><td>🔥 Волшебник</td><td>8к🔮 / 800⏳</td><td>+125%</td><td>2.70🥈 / 90%</td><td>-25%</td></tr>
+                <tr><td>🌊 Мастер В.</td><td>9к🔮 / 900⏳</td><td>+150%</td><td>3.20🥈 / 95%</td><td>-28%</td></tr>
+                <tr style="background: rgba(162, 155, 254, 0.1);"><td>🔥 Архимагиус</td><td>10к🔮 / 1000⏳</td><td>+200%</td><td>4.50🥈 / Беспл</td><td>-30%</td></tr>
             </table>
         `
     },
@@ -248,23 +248,27 @@ window.guildsData = {
                 ❗ Красть можно только текущие вещи из магазина.
                 ❗ Купленные 🔖 можно продать за 80% от цены.
             </p>
-            <p style="color: #d4af37;">🕵️ ШАНС КРАЖИ:</p>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <p style="color: #d4af37; margin: 0;">🕵️ ШАНС КРАЖИ:</p>
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <span style="font-size:0.8rem; color:#aaa;">Ур:</span>
+                    <input type="number" id="theft-item-level" style="width:40px; background:#000; color:#fff; border:1px solid #444; padding:2px; text-align:center;" oninput="window.updateTheftTable()">
+                    <button class="craft-btn sell" onclick="window.toggleTheftMode()">🧤 УКРАСТЬ</button>
+                </div>
+            </div>
             <table style="width: 100%; font-size: 0.75rem; text-align: center; border-collapse: collapse;">
                 <tr style="color: #d4af37; border-bottom: 1px solid #5a0000;">
-                    <th>🌒 Герой</th><th>📓</th><th>📘</th><th>📒</th><th>B</th><th>A3</th><th>A2</th><th>A1,S+</th><th>SS</th>
+                    <th>🌒 Герой</th><th>📓 (N)</th><th>📘 (D)</th><th>📒 (C)</th>
                 </tr>
-                <tr><td>01-19</td><td>50</td><td>35</td><td>25</td><td>20</td><td>15</td><td>5</td><td>-5</td><td>-25</td></tr>
-                <tr><td>20-39</td><td>50</td><td>50</td><td>35</td><td>30</td><td>25</td><td>15</td><td>5</td><td>-15</td></tr>
-                <tr><td>40-70</td><td>50</td><td>50</td><td>50</td><td>45</td><td>40</td><td>30</td><td>20</td><td>0</td></tr>
+                <tr id="tr-theft-1" class="theft-row"><td>01-19</td><td id="td-theft-n-1" class="theft-cell" onclick="window.attemptTheft('N', 50, 1)">50%</td><td id="td-theft-d-1" class="theft-cell" onclick="window.attemptTheft('D', 35, 1)">35%</td><td id="td-theft-c-1" class="theft-cell" onclick="window.attemptTheft('C', 25, 1)">25%</td></tr>
+                <tr id="tr-theft-2" class="theft-row"><td>20-39</td><td id="td-theft-n-2" class="theft-cell" onclick="window.attemptTheft('N', 50, 2)">50%</td><td id="td-theft-d-2" class="theft-cell" onclick="window.attemptTheft('D', 50, 2)">50%</td><td id="td-theft-c-2" class="theft-cell" onclick="window.attemptTheft('C', 35, 2)">35%</td></tr>
+                <tr id="tr-theft-3" class="theft-row"><td>40-70</td><td id="td-theft-n-3" class="theft-cell" onclick="window.attemptTheft('N', 50, 3)">50%</td><td id="td-theft-d-3" class="theft-cell" onclick="window.attemptTheft('D', 50, 3)">50%</td><td id="td-theft-c-3" class="theft-cell" onclick="window.attemptTheft('C', 50, 3)">50%</td></tr>
             </table>
-            <p style="font-size: 0.8rem; margin: 10px 0;">Разница 🌒: ⏫1 = ⏬1.5% | ⏬1 = ⏫1%</p>
+            <p style="font-size: 0.8rem; margin: 10px 0; color: #888;">* Нажмите "УКРАСТЬ", затем выберите ячейку.</p>
             <hr>
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <p style="color: #d4af37; margin: 0;">🔖 ЗАКЕНЫ (1 🔖 = Кадала):</p>
-                <div style="display: flex; flex-direction: column; gap: 5px; align-items: flex-end;">
-                    <button class="calc-nav-btn" onclick="buyZakens('buy')">💰 КУПИТЬ</button>
-                    <button class="calc-nav-btn" style="border-color: #ff4444; color: #ff4444;" onclick="buyZakens('sell')">📉 ПРОДАТЬ</button>
-                </div>
+                <button class="calc-nav-btn" onclick="buyZakens('buy')">💰 КУПИТЬ</button>
             </div>
             <div style="column-count: 2; font-size: 0.85rem;">
                 20🗡️-1.20🥈 | 25🗡️-2🥈<br>30🗡️-3🥈 | 35🗡️-5🥈<br>40🗡️-9🥈 | 45🗡️-13🥈<br>
@@ -313,8 +317,7 @@ window.guildsData = {
                 📜🔻 Опыт -17.5% | 💊 +20%<br>
                 📜🔻 Штраф за поимку — 100% стоимости 💍
             </div>
-            <p>❗ 1 попытка кражи = найти 5 💍.</p>
-            <p>📢 <b>Условие:</b> украсть 3 📘grade 💍 (выбросить).</p>
+            <p> <b>Условие:</b> украсть 3 📘grade 💍 (выбросить).</p>
             <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse; text-align: left;">
                 <tr style="color: #d4af37; border-bottom: 1px solid #5a0000;"><th>Ранг</th><th>Успех</th><th>Штраф</th></tr>
                 <tr><td>🎲 Лягуха</td><td>7</td><td>98%</td></tr>
@@ -458,7 +461,8 @@ window.guildsData = {
                 <b style="color: #ff4444;">Минусы ⬇️:</b><br>
                 📜🔻Изменение 💍 на 15% ⏫ | 📖 и ⏳ на 20% ⏬
             </div>
-            <p>📢 <b>Условие:</b> убить 500 мобов</p>
+            <p>📢 <b>Условие:</b> 1000 🏮 или 1700 💀</p>
+            <p style="text-align: center; color: #d4af37;">💲: 1.75🧧 * 🌒 * кол-во 💀 * ⛓️</p>
             <table style="width: 100%; font-size: 0.75rem; border-collapse: collapse;">
                 <tr style="color: #d4af37; border-bottom: 1px solid #5a0000;"><th>Ранг</th><th>🏮 или 💀</th><th>Бонус ранга к 💰</th></tr>
                 <tr><td>🎑 Союзник</td><td>1к / 1.7к</td><td>х1.5</td></tr>
@@ -483,7 +487,7 @@ window.guildsData = {
                 📜🔺 Создание крафта за 105% | Продажа за 90%<br>
                 📜🔺 Контракты: х3 💰 если убил больше 💀 чем напарник
             </div>
-            <p>📢 <b>Условие:</b> убить 1500 мобов</p>
+            <p>📢 <b>Условие:</b> 1000 🏮 или 1700 💀</p>
             <p style="text-align: center; color: #d4af37;">💲: 1.23🧧 * 🌒 * кол-во 💀 * ⛓️</p>
             <table style="width: 100%; font-size: 0.75rem; border-collapse: collapse;">
                 <tr style="color: #d4af37; border-bottom: 1px solid #5a0000;"><th>Ранг</th><th>🏮 или 💀</th><th>Бонус ранга к 💰</th></tr>

@@ -246,7 +246,8 @@
                 <label>Грейд: 
                     <select id="modal-sell-grade" style="background: #000; color: #fff; border: 1px solid #444; width: 60px; cursor: pointer;">
                         <option value="N">N</option>
-                        <option value="DC">D/C</option>
+                        <option value="D">D</option>
+                        <option value="C">C</option>
                         <option value="B">B</option>
                         <option value="A">A</option>
                         <option value="S">S</option>
@@ -261,7 +262,7 @@
         <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
             <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
                 <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">40%</div>
-                <div style="font-size: 0.85rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 40)">Основа оружия</span></div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="sell-prop-item" onclick="toggleSellProperty(this, 40)">Основа оружия</span><br><span class="sell-prop-item" onclick="toggleSellProperty(this, 40)">Гнездо (бижутерия)</span></div>
             </div>
             <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
                 <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">30%</div>
@@ -323,7 +324,7 @@
             <!-- Properties will be cloned here by JS or hardcoded -->
             <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
                 <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">40%</div>
-                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 40)">Основа оружия</span></div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 40)">Основа оружия</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 40)">Гнездо (бижутерия)</span></div>
             </div>
             <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
                 <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">30%</div>
@@ -393,7 +394,7 @@
         <div class="set-props-container" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
             <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
                 <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">40%</div>
-                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 40)">Основа оружия</span></div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 40)">Основа оружия</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 40)">Гнездо (бижутерия)</span></div>
             </div>
             <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
                 <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">30%</div>
@@ -443,7 +444,7 @@
         <div class="agrade-props-container" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
             <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
                 <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">40%</div>
-                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 40)">Основа оружия</span></div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="buy-prop-item" onclick="toggleBuyProperty(this, 40)">Основа оружия</span><br><span class="buy-prop-item" onclick="toggleBuyProperty(this, 40)">Гнездо (бижутерия)</span></div>
             </div>
             <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
                 <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">30%</div>
@@ -556,7 +557,7 @@
         <div style="width: 90%; max-width: 450px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #d4af37; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); padding: 25px; text-align: center; font-family: 'Cinzel', serif; color: #e0e0e0;">
             <h3 id="multi-sell-title" style="color: #d4af37; margin-top: 0; font-size: 1.5rem;">Продажа ресурсов</h3>
             <div style="margin-bottom: 15px;">
-                <label>Уровень ресурсов: 
+                <label><span id="multi-sell-label-text">Уровень ресурсов:</span> 
                     <select id="multi-sell-level" style="background: #000; color: #fff; border: 1px solid #444; width: 80px; padding: 5px; cursor: pointer;">
                         <option value="5">1-5</option>
                         <option value="10">6-10</option>
@@ -584,6 +585,86 @@
                 <button id="multi-sell-ok-btn" class="death-confirm-btn">Продать</button>
                 <button id="multi-sell-cancel-btn" class="death-cancel-btn">Отмена</button>
             </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО ЗАЧАРОВАНИЯ (ИЗМЕНЕНИЕ СВОЙСТВ) -->
+    <div id="enchant-item-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 7000; align-items: center; justify-content: center;">
+        <div style="width: 90%; max-width: 450px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #a29bfe; box-shadow: 0 0 30px rgba(162, 155, 254, 0.2); padding: 25px; text-align: center; font-family: 'Cinzel', serif; color: #e0e0e0;">
+            <h3 style="color: #a29bfe; margin-top: 0; font-size: 1.5rem;">🔮 ИЗМЕНЕНИЕ СВОЙСТВ</h3>
+            <p id="enchant-subtitle" style="font-size: 0.8rem; color: #aaa;">Выберите предмет (N и D грейды нельзя менять).</p>
+            
+            <div id="enchant-inventory-list" style="max-height: 300px; overflow-y: auto; text-align: left; margin-bottom: 20px; border: 1px solid #444; padding: 5px;">
+                <!-- Items will be loaded here -->
+            </div>
+            
+            <!-- Контейнер для выбора свойства (скрыт по умолчанию) -->
+            <div id="enchant-properties-selector" style="display: none;">
+                <p style="color: #d4af37;">Выберите свойство для замены:</p>
+                <div id="enchant-current-props" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-bottom: 15px;"></div>
+                
+                <p style="color: #66ff66;">Выберите НОВОЕ свойство:</p>
+                <div id="enchant-new-props-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #333; padding: 5px;">
+                    <!-- Сюда клонируются свойства из Buy/Sell -->
+                </div>
+                <div style="margin-top: 15px;">
+                    <button class="craft-btn craft" onclick="window.confirmEnchantSwap()">ЗАМЕНИТЬ</button>
+                    <button class="death-cancel-btn" onclick="window.resetEnchantModal()">НАЗАД</button>
+                </div>
+            </div>
+
+            <button class="death-cancel-btn" onclick="document.getElementById('enchant-item-modal').style.display='none'">ЗАКРЫТЬ</button>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО КРАЖИ (ВЫБОР СВОЙСТВ) -->
+    <div id="theft-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; max-width: 600px; max-height: 90vh; background: #1a1a1a; border: 2px solid #444; z-index: 8000; padding: 20px; overflow-y: auto; box-shadow: 0 0 50px #000;">
+        <h3 id="theft-modal-title" style="text-align: center; font-family: 'Cinzel', serif; margin-top: 0;">🕵️ РЕЗУЛЬТАТ КРАЖИ</h3>
+        <p id="theft-modal-status" style="text-align: center; font-size: 1.1rem; margin-bottom: 15px;"></p>
+        
+        <div style="text-align: center; margin-bottom: 15px;">
+            <span style="color: #aaa;">Грейд:</span> <span id="theft-grade-display" style="font-weight: bold; color: #fff;"></span> | 
+            <span style="color: #aaa;">Уровень:</span> <span id="theft-level-display" style="font-weight: bold; color: #fff;"></span>
+        </div>
+
+        <p style="text-align: center; color: #d4af37; font-size: 0.9rem;">Выберите свойства предмета:</p>
+        
+        <!-- Контейнер свойств (клонируется из Buy/Sell) -->
+        <div id="theft-props-container" class="ancient-props-container" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+            <!-- JS заполнит это -->
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <button id="theft-action-btn" class="death-confirm-btn" onclick="window.finalizeTheft()">ЗАВЕРШИТЬ</button>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО ВЫБОРА СЛОЖНОСТИ ПОРТАЛА -->
+    <div id="rift-diff-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 8000; align-items: center; justify-content: center;">
+        <div style="width: 90%; max-width: 400px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #d4af37; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); padding: 25px; text-align: center; font-family: 'Cinzel', serif; color: #e0e0e0;">
+            <h3 style="color: #d4af37; margin-top: 0;">ВЫБОР СЛОЖНОСТИ НП</h3>
+            <p id="rift-diff-cost-display" style="font-family: 'Lora', serif; font-size: 0.9rem; color: #aaa; margin-bottom: 15px;"></p>
+            <div id="rift-diff-buttons-container" style="display: flex; flex-direction: column; gap: 10px; margin: 20px 0;">
+                <!-- Кнопки генерируются через JS -->
+            </div>
+            <button class="death-cancel-btn" onclick="document.getElementById('rift-diff-modal').style.display='none'">ОТМЕНА</button>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО АКТИВНОГО ПОРТАЛА -->
+    <div id="active-rift-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9000; align-items: center; justify-content: center; flex-direction: column;">
+        <div style="width: 90%; max-width: 400px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #d4af37; box-shadow: 0 0 50px rgba(212, 175, 55, 0.3); padding: 30px; text-align: center; font-family: 'Cinzel', serif; color: #e0e0e0;">
+            <h2 style="color: #d4af37; margin-top: 0; text-shadow: 0 0 10px #d4af37;">🌀 ПОРТАЛ ОТКРЫТ</h2>
+            <p id="active-rift-info" style="font-family: 'Lora', serif; font-size: 1rem; color: #aaa; margin-bottom: 25px;"></p>
+            
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <button class="death-confirm-btn" style="background: #2d5a3a; border-color: #66ff66; font-size: 1rem; padding: 15px;" onclick="window.buyExtraRiftLocation()">🛒 КУПИТЬ ЛОКАЦИЮ</button>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button class="death-confirm-btn" style="background: #1a1a1a; border-color: #66ff66; color: #66ff66; flex: 1;" onclick="window.closeNephalemRift(true)">✅ ЗАКРЫТ</button>
+                    <button class="death-confirm-btn" style="background: #1a1a1a; border-color: #ff4444; color: #ff4444; flex: 1;" onclick="window.closeNephalemRift(false)">❌ НЕ ЗАКРЫТ</button>
+                </div>
+            </div>
+            <p style="font-size: 0.8rem; color: #666; margin-top: 20px;">* Интерфейс заблокирован до закрытия портала.</p>
         </div>
     </div>
 
@@ -668,8 +749,7 @@
                     <div class="stat-row">Репутация: <input type="number" id="input-reputation" class="char-input" value="0" onchange="savePlayerData()"> 🎭</div>
                     <div class="stat-row">Сделки: <input type="number" id="input-deals" class="char-input" value="0" onchange="savePlayerData()"> 🤝</div>
                     <div class="stat-row">Сундуки: <input type="number" id="input-chests" class="char-input" value="0" onchange="savePlayerData()"> 📦</div>
-                    <div class="stat-row">Куплено на ЧР: <input type="number" id="input-black-market" class="char-input" value="0" onchange="savePlayerData()"> 🕶️</div>
-                    <div class="stat-row">Украдено: <input type="number" id="input-steals" class="char-input" value="0" onchange="savePlayerData()"> <span id="view-theft-fine" style="font-size: 0.6rem;"></span></div>
+                    <div class="stat-row">Украдено: <span id="view-theft-chance" style="font-size: 0.7rem; color: #aaa; margin-right: 3px;"></span><input type="number" id="input-steals" class="char-input" value="0" onchange="savePlayerData()"> <span id="view-theft-fine" style="font-size: 0.6rem;"></span></div>
                 </div>
             </div>
 
@@ -692,10 +772,11 @@
                     <div class="stat-row">Убито мобов: <input type="number" id="input-kills" class="char-input" value="0" onchange="savePlayerData()"> 💀</div>
                     <div class="stat-row">Элита (соло): <input type="number" id="input-elites-solo" class="char-input" value="0" onchange="savePlayerData()"> ☠️</div>
                     <div class="stat-row">Боссы: <input type="number" id="input-bosses" class="char-input" value="0" onchange="savePlayerData()"> 👹</div>
-                    <div class="stat-row" style="font-size: 0.7rem; color: #888;">Изначально: <input type="number" id="input-base-kills" class="char-input" style="width: 40px;" value="0" onchange="savePlayerData()">💀 / <input type="number" id="input-base-elites" class="char-input" style="width: 40px;" value="0" onchange="savePlayerData()">☠️</div>
+                    <div class="stat-row" style="font-size: 0.7rem; color: #888;">Изначально: <input type="number" id="input-base-kills" class="char-input" style="width: 35px;" value="0" onchange="savePlayerData()">💀 / <input type="number" id="input-base-elites" class="char-input" style="width: 35px;" value="0" onchange="savePlayerData()">☠️</div>
                     <div class="stat-row">Гоблины: <input type="number" id="input-gobs-solo" class="char-input" value="0" onchange="savePlayerData()">(С) / <input type="number" id="input-gobs-assist" class="char-input" value="0" onchange="savePlayerData()">(П)</div>
-                    <div class="stat-row" style="font-size: 0.7rem;">Портал 70: <input type="text" id="input-lvl70-portal" class="char-input" style="width: 60px;" onchange="savePlayerData()"></div>
+                    <div class="stat-row" style="font-size: 0.7rem;">Портал 70: <input type="text" id="input-lvl70-portal" class="char-input" style="width: 30px;" onchange="savePlayerData()"></div>
                     <div class="stat-row">Сложность: <span id="view-difficulty" class="stat-value">T1</span></div>
+                    <div class="stat-row">Акт: <input type="number" id="input-act" class="char-input" value="1" min="1" max="5" onchange="savePlayerData()"> <span id="view-np-discount" style="font-size: 0.7rem; color: #aaa;"></span></div>
                 </div>
             </div>
 
@@ -703,8 +784,8 @@
                 <div class="stat-group-title"><span class="group-toggle" onclick="window.toggleStatGroup(this)">[-]</span> Лут и Крафт</div>
                 <div class="stat-group-content">
                     <div class="stat-row">Найдено Лег: <input type="number" id="input-found-legs" class="char-input" value="0" onchange="savePlayerData()"> 📙</div>
-                    <div class="stat-row">Найдено Желтых: <input type="number" id="input-found-yellows" class="char-input" value="0" onchange="savePlayerData()"> 📒</div>
-                    <div class="stat-row">Ресурсы: <input type="number" id="input-res-n" class="char-input" value="0" style="width:30px;" onchange="savePlayerData()">📓 <input type="number" id="input-res-dc" class="char-input" value="0" style="width:30px;" onchange="savePlayerData()">📘📒 <input type="number" id="input-res-b" class="char-input" value="0" style="width:30px;" onchange="savePlayerData()">📙 <input type="number" id="input-res-a" class="char-input" value="0" style="width:30px;" onchange="savePlayerData()">📕</div>
+                    <div class="stat-row">Найдено Желтых: <input type="number" id="input-found-yellows" class="char-input" value="0" onchange="savePlayerData()"> </div>
+                    <div class="stat-row">Ресурсы: <input type="number" id="input-res-n" class="char-input" value="0" style="width:25px;" onchange="savePlayerData()">📓 <input type="number" id="input-res-dc" class="char-input" value="0" style="width:25px;" onchange="savePlayerData()">📘📒 <input type="number" id="input-res-b" class="char-input" value="0" style="width:25px;" onchange="savePlayerData()">📙 <input type="number" id="input-res-a" class="char-input" value="0" style="width:25px;" onchange="savePlayerData()">📕</div>
                     <div class="stat-row">Реагенты: <input type="number" id="input-reagents" class="char-input" value="0" onchange="savePlayerData()"></div>
                     <div class="stat-row">Дыхание смерти: <input type="number" id="input-death-breath" class="char-input" value="0" onchange="savePlayerData()"> 🧪</div>
                 </div>
