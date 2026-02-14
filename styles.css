@@ -494,6 +494,29 @@ th { color: var(--theme-highlight); }
     transition: transform 0.3s;
 }
 
+/* Ресайз для виджетов */
+#char-sheet, #learned-skills-widget, #inventory-widget {
+    resize: both;
+    overflow: auto;
+    min-width: 200px;
+    min-height: 100px;
+}
+
+/* Сетка для содержимого виджетов */
+.widget-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+.widget-item {
+    flex: 1 1 140px; /* Растягивается, база 140px */
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #333;
+    padding: 5px;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
 .char-sheet-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;

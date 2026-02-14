@@ -42,7 +42,7 @@ window.updateCalcSkills = function() {
         // Сортировка активных навыков по категориям
         const categoryOrder = {
             "Основное": 1, "Вспомогательное": 2, "Сила": 3, 
-            "Мастерство": 4, "Защита": 5, "Чары": 6, "Другое": 99
+            "Мастерство": 4, "Защита": 5, "Чары": 6, "Тактика": 7, "Другое": 99
         };
         activeSkills.sort((a, b) => {
             const orderA = categoryOrder[a.category || "Другое"] || 99;
@@ -596,6 +596,27 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
         cost = cost * (1 + totalEffInc / 100);
         details.push(`Общая Эфф.: ${oldCost.toFixed(2)} * (1 + ${totalEffInc.toFixed(0)}%/100 [Эфф]) = ${cost.toFixed(2)}`);
     }
+    
+    // --- ПРАВИЛО ДОП. НАВЫКОВ (3-я Профа / 2-й Билд) ---
+    // Если изучено >= 6 активных или >= 4 пассивных, цена х1.3
+    let actCount = 0;
+    let passCount = 0;
+    if (window.playerData.learnedSkills) {
+        for (const [sName, runes] of Object.entries(window.playerData.learnedSkills)) {
+            // Ищем навык в БД чтобы понять категорию
+            const skillObj = window.skillDB[className].find(s => s.name === sName);
+            if (skillObj) {
+                if (skillObj.category === "Пассивные") passCount++;
+                else actCount++;
+            }
+        }
+    }
+
+    if ((!isPassive && actCount >= 6) || (isPassive && passCount >= 4)) {
+        let oldCost = cost;
+        cost *= 1.3;
+        details.push(`<span style="color:#ffcc00">⚠️ Доп. навык (Лимит превышен): ${oldCost.toFixed(2)} * 1.3 = ${cost.toFixed(2)}</span>`);
+    }
 
     return { cost: cost, details: details };
 }
@@ -696,18 +717,44 @@ function proceedWithPurchase() {
     // Профа 1: +2 (Итого 3)
     // Профа 2: +2 (Итого 5)
     // Профа 3: +1 (Итого 6)
-    let maxSkills = 1;
-    if (window.playerData.professions[1]) maxSkills += 2;
-    if (window.playerData.professions[2]) maxSkills += 2;
-    if (window.playerData.professions[3]) maxSkills += 1;
+    // Доп. правило: После 3-й профы можно +1 Актив (Итого 7) и +1 Пассив (Итого 5)
+    
+    let maxActive = 1;
+    if (window.playerData.professions[1]) maxActive += 2;
+    if (window.playerData.professions[2]) maxActive += 2;
+    if (window.playerData.professions[3]) maxActive += 2; // +1 обычный +1 доп = +2
 
-    // Считаем только уникальные названия навыков (не руны)
-    const currentSkillCount = Object.keys(window.playerData.learnedSkills).length;
+    let maxPassive = 0; // База? В D3 пассивки открываются по уровням.
+    // В моде: Профа 1 (+1), Профа 2 (+1), Профа 3 (+2) = 4.
+    // Доп правило: +1 Пассив после 3 профы = 5.
+    if (window.playerData.professions[1]) maxPassive += 1;
+    if (window.playerData.professions[2]) maxPassive += 1;
+    if (window.playerData.professions[3]) maxPassive += 3; // +2 обычных +1 доп = +3
 
-    // Если навык новый (еще не в списке), проверяем лимит
-    if (!window.playerData.learnedSkills[skillName] && currentSkillCount >= maxSkills) {
-        window.showCustomAlert(`❌ Достигнут лимит навыков (${currentSkillCount}/${maxSkills}).`);
-        return;
+    // Считаем текущие
+    let currentActive = 0;
+    let currentPassive = 0;
+    const skillObj = window.skillDB[className][skillIdx];
+    const isPassive = skillObj.category === "Пассивные";
+
+    for (const [sName, runes] of Object.entries(window.playerData.learnedSkills)) {
+        const s = window.skillDB[className].find(sk => sk.name === sName);
+        if (s) {
+            if (s.category === "Пассивные") currentPassive++;
+            else currentActive++;
+        }
+    }
+
+    // Если навык новый, проверяем лимит
+    if (!window.playerData.learnedSkills[skillName]) {
+        if (isPassive && currentPassive >= maxPassive) {
+            window.showCustomAlert(`❌ Достигнут лимит пассивных навыков (${currentPassive}/${maxPassive}).`);
+            return;
+        }
+        if (!isPassive && currentActive >= maxActive) {
+            window.showCustomAlert(`❌ Достигнут лимит активных навыков (${currentActive}/${maxActive}).`);
+            return;
+        }
     }
 
     if (isNaN(cost) || cost < 0) { 
@@ -785,6 +832,14 @@ window.openExpCalculator = function() {
     const g = (window.playerData.guild || "").toLowerCase();
     
     // Логика отображения полей
+    const bossRow = document.getElementById('exp-bosses').parentNode;
+    if (window.activeRiftMultiplier !== null && window.riftSuccess === false) {
+        bossRow.style.display = 'none';
+        document.getElementById('exp-bosses').value = 0;
+    } else {
+        bossRow.style.display = 'flex';
+    }
+
     const mobsRow = document.getElementById('exp-mobs').parentNode;
     if (g.includes('торговц')) {
         mobsRow.style.display = 'none';
@@ -819,9 +874,16 @@ window.calculateExp = function() {
     let chestsPara = 0;
 
     // Применяем множитель рифта
-    if (window.activeRiftMultiplier && window.activeRiftMultiplier !== 1) {
-        runesBase *= window.activeRiftMultiplier;
-        paraBase *= window.activeRiftMultiplier;
+    let riftMult = 1;
+    if (window.activeRiftExpMultiplier !== undefined && window.activeRiftExpMultiplier !== null) {
+        riftMult = window.activeRiftExpMultiplier;
+    } else if (window.activeRiftMultiplier) {
+        riftMult = window.activeRiftMultiplier;
+    }
+
+    if (riftMult !== 1) {
+        runesBase *= riftMult;
+        paraBase *= riftMult;
     }
 
     const g = (window.playerData.guild || "").toLowerCase();
@@ -883,8 +945,8 @@ window.calculateExp = function() {
     const totalPara = ((paraBase * paraMod) + chestsPara).toFixed(2);
 
     let riftMsg = "";
-    if (window.activeRiftMultiplier && window.activeRiftMultiplier !== 1) {
-        riftMsg = `<br><span style="color:#ffd700; font-size:0.8rem;">(Множитель НП: x${window.activeRiftMultiplier})</span>`;
+    if (riftMult !== 1) {
+        riftMsg = `<br><span style="color:#ffd700; font-size:0.8rem;">(Множитель: x${riftMult.toFixed(2)})</span>`;
     }
 
     const diffText = (dMobs > 0 || dElites > 0) ? `<br><span style="font-size:0.8rem; color:#aaa;">(+${dMobs}💀, +${dElites}☠️)</span>` : "";
@@ -914,6 +976,13 @@ window.applyExpCalculation = function() {
     const addRunes = runesMatch ? parseFloat(runesMatch[1]) : 0;
     const addPara = paraMatch ? parseFloat(paraMatch[1]) : 0;
 
+    // Блокировка ввода опыта во время ВП (до закрытия)
+    if (window.playerData.is_vp && !window.playerData.vp_close_mode) {
+        window.showCustomAlert("⚠️ В ВП опыт начисляется только после закрытия портала.");
+
+        return;
+    }
+
     window.playerData.runes = parseFloat((window.playerData.runes + addRunes).toFixed(2));
     window.playerData.para = parseFloat((window.playerData.para + addPara).toFixed(2));
     window.playerData.kills += dMobs;
@@ -935,6 +1004,16 @@ window.applyExpCalculation = function() {
         
         const reward = Math.floor(dMobs * mult * window.playerData.level);
         window.addYen(reward);
+    }
+    // Сброс флагов ВП после начисления
+    if (window.playerData.vp_close_mode) {
+        window.playerData.is_vp = false;
+        window.playerData.vp_close_mode = false;
+        window.playerData.is_in_np = false;
+        window.playerData.vp_empowered = false;
+                window.playerData.current_rift_cost = 0; // Сброс затрат
+
+       
     }
     
     window.saveToStorage();
@@ -1609,7 +1688,7 @@ window.openGemServices = function(mode) {
     if (window.activeRiftMultiplier && mode === 'sell') {
         const cancelBtn = buttonsContainer.querySelector('.death-cancel-btn');
         cancelBtn.innerText = "ЗАВЕРШИТЬ";
-        cancelBtn.onclick = () => { closeGemModal(); window.activeRiftMultiplier = null; window.showCustomAlert("🏁 Цепочка НП завершена!"); };
+        cancelBtn.onclick = () => { closeGemModal(); window.activeRiftMultiplier = null; window.activeRiftExpMultiplier = null; window.riftSuccess = null; window.showCustomAlert("🏁 Цепочка завершена!"); };
 
     }
     
@@ -2727,6 +2806,19 @@ window.calculateDifficulty = function() {
         document.getElementById('diff-result-details').innerHTML = `По урону: ${dmgTier}<br>По живучести: ${toughTier}`;
         document.getElementById('diff-result-tier').dataset.tier = resultTier;
     }
+     // --- Правило НГ+ (Сложность +1) ---
+    if (window.playerData.act > 5) {
+        let currentTier = document.getElementById('diff-result-tier').innerText;
+        const order = window.difficultyOrder || [];
+        const idx = order.indexOf(currentTier);
+        
+        if (idx !== -1 && idx < order.length - 1) {
+            const nextTier = order[idx + 1];
+            document.getElementById('diff-result-tier').innerText = nextTier;
+            document.getElementById('diff-result-tier').dataset.tier = nextTier;
+            document.getElementById('diff-result-details').innerHTML += `<br><span style="color:#d4af37">NG+ (Акт ${window.playerData.act}): Сложность +1</span>`;
+        }
+    }
 }
 
 window.applyDifficulty = function() {
@@ -2747,7 +2839,7 @@ const npCosts = {
     "T9": 2060000, "T10": 2360000, "T11": 2720000, "T12": 3290000,
     "T13": 3610000, "T14": 3980000, "T15": 4380000, "T16": 4810000
 };
-const difficultyOrder = [
+window.difficultyOrder = [
     "Высокий", "Эксперт", "Мастер",
     "T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8",
     "T9", "T10", "T11", "T12", "T13", "T14", "T15", "T16"
@@ -2767,6 +2859,16 @@ window.buyLocationEntry = function(type) {
         name = "Великий Портал";
     }
 
+    if (type === 'vp') {
+        // Для ВП открываем выбор сложности с флагом isVP
+        window.selectRiftDifficulty(cost, name, diff, true);
+        return;
+    }
+    if (type === 'np') {
+        // Для НП открываем выбор сложности
+        window.selectRiftDifficulty(cost, name, diff, false);
+        return;
+    }
     // Скидка на НП (10% за каждый пройденный в акте, макс 50%)
     if (type === 'np') {
         const count = window.playerData.np_count || 0;
@@ -2790,11 +2892,7 @@ window.buyLocationEntry = function(type) {
         return;
     }
 
-    if (type === 'np') {
-        // Для НП открываем выбор сложности
-        window.selectRiftDifficulty(cost, name, diff);
-        return;
-    }
+    
 
     window.showCustomConfirm(
         `Купить вход: ${name} (${diff})?<br>Стоимость: ${window.formatCurrency(Math.floor(cost))}`,
@@ -2811,74 +2909,136 @@ window.buyLocationEntry = function(type) {
     );
 }
 
-window.selectRiftDifficulty = function(cost, name, diff) {
+window.selectRiftDifficulty = function(cost, name, diff, isVP = false) {
     const modal = document.getElementById('rift-diff-modal');
     // Сохраняем параметры для подтверждения
-    window.pendingRift = { cost: cost, name: name, diff: diff };
+    window.pendingRift = { name: name, diff: diff, isVP: isVP }; // cost не сохраняем, пересчитываем
     document.getElementById('rift-diff-cost-display').innerHTML = `Выберите уровень сложности относительно вашего текущего (${diff}):`;
     
     const container = document.getElementById('rift-diff-buttons-container');
     
+    
+
+    // Добавляем чекбокс улучшения для ВП
+    let extraHtml = '';
+    if (isVP) {
+        extraHtml = `<div style="margin: 10px 0; text-align: center;">
+            <label style="color:#d4af37; cursor:pointer; font-size: 0.9rem;">
+                <input type="checkbox" id="vp-empowered" onchange="window.renderRiftButtons()"> Улучшить портал (+10% 💰)
+            </label>
+        </div>`;
+    }
+
+    container.innerHTML = extraHtml + '<div id="rift-buttons-list" style="display:flex; flex-direction:column; gap:5px;"></div>';
+    
+    window.renderRiftButtons();
+    
+    modal.style.display = 'flex';
+}
+
+window.renderRiftButtons = function() {
+    const container = document.getElementById('rift-buttons-list');
+    if (!container) return;
+    
+    const params = window.pendingRift;
+    if (!params) return;
+    
+    const diff = params.diff;
+    const isVP = params.isVP;
+    
     // Расчет скидки
     const count = window.playerData.np_count || 0;
-    const discount = Math.min(0.5, count * 0.1);
+    const discount = isVP ? 0 : Math.min(0.5, count * 0.1); // Скидка только для НП
     const g = (window.playerData.guild || "").toLowerCase();
     const isGoblinHunter = g.includes('охотник на гоблинов');
+    
+    const empCheckbox = document.getElementById('vp-empowered');
+    const isEmpowered = empCheckbox && empCheckbox.checked;
 
-    const currentIndex = difficultyOrder.indexOf(diff);
+    const currentIndex = window.difficultyOrder.indexOf(diff);
     let html = '';
-
-    const offsets = [
-        { val: 1, mult: 1.5, bg: '#2d5a3a', border: '#66ff66' },
-        { val: 0, mult: 1.0, bg: '#444', border: '#888' },
-        { val: -1, mult: 0.66, bg: '#5a4a2d', border: '#d4af37' },
-        { val: -2, mult: 0.44, bg: '#5a2d2d', border: '#ff4444' }
-    ];
+    let offsets = [];
+    if (isVP) {
+        // Для ВП: +0, -1, -2, -3
+        offsets = [
+            { val: 0, mult: "x1.75 / x1", bg: '#2d5a3a', border: '#66ff66' },
+            { val: -1, mult: "x1.17 / x0.67", bg: '#444', border: '#888' },
+            { val: -2, mult: "x0.78 / x0.44", bg: '#5a4a2d', border: '#d4af37' },
+            { val: -3, mult: "x0.52 / x0.29", bg: '#5a2d2d', border: '#ff4444' }
+        ];
+    } else {
+        // Для НП: +1, +0, -1, -2
+        offsets = [
+            { val: 1, mult: 1.5, bg: '#2d5a3a', border: '#66ff66' },
+            { val: 0, mult: 1.0, bg: '#444', border: '#888' },
+            { val: -1, mult: 0.66, bg: '#5a4a2d', border: '#d4af37' },
+            { val: -2, mult: 0.44, bg: '#5a2d2d', border: '#ff4444' }
+        ];
+    }
+    
 
     offsets.forEach(opt => {
         const targetIndex = currentIndex + opt.val;
         
-        if (targetIndex >= 0 && targetIndex < difficultyOrder.length) {
-            const targetDiff = difficultyOrder[targetIndex];
+        if (targetIndex >= 0 && targetIndex < window.difficultyOrder.length) {
+            const targetDiff = window.difficultyOrder[targetIndex];
             let base = npCosts[targetDiff] || 440000;
-            
+            // Для ВП цена берется из таблицы НП * 2.5
+            if (isVP) base = base * 2.5;
             // Применяем бонусы
-            if (isGoblinHunter) base *= 0.8;
+            if (isGoblinHunter && !isVP) base *= 0.8; // Бонус охотника только для НП
+            // Применяем улучшение (+10%)
+            if (isVP && isEmpowered) base *= 1.1;
+            
             const finalCost = Math.floor(base * (1 - discount));
-            const costStr = window.formatCurrency(finalCost);
+                        const displayCost = finalCost; 
+ 
+            const costStr = window.formatCurrency(Math.floor(displayCost));
             const label = opt.val > 0 ? `+${opt.val}` : `${opt.val}`;
 
-            html += `<button class="death-confirm-btn" style="background: ${opt.bg}; border-color: ${opt.border};" onclick="window.confirmRiftEntry(${opt.val}, ${finalCost})">${label} (Награда х${opt.mult}) — ${costStr}</button>`;
-        } else {
+// Передаем базовую стоимость в confirmRiftEntry, там накрутим 10% если надо
+            html += `<button class="death-confirm-btn" style="background: ${opt.bg}; border-color: ${opt.border};" onclick="window.confirmRiftEntry(${opt.val}, ${Math.floor(displayCost)})">${label} (Награда ${isVP ? opt.mult : 'х'+opt.mult}) — ${costStr}</button>`;        } else {
             const label = opt.val > 0 ? `+${opt.val}` : `${opt.val}`;
             html += `<button class="death-confirm-btn" style="background: #333; border-color: #555; opacity: 0.5; cursor: not-allowed;" disabled>${label} — Недоступно</button>`;
         }
     });
 
-    container.innerHTML = html;
-    
-    modal.style.display = 'flex';
+        container.innerHTML = html;
+
 }
 
 window.confirmRiftEntry = function(offset, specificCost) {
     const params = window.pendingRift;
     if (!params) return;
 
-    const finalCost = specificCost !== undefined ? specificCost : params.cost;
+    let finalCost = specificCost;
+
+    // Проверка улучшения портала
+    const empCheckbox = document.getElementById('vp-empowered');
+    
 
     const currentMoney = window.getAllMoneyInYen();
     if (currentMoney >= finalCost) {
         window.setMoneyFromYen(currentMoney - Math.floor(finalCost));
         
         window.playerData.is_in_np = true;
-        window.playerData.np_count = (window.playerData.np_count || 0) + 1;
-        window.playerData.current_run_diff = offset; // Сохраняем смещение сложности
+// Увеличиваем счетчик НП только если это НЕ ВП
+        if (!params.isVP) {
+            window.playerData.np_count = (window.playerData.np_count || 0) + 1;
+        }        window.playerData.current_run_diff = offset; // Сохраняем смещение сложности
+         // Настройка режима ВП
+        if (params.isVP) {
+            window.playerData.is_vp = true;
+         window.playerData.vp_empowered = (empCheckbox && empCheckbox.checked);
+        }
+                window.playerData.current_rift_cost = Math.floor(finalCost); // Запоминаем стоимость входа
+
         window.updateActiveRiftModal();
         
         window.updateUI();
         document.getElementById('rift-diff-modal').style.display = 'none';
-        window.showCustomAlert(`✅ Вход в НП оплачен!<br>Сложность: ${offset > 0 ? '+' : ''}${offset}<br>Удачи, Нефалем!`);
-    } else {
+const typeName = params.isVP ? "ВП" : "НП";
+        window.showCustomAlert(`✅ Вход в ${typeName} оплачен!<br>Сложность: ${offset > 0 ? '+' : ''}${offset}<br>Удачи, Нефалем!`);    } else {
         window.showCustomAlert(`❌ Недостаточно средств!`);
     }
 }
@@ -2888,36 +3048,45 @@ window.buyExtraRiftLocation = function() {
     const offset = window.playerData.current_run_diff || 0;
     
     // Calculate target difficulty based on offset
-    const currentIndex = difficultyOrder.indexOf(diff);
+        const currentIndex = window.difficultyOrder.indexOf(diff);
+
     const targetIndex = currentIndex + offset;
     
-    if (targetIndex < 0 || targetIndex >= difficultyOrder.length) {
+    if (targetIndex < 0 || targetIndex >= window.difficultyOrder.length) {
         window.showCustomAlert("Ошибка определения сложности.");
         return;
     }
     
-    const targetDiff = difficultyOrder[targetIndex];
+    const targetDiff = window.difficultyOrder[targetIndex];
     let baseCost = npCosts[targetDiff] || 440000;
     
-    // Apply bonuses
-    const g = (window.playerData.guild || "").toLowerCase();
-    if (g.includes('охотник на гоблинов')) {
-        baseCost *= 0.8;
+    let finalCost = 0;
+
+    if (window.playerData.is_vp) {
+        // Логика цены для ВП
+        baseCost *= 2.5; // Базовая наценка ВП
+        if (window.playerData.vp_empowered) {
+            baseCost *= 1.1; // Наценка за улучшение
+        }
+        finalCost = Math.floor(baseCost);
+    } else {
+        // Логика цены для НП
+        const g = (window.playerData.guild || "").toLowerCase();
+        if (g.includes('охотник на гоблинов')) {
+            baseCost *= 0.8;
+        }
+        
+        // Скидка за кол-во пройденных НП
+        const count = window.playerData.np_count || 1;
+        const discount = Math.min(0.5, Math.max(0, (count - 1) * 0.1));
+        finalCost = Math.floor(baseCost * (1 - discount));
     }
-    
-    // Apply Act Discount
-    // np_count is already incremented for this rift.
-    // So for the 1st rift, np_count is 1. We want 0 discount.
-    // For 2nd rift, np_count is 2. We want 10% discount.
-    // Discount = (np_count - 1) * 0.1
-    const count = window.playerData.np_count || 1;
-    const discount = Math.min(0.5, Math.max(0, (count - 1) * 0.1));
-    
-    const finalCost = Math.floor(baseCost * (1 - discount));
     
     const currentMoney = window.getAllMoneyInYen();
     if (currentMoney >= finalCost) {
         window.setMoneyFromYen(currentMoney - finalCost);
+                window.playerData.current_rift_cost = (window.playerData.current_rift_cost || 0) + finalCost; // Добавляем к затратам
+
         window.updateUI();
         window.showCustomAlert(`✅ Доп. локация оплачена!<br>Списано: ${window.formatCurrency(finalCost)}`);
     } else {
@@ -2929,6 +3098,40 @@ window.closeNephalemRift = function(success) {
     if (!window.playerData.is_in_np) {
         window.showCustomAlert("⚠️ Вы не находитесь в Нефалемском портале.");
         return;
+        }
+
+    // Логика закрытия ВП
+    if (window.playerData.is_vp) {
+        if (!success) {
+            // Провал (отмена)
+            window.playerData.is_vp = false;
+            
+            window.playerData.is_in_np = false;
+            window.playerData.vp_is_solo = false;
+window.playerData.vp_empowered = false;
+            window.playerData.current_rift_cost = 0; // Сброс затрат при провале
+            window.playerData.saved_rift_multiplier = null;
+            window.playerData.saved_rift_exp_multiplier = null;
+
+            window.saveToStorage();
+            window.updateActiveRiftModal();
+            window.showCustomAlert("❌ ВП провален. Награды потеряны.");
+            return;
+        }
+
+        // Успех (закрытие) - спрашиваем время
+        let options = `<option value=">15">> 15 мин</option>`;
+        for (let i = 15; i >= 1; i--) {
+            options += `<option value="${i}">${i} мин</option>`;
+        }
+        
+        const msg = `<p>Выберите время прохождения:</p><select id="vp-close-time" style="background:#000; color:#fff; padding:5px; font-size:1rem;">${options}</select>`;
+        
+        window.showCustomConfirm(msg, () => {
+            const timeVal = document.getElementById('vp-close-time').value;
+            window.finishVPClose(timeVal);
+        });
+        return;
     }
 
      // Скрываем модальное окно блокировки
@@ -2937,10 +3140,7 @@ window.closeNephalemRift = function(success) {
     window.playerData.is_in_np = false;
     window.saveToStorage();
 
-    if (!success) {
-        window.showCustomAlert("❌ Портал не закрыт. Награды не получены.");
-        return;
-    }
+   
 
     // Расчет множителя наград
     const offset = window.playerData.current_run_diff || 0;
@@ -2952,11 +3152,74 @@ window.closeNephalemRift = function(success) {
 
     window.activeRiftMultiplier = multiplier;
 
-    window.showCustomAlert(`✅ Портал закрыт!<br>Множитель наград: x${multiplier}<br>Приступаем к подсчету...`);
+    window.riftSuccess = success;
+    if (success) {
+        window.showCustomAlert(`✅ Портал закрыт!<br>Множитель наград: x${multiplier}<br>Приступаем к подсчету...`);
+    } else {
+        window.showCustomAlert(`❌ Портал не закрыт.<br>Множитель наград: x${multiplier}<br>Приступаем к подсчету (без Босса)...`);
+    }
     
     // Запуск цепочки окон
     setTimeout(() => {
         window.nextRiftSequenceStep(1);
+    }, 1500);
+}
+
+window.finishVPClose = function(timeVal) {
+    const offset = window.playerData.current_run_diff || 0;
+    
+    // 1. Множитель времени
+    const timeMultMap = {
+        ">15": 2.0, "15": 1.8, "14": 1.6, "13": 1.4, "12": 1.2, "11": 1.1,
+        "10": 1.0, "9": 0.8, "8": 0.6, "7": 0.4, "6": 0.3, "5": 0.2,
+        "4": 0.1, "3": 0.066, "2": 0, "1": 0
+    };
+    const timeMult = timeMultMap[timeVal] || 0;
+
+    // 2. Множитель сложности (В зависимости от того, уложились ли в 15 мин)
+    // Если время > 15, значит НЕ вовремя.
+    const isLate = (timeVal === ">15"); 
+    
+    let diffMult = 1.0;
+    if (isLate) {
+        // НЕ ВОВРЕМЯ
+        if (offset === 0) diffMult = 1.0;
+        else if (offset === -1) diffMult = 0.67;
+        else if (offset === -2) diffMult = 0.44;
+        else if (offset === -3) diffMult = 0.29;
+    } else {
+        // ВОВРЕМЯ
+        if (offset === 0) diffMult = 1.75;
+        else if (offset === -1) diffMult = 1.17;
+        else if (offset === -2) diffMult = 0.78;
+        else if (offset === -3) diffMult = 0.52;
+    }
+
+    const totalMultiplier = timeMult * diffMult;
+    window.activeRiftMultiplier = totalMultiplier;
+    // Возврат 25% стоимости, если вовремя
+    let refundMsg = "";
+    if (!isLate) {
+        const totalCost = window.playerData.current_rift_cost || 0;
+        if (totalCost > 0) {
+            const refund = Math.floor(totalCost * 0.25);
+            window.addYen(refund);
+            refundMsg = `<br><span style="color:#66ff66">Возврат 25%: ${window.formatCurrency(refund)}</span>`;
+        }
+    }
+
+
+    // Устанавливаем режим закрытия ВП для калькулятора опыта
+    window.playerData.vp_close_mode = true;
+
+    document.getElementById('active-rift-modal').style.display = 'none';
+    window.saveToStorage();
+    window.updateUI();
+
+    window.showCustomAlert(`✅ ВП закрыт!<br>Время: ${timeVal} мин<br>Множитель: x${totalMultiplier.toFixed(2)}${refundMsg}<br>Введите статистику убийств для начисления наград.`);
+    
+    setTimeout(() => {
+        window.nextRiftSequenceStep(1); // Открываем калькулятор опыта
     }, 1500);
 }
 

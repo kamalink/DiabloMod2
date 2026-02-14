@@ -39,18 +39,27 @@ window.worldData = {
             <p style="text-align: center; color: #66ccff; font-weight: bold;">Пентограмма Душ — это Куб Канаи</p>
             
             <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; margin-bottom: 10px; border: 1px solid #333;">
-                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 5px;">
-                    <input type="checkbox" id="penta_1" onchange="window.togglePentagram('penta_1')"> 
-                    <span>1️⃣ вкладка — закрытие 25🏛️</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 5px;">
-                    <input type="checkbox" id="penta_2" onchange="window.togglePentagram('penta_2')"> 
-                    <span>2️⃣ вкладка — закрытие 60🏛️</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                    <input type="checkbox" id="penta_3" onchange="window.togglePentagram('penta_3')"> 
-                    <span>3️⃣ вкладка — закрытие 100🏛️</span>
-                </label>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 5px;">
+                    <span>1️⃣ вкладка (25🏛️)</span>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <span id="penta-boss-1" style="color: #ff4444; font-weight: bold; font-size: 0.9rem;"></span>
+                        <button id="btn-penta-1" class="craft-btn" style="font-size: 0.7rem; padding: 2px 5px; display:none;" onclick="window.randomizePentaBoss(1)">🎲 БОСС</button>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 5px;">
+                    <span>2️⃣ вкладка (60🏛️)</span>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <span id="penta-boss-2" style="color: #ff4444; font-weight: bold; font-size: 0.9rem;"></span>
+                        <button id="btn-penta-2" class="craft-btn" style="font-size: 0.7rem; padding: 2px 5px; display:none;" onclick="window.randomizePentaBoss(2)">🎲 БОСС</button>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span>3️⃣ вкладка (100🏛️)</span>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <span id="penta-boss-3" style="color: #ff4444; font-weight: bold; font-size: 0.9rem;"></span>
+                        <button id="btn-penta-3" class="craft-btn" style="font-size: 0.7rem; padding: 2px 5px; display:none;" onclick="window.randomizePentaBoss(3)">🎲 БОСС</button>
+                    </div>
+                </div>
             </div>
             <hr>
             <p style="color: #ff4444;">❗ Чтобы использовать изученные вещи в кубе, нужно найти и купить их в этой жизни.</p>
@@ -65,7 +74,9 @@ window.worldData = {
     },
     portals_vp: {
         content: `
-            <p>🔹 <b>Стоимость входа:</b> 💰 х2.5 от НП <button class="calc-nav-btn" onclick="buyLocationEntry('vp')" style="padding: 2px 8px; font-size: 0.7rem;">КУПИТЬ ВХОД</button></p>
+            <p>🔹 <b>Стоимость входа:</b> 💰 х2.5 от НП 
+                <button class="calc-nav-btn" onclick="buyLocationEntry('vp')" style="padding: 2px 8px; font-size: 0.7rem;">КУПИТЬ ВП</button>
+            </p>
             <p style="color: #ff4444; border: 1px solid #5a0000; padding: 10px;">
                 ‼️ В ВП не считаются 📖, ⏳ и 💀, ☠️ пока портал не закрыт. Если завалили — ничего не засчитывается.
             </p>

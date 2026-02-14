@@ -328,20 +328,26 @@ window.showText = function(title, content) {
     if (title.includes('Пентограмма')) {
         const vp = window.playerData.maxVp || 0;
         
-        const p1 = document.getElementById('penta_1');
-        if (p1) {
-            p1.checked = window.playerData.penta_1;
-            if (vp >= 25) { p1.checked = true; p1.disabled = true; }
-        }
-        const p2 = document.getElementById('penta_2');
-        if (p2) {
-            p2.checked = window.playerData.penta_2;
-            if (vp >= 60) { p2.checked = true; p2.disabled = true; }
-        }
-        const p3 = document.getElementById('penta_3');
-        if (p3) {
-            p3.checked = window.playerData.penta_3;
-            if (vp >= 100) { p3.checked = true; p3.disabled = true; }
+        for (let i = 1; i <= 3; i++) {
+            const req = (i === 1) ? 25 : (i === 2 ? 60 : 100);
+            const boss = window.playerData[`penta_${i}_boss`];
+            const btn = document.getElementById(`btn-penta-${i}`);
+            const bossSpan = document.getElementById(`penta-boss-${i}`);
+            
+            if (boss) {
+                if (bossSpan) bossSpan.innerText = `Убить: ${boss}`;
+                if (btn) btn.style.display = 'none';
+            } else {
+                if (vp >= req) {
+                    if (btn) btn.style.display = 'inline-block';
+                } else {
+                    if (btn) btn.style.display = 'none';
+                    if (bossSpan) {
+                        bossSpan.innerText = "🔒";
+                        bossSpan.style.color = "#555";
+                    }
+                }
+            }
         }
     }
 
@@ -444,7 +450,14 @@ window.updateUI = function() {
     document.getElementById('input-gobs-assist').value = window.playerData.gobs_assist;
     document.getElementById('input-max-vp').value = window.playerData.maxVp;
     document.getElementById('view-difficulty').innerText = window.playerData.difficulty || "Высокий";
-    document.getElementById('input-act').value = window.playerData.act || 1;
+    
+    const actInput = document.getElementById('input-act');
+    if (actInput) {
+        actInput.type = 'text'; // Разрешаем текст для "1+"
+        const currentAct = window.playerData.act || 1;
+        // Если акт > 5, показываем как НГ+ (1+, 2+ и т.д.)
+        actInput.value = currentAct > 5 ? (currentAct - 5) + "+" : currentAct;
+    }
     
     // Отображение скидки на НП
     const npCount = window.playerData.np_count || 0;
@@ -681,6 +694,7 @@ window.restorePanels = function() {
         p.style.display = 'block';
         p.style.order = '2';
         p.classList.add('right-panel-bonus');
+        window.makeDraggable(p);
     }
     if (window.playerData.class_html) {
         document.getElementById('bonus-class-name').innerText = (window.playerData.build || "БИЛД").toUpperCase();
@@ -689,6 +703,27 @@ window.restorePanels = function() {
         p.style.display = 'block';
         p.style.order = '1';
         p.classList.add('right-panel-bonus');
+        window.makeDraggable(p);
+    }
+    
+    // Восстановление второго билда
+    if (window.playerData.class_html_2) {
+        let p2 = document.getElementById('active-class-bonus-2');
+        if (!p2) {
+            // Создаем панель, если её нет в HTML (динамически)
+            p2 = document.createElement('div');
+            p2.id = 'active-class-bonus-2';
+            p2.className = 'right-panel-bonus';
+            p2.style.display = 'none';
+            p2.innerHTML = `<h3 id="bonus-class-name-2" style="color: #66ccff; border-bottom: 1px solid #66ccff; padding-bottom: 5px; margin-top: 0;">БИЛД 2</h3><div id="class-bonus-content-2"></div>`;
+            document.getElementById('right-panels-stack').appendChild(p2);
+        }
+        
+        document.getElementById('bonus-class-name-2').innerText = (window.playerData.build_2 || "БИЛД 2").toUpperCase();
+        document.getElementById('class-bonus-content-2').innerHTML = window.playerData.class_html_2;
+        p2.style.display = 'block';
+        p2.style.order = '3';
+        window.makeDraggable(p2);
     }
 }
 
@@ -785,7 +820,19 @@ window.savePlayerData = function() {
         }
     }
     
-    const act = getVal('input-act');
+    // Кастомное чтение акта для поддержки "1+"
+    let act = null;
+    const actEl = document.getElementById('input-act');
+    if (actEl) {
+        const valStr = actEl.value.toString();
+        if (valStr.includes('+')) {
+            act = parseInt(valStr) + 5;
+        } else {
+            act = parseInt(valStr);
+        }
+        if (isNaN(act)) act = null;
+    }
+
     if (act !== null && act !== window.playerData.act) {
         // Если акт изменился, сбрасываем счетчик НП
         window.playerData.act = act;
@@ -818,11 +865,6 @@ window.savePlayerData = function() {
     const gobsA = getVal('input-gobs-assist'); if (gobsA !== null) window.playerData.gobs_assist = gobsA;
     const maxVp = getVal('input-max-vp'); if (maxVp !== null) window.playerData.maxVp = maxVp;
     
-    // Автоматическое открытие вкладок Пентограммы от ВП
-    if ((window.playerData.maxVp || 0) >= 25) window.playerData.penta_1 = true;
-    if ((window.playerData.maxVp || 0) >= 60) window.playerData.penta_2 = true;
-    if ((window.playerData.maxVp || 0) >= 100) window.playerData.penta_3 = true;
-
     const portal70 = getStr('input-lvl70-portal'); if (portal70 !== null) window.playerData.lvl70_portal = portal70;
 
     // Логика перехода на 70 уровень: Установка начального ВП
@@ -909,19 +951,37 @@ window.renderLearnedSkillsWidget = function() {
         return;
     }
 
-    const secondLifeSkills = ["Нестабильная аномалия"];
+    const secondLifeSkills = ["Нестабильная аномалия", "Стальные нервы", "Познание смерти", "Вместилище духов", "Непробиваемая броня", "Бдительность"];
 
-    let html = '';
+    let activeHtml = '';
+    let passiveHtml = '';
+    const cls = window.playerData.className;
+    const db = window.skillDB[cls];
+
     for (const [skill, runes] of Object.entries(skills)) {
+        let isPassive = false;
+        if (db) {
+            const sObj = db.find(s => s.name === skill);
+            if (sObj && sObj.category === "Пассивные") isPassive = true;
+        }
+
         let skillNameHtml = `<span style="color: #fff; font-weight: bold;">${skill}</span>`;
         
         if (secondLifeSkills.includes(skill)) {
             skillNameHtml = `<span style="color: #ff7979; font-weight: bold; cursor: pointer; border-bottom: 1px dashed #ff7979;" onclick="window.handleSecondLifeClick('${skill}')" title="Нажмите для оплаты срабатывания">${skill} (2-я жизнь)</span>`;
         }
 
-        html += `<div style="margin-bottom: 4px; line-height: 1.2;">${skillNameHtml}<br><span style="color: #888; font-size: 0.7rem;">${runes.join(', ')}</span></div>`;
+        const entryHtml = `<div class="widget-item">${skillNameHtml}<br><span style="color: #888; font-size: 0.7rem;">${runes.join(', ')}</span></div>`;
+        
+        if (isPassive) passiveHtml += entryHtml;
+        else activeHtml += entryHtml;
     }
-    content.innerHTML = html;
+    
+    let finalHtml = '';
+    if (activeHtml) finalHtml += `<div style="color: #d4af37; font-size: 0.75rem; font-weight: bold; margin: 5px 0 2px 0; border-bottom: 1px solid #555;">⚔️ АКТИВНЫЕ</div><div class="widget-grid">${activeHtml}</div>`;
+    if (passiveHtml) finalHtml += `<div style="color: #a29bfe; font-size: 0.75rem; font-weight: bold; margin: 10px 0 2px 0; border-bottom: 1px solid #555;">🛡️ ПАССИВНЫЕ</div><div class="widget-grid">${passiveHtml}</div>`;
+    
+    content.innerHTML = finalHtml;
 }
 
 window.renderInventoryWidget = function() {
@@ -958,23 +1018,26 @@ window.renderInventoryWidget = function() {
         const nameColor = isStolen ? "#ff7979" : "#fff";
         const icon = isStolen ? " 🧤" : "";
 
-        return `<div style="margin-bottom: 4px; line-height: 1.2; border-bottom: 1px dashed #333; padding-bottom: 2px; cursor: help;" onmousemove="window.showItemTooltip(event, '${safeName}', '${item.grade}', ${item.level}, ${item.buyPrice}, ${item.isCrafted}, '${propsStr}', ${isStolen})" onmouseleave="window.hideItemTooltip()">
+        return `<div class="widget-item" style="cursor: help;" onmousemove="window.showItemTooltip(event, '${safeName}', '${item.grade}', ${item.level}, ${item.buyPrice}, ${item.isCrafted}, '${propsStr}', ${isStolen})" onmouseleave="window.hideItemTooltip()">
             <span style="color: ${nameColor}; font-weight: bold;">${item.name}${icon}</span><br>
             <span style="color: #888; font-size: 0.7rem;">${item.grade} | Lvl ${item.level} | ${window.formatCurrency(item.buyPrice)}</span>
         </div>`;
     };
 
     if (weapons.length > 0) {
-        html += `<div style="color: #ff9900; font-size: 0.75rem; font-weight: bold; margin: 5px 0 2px 0; border-bottom: 1px solid #555;">⚔️ ОРУЖИЕ</div>`;
+        html += `<div style="color: #ff9900; font-size: 0.75rem; font-weight: bold; margin: 5px 0 2px 0; border-bottom: 1px solid #555;">⚔️ ОРУЖИЕ</div><div class="widget-grid">`;
         weapons.forEach(i => html += renderItem(i));
+        html += `</div>`;
     }
     if (armors.length > 0) {
-        html += `<div style="color: #66ccff; font-size: 0.75rem; font-weight: bold; margin: 5px 0 2px 0; border-bottom: 1px solid #555;">🛡️ БРОНЯ</div>`;
+        html += `<div style="color: #66ccff; font-size: 0.75rem; font-weight: bold; margin: 5px 0 2px 0; border-bottom: 1px solid #555;">🛡️ БРОНЯ</div><div class="widget-grid">`;
         armors.forEach(i => html += renderItem(i));
+        html += `</div>`;
     }
     if (others.length > 0) {
-        html += `<div style="color: #aaa; font-size: 0.75rem; font-weight: bold; margin: 5px 0 2px 0; border-bottom: 1px solid #555;">📦 РАЗНОЕ</div>`;
+        html += `<div style="color: #aaa; font-size: 0.75rem; font-weight: bold; margin: 5px 0 2px 0; border-bottom: 1px solid #555;">📦 РАЗНОЕ</div><div class="widget-grid">`;
         others.forEach(i => html += renderItem(i));
+        html += `</div>`;
     }
     content.innerHTML = html;
 }

@@ -74,6 +74,18 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                 classPanel.classList.remove('right-panel-bonus');
                 void classPanel.offsetWidth;
                 classPanel.classList.add('right-panel-bonus');
+                
+                // Делаем панель перетаскиваемой
+                window.makeDraggable(classPanel);
+            }
+            else if (segments.includes('Классы') && window.isSelectingSecondBuild) {
+                // Логика второго билда
+                window.playerData.build_2 = title;
+                window.playerData.class_html_2 = cleanHtml;
+                
+                // Отрисовка второго виджета (через restorePanels или напрямую)
+                window.restorePanels();
+                window.isSelectingSecondBuild = false; // Сброс флага
             }
             
             textWindow.style.display = 'none';
@@ -301,10 +313,41 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
         }
 
         if (window.playerData.build && window.playerData.build !== "") {
-            window.showCustomConfirm(
-                `У вас уже выбран билд "<span style="color:#fff">${window.playerData.build}</span>".<br>Сменить его на "<span style="color:#66ccff">${title}</span>"?`,
-                applySelection
-            );
+            // Проверка условий для второго билда
+            // 1. Прошел ВП Соло (>= 0 сложности)
+            // 2. Изучено >= 3 навыков и >= 2 пассивок
+            
+            const activeSkillsCount = Object.values(window.playerData.learnedSkills).flat().length; // Грубый подсчет, но сойдет
+            // Точнее:
+            let actCount = 0;
+            let passCount = 0;
+            const cls = window.playerData.className;
+            if (window.skillDB[cls]) {
+                for (const [sName, runes] of Object.entries(window.playerData.learnedSkills)) {
+                    const skillObj = window.skillDB[cls].find(s => s.name === sName);
+                    if (skillObj) {
+                        if (skillObj.category === "Пассивные") passCount++;
+                        else actCount++;
+                    }
+                }
+            }
+
+            if (window.playerData.solo_vp_complete && actCount >= 3 && passCount >= 2) {
+                if (window.playerData.build_2) {
+                     window.showCustomAlert(`❌ У вас уже выбрано два билда.<br>1: ${window.playerData.build}<br>2: ${window.playerData.build_2}`);
+                     return;
+                }
+                
+                window.showCustomConfirm(
+                    `🔓 <b>Открыт слот Второго Билда!</b><br>Выбрать "<span style="color:#66ccff">${title}</span>" как дополнительный билд?`,
+                    () => {
+                        window.isSelectingSecondBuild = true;
+                        applySelection();
+                    }
+                );
+            } else {
+                window.showCustomAlert(`❌ Билд "<span style="color:#fff">${window.playerData.build}</span>" уже выбран.<br>Смена билда заблокирована.<br><br>Чтобы открыть <b>Второй Билд</b>, нужно:<br>1. Пройти ВП Соло (на своей сложности).<br>2. Изучить 3 активных и 2 пассивных навыка.`);
+            }
             return;
         }
         applySelection();
@@ -1352,6 +1395,27 @@ window.togglePentagram = function(id) {
         window.playerData[id] = el.checked;
         window.updateUI();
     }
+}
+
+window.d3Bosses = [
+    "Мясник", "Магда", "Золтун Кулл", "Белиал", 
+    "Кхом", "Штурмовой зверь", "Азмодан", 
+    "Раканот", "Диабло", "Урзаэль", "Адрия", "Малтаэль"
+];
+
+window.randomizePentaBoss = function(slot) {
+    const boss = window.d3Bosses[Math.floor(Math.random() * window.d3Bosses.length)];
+    window.playerData[`penta_${slot}_boss`] = boss;
+    window.playerData[`penta_${slot}`] = true; // Активируем вкладку (слот в сайдбаре)
+    window.saveToStorage();
+    
+    // Обновляем UI (перерисовка окна через showText не нужна, обновим элементы точечно и весь UI)
+    const bossSpan = document.getElementById(`penta-boss-${slot}`);
+    const btn = document.getElementById(`btn-penta-${slot}`);
+    if (bossSpan) bossSpan.innerText = `Убить: ${boss}`;
+    if (btn) btn.style.display = 'none';
+    
+    window.updateUI();
 }
 
 window.handleSecondLifeClick = function(skillName) {

@@ -58,14 +58,20 @@ window.playerData = savedData ? JSON.parse(savedData) : {
     is_in_np: false, // Находится ли игрок в НП
     gambler_bm_purchases_count: 0, // Счетчик покупок на ЧР для бонуса
     gambler_bonus_sales_left: 0, // Количество предметов для продажи по х5
+    solo_vp_complete: false, // Флаг прохождения ВП соло
+    vp_is_solo: false, // Текущий забег ВП - соло?
+    current_rift_cost: 0, // Текущие затраты на портал (для возврата 25%)
     // Куб и навыки
     // Пентограмма (чекбоксы)
     penta_1: false, penta_2: false, penta_3: false,
+    penta_1_boss: "", penta_2_boss: "", penta_3_boss: "",
     
     learnedSkills: {},
     className: "Класс не выбран",
     build: "",
+    build_2: "", // Второй билд
     guild: "Нет",
+    class_html_2: "", // HTML второго билда
     rank: 0,
     rankName: "",
     joined_level: 1, // Уровень, на котором вступили в гильдию
@@ -96,6 +102,8 @@ if (typeof window.playerData.gambler_bm_purchases_count === 'undefined') window.
 if (typeof window.playerData.gambler_bonus_sales_left === 'undefined') window.playerData.gambler_bonus_sales_left = 0;
 if (typeof window.playerData.theft_attempts_level === 'undefined') window.playerData.theft_attempts_level = window.playerData.level || 1;
 if (typeof window.playerData.theft_attempts_count === 'undefined') window.playerData.theft_attempts_count = 0;
+if (typeof window.playerData.current_rift_cost === 'undefined') window.playerData.current_rift_cost = 0;
+
 if (typeof window.playerData.base_vp_at_70 === 'undefined') {
     if (window.playerData.level >= 70) {
         window.playerData.base_vp_at_70 = window.playerData.maxVp || 0;
@@ -114,8 +122,9 @@ window.lastCraftSellLevel = 1;
 window.audioTrack = new Audio('06 - The Slaughtered Calf Inn.mp3');
 window.audioTrack.loop = true;
 window.coinSound = new Audio('freesound_community-coin-clatter-6-87110.mp3');
-window.activeRiftMultiplier = 1; // Множитель наград за текущий рифт
 window.activeRiftMultiplier = null; // Множитель наград за текущий рифт (null если нет активной цепочки)
+window.activeRiftExpMultiplier = null; // Отдельный множитель для опыта (для ВП)
+window.riftSuccess = null; // Флаг успешного закрытия портала
 window.idleTimer = null;
 
 // --- УТИЛИТЫ ---

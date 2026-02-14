@@ -166,7 +166,7 @@ window.makeDraggable = function(elmnt) {
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
     
     // Ищем заголовок для перетаскивания
-    const header = elmnt.querySelector('h2') || elmnt.querySelector('h3') || elmnt.querySelector('#window-title') || elmnt.querySelector('#prompt-title') || elmnt.querySelector('#confirm-title') || elmnt.querySelector('#learned-skills-title') || elmnt.querySelector('#inventory-title');
+    const header = elmnt.querySelector('h2') || elmnt.querySelector('h3') || elmnt.querySelector('#window-title') || elmnt.querySelector('#prompt-title') || elmnt.querySelector('#confirm-title') || elmnt.querySelector('#learned-skills-title') || elmnt.querySelector('#inventory-title') || elmnt.querySelector('#bonus-guild-name') || elmnt.querySelector('#bonus-class-name') || elmnt.querySelector('#bonus-class-name-2');
     
     if (header) {
         header.onmousedown = dragMouseDown;
@@ -179,6 +179,10 @@ window.makeDraggable = function(elmnt) {
     function dragMouseDown(e) {
         e = e || window.event;
         e.preventDefault();
+
+        // Принудительно делаем элемент фиксированным, чтобы его можно было вытащить из стека
+        elmnt.style.position = 'fixed';
+        elmnt.style.zIndex = '5000'; // Поверх всего
 
         // Рассчитываем позицию элемента в пикселях и отключаем transform
         const rect = elmnt.getBoundingClientRect();
