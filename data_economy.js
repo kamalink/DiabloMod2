@@ -58,6 +58,10 @@ window.economyData = {
                         <button class="craft-btn buy" onclick="buyItemImmediate()">КУПИТЬ</button>
                     </div>
                 </div>
+                <div id="hand-selector-main" style="display:none; justify-content:center; gap:15px; margin-bottom:10px;">
+                    <label style="color:#ff4444; cursor:pointer;"><input type="radio" name="hand-sel-main" value="right" checked> Правая рука</label>
+                    <label style="color:#66ccff; cursor:pointer;"><input type="radio" name="hand-sel-main" value="left"> Левая рука</label>
+                </div>
                 <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
                     <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
                         <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">40%</div>
@@ -212,7 +216,7 @@ window.economyData = {
         ` },
         { id: 'grades_abc_menu', title: 'A grade' },
         { id: 'grade_ssplus', title: 'S, S+, Spectrum grade', content: `
-            <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+            <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px; padding: 10px;">
                 <button class="d2-button sub-btn" onclick="openBuyAncientModal()">КУПИТЬ ДРЕВНИЙ / ПЕРВОЗДАННЫЙ</button>
                 <button class="d2-button sub-btn" onclick="openBuySetModal()">КУПИТЬ КОМПЛЕКТ (S+ / SPECTRUM)</button>
             </div>

@@ -139,32 +139,16 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                 window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?`, () => applySelection());
             }
             else if (newGuild.includes('охотник на гоблинов') || newGuild.includes('охотник на ☠️')) {
-                if (window.playerData.reputation < 85) {
-                    window.showCustomAlert("❌ Для вступления нужно 85 репутации (Ранг 1).");
-                    return;
-                }
                 // Логика ниже
             }
             else if (newGuild.includes('искатель приключений')) {
-                if (window.playerData.found_legs < 5) {
-                    window.showCustomAlert("❌ Для вступления нужно найти 5 легендарок (Ранг 1).");
-                    return;
-                }
                 // Логика ниже
             }
             else if (newGuild.includes('искатель богатства')) {
-                if (window.playerData.found_legs < 8) {
-                    window.showCustomAlert("❌ Для вступления нужно найти 8 легендарок (Ранг 1).");
-                    return;
-                }
                 // Логика ниже
             }
             
             else if (newGuild.includes('вампир')) {
-                if (window.playerData.stat_int < 1000 && window.playerData.para < 50) {
-                    window.showCustomAlert("❌ Для вступления нужно 1000 интеллекта или 50 парагона (Ранг 1).");
-                    return;
-                }
                 window.showCustomConfirm(
                     "Для вступления в клан Вампиров нужно умереть.<br>Нажмите 'ДА', затем в главном меню нажмите '☠️ Я УМЕР'.",
                     () => {
@@ -183,6 +167,12 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                 window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?`, () => applySelection());
             }
             else if (newGuild.includes('охотник')) {
+                // Проверка условий 1 ранга (85 Репутации) для Охотников на Гоблинов и Элиту
+                if ((newGuild.includes('гоблин') || newGuild.includes('на ☠️')) && window.playerData.reputation >= 85) {
+                    window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?<br><small>(Условие 1-го ранга выполнено)</small>`, () => applySelection());
+                    return;
+                }
+
                 // For Hunters, we use the tracking system for the kill requirement
                 // Goblin Hunter: Kill 1 goblin (gobs_solo)
                 // Elite Hunter: Kill 5 elites (elites_solo)
@@ -227,13 +217,12 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                 return;
             }
             else if (newGuild.includes('вор') || newGuild.includes('воришка')) {
-                // Для Вора (не воришки) нужно сначала проверить 7 краж
-                 if (newGuild.includes('вор') && !newGuild.includes('воришка')) {
-                    if (window.playerData.steals < 7) {
-                        window.showCustomAlert("❌ Для вступления нужно минимум 7 успешных краж (Ранг 1).");
-                        return;
-                    }
+                 // Проверка условий 1 ранга (7 Краж)
+                 if (window.playerData.steals >= 7) {
+                    window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?<br><small>(Условие 1-го ранга выполнено)</small>`, () => applySelection());
+                    return;
                  }
+
                  let count = newGuild.includes('воришка') ? 1 : 3;
                  
                  // Устанавливаем состояние ожидания вступления
@@ -250,6 +239,16 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                  return;
             }
             else if (newGuild.includes('искатель') || newGuild.includes('джимми')) {
+                // Проверка условий 1 ранга (Найденные легендарки)
+                let passed = false;
+                if (newGuild.includes('приключений') && window.playerData.found_legs >= 5) passed = true;
+                if (newGuild.includes('богатства') && window.playerData.found_legs >= 8) passed = true;
+                
+                if (passed) {
+                    window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?<br><small>(Условие 1-го ранга выполнено)</small>`, () => applySelection());
+                    return;
+                }
+
                 let r = 0;
                 if (newGuild.includes('приключений')) r = 1.5;
                 else if (newGuild.includes('богатства')) r = 2.0;
@@ -267,16 +266,20 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                 return;
             }
             else if (newGuild.includes('салага') || newGuild.includes('громила') || newGuild.includes('лорд')) {
-                 let kills = 0;
+                 // Проверка условий 1 ранга (Громила/Лорд: 1000 Силы или 500 Убийств)
                  const totalKills = window.playerData.kills + (window.playerData.base_kills || 0);
-                 if ((newGuild.includes('громила') || newGuild.includes('лорд')) && window.playerData.stat_str < 1000 && totalKills < 1700) {
-                     window.showCustomAlert("❌ Для вступления нужно 1000 силы или 1700 убийств (Ранг 1).");
-                     return;
+                 const str = window.playerData.stat_str;
+                 
+                 if ((newGuild.includes('громила') || newGuild.includes('лорд')) && (str >= 1000 || totalKills >= 1700)) {
+                    window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?<br><small>(Условие 1-го ранга выполнено)</small>`, () => applySelection());
+                    return;
                  }
+
+                 let kills = 0;
                  let mult = 0;
                  if (newGuild.includes('салага')) { kills = 150; mult = 0.88; }
                  else if (newGuild.includes('громила')) { kills = 500; mult = 1.75; }
-                 else if (newGuild.includes('лорд')) { kills = 1500; mult = 1.23; }
+                 else if (newGuild.includes('лорд')) { kills = 500; mult = 1.23; }
 
                  window.showCustomConfirm(
                     `Условие: Убить ${kills} мобов.<br>Выполнено?`,
@@ -597,7 +600,9 @@ window.checkTormentReward = function() {
 
     const grToTormentMap = {
         8: 1, 12: 2, 15: 3, 17: 4, 20: 5, 25: 6,
-        30: 7, 35: 8, 40: 9, 45: 10, 50: 11, 55: 12, 60: 13, 65: 14, 70: 15, 75: 16
+        30: 7, 35: 8, 40: 9, 45: 10, 50: 11, 55: 12, 60: 13, 65: 14, 70: 15, 75: 16,
+        80: 17, 85: 18, 90: 19, 95: 20, 100: 21, 105: 22, 110: 23, 115: 24, 120: 25, 
+        125: 26, 130: 27, 135: 28, 140: 29, 145: 30, 150: 31
     };
 
     const tormentLevel = grToTormentMap[grLevel];
@@ -734,15 +739,7 @@ window.applyGuildRewards = function(oldData) {
             rewardRep += dBosses * 30;
         }
     }
-    else if (g.includes('салага')) {
-        if (dKills > 0) rewardYen += dKills * 0.88 * lvl;
-    }
-    else if (g.includes('громила')) {
-        if (dKills > 0) rewardYen += dKills * 1.75 * lvl * rankMult;
-    }
-    else if (g.includes('лорд войны')) {
-        if (dKills > 0) rewardYen += dKills * 1.23 * lvl * rankMult;
-    }
+    
     else if (g.includes('искатель приключений')) {
         if (dChests > 0) { rewardRunes += dChests * 0.5; rewardPara += dChests * 0.5; }
     }
@@ -1412,7 +1409,22 @@ window.randomizePentaBoss = function(slot) {
     // Обновляем UI (перерисовка окна через showText не нужна, обновим элементы точечно и весь UI)
     const bossSpan = document.getElementById(`penta-boss-${slot}`);
     const btn = document.getElementById(`btn-penta-${slot}`);
-    if (bossSpan) bossSpan.innerText = `Убить: ${boss}`;
+    
+    // Расчет сложности
+    const currentDiff = window.playerData.difficulty || "Высокий";
+    const diffOrder = window.difficultyOrder || [];
+    const currentIndex = diffOrder.indexOf(currentDiff);
+    let targetDiff = currentDiff;
+    if (currentIndex !== -1) {
+        const offset = slot - 1; 
+        const targetIndex = Math.min(currentIndex + offset, diffOrder.length - 1);
+        targetDiff = diffOrder[targetIndex];
+    }
+
+    window.playerData[`penta_${slot}_diff`] = targetDiff; // Сохраняем сложность
+    window.saveToStorage();
+
+    if (bossSpan) bossSpan.innerHTML = `Убить: ${boss} <span style="color:#d4af37">(${targetDiff})</span>`;
     if (btn) btn.style.display = 'none';
     
     window.updateUI();

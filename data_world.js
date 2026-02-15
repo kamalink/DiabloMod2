@@ -8,6 +8,18 @@ window.worldData = {
     portals_rating: {
         content: `
             <p style="color: #ff4444; text-align: center;">❗ (2 игрока, хардкор) 2024 – 2025</p>
+            
+            <div style="text-align: center; margin-top: 10px; margin-bottom: 10px; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid #444;">
+                <p style="margin: 5px 0;"><b>Проверить награду за Torment</b></p>
+                <input type="number" id="torment-input" placeholder="Уровень ВП" style="width: 100px; padding: 5px; background: #000; border: 1px solid #444; color: #fff;">
+                <button class="claim-reward-btn" onclick="window.checkTormentReward()">Проверить</button>
+                
+                <p style="margin: 10px 0 5px 0; border-top: 1px dashed #555; padding-top: 10px;"><b>Проверить награду за место в рейтинге</b></p>
+                <input type="number" id="rank-input" placeholder="Место" style="width: 80px; padding: 5px; background: #000; border: 1px solid #444; color: #fff;">
+                <input type="number" id="rank-gr-input" placeholder="Уровень ВП" style="width: 100px; padding: 5px; background: #000; border: 1px solid #444; color: #fff;">
+                <button class="claim-reward-btn" onclick="window.checkRankReward()">Получить</button>
+            </div>
+
             <hr>
             <p style="color: #d4af37;"><b>🔹 Награда за вхождение в таблицу:</b></p>
             <p>До 100🏛️: 6🥇 * 1.04<sup>ур</sup></p>
@@ -21,17 +33,6 @@ window.worldData = {
                 ❗ Награда в 💰 выдаётся только на рейтингах:<br>
                 <b>600, 500, 400, 300, 200, 100, 50, 25, 10, 5, 2 и 1</b>
             </p>
-            <div style="text-align: center; margin-top: 20px; border-top: 1px solid #555; padding-top: 15px;">
-                <p><b>Проверить награду за Torment</b></p>
-                <input type="number" id="torment-input" placeholder="Уровень ВП" style="width: 100px; padding: 5px; background: #000; border: 1px solid #444; color: #fff;">
-                <button class="claim-reward-btn" onclick="window.checkTormentReward()">Проверить</button>
-            </div>
-            <div style="text-align: center; margin-top: 20px; border-top: 1px solid #555; padding-top: 15px;">
-                <p><b>Проверить награду за место в рейтинге</b></p>
-                <input type="number" id="rank-input" placeholder="Место" style="width: 80px; padding: 5px; background: #000; border: 1px solid #444; color: #fff;">
-                <input type="number" id="rank-gr-input" placeholder="Уровень ВП" style="width: 100px; padding: 5px; background: #000; border: 1px solid #444; color: #fff;">
-                <button class="claim-reward-btn" onclick="window.checkRankReward()">Получить</button>
-            </div>
         `
     },
     portals_pentagram: {

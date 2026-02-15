@@ -2,6 +2,14 @@
     from { opacity: 0; }
     to { opacity: 1; }
 }
+
+@font-face {
+    font-family: 'Exocet';
+    src: local('Exocet'), url('Exocet.ttf') format('truetype'), url('exocet.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 body, html {
     margin: 0; padding: 0; width: 100%; height: 100%;
     background-color: transparent; color: #b8a078;
@@ -10,6 +18,13 @@ body, html {
     overflow-y: scroll; /* Сохраняем функционал скролла */
     scrollbar-width: none; /* Firefox: скрываем скроллбар */
     -ms-overflow-style: none; /* IE/Edge */
+}
+
+/* Скрываем скроллбар для всех элементов */
+*::-webkit-scrollbar { display: none; }
+* {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 :root {
@@ -31,7 +46,6 @@ body.theme-crusader { --theme-border: #77aaff; --theme-highlight: #add8e6; --the
 #right-panels-stack,
 #reset-btn,
 #music-btn,
-#randomizer-btn,
 #breadcrumb,
 #learned-skills-widget,
 #widgets-container,
@@ -112,9 +126,20 @@ body::after {
 }
 
 .header-title {
-    font-family: 'Cinzel', serif; font-weight: 700;
-    font-size: 2rem; margin-bottom: 40px;
-    color: var(--theme-highlight); text-shadow: 2px 2px 5px #000;
+    font-family: 'Exocet', serif; font-weight: 700;
+    font-size: 3rem; margin-bottom: 40px;
+    
+    /* Эффект гравированного камня */
+    color: #8a8a8a;
+    text-shadow: 
+        -1px -1px 2px #000, 
+        1px 1px 1px rgba(255, 255, 255, 0.15),
+        0 0 15px rgba(0,0,0,0.8);
+}
+
+@keyframes shimmer {
+    0% { left: -150%; }
+    100% { left: 150%; }
 }
 
 /* КНОПКИ */
@@ -123,36 +148,53 @@ body::after {
     position: relative;
     margin: 20px auto; width: 100%;
     /* Типографика */
-    font-family: 'Cinzel', serif;
+    font-family: 'Exocet', serif;
     font-weight: 700;
     text-transform: uppercase;
     color: #b8a078;
-    text-shadow: 0 2px 2px #000; /* Эффект тиснения */
+    text-shadow: 3px 3px 2px #000;
     letter-spacing: 1px;
     text-align: center;
     
-    /* Фон - Темная текстура (паттерн через CSS) */
-    background-color: #1a0b0b;
-    background-image: 
-        linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,0.6)),
-        url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 3h1v1H1V3zm2-2h1v1H3V1z' fill='%23000' fill-opacity='0.5' fill-rule='evenodd'/%3E%3C/svg%3E");
+    /* Фон */
+    background: linear-gradient(to bottom, #2b1d1d, #1a0b0b);
     
-    /* Границы и Рамка */
-    border: 10px solid;
-    border-image-source: url("data:image/svg+xml,%3csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3e%3cstyle%3e.s { fill: none; stroke: %23d4af37; stroke-width: 1; } .f { fill: %23d4af37; }%3c/style%3e%3cpath class='f' d='M0 10 L0 0 L10 0 L10 2 L2 2 L2 10 Z' /%3e%3cpath class='f' d='M30 0 L40 0 L40 10 L38 10 L38 2 L30 2 Z' /%3e%3cpath class='f' d='M40 30 L40 40 L30 40 L30 38 L38 38 L38 30 Z' /%3e%3cpath class='f' d='M10 40 L0 40 L0 30 L2 30 L2 38 L10 38 Z' /%3e%3cline x1='10' y1='1' x2='30' y2='1' class='s' /%3e%3cline x1='39' y1='10' x2='39' y2='30' class='s' /%3e%3cline x1='30' y1='39' x2='10' y2='39' class='s' /%3e%3cline x1='1' y1='30' x2='1' y2='10' class='s' /%3e%3c/svg%3e");
-    border-image-slice: 15;
-    border-image-width: 10px;
-    border-image-outset: 0px;
-    border-image-repeat: stretch;
+    /* Границы (только верх и низ) */
+    border: none;
+    border-top: 2px solid #5a4a2d;
+    border-bottom: 2px solid #5a4a2d;
     box-shadow: 0 5px 15px #000;
 
-    /* Форма: шире к центру, уже по бокам */
-    clip-path: polygon(5% 0%, 95% 0%, 100% 50%, 95% 100%, 5% 100%, 0% 50%);
-    padding-left: 20px; padding-right: 20px; /* Отступы чтобы текст не обрезался */
+    padding-left: 30px; padding-right: 30px;
 
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     z-index: 1;
+    overflow: visible; /* Для наконечников */
+}
+
+/* Каменные наконечники (Слева и Справа) */
+.d2-button::before, .d2-button::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, #2b1d1d, #1a0b0b);
+    border: 2px solid #5a4a2d;
+    transform: translateY(-50%) rotate(45deg);
+    z-index: -1;
+    box-shadow: 0 5px 10px #000;
+    transition: all 0.2s ease-in-out;
+}
+
+.d2-button::before {
+    left: -15px;
+    border-top: none; border-right: none;
+}
+
+.d2-button::after {
+    right: -15px;
+    border-bottom: none; border-left: none;
 }
 
 /* Главное меню: +50% */
@@ -160,55 +202,40 @@ body::after {
     padding: 25px; 
     font-size: 1.8rem; 
     margin: 30px auto;
-    /* Темно-бордовый оттенок */
-    background-color: #2a0505;
+    font-family: 'Exocet', serif;
+    background: linear-gradient(to bottom, #2a0505, #1a0000);
 }
 
 /* Подразделы: +30% */
 .sub-btn { 
     padding: 18px; 
     font-size: 1.4rem;
-    /* Темно-серый/черный оттенок */
-    background-color: #151515;
+    background: linear-gradient(to bottom, #151515, #0a0a0a);
     color: #a0a0a0;
-}
-
-/* Эффект Shimmer (Блик) */
-.d2-button::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -150%;
-    width: 150%;
-    height: 100%;
-    background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
-    pointer-events: none;
-    transition: none;
-}
-.d2-button:hover::after {
-    animation: shimmer 0.6s ease-in-out;
-}
-@keyframes shimmer {
-    0% { left: -150%; }
-    100% { left: 150%; }
 }
 
 .d2-button:hover {
     color: #fff;
     text-shadow: 0 0 10px #ff4444; /* Красное свечение текста */
     transform: scale(1.05);
-    
+    border-color: #d4af37;
+    background: linear-gradient(to bottom, #3a2a2a, #2a1b1b);
     z-index: 5;
+}
+
+.d2-button:hover::before, .d2-button:hover::after {
+    border-color: #d4af37;
+    background: linear-gradient(135deg, #3a2a2a, #2a1b1b);
 }
 
 /* Состояния наведения для разных типов */
 .main-btn:hover {
-    background-color: #3a0a0a;
+    background: linear-gradient(to bottom, #3a0a0a, #2a0000);
     box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); /* Внешнее свечение */
 }
 
 .sub-btn:hover {
-    background-color: #252525;
+    background: linear-gradient(to bottom, #252525, #151515);
     color: #fff;
     box-shadow: 0 0 15px rgba(200, 200, 200, 0.2);
 }
@@ -222,18 +249,69 @@ body::after {
 .d2-button.locked-btn {
     cursor: not-allowed;
     opacity: 0.7;
-    border-image-source: url("data:image/svg+xml,%3csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3e%3cstyle%3e.s { fill: none; stroke: %23666; stroke-width: 1; } .f { fill: %23666; }%3c/style%3e%3cpath class='f' d='M0 10 L0 0 L10 0 L10 2 L2 2 L2 10 Z' /%3e%3cpath class='f' d='M30 0 L40 0 L40 10 L38 10 L38 2 L30 2 Z' /%3e%3cpath class='f' d='M40 30 L40 40 L30 40 L30 38 L38 38 L38 30 Z' /%3e%3cpath class='f' d='M10 40 L0 40 L0 30 L2 30 L2 38 L10 38 Z' /%3e%3cline x1='10' y1='1' x2='30' y2='1' class='s' /%3e%3cline x1='39' y1='10' x2='39' y2='30' class='s' /%3e%3cline x1='30' y1='39' x2='10' y2='39' class='s' /%3e%3cline x1='1' y1='30' x2='1' y2='10' class='s' /%3e%3c/svg%3e");
+    border-color: #444;
+    background: #222;
 }
+.d2-button.locked-btn::before, .d2-button.locked-btn::after {
+    border-color: #444;
+    background: #222;
+}
+
+/* Простая кнопка (для калькуляторов и селектов) - без наконечников и Exocet */
+.simple-btn {
+    display: inline-block;
+    background: linear-gradient(to bottom, #2b1d1d, #1a0b0b);
+    border: 1px solid #5a4a2d;
+    color: #b8a078;
+    font-family: 'Cinzel', serif; /* Возвращаем шрифт Cinzel */
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px #000;
+    transition: all 0.2s;
+}
+.simple-btn:hover {
+    color: #fff;
+    border-color: #d4af37;
+    background: linear-gradient(to bottom, #3a2a2a, #2a1b1b);
+}
+
 .d2-button.locked-btn:hover {
     transform: none;
     box-shadow: 0 5px 15px #000;
 }
 
+/* Эффект Shimmer (Блик) через span */
+.btn-shimmer {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 2;
+}
+.btn-shimmer::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 150%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+    transform: skewX(-20deg);
+}
+.d2-button:hover .btn-shimmer::after {
+    animation: shimmer 0.6s ease-in-out;
+}
+
 /* Кнопки навигации */
-.nav-box { margin-bottom: 30px; border-bottom: 1px dashed #333; padding-bottom: 20px; }
+.nav-box { 
+    margin-bottom: 30px; border-bottom: 1px dashed #333; padding-bottom: 20px;
+    display: flex; justify-content: center; gap: 40px; /* Разводим кнопки */
+}
 .nav-btn { 
-    display: inline-block; width: 45%; margin: 5px; 
-    padding: 10px; font-size: 0.9rem; background: #1a1a1a; border-color: #444; 
+    width: auto; flex: 1; max-width: 200px; margin: 0;
+    padding: 10px; font-size: 0.9rem; 
+    /* Убрал переопределение фона, чтобы они были как d2-button */
 }
 
 #window-title { font-family: 'Cinzel', serif; font-weight: 700; color: var(--theme-highlight); text-align: center; border-bottom: 1px solid #5a0000; padding-bottom: 10px; }
@@ -287,8 +365,7 @@ th { color: var(--theme-highlight); }
 
     /* Кнопки управления */
     #reset-btn { top: 10px; right: 10px; padding: 5px 10px; font-size: 0.7rem; }
-    #randomizer-btn { top: 45px; right: 10px; padding: 5px 10px; font-size: 0.7rem; }
-    #music-btn { top: 80px; right: 10px; padding: 5px 10px; font-size: 0.7rem; }
+    #music-btn { top: 45px; right: 10px; padding: 5px 10px; font-size: 0.7rem; }
     #edit-char-btn { display: none; } /* Скрываем кнопку, она будет в нижнем меню */
     
     #breadcrumb { top: 15px; left: 10px; font-size: 0.7rem; max-width: 150px; }
@@ -335,57 +412,40 @@ th { color: var(--theme-highlight); }
     line-height: 1;
 }
 /* Мягкие цвета для кнопок классов и гильдий */
-.btn-barbarian { background: linear-gradient(to bottom, #5a2d2d, #3a1d1d) !important; } /* Приглушенный красный */
-.btn-wizard { background: linear-gradient(to bottom, #44335a, #2a1f38) !important; }    /* Мягкий фиолетовый */
-.btn-dh { background: linear-gradient(to bottom, #2d3a5a, #1d2538) !important; }        /* Темно-синий */
-.btn-wd { background: linear-gradient(to bottom, #2d5a3a, #1d3824) !important; }        /* Болотный зеленый */
-.btn-monk { background: linear-gradient(to bottom, #5a4a2d, #382d1d) !important; }      /* Горчичный */
-.btn-crusader { background: linear-gradient(to bottom, #5a5a4d, #38382d) !important; }  /* Платиновый/Серый */
-.btn-necromancer { background: linear-gradient(to bottom, #3d3d3d, #242424) !important; } /* Темно-серый */
+.btn-barbarian { border-color: #8a0000 !important; background: linear-gradient(to bottom, #5a2d2d, #3a1d1d) !important; }
+.btn-barbarian::before, .btn-barbarian::after { border-color: #8a0000 !important; background: linear-gradient(135deg, #5a2d2d, #3a1d1d) !important; }
 
-#randomizer-btn {
-    position: fixed;
-    top: 15px;
-    right: 15px;
-    z-index: 1000;
-    padding: 8px 15px;
-    background: linear-gradient(145deg, #4a0e0e, #2a0505);
-    border: 2px solid #d4af37;
-    border-radius: 5px;
-    color: #d4af37;
-    text-decoration: none;
-    font-family: 'Cinzel', serif; font-weight: 700;
-    font-size: 0.8rem;
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
-    transition: 0.3s;
-}
-#randomizer-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
-}
+.btn-wizard { border-color: #4834d4 !important; background: linear-gradient(to bottom, #44335a, #2a1f38) !important; }
+.btn-wizard::before, .btn-wizard::after { border-color: #4834d4 !important; background: linear-gradient(135deg, #44335a, #2a1f38) !important; }
+
+.btn-dh { border-color: #444 !important; background: linear-gradient(to bottom, #2d3a5a, #1d2538) !important; }
+.btn-dh::before, .btn-dh::after { border-color: #444 !important; background: linear-gradient(135deg, #2d3a5a, #1d2538) !important; }
+
+.btn-wd { border-color: #006400 !important; background: linear-gradient(to bottom, #2d5a3a, #1d3824) !important; }
+.btn-wd::before, .btn-wd::after { border-color: #006400 !important; background: linear-gradient(135deg, #2d5a3a, #1d3824) !important; }
+
+.btn-monk { border-color: #b8860b !important; background: linear-gradient(to bottom, #5a4a2d, #382d1d) !important; }
+.btn-monk::before, .btn-monk::after { border-color: #b8860b !important; background: linear-gradient(135deg, #5a4a2d, #382d1d) !important; }
+
+.btn-crusader { border-color: #77aaff !important; background: linear-gradient(to bottom, #5a5a4d, #38382d) !important; }
+.btn-crusader::before, .btn-crusader::after { border-color: #77aaff !important; background: linear-gradient(135deg, #5a5a4d, #38382d) !important; }
+
+.btn-necromancer { border-color: #3d3d3d !important; background: linear-gradient(to bottom, #3d3d3d, #242424) !important; }
+.btn-necromancer::before, .btn-necromancer::after { border-color: #3d3d3d !important; background: linear-gradient(135deg, #3d3d3d, #242424) !important; }
 
 #reset-btn {
     position: fixed;
     top: 15px;
-    right: 140px; /* Левее кнопки Рандом */
+    right: 15px;
     z-index: 1000;
-    padding: 8px 15px;
-    background: linear-gradient(145deg, #300000, #1a0000);
-    border: 2px solid #ff4444;
-    border-radius: 5px;
+    width: auto; margin: 0; /* Сброс стилей d2-button */
+    padding: 8px 25px; /* Чуть шире для наконечников */
     color: #ff4444;
-    text-decoration: none;
-    font-family: 'Cinzel', serif; font-weight: 700;
     font-size: 0.8rem;
-    box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
-    transition: 0.3s;
-    cursor: pointer;
 }
 #reset-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
-    background: #500000;
-    color: white;
+    color: #fff;
+    text-shadow: 0 0 10px #ff4444;
 }
 
 /* Стили для кнопок крафта/покупки в окнах */
@@ -433,27 +493,39 @@ th { color: var(--theme-highlight); }
 #music-btn {
     position: fixed;
     top: 15px;
-    right: 310px; /* Левее кнопки Сброса */
+    right: 230px;
     z-index: 1000;
-    padding: 8px 15px;
-    background: linear-gradient(145deg, #1a1a1a, #000);
-    border: 2px solid #66ccff;
-    border-radius: 5px;
+    width: auto; margin: 0; /* Сброс стилей d2-button */
+    padding: 8px 25px;
     color: #66ccff;
-    text-decoration: none;
-    font-family: 'Cinzel', serif; font-weight: 700;
     font-size: 0.8rem;
-    box-shadow: 0 0 10px rgba(102, 204, 255, 0.2);
-    transition: 0.3s;
-    cursor: pointer;
 }
-#music-btn:hover { transform: scale(1.1); box-shadow: 0 0 20px rgba(102, 204, 255, 0.5); }
+#music-btn:hover { transform: scale(1.05); }
+
+/* Стили для кнопок сохранения/загрузки */
+#save-btn, #load-btn, #code-btn {
+    width: auto; margin: 0;
+    padding: 5px 15px;
+    color: #d4af37;
+    font-size: 0.6rem;
+}
+#save-btn:hover, #load-btn:hover, #code-btn:hover { transform: scale(1.05); }
+
+/* Уменьшенные наконечники для кнопок Сохранить/Загрузить (на 30%) */
+#save-btn::before, #save-btn::after,
+#load-btn::before, #load-btn::after,
+#code-btn::before, #code-btn::after {
+    width: 21px; height: 21px;
+}
+#save-btn::before, #load-btn::before, #code-btn::before { left: -10px; }
+#save-btn::after, #load-btn::after, #code-btn::after { right: -10px; }
 
 /* Стили для ползунка громкости */
+
 #volume-slider {
     -webkit-appearance: none;
     appearance: none;
-    width: 100px;
+     width: 100px;
     height: 5px;
     background: #444;
     outline: none;
@@ -472,6 +544,7 @@ th { color: var(--theme-highlight); }
     width: 15px; height: 15px;
     background: #66ccff; border-radius: 50%; cursor: pointer;
     border: 2px solid #1a1a1a;
+
 }
 
 /* Левая панель статов */
@@ -494,8 +567,15 @@ th { color: var(--theme-highlight); }
     transition: transform 0.3s;
 }
 
-/* Ресайз для виджетов */
-#char-sheet, #learned-skills-widget, #inventory-widget {
+/* Общий стиль для виджетов (как у карточки игрока) */
+.sidebar-widget {
+    background: linear-gradient(180deg, #1a1a1a 0%, #050505 100%);
+    border: 1px solid var(--theme-border);
+    border-radius: 2px;
+    padding: 15px;
+    color: #b8a078;
+    font-family: 'Lora', serif; font-weight: 600;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 0 40px rgba(139, 69, 19, 0.1);
     resize: both;
     overflow: auto;
     min-width: 200px;
@@ -574,7 +654,8 @@ th { color: var(--theme-highlight); }
     color: #fff;
     font-family: inherit;
     font-weight: bold;
-    width: 45px;
+    width: auto;
+    min-width: 30px;
     text-align: center;
     padding: 0;
 }
@@ -764,4 +845,54 @@ th { color: var(--theme-highlight); }
     background: rgba(102, 255, 102, 0.4);
     color: #fff;
     font-weight: bold;
+}
+
+/* Искры при клике */
+.click-spark {
+    position: fixed;
+    width: 3px;
+    height: 3px;
+    background: #ffd700;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #ff4444;
+    pointer-events: none;
+    z-index: 10000;
+    animation: clickSparkFly 0.5s ease-out forwards;
+}
+
+@keyframes clickSparkFly {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0); opacity: 0; }
+}
+
+/* Огненный след за курсором */
+.fire-trail-particle {
+    position: fixed;
+    width: 8px; height: 8px;
+    background: #ff4444;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    box-shadow: 0 0 6px #ffd700;
+    animation: fireTrailAnim 0.6s linear forwards;
+}
+@keyframes fireTrailAnim {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -150%) scale(0); opacity: 0; }
+}
+
+/* Искры при столкновении окон */
+.collision-spark {
+    position: fixed;
+    width: 6px; height: 6px;
+    background: #fff;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    box-shadow: 0 0 10px #ffd700, 0 0 20px #ff4444;
+    animation: collisionSparkAnim 0.5s ease-out forwards;
+}
+@keyframes collisionSparkAnim {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0); }
 }

@@ -823,6 +823,19 @@ window.openExpCalculator = function() {
     document.getElementById('exp-elites').value = 0;
     document.getElementById('exp-bosses').value = 0;
     
+    // Сброс и настройка чекбокса контракта
+    const contractLabel = document.getElementById('exp-contract-label');
+    const contractCheck = document.getElementById('exp-contract-check');
+    if (contractLabel && contractCheck) {
+        contractCheck.checked = false;
+        const g = (window.playerData.guild || "").toLowerCase();
+        if (g.includes('громила') || g.includes('лорд войны')) {
+            contractLabel.style.display = 'inline-block';
+        } else {
+            contractLabel.style.display = 'none';
+        }
+    }
+    
     // Сброс и настройка полей сундуков
     const chestRow = document.getElementById('exp-chests-row');
     const bigChestRow = document.getElementById('exp-big-chests-row');
@@ -866,6 +879,13 @@ window.calculateExp = function() {
     const dMobs = Math.max(0, mobs - (window.playerData.last_input_mobs || 0));
     const dElites = Math.max(0, elites - (window.playerData.last_input_elites || 0));
     // Боссы считаются как есть (вводятся за раз)
+
+    // Отображение убийств напарника
+    const partnerKillsEl = document.getElementById('exp-partner-kills');
+    if (window.partnerData && window.partnerData.last_kills !== undefined) {
+        partnerKillsEl.style.display = 'inline';
+        partnerKillsEl.innerText = `(Нап: ${window.partnerData.last_kills})`;
+    }
     // Сундуки считаются как есть (вводятся за раз)
 
     let runesBase = (dMobs * 0.01) + (dElites * 0.1) + (bosses * 3);
@@ -967,6 +987,18 @@ window.applyExpCalculation = function() {
     // Считаем разницу для статистики
     const dMobs = Math.max(0, mobs - (window.playerData.last_input_mobs || 0));
     const dElites = Math.max(0, elites - (window.playerData.last_input_elites || 0));
+    
+    // Сохраняем убийства за этот ран для экспорта статистики
+    window.playerData.last_run_kills = dMobs;
+
+    // Автоматическая проверка контракта Соратников
+    const g = (window.playerData.guild || "").toLowerCase();
+    const contractCheck = document.getElementById('exp-contract-check');
+    if ((g.includes('громила') || g.includes('лорд войны')) && window.partnerData && window.partnerData.last_kills !== undefined) {
+        if (dMobs > window.partnerData.last_kills) {
+            if (contractCheck) contractCheck.checked = true;
+        }
+    }
 
     window.calculateExp();
     const resHTML = document.getElementById('exp-result-display').innerHTML;
@@ -995,15 +1027,22 @@ window.applyExpCalculation = function() {
     }
 
     // Начисление золота Соратникам за убийства
-    const g = (window.playerData.guild || "").toLowerCase();
+    let rewardMsg = "";
     if (dMobs > 0 && (g.includes('салага') || g.includes('громила') || g.includes('лорд войны'))) {
         let mult = 0;
         if (g.includes('салага')) mult = 0.88;
         else if (g.includes('громила')) mult = 1.75;
         else if (g.includes('лорд войны')) mult = 1.23;
         
+        // Проверка контракта (х3)
+        const contractCheck = document.getElementById('exp-contract-check');
+        if (contractCheck && contractCheck.checked && (g.includes('громила') || g.includes('лорд войны'))) {
+            mult *= 3;
+        }
+        
         const reward = Math.floor(dMobs * mult * window.playerData.level);
         window.addYen(reward);
+        rewardMsg = `<br>💰 Получено: ${window.formatCurrency(reward)}`;
     }
     // Сброс флагов ВП после начисления
     if (window.playerData.vp_close_mode) {
@@ -1019,7 +1058,7 @@ window.applyExpCalculation = function() {
     window.saveToStorage();
     window.updateUI();
     document.getElementById('exp-calc-modal').style.display = 'none';
-    window.showCustomAlert(`✅ Получено: ${addRunes} 📖 и ${addPara} ⏳<br>Статистика обновлена.`);
+    window.showCustomAlert(`✅ Получено: ${addRunes} 📖 и ${addPara} ⏳${rewardMsg}<br>Статистика обновлена.`);
 }
 
 window.setBaseStats = function() {
@@ -1819,6 +1858,26 @@ function getBaseNPriceForCraft(level) {
     return 25;
 }
 
+// Helper to get hand penalty multiplier
+window.getHandPenaltyMult = function(containerId) {
+    const g = (window.playerData.guild || "").toLowerCase();
+    if (!g.includes('охотник')) return 1.0;
+
+    const container = document.getElementById(containerId);
+    if (!container) return 1.0;
+    
+    const radio = container.querySelector('input[type="radio"]:checked');
+    if (!radio) return 1.0;
+    
+    if (radio.value === 'right') {
+        if (g.includes('гоблин')) return 1.5; // +50%
+        if (g.includes('на ☠️')) return 1.25; // +25%
+        if (g.includes('помощник')) return 1.1; // +10%
+    }
+    // Left hand has no penalty
+    return 1.0;
+}
+
 // Helper: Get numeric index for grade
 window.getGradeIndex = function(grade) {
     const g = grade.toUpperCase();
@@ -1888,6 +1947,13 @@ window.sellItemsBulk = function() {
     const okBtn = document.getElementById('multi-sell-ok-btn');
     const cancelBtn = document.getElementById('multi-sell-cancel-btn');
     const levelInput = document.getElementById('multi-sell-level');
+
+    // Show/Hide Hand Selector for Hunters
+    const handSelector = document.getElementById('hand-selector-main');
+    const g = (window.playerData.guild || "").toLowerCase();
+    if (handSelector) {
+        handSelector.style.display = (g.includes('охотник')) ? 'flex' : 'none';
+    }
 
     // Если это не цепочка НП, сбрасываем множитель, чтобы не влиял на обычную продажу
     if (!window.activeRiftMultiplier && document.getElementById('active-rift-modal').style.display === 'none') {
@@ -2064,6 +2130,11 @@ window.openSellCraftedModal = function() {
     if (!btn) btn = modal.querySelector('.craft-btn'); // Доп. поиск кнопки
     
     // Сброс интерфейса в режим продажи
+    const handSelector = document.getElementById('hand-selector-craft');
+    const g = (window.playerData.guild || "").toLowerCase();
+    if (handSelector) {
+        handSelector.style.display = 'none'; // Hide for sell mode
+    }
     if (window.activeRiftMultiplier) {
         title.innerText = "💰 ПРОДАЖА ПРЕДМЕТОВ";
     } else {
@@ -2201,6 +2272,12 @@ window.openBuySellAGradeModal = function(mode, classMult) {
     modal.dataset.classMult = classMult;
     
     itemName.innerText = window.selectedAGradeItemName;
+
+    const handSelector = document.getElementById('hand-selector-agrade');
+    const g = (window.playerData.guild || "").toLowerCase();
+    if (handSelector) {
+        handSelector.style.display = (g.includes('охотник') && mode === 'buy') ? 'flex' : 'none';
+    }
     
     if (mode === 'buy') {
         title.innerText = "КУПИТЬ ПРЕДМЕТ (A-GRADE)";
@@ -2269,9 +2346,11 @@ window.confirmBuySellAGrade = function() {
             bonuses.push(`Торговцы ${Math.round((buyMult-1)*100)}%`);
         }
         if (isWeapon) {
-            if (g.includes('охотник на гоблинов')) { buyMult += 0.5; bonuses.push(`Охотник +50%`); }
-            else if (g.includes('охотник на ☠️')) { buyMult += 0.25; bonuses.push(`Охотник +25%`); }
-            else if (g.includes('помощник охотника')) { buyMult += 0.10; bonuses.push(`Охотник +10%`); }
+            const handMult = window.getHandPenaltyMult('hand-selector-agrade');
+            if (handMult > 1) {
+                buyMult *= handMult;
+                bonuses.push(`Охотник (Рука) +${Math.round((handMult-1)*100)}%`);
+            }
         }
         // Штраф Гэмблера
         if (g.includes('гэмблер')) {
@@ -2344,6 +2423,11 @@ window.openBuyAncientModal = function() {
     modal.style.top = '50%';
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
+    const handSelector = document.getElementById('hand-selector-ancient');
+    const g = (window.playerData.guild || "").toLowerCase();
+    if (handSelector) {
+        handSelector.style.display = (g.includes('охотник')) ? 'flex' : 'none';
+    }
     document.getElementById('ancient-level-input').value = window.playerData.level;
     window.updateAncientInputs(); // Initial check
     modal.style.display = 'block';
@@ -2375,6 +2459,11 @@ window.openBuySetModal = function() {
     modal.style.top = '50%';
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
+    const handSelector = document.getElementById('hand-selector-set');
+    const g = (window.playerData.guild || "").toLowerCase();
+    if (handSelector) {
+        handSelector.style.display = (g.includes('охотник')) ? 'flex' : 'none';
+    }
     document.getElementById('set-level-input').value = window.playerData.level;
     modal.style.display = 'block';
 }
@@ -2383,7 +2472,8 @@ window.buyAncientImmediate = function() {
         const level = parseInt(document.getElementById('ancient-level-input').value) || 1;
     const grade = document.getElementById('ancient-grade-input').value;
     const type = document.getElementById('ancient-type-input').value;
-    const itemClassMult = parseFloat(document.getElementById('ancient-item-class').value) || 1.0;
+    const itemClassMultEl = document.getElementById('ancient-item-class');
+    const itemClassMult = itemClassMultEl ? (parseFloat(itemClassMultEl.value) || 1.0) : 1.0;
     
     // New Formula: Base * 1.1^(level - 1)
     // B grade: 12 copper (1200 yen), A grade: 32 copper (3200 yen)
@@ -2441,10 +2531,12 @@ window.buyAncientImmediate = function() {
         bonuses.push(`Торговцы ${Math.round((buyMult-1)*100)}%`);
     }
     if (isWeapon) {
-        if (g.includes('охотник на гоблинов')) { buyMult += 0.5; bonuses.push(`Охотник +50%`); }
-        else if (g.includes('охотник на ☠️')) { buyMult += 0.25; bonuses.push(`Охотник +25%`); }
-        else if (g.includes('помощник охотника')) { buyMult += 0.10; bonuses.push(`Охотник +10%`); }
+        const handMult = window.getHandPenaltyMult('hand-selector-ancient');
+        if (handMult > 1) {
+            buyMult *= handMult;
+            bonuses.push(`Охотник (Рука) +${Math.round((handMult-1)*100)}%`);
         }
+          }
     // Штраф Гэмблера
     if (g.includes('гэмблер')) {
         buyMult += 0.25;
@@ -2474,6 +2566,8 @@ window.buyAncientImmediate = function() {
                         grade: grade,
                         level: level,
                         buyPrice: cost,
+                        isAncient: (type === 'ancient'),
+                        isPrimal: (type === 'primal'),
                     isCrafted: false,
                     properties: propsList
                     });
@@ -2555,9 +2649,11 @@ window.buySetImmediate = function() {
         bonuses.push(`Торговцы ${Math.round((buyMult-1)*100)}%`);
     }
     if (isWeapon) {
-        if (g.includes('охотник на гоблинов')) { buyMult += 0.5; bonuses.push(`Охотник +50%`); }
-        else if (g.includes('охотник на ☠️')) { buyMult += 0.25; bonuses.push(`Охотник +25%`); }
-        else if (g.includes('помощник охотника')) { buyMult += 0.10; bonuses.push(`Охотник +10%`); }
+        const handMult = window.getHandPenaltyMult('hand-selector-set');
+        if (handMult > 1) {
+            buyMult *= handMult;
+            bonuses.push(`Охотник (Рука) +${Math.round((handMult-1)*100)}%`);
+        }
         }
     // Штраф Гэмблера
     if (g.includes('гэмблер')) {
@@ -2588,6 +2684,8 @@ window.buySetImmediate = function() {
                         grade: grade,
                         level: level,
                         buyPrice: cost,
+                        isAncient: (type === 'ancient'),
+                        isPrimal: (type === 'primal'),
                         isCrafted: false,
                         properties: propsList
                     });
@@ -2671,9 +2769,20 @@ window.openDifficultyCalculator = function() {
     // Reset inputs
     const inputs = modal.querySelectorAll('input');
     inputs.forEach(inp => {
-        if (inp.id.includes('mult')) inp.value = 1;
+        if (inp.id === 'diff-multipliers') inp.value = "";
+        else if (inp.id.includes('mult')) inp.value = 1;
+        else if (inp.id === 'diff-tough-multipliers') inp.value = "";
+        else if (inp.type === 'text') inp.value = "";
         else inp.value = 0;
     });
+    // Load saved data
+    window.loadDifficultyCalcData();
+
+    // Авто-заполнение данных напарника, если они есть
+    if (window.partnerData && window.partnerData.dmg) {
+        document.getElementById('diff-partner-dmg').value = window.partnerData.dmg;
+        document.getElementById('diff-partner-tough').value = window.partnerData.tough;
+    }
 
     // Auto-fetch best skill
     let maxDmg = 0;
@@ -2688,20 +2797,73 @@ window.openDifficultyCalculator = function() {
             if (skillObj) {
                 runes.forEach(rName => {
                     const runeObj = skillObj.runes.find(r => r.name === rName);
-                    if (runeObj && runeObj.dmg > maxDmg) {
-                        maxDmg = runeObj.dmg;
-                        bestSkillName = `${sName} (${rName})`;
+                    if (runeObj) {
+                        const totalRuneDmg = (runeObj.dmg || 0) + (runeObj.dmg2 || 0) + (runeObj.passiveDmg || 0);
+                        if (totalRuneDmg > maxDmg) {
+                            maxDmg = totalRuneDmg;
+                            bestSkillName = `${sName} (${rName})`;
+                        }
                     }
                 });
             }
         }
     }
     
+    // Auto-fetch toughness from skills
+    let skillToughTotal = 0;
+    let passToughTotal = 0;
+    
+    // Class multipliers for auto-calc
+    let armorMult = 1.0;
+    let resMult = 1.0;
+    let dodgeMult = 1.0;
+    if (cls === "Варвар" || cls === "Крестоносец") armorMult = 0.63;
+    if (cls === "Чародей" || cls === "Колдун") resMult = 0.63;
+    if (cls === "Монах" || cls === "Охотник на демонов") dodgeMult = 0.63;
+
+    if (cls && window.skillDB[cls]) {
+        for (const [sName, runes] of Object.entries(learned)) {
+            const skillObj = window.skillDB[cls].find(s => s.name === sName);
+            if (skillObj) {
+                const isPassive = skillObj.category === "Пассивные";
+                runes.forEach(rName => {
+                    const runeObj = skillObj.runes.find(r => r.name === rName);
+                    if (runeObj) {
+                        // Sum up all buffDef values
+                        const buffs = [
+                            { val: runeObj.buffDef || 0, type: runeObj.defType },
+                            { val: runeObj.buffDef2 || 0, type: runeObj.defType2 },
+                            { val: runeObj.buffDef3 || 0, type: runeObj.defType3 }
+                        ];
+                        
+                        let runeTotal = 0;
+                        buffs.forEach(b => {
+                            if (b.val > 0) {
+                                let mult = 1;
+                                if (b.type === "armor") mult = armorMult;
+                                else if (b.type === "res") mult = resMult;
+                                else if (b.type === "dodge") mult = dodgeMult;
+                                runeTotal += b.val * mult;
+                            }
+                        });
+
+                        if (isPassive) passToughTotal += runeTotal;
+                        else skillToughTotal += runeTotal;
+                    }
+                });
+            }
+        }
+    }
+    document.getElementById('diff-skill-tough').value = skillToughTotal;
+    document.getElementById('diff-pass-tough').value = passToughTotal;
+
     document.getElementById('diff-skill-pct').value = maxDmg;
     document.getElementById('diff-auto-skill-name').innerText = bestSkillName;
     
+    const calcInputs = modal.querySelectorAll('input');
+
     // Add listeners for live calculation
-    inputs.forEach(inp => inp.oninput = window.calculateDifficulty);
+    calcInputs.forEach(inp => inp.oninput = window.calculateDifficulty);
     
     // Add listeners for selects
     const selects = modal.querySelectorAll('select');
@@ -2734,28 +2896,22 @@ window.calculateDifficulty = function() {
 
     // Damage
     const heroDmg = parseFloat(document.getElementById('diff-hero-dmg').value) || 0;
-    const itemSkillPct = parseFloat(document.getElementById('diff-item-skill-pct').value) || 0;
+   
     const skillPct = parseFloat(document.getElementById('diff-skill-pct').value) || 0;
-    const elemPct = parseFloat(document.getElementById('diff-elem-pct').value) || 0;
-    const gemsPct = parseFloat(document.getElementById('diff-gems-pct').value) || 0;
+    
     const partnerDmg = parseFloat(document.getElementById('diff-partner-dmg').value) || 0;
 
-    // Cube Logic
-    let cubeDmgMult = 1;
-    let cubeToughMult = 1;
-
-    for (let i = 1; i <= 3; i++) {
-        const type = document.getElementById(`diff-cube-${i}-type`).value;
-        const val = parseFloat(document.getElementById(`diff-cube-${i}-val`).value) || 0;
-        
-        if (val > 0) {
-            if (type === 'dmg' || type === 'skill') {
-                // Treat both General and Skill damage from cube as multipliers for simplicity/mod rules
-                cubeDmgMult *= (1 + val / 100);
-            } else if (type === 'tough') {
-                cubeToughMult *= (1 + val / 100);
+    // Parse Additional Multipliers (Comma separated)
+    const multipliersStr = document.getElementById('diff-multipliers').value || "";
+    let additionalMult = 1;
+    if (multipliersStr.trim() !== "") {
+        const parts = multipliersStr.split(/[,;]+/);
+        parts.forEach(p => {
+            const val = parseFloat(p.trim());
+            if (!isNaN(val)) {
+                additionalMult *= (1 + val / 100);
             }
-        }
+        });
     }
 
     // Formula: Hero * (1 + ItemSkill%) * (Skill%/100) * (1 + Elem%) * (1 + Gems%) * Cube
@@ -2765,19 +2921,74 @@ window.calculateDifficulty = function() {
     
     const skillMult = skillPct > 0 ? (skillPct / 100) : 1;
 
-    const totalHeroDmg = heroDmg * (1 + itemSkillPct/100) * skillMult * (1 + elemPct/100) * (1 + gemsPct/100) * cubeDmgMult;
-    const totalDmg = totalHeroDmg + partnerDmg;
+        const totalHeroDmg = heroDmg * skillMult * additionalMult;
+      const totalDmg = totalHeroDmg + partnerDmg;
+
+    // Сохраняем рассчитанный урон героя для экспорта статистики
+    window.playerData.calculated_dmg = totalHeroDmg;
 
     document.getElementById('diff-total-dmg').innerText = totalDmg.toLocaleString('ru-RU', { maximumFractionDigits: 0 });
 
     // Toughness
     const baseTough = parseFloat(document.getElementById('diff-base-tough').value) || 0;
-    const legToughPct = parseFloat(document.getElementById('diff-leg-tough').value) || 0;
+    
+    // 1. Damage Reduction (Multiplicative)
+    let damageTakenMult = 1.0;
+    document.querySelectorAll('.calc-reduce-dmg').forEach(inp => {
+        const val = parseFloat(inp.value) || 0;
+        if (val > 0 && val < 100) {
+            damageTakenMult *= (1 - val / 100);
+        }
+    });
+    const reductionMult = 1 / damageTakenMult;
+
+    // 2. Armor/Res/Dodge
+    const cls = window.playerData.className;
+    let armorMult = 1.0;
+    let resMult = 1.0;
+    let dodgeMult = 1.0;
+    
+    if (cls === "Варвар" || cls === "Крестоносец") armorMult = 0.63;
+    if (cls === "Чародей" || cls === "Колдун") resMult = 0.63;
+    if (cls === "Монах" || cls === "Охотник на демонов") dodgeMult = 0.63;
+
+    let armorBonus = 0;
+    document.querySelectorAll('.calc-armor-pct').forEach(inp => armorBonus += (parseFloat(inp.value) || 0));
+    
+    let resBonus = 0;
+    document.querySelectorAll('.calc-res-pct').forEach(inp => resBonus += (parseFloat(inp.value) || 0));
+    
+    let dodgeBonus = 0;
+    document.querySelectorAll('.calc-dodge-pct').forEach(inp => dodgeBonus += (parseFloat(inp.value) || 0));
+
     const skillToughPct = parseFloat(document.getElementById('diff-skill-tough').value) || 0;
     const passToughPct = parseFloat(document.getElementById('diff-pass-tough').value) || 0;
     const partnerTough = parseFloat(document.getElementById('diff-partner-tough').value) || 0;
 
-    const totalTough = (baseTough * (1 + legToughPct / 100) * (1 + skillToughPct / 100) * (1 + passToughPct / 100) * cubeToughMult) + partnerTough;
+    // 4. Additional Multipliers
+    const toughMultipliersStr = document.getElementById('diff-tough-multipliers').value || "";
+    let additionalToughMult = 1;
+    if (toughMultipliersStr.trim() !== "") {
+        const parts = toughMultipliersStr.split(/[,;]+/);
+        parts.forEach(p => {
+            const val = parseFloat(p.trim());
+            if (!isNaN(val)) {
+                additionalToughMult *= (1 + val / 100);
+            }
+        });
+    }
+
+    const totalTough = baseTough * reductionMult 
+                       * (1 + (armorBonus * armorMult)/100) 
+                       * (1 + (resBonus * resMult)/100) 
+                       * (1 + (dodgeBonus * dodgeMult)/100)
+                       * (1 + skillToughPct / 100) 
+                       * (1 + passToughPct / 100) 
+                       * additionalToughMult 
+                       + partnerTough;
+
+    // Сохраняем рассчитанную живучесть героя для экспорта
+    window.playerData.calculated_tough = totalTough - partnerTough; // Сохраняем только свою часть
 
     document.getElementById('diff-total-tough').innerText = totalTough.toLocaleString('ru-RU', { maximumFractionDigits: 0 });
 
@@ -2819,6 +3030,9 @@ window.calculateDifficulty = function() {
             document.getElementById('diff-result-details').innerHTML += `<br><span style="color:#d4af37">NG+ (Акт ${window.playerData.act}): Сложность +1</span>`;
         }
     }
+
+    // Save data on calculation
+    window.saveDifficultyCalcData();
 }
 
 window.applyDifficulty = function() {
@@ -2828,6 +3042,91 @@ window.applyDifficulty = function() {
     window.updateUI();
     document.getElementById('difficulty-calc-modal').style.display = 'none';
     window.showCustomAlert(`✅ Уровень сложности обновлен: ${tier}`);
+}
+
+window.addCalcField = function(containerId, inputClass) {
+    const container = document.getElementById(containerId).querySelector('div');
+    const btn = container.querySelector('button');
+    
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.className = inputClass;
+    input.name = inputClass;
+    input.placeholder = '%';
+    input.style.width = '50px';
+    input.style.background = '#000'; input.style.border = '1px solid #444'; input.style.color = '#fff'; input.style.textAlign = 'center';
+    input.oninput = window.calculateDifficulty;
+    
+    container.insertBefore(input, btn);
+}
+
+window.saveDifficultyCalcData = function() {
+    const data = {
+        heroDmg: document.getElementById('diff-hero-dmg').value,
+        skillPct: document.getElementById('diff-skill-pct').value,
+        multipliers: document.getElementById('diff-multipliers').value,
+        partnerDmg: document.getElementById('diff-partner-dmg').value,
+        
+        baseTough: document.getElementById('diff-base-tough').value,
+        skillTough: document.getElementById('diff-skill-tough').value,
+        passTough: document.getElementById('diff-pass-tough').value,
+        toughMultipliers: document.getElementById('diff-tough-multipliers').value,
+        partnerTough: document.getElementById('diff-partner-tough').value,
+        
+        reduceDmg: Array.from(document.querySelectorAll('.calc-reduce-dmg')).map(i => i.value),
+        armorPct: Array.from(document.querySelectorAll('.calc-armor-pct')).map(i => i.value),
+        dodgePct: Array.from(document.querySelectorAll('.calc-dodge-pct')).map(i => i.value),
+        resPct: Array.from(document.querySelectorAll('.calc-res-pct')).map(i => i.value)
+    };
+    window.playerData.diffCalcData = data;
+    window.saveToStorage();
+}
+
+window.loadDifficultyCalcData = function() {
+    const data = window.playerData.diffCalcData || {};
+    
+    const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if(el) el.value = val !== undefined ? val : 0;
+    };
+    const setStr = (id, val) => {
+        const el = document.getElementById(id);
+        if(el) el.value = val !== undefined ? val : "";
+    };
+
+    setVal('diff-hero-dmg', data.heroDmg);
+    setVal('diff-skill-pct', data.skillPct);
+    setStr('diff-multipliers', data.multipliers);
+    setVal('diff-partner-dmg', data.partnerDmg);
+    
+    setVal('diff-base-tough', data.baseTough);
+    setVal('diff-skill-tough', data.skillTough);
+    setVal('diff-pass-tough', data.passTough);
+    setStr('diff-tough-multipliers', data.toughMultipliers);
+    setVal('diff-partner-tough', data.partnerTough);
+
+    const restoreDynamic = (containerId, inputClass, values) => {
+        const container = document.getElementById(containerId).querySelector('div');
+        container.querySelectorAll('.' + inputClass).forEach(el => el.remove());
+        const vals = values && values.length > 0 ? values : [""];
+        vals.forEach(val => {
+            const btn = container.querySelector('button');
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.className = inputClass;
+            input.placeholder = '%';
+            input.style.width = '50px';
+            input.style.background = '#000'; input.style.border = '1px solid #444'; input.style.color = '#fff'; input.style.textAlign = 'center';
+            input.value = val;
+            input.oninput = window.calculateDifficulty;
+            container.insertBefore(input, btn);
+        });
+    };
+
+    restoreDynamic('container-reduce-dmg', 'calc-reduce-dmg', data.reduceDmg);
+    restoreDynamic('container-armor-pct', 'calc-armor-pct', data.armorPct);
+    restoreDynamic('container-dodge-pct', 'calc-dodge-pct', data.dodgePct);
+    restoreDynamic('container-res-pct', 'calc-res-pct', data.resPct);
 }
 
 // --- НОВЫЕ ФУНКЦИИ (ПОКУПКА ЛОКАЦИЙ, ОБМЕН, КАМНИ) ---
@@ -3323,6 +3622,19 @@ window.sellLegendaryGem = function() {
 // --- ПОКУПКА ПРЕДМЕТОВ (MODAL) ---
 
 window.toggleBuyProperty = function(el, percent) {
+    const propName = el.innerText;
+    const bases = ["Основа оружия", "Основа брони", "Основа бижы"];
+    
+    if (bases.includes(propName) && !el.classList.contains('selected')) {
+        // Если выбираем основу, снимаем выбор с других основ
+        const allSelected = document.querySelectorAll('.buy-prop-item.selected');
+        allSelected.forEach(sel => {
+            if (bases.includes(sel.innerText) && sel !== el) {
+                sel.classList.remove('selected');
+            }
+        });
+    }
+
     el.classList.toggle('selected');
     el.dataset.percent = percent;
 }
@@ -3481,6 +3793,11 @@ window.openCraftModal = function() {
         btn.className = "craft-btn craft";
         btn.onclick = window.craftItemFromModal;
     }
+    const handSelector = document.getElementById('hand-selector-craft');
+    const g = (window.playerData.guild || "").toLowerCase();
+    if (handSelector) {
+        handSelector.style.display = (g.includes('охотник')) ? 'flex' : 'none';
+    }
     
     // Set level default
     document.getElementById('modal-sell-level').value = window.playerData.level || 1;
@@ -3534,9 +3851,11 @@ window.craftItemFromModal = function() {
         bonuses.push(`Торговцы ${Math.round((buyMult-1)*100)}%`);
     }
     if (isWeapon) {
-        if (g.includes('охотник на гоблинов')) { buyMult += 0.5; bonuses.push(`Охотник +50%`); }
-        else if (g.includes('охотник на ☠️')) { buyMult += 0.25; bonuses.push(`Охотник +25%`); }
-        else if (g.includes('помощник охотника')) { buyMult += 0.10; bonuses.push(`Охотник +10%`); }
+        const handMult = window.getHandPenaltyMult('hand-selector-craft');
+        if (handMult > 1) {
+            buyMult *= handMult;
+            bonuses.push(`Охотник (Рука) +${Math.round((handMult-1)*100)}%`);
+        }
     }
 
     // Crafting Multiplier (150%)
@@ -3789,6 +4108,7 @@ window.processSellItem = function(itemId, sellPrice) {
 }
 
 window.buyItemImmediate = function() {
+    if (!document.getElementById('buy-item-level-input')) return; // Fix for null error
     const level = parseInt(document.getElementById('buy-item-level-input').value) || 1;
     const grade = document.getElementById('buy-item-grade-input').value;
     let bonuses = [];
@@ -3803,7 +4123,8 @@ window.buyItemImmediate = function() {
     if (gradePenaltyMult > 1) bonuses.push(`Грейд +${Math.round((gradePenaltyMult-1)*100)}%`);
 
     let totalPercent = 0;
-    const selectedProps = document.querySelectorAll('.buy-prop-item.selected');
+    const container = document.getElementById('window-content');
+    const selectedProps = container ? container.querySelectorAll('.buy-prop-item.selected') : [];
     if (selectedProps.length === 0) {
         window.showCustomAlert("❌ Выберите хотя бы одно свойство.");
         return;
@@ -3831,9 +4152,11 @@ window.buyItemImmediate = function() {
     }
     
     if (isWeapon) {
-        if (g.includes('охотник на гоблинов')) { buyMult += 0.5; bonuses.push(`Охотник +50%`); }
-        else if (g.includes('охотник на ☠️')) { buyMult += 0.25; bonuses.push(`Охотник +25%`); }
-        else if (g.includes('помощник охотника')) { buyMult += 0.10; bonuses.push(`Охотник +10%`); }
+        const handMult = window.getHandPenaltyMult('hand-selector-main');
+        if (handMult > 1) {
+            buyMult *= handMult;
+            bonuses.push(`Охотник (Рука) +${Math.round((handMult-1)*100)}%`);
+        }
     }
     
     finalPrice *= buyMult;
@@ -3854,6 +4177,8 @@ window.buyItemImmediate = function() {
                         grade: grade,
                         level: level,
                         buyPrice: cost,
+                        isAncient: false,
+                        isPrimal: false,
                         isCrafted: false,
                         properties: propsList
                     });
@@ -3960,6 +4285,18 @@ window.selectOldEnchantProperty = function(el, propName) {
 }
 
 window.selectNewEnchantProperty = function(el) {
+    const target = window.enchantTarget;
+    if (!target || !target.itemId) return;
+    
+    const item = window.playerData.inventory.find(i => i.id === target.itemId);
+    if (!item) return;
+
+    const propName = el.innerText;
+    if (item.properties.includes(propName)) {
+        window.showCustomAlert("❌ Этот предмет уже имеет данное свойство.");
+        return;
+    }
+
     const container = document.getElementById('enchant-new-props-list');
     container.querySelectorAll('.selected').forEach(i => i.classList.remove('selected'));
     el.classList.add('selected');
@@ -4187,4 +4524,58 @@ window.finalizeTheft = function() {
     }
     
     modal.style.display = 'none';
+}
+
+window.createClickSparks = function(x, y) {
+    const count = 8 + Math.floor(Math.random() * 5);
+    for (let i = 0; i < count; i++) {
+        const spark = document.createElement('div');
+        spark.className = 'click-spark';
+        spark.style.left = x + 'px';
+        spark.style.top = y + 'px';
+        
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = 30 + Math.random() * 50;
+        
+        spark.style.setProperty('--tx', Math.cos(angle) * velocity + 'px');
+        spark.style.setProperty('--ty', Math.sin(angle) * velocity + 'px');
+        
+        document.body.appendChild(spark);
+        setTimeout(() => spark.remove(), 500);
+    }
+}
+
+window.createFireTrail = function(x, y) {
+    const particle = document.createElement('div');
+    particle.className = 'fire-trail-particle';
+    particle.style.left = x + 'px';
+    particle.style.top = y + 'px';
+    document.body.appendChild(particle);
+    setTimeout(() => particle.remove(), 600);
+}
+
+window.createCollisionSparks = function(x, y, side) {
+    const count = 20 + Math.floor(Math.random() * 10);
+    for (let i = 0; i < count; i++) {
+        const spark = document.createElement('div');
+        spark.className = 'collision-spark';
+        spark.style.left = x + 'px';
+        spark.style.top = y + 'px';
+        
+        let angleBase = 0;
+        if (side === 'left') angleBase = 0; // Искры летят вправо
+        else if (side === 'right') angleBase = Math.PI; // Искры летят влево
+        else if (side === 'top') angleBase = Math.PI / 2; // Искры летят вниз
+        else if (side === 'bottom') angleBase = -Math.PI / 2; // Искры летят вверх
+        
+       // Разброс +/- 80 градусов
+        const angle = angleBase + (Math.random() * 2 - 1) * (Math.PI / 2.2);
+        const velocity = 50 + Math.random() * 80;
+        
+        spark.style.setProperty('--tx', (Math.cos(angle) * velocity) + 'px');
+        spark.style.setProperty('--ty', (Math.sin(angle) * velocity) + 'px');
+        
+        document.body.appendChild(spark);
+        setTimeout(() => spark.remove(), 600);
+    }
 }

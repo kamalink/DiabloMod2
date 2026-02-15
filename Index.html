@@ -37,18 +37,17 @@
         <div id="window-content"></div>
     </div>
 
-    <button id="reset-btn" onclick="resetProgress()">🗑️ СТЕРЕТЬ ВСЕ</button>
-    <button id="music-btn" onclick="toggleMusic()">🎵 МУЗЫКА</button>
-    <input type="range" id="volume-slider" min="0" max="1" step="0.01" oninput="setVolume(this.value)" style="display: none; position: fixed; top: 55px; right: 310px; width: 100px; z-index: 1001;">
-    <a href="#" onclick="event.preventDefault(); window.openIframe('https://randstuff.ru/number/');" id="randomizer-btn">🎲 РАНДОМ</a>
+    <button id="reset-btn" class="d2-button" onclick="resetProgress()">СТЕРЕТЬ ВСЕ<span class="btn-shimmer"></span></button>
+    <button id="music-btn" class="d2-button" onclick="toggleMusic()">МУЗЫКА<span class="btn-shimmer"></span></button>
+    <input type="range" id="volume-slider" min="0" max="1" step="0.01" oninput="setVolume(this.value)" style="display: none; position: fixed; top: 55px; right: 230px; width: 100px; z-index: 1001;">
 
     <!-- Виджет изученных навыков -->
-    <div id="learned-skills-widget" style="position: fixed; top: 110px; right: 310px; width: 180px; max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.8); border: 1px solid #444; padding: 10px; color: #ccc; font-size: 0.75rem; z-index: 900; display: none; border-radius: 4px;">
+    <div id="learned-skills-widget" class="sidebar-widget" style="position: fixed; top: 110px; right: 310px; width: 180px; max-height: 300px; z-index: 900; display: none;">
         <div id="learned-skills-title" style="color: #d4af37; border-bottom: 1px solid #555; margin-bottom: 5px; font-weight: bold; text-align: center; cursor: move;">ИЗУЧЕНО</div>
         <div id="learned-skills-content"></div>
     </div>
  <!-- Виджет инвентаря -->
-    <div id="inventory-widget" style="position: fixed; top: 430px; right: 310px; width: 180px; max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.8); border: 1px solid #444; padding: 10px; color: #ccc; font-size: 0.75rem; z-index: 900; display: none; border-radius: 4px;">
+    <div id="inventory-widget" class="sidebar-widget" style="position: fixed; top: 430px; right: 310px; width: 180px; max-height: 300px; z-index: 900; display: none;">
         <div id="inventory-title" style="color: #d4af37; border-bottom: 1px solid #555; margin-bottom: 5px; font-weight: bold; text-align: center; cursor: move;">ИНВЕНТАРЬ</div>
         <div id="inventory-content"></div>
     </div>
@@ -72,14 +71,14 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
             <!-- Левая часть: Выбор -->
             <div>
-                <label style="color: #aaa;">Класс:</label>
-                <select id="calc-class-select" class="d2-button" style="padding: 5px; margin: 5px 0;" onchange="updateCalcSkills()"></select>
+                <label for="calc-class-select" style="color: #aaa;">Класс:</label>
+                <select id="calc-class-select" class="simple-btn" style="padding: 5px; margin: 5px 0; width: 100%;" onchange="updateCalcSkills()"></select>
                 
-                <label style="color: #aaa;">Навык:</label>
-                <select id="calc-skill-select" class="d2-button" style="padding: 5px; margin: 5px 0;" onchange="updateCalcRunes()"></select>
+                <label for="calc-skill-select" style="color: #aaa;">Навык:</label>
+                <select id="calc-skill-select" class="simple-btn" style="padding: 5px; margin: 5px 0; width: 100%;" onchange="updateCalcRunes()"></select>
                 
-                <label style="color: #aaa;">Руна:</label>
-                <select id="calc-rune-select" class="d2-button" style="padding: 5px; margin: 5px 0;" onchange="loadCalcSkillData()"></select>
+                <label for="calc-rune-select" style="color: #aaa;">Руна:</label>
+                <select id="calc-rune-select" class="simple-btn" style="padding: 5px; margin: 5px 0; width: 100%;" onchange="loadCalcSkillData()"></select>
                 
                 <hr style="border-color: #333;">
                 
@@ -103,13 +102,13 @@
                 <input type="hidden" id="calc-aoe-2" value="1"> <!-- Область второго источника -->
                 
                 <div id="calc-synergy-box" style="display:none; margin-top:10px; border-top: 1px dashed #444; padding-top: 5px;">
-                    <label style="color: #ff9900; font-size: 0.8rem;">⚔️ Лучший навык атаки:</label>
-                    <select id="calc-synergy-skill" class="d2-button" style="padding: 3px; font-size: 0.75rem; margin: 3px 0;" onchange="calculateSkillCost()"></select>
+                    <label for="calc-synergy-skill" style="color: #ff9900; font-size: 0.8rem;">⚔️ Лучший навык атаки:</label>
+                    <select id="calc-synergy-skill" class="simple-btn" style="padding: 3px; font-size: 0.75rem; margin: 3px 0; width: 100%;" onchange="calculateSkillCost()"></select>
                 </div>
                 <input type="hidden" id="calc-cost-red-flat" value="0"> <!-- Скрытое поле для снижения затрат (плоское) -->
                 
                 <div id="calc-skill-cost-box" style="display:none; margin-top:5px;">
-                    <label style="color: #a29bfe;">📉 Цена осн. навыка:</label> <input type="number" id="calc-main-skill-cost" style="width: 80px;" value="0" oninput="calculateSkillCost()">
+                    <label for="calc-main-skill-cost" style="color: #a29bfe;">📉 Цена осн. навыка:</label> <input type="number" id="calc-main-skill-cost" style="width: 80px;" value="0" oninput="calculateSkillCost()">
                 </div>
             </div>
         </div>
@@ -130,23 +129,29 @@
     
         
         <div class="exp-input-row">
-            <label>💀 Мобы:</label>
-            <input type="number" id="exp-mobs" value="0" oninput="calculateExp()">
+            <label for="exp-mobs">💀 Мобы:</label>
+            <div style="display:flex; align-items:center; gap:5px;">
+                <span id="exp-partner-kills" style="font-size:0.7rem; color:#888; display:none;" title="Убийства напарника">(Нап: 0)</span>
+                <label id="exp-contract-label" style="font-size:0.7rem; color:#d4af37; display:none; cursor:pointer; margin-right:5px;" title="Контракт: х3 золото">
+                    <input type="checkbox" id="exp-contract-check"> x3
+                </label>
+                <input type="number" id="exp-mobs" value="0" oninput="calculateExp()">
+            </div>
         </div>
         <div class="exp-input-row">
-            <label>☠️ Элита:</label>
+            <label for="exp-elites">☠️ Элита:</label>
             <input type="number" id="exp-elites" value="0" oninput="calculateExp()">
         </div>
         <div class="exp-input-row">
-            <label>👹 Боссы:</label>
+            <label for="exp-bosses">👹 Боссы:</label>
             <input type="number" id="exp-bosses" value="0" oninput="calculateExp()">
         </div>
         <div class="exp-input-row" id="exp-chests-row" style="display:none;">
-            <label>📦 Сундуки:</label>
+            <label for="exp-chests">📦 Сундуки:</label>
             <input type="number" id="exp-chests" value="0" oninput="calculateExp()">
         </div>
         <div class="exp-input-row" id="exp-big-chests-row" style="display:none;">
-            <label>🧰 Большие:</label>
+            <label for="exp-big-chests">🧰 Большие:</label>
             <input type="number" id="exp-big-chests" value="0" oninput="calculateExp()">
         </div>
 
@@ -161,40 +166,20 @@
         
         <div id="diff-calc-damage-section">
             <h4 style="color: #ff4444; border-bottom: 1px solid #555; padding-bottom: 5px;">⚔️ УРОН</h4>
-            <div class="exp-input-row"><label>Урон героя:</label><input type="number" id="diff-hero-dmg" value="0"></div>
+            <div class="exp-input-row"><label for="diff-hero-dmg">Урон героя:</label><input type="number" id="diff-hero-dmg" value="0"></div>
             
             <div class="exp-input-row">
-                <label style="font-size:0.8rem;">% Умения на вещах:</label>
-                <input type="number" id="diff-item-skill-pct" value="0" placeholder="%">
-            </div>
-            
-            <div class="exp-input-row">
-                <label style="font-size:0.8rem;">% Умения (Авто):</label>
+                <label for="diff-skill-pct" style="font-size:0.8rem;">% Умения (Авто):</label>
                 <div style="text-align:right; flex:1; padding-right:10px; font-size:0.8rem; color:#66ccff;" id="diff-auto-skill-name">Нет</div>
-                <input type="number" id="diff-skill-pct" value="0" readonly style="background:#222; color:#aaa;">
+                <input type="number" id="diff-skill-pct" value="0" disabled style="background: transparent; border: none; color: #fff; cursor: default;">
             </div>
             
-            <div class="exp-input-row"><label>% Стихии:</label><input type="number" id="diff-elem-pct" value="0" placeholder="%"></div>
-            <div class="exp-input-row"><label>% Лег. камни:</label><input type="number" id="diff-gems-pct" value="0" placeholder="%"></div>
-            
-            <h4 style="color: #d4af37; border-bottom: 1px solid #555; padding-bottom: 5px; margin-top: 10px;">📦 КУБ КАНАИ</h4>
-            <!-- Слот 1 -->
-            <div class="exp-input-row" style="gap:5px;">
-                <select id="diff-cube-1-type" class="d2-button" style="margin:0; padding:2px; font-size:0.7rem; width:100px;"><option value="dmg">Урон (Общ)</option><option value="skill">Урон (Скилл)</option><option value="tough">Живучесть</option></select>
-                <input type="number" id="diff-cube-1-val" value="0" placeholder="%" style="width:60px;">
-            </div>
-            <!-- Слот 2 -->
-            <div class="exp-input-row" style="gap:5px;">
-                <select id="diff-cube-2-type" class="d2-button" style="margin:0; padding:2px; font-size:0.7rem; width:100px;"><option value="dmg">Урон (Общ)</option><option value="skill">Урон (Скилл)</option><option value="tough">Живучесть</option></select>
-                <input type="number" id="diff-cube-2-val" value="0" placeholder="%" style="width:60px;">
-            </div>
-            <!-- Слот 3 -->
-            <div class="exp-input-row" style="gap:5px;">
-                <select id="diff-cube-3-type" class="d2-button" style="margin:0; padding:2px; font-size:0.7rem; width:100px;"><option value="dmg">Урон (Общ)</option><option value="skill">Урон (Скилл)</option><option value="tough">Живучесть</option></select>
-                <input type="number" id="diff-cube-3-val" value="0" placeholder="%" style="width:60px;">
+            <div class="exp-input-row" style="flex-direction:column; align-items:flex-start; gap:5px;">
+                <label for="diff-multipliers" style="width:100%; font-size:0.8rem; color:#d4af37;">Доп. множители (%, через запятую):</label>
+                <input type="text" id="diff-multipliers" value="" placeholder="Напр: 20000, 100, 58" style="width:100%; text-align:left; padding:5px; background:#000; border:1px solid #444; color:#fff;">
             </div>
 
-            <div class="exp-input-row"><label>Урон напарника:</label><input type="number" id="diff-partner-dmg" value="0"></div>
+            <div class="exp-input-row"><label for="diff-partner-dmg">Урон напарника:</label><input type="number" id="diff-partner-dmg" value="0"></div>
             <div style="text-align: right; color: #ff4444; font-weight: bold; margin-top: 5px;">
                 Итого Урон: <span id="diff-total-dmg">0</span>
             </div>
@@ -202,11 +187,47 @@
 
         <div id="diff-calc-toughness-section" style="margin-top: 20px;">
             <h4 style="color: #66ff66; border-bottom: 1px solid #555; padding-bottom: 5px;">🛡️ ЖИВУЧЕСТЬ</h4>
-            <div class="exp-input-row"><label>⛑️ + Восст.:</label><input type="number" id="diff-base-tough" value="0"></div>
-            <div class="exp-input-row"><label>Легендарки (%):</label><input type="number" id="diff-leg-tough" value="0"></div>
-            <div class="exp-input-row"><label>Навыки (%):</label><input type="number" id="diff-skill-tough" value="0"></div>
-            <div class="exp-input-row"><label>Пассивки (%):</label><input type="number" id="diff-pass-tough" value="0"></div>
-            <div class="exp-input-row"><label>Живучесть напарника:</label><input type="number" id="diff-partner-tough" value="0"></div>
+            <div class="exp-input-row"><label for="diff-base-tough">⛑️ + Восст.:</label><input type="number" id="diff-base-tough" value="0"></div>
+            
+            <!-- Dynamic Fields -->
+            <div class="exp-input-row" id="container-reduce-dmg">
+                <label for="diff-reduce-dmg-base" style="font-size:0.8rem;">Снижение урона (%):</label>
+                <div style="flex:1; display:flex; flex-wrap:wrap; gap:5px; justify-content: flex-end;">
+                    <input id="diff-reduce-dmg-base" type="number" class="calc-reduce-dmg" name="calc-reduce-dmg" placeholder="%" style="width:50px; background:#000; border:1px solid #444; color:#fff; text-align:center;" oninput="window.calculateDifficulty()">
+                    <button class="simple-btn" style="width:25px; padding:0; margin:0; min-width:unset;" onclick="window.addCalcField('container-reduce-dmg', 'calc-reduce-dmg')">+</button>
+                </div>
+            </div>
+            <div class="exp-input-row" id="container-armor-pct">
+                <label for="diff-armor-pct-base" style="font-size:0.8rem;">Броня (%):</label>
+                <div style="flex:1; display:flex; flex-wrap:wrap; gap:5px; justify-content: flex-end;">
+                    <input id="diff-armor-pct-base" type="number" class="calc-armor-pct" name="calc-armor-pct" placeholder="%" style="width:50px; background:#000; border:1px solid #444; color:#fff; text-align:center;" oninput="window.calculateDifficulty()">
+                    <button class="simple-btn" style="width:25px; padding:0; margin:0; min-width:unset;" onclick="window.addCalcField('container-armor-pct', 'calc-armor-pct')">+</button>
+                </div>
+            </div>
+            <div class="exp-input-row" id="container-dodge-pct">
+                <label for="diff-dodge-pct-base" style="font-size:0.8rem;">Уклонение (%):</label>
+                <div style="flex:1; display:flex; flex-wrap:wrap; gap:5px; justify-content: flex-end;">
+                    <input id="diff-dodge-pct-base" type="number" class="calc-dodge-pct" name="calc-dodge-pct" placeholder="%" style="width:50px; background:#000; border:1px solid #444; color:#fff; text-align:center;" oninput="window.calculateDifficulty()">
+                    <button class="simple-btn" style="width:25px; padding:0; margin:0; min-width:unset;" onclick="window.addCalcField('container-dodge-pct', 'calc-dodge-pct')">+</button>
+                </div>
+            </div>
+            <div class="exp-input-row" id="container-res-pct">
+                <label for="diff-res-pct-base" style="font-size:0.8rem;">Сопротивление (%):</label>
+                <div style="flex:1; display:flex; flex-wrap:wrap; gap:5px; justify-content: flex-end;">
+                    <input id="diff-res-pct-base" type="number" class="calc-res-pct" name="calc-res-pct" placeholder="%" style="width:50px; background:#000; border:1px solid #444; color:#fff; text-align:center;" oninput="window.calculateDifficulty()">
+                    <button class="simple-btn" style="width:25px; padding:0; margin:0; min-width:unset;" onclick="window.addCalcField('container-res-pct', 'calc-res-pct')">+</button>
+                </div>
+            </div>
+
+            <div class="exp-input-row"><label for="diff-skill-tough">Навыки (%):</label><input type="number" id="diff-skill-tough" value="0" disabled style="background: transparent; border: none; color: #fff; cursor: default;"></div>
+            <div class="exp-input-row"><label for="diff-pass-tough">Пассивки (%):</label><input type="number" id="diff-pass-tough" value="0" disabled style="background: transparent; border: none; color: #fff; cursor: default;"></div>
+            
+            <div class="exp-input-row" style="flex-direction:column; align-items:flex-start; gap:5px;">
+                <label for="diff-tough-multipliers" style="width:100%; font-size:0.8rem; color:#66ff66;">Доп. множители (%, через запятую):</label>
+                <input type="text" id="diff-tough-multipliers" value="" placeholder="Напр: 50, 20" style="width:100%; text-align:left; padding:5px; background:#000; border:1px solid #444; color:#fff;">
+            </div>
+
+            <div class="exp-input-row"><label for="diff-partner-tough">Живучесть напарника:</label><input type="number" id="diff-partner-tough" value="0"></div>
             <div style="text-align: right; color: #66ff66; font-weight: bold; margin-top: 5px;">
                 Итого Живучесть: <span id="diff-total-tough">0</span>
             </div>
@@ -266,6 +287,11 @@
                 </label>
             </div>
             <button class="craft-btn smith-sell" onclick="sellCraftedItemFromModal()">ПРОДАТЬ</button>
+        </div>
+        
+        <div id="hand-selector-craft" style="display:none; justify-content:center; gap:15px; margin-bottom:10px;">
+            <label style="color:#ff4444; cursor:pointer;"><input type="radio" name="hand-sel-craft" value="right" checked> Правая рука</label>
+            <label style="color:#66ccff; cursor:pointer;"><input type="radio" name="hand-sel-craft" value="left"> Левая рука</label>
         </div>
 
         <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
@@ -327,6 +353,11 @@
                 </label>
             </div>
             <button class="craft-btn buy" onclick="buyAncientImmediate()">КУПИТЬ</button>
+        </div>
+        
+        <div id="hand-selector-ancient" style="display:none; justify-content:center; gap:15px; margin-bottom:10px;">
+            <label style="color:#ff4444; cursor:pointer;"><input type="radio" name="hand-sel-ancient" value="right" checked> Правая рука</label>
+            <label style="color:#66ccff; cursor:pointer;"><input type="radio" name="hand-sel-ancient" value="left"> Левая рука</label>
         </div>
 
         <div class="ancient-props-container" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
@@ -399,6 +430,11 @@
             </div>
             <button class="craft-btn buy" onclick="buySetImmediate()">КУПИТЬ</button>
         </div>
+        
+        <div id="hand-selector-set" style="display:none; justify-content:center; gap:15px; margin-bottom:10px;">
+            <label style="color:#ff4444; cursor:pointer;"><input type="radio" name="hand-sel-set" value="right" checked> Правая рука</label>
+            <label style="color:#66ccff; cursor:pointer;"><input type="radio" name="hand-sel-set" value="left"> Левая рука</label>
+        </div>
 
         <div class="set-props-container" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
             <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
@@ -449,6 +485,11 @@
             </div>
             <button id="agrade-action-btn" class="craft-btn buy" onclick="confirmBuySellAGrade()">ВЫПОЛНИТЬ</button>
         </div>
+        
+        <div id="hand-selector-agrade" style="display:none; justify-content:center; gap:15px; margin-bottom:10px;">
+            <label style="color:#ff4444; cursor:pointer;"><input type="radio" name="hand-sel-agrade" value="right" checked> Правая рука</label>
+            <label style="color:#66ccff; cursor:pointer;"><input type="radio" name="hand-sel-agrade" value="left"> Левая рука</label>
+        </div>
 
         <div class="agrade-props-container" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
             <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
@@ -488,7 +529,7 @@
     <!-- МОДАЛЬНОЕ ОКНО ПОКУПКИ ЗАКЕНОВ -->
     <div id="zaken-buy-modal">
         <span class="close-x" onclick="document.getElementById('zaken-buy-modal').style.display='none'">[X]</span>
-        <h3>💰 ПОКУПКА ЗАКЕНОВ</h3>
+        <h3>ПОКУПКА ЗАКЕНОВ</h3>
         <p id="zaken-price-display" style="color: #aaa; font-size: 0.9rem;"></p>
         
         <label>Количество:</label><br>
@@ -544,7 +585,7 @@
 
     <!-- МОДАЛЬНОЕ ОКНО УСЛУГ ЮВЕЛИРА -->
     <div id="gem-service-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 7000; align-items: center; justify-content: center;">
-        <div style="width: 90%; max-width: 450px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #d4af37; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); padding: 25px; text-align: center; font-family: 'Cinzel', serif; color: #e0e0e0;">
+        <div style="width: 90%; max-width: 450px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #d4af37; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); padding: 25px; text-align: center; font-family: 'Lora', serif; color: #e0e0e0;">
             <h3 id="gem-service-title" style="color: #d4af37; margin-top: 0; font-size: 1.5rem;">Услуги ювелира</h3>
             <div id="gem-service-inputs" style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
                 <label>Ранг 💎 (1-10): <input type="number" id="gem-rank-input" value="1" min="1" max="10" style="width: 80px; padding: 5px; background: #000; border: 1px solid #444; color: #fff;"></label>
@@ -563,7 +604,7 @@
 
     <!-- МОДАЛЬНОЕ ОКНО ПРОДАЖИ РЕСУРСОВ -->
     <div id="multi-sell-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 7000; align-items: center; justify-content: center;">
-        <div style="width: 90%; max-width: 450px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #d4af37; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); padding: 25px; text-align: center; font-family: 'Cinzel', serif; color: #e0e0e0;">
+        <div style="width: 90%; max-width: 450px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #d4af37; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); padding: 25px; text-align: center; font-family: 'Lora', serif; color: #e0e0e0;">
             <h3 id="multi-sell-title" style="color: #d4af37; margin-top: 0; font-size: 1.5rem;">Продажа ресурсов</h3>
             <div style="margin-bottom: 15px;">
                 <label><span id="multi-sell-label-text">Уровень ресурсов:</span> 
@@ -599,7 +640,7 @@
 
     <!-- МОДАЛЬНОЕ ОКНО ЗАЧАРОВАНИЯ (ИЗМЕНЕНИЕ СВОЙСТВ) -->
     <div id="enchant-item-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 7000; align-items: center; justify-content: center;">
-        <div style="width: 90%; max-width: 450px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #a29bfe; box-shadow: 0 0 30px rgba(162, 155, 254, 0.2); padding: 25px; text-align: center; font-family: 'Cinzel', serif; color: #e0e0e0;">
+        <div style="width: 90%; max-width: 450px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #a29bfe; box-shadow: 0 0 30px rgba(162, 155, 254, 0.2); padding: 25px; text-align: center; font-family: 'Lora', serif; color: #e0e0e0;">
             <h3 style="color: #a29bfe; margin-top: 0; font-size: 1.5rem;">🔮 ИЗМЕНЕНИЕ СВОЙСТВ</h3>
             <p id="enchant-subtitle" style="font-size: 0.8rem; color: #aaa;">Выберите предмет (N и D грейды нельзя менять).</p>
             
@@ -650,7 +691,7 @@
 
     <!-- МОДАЛЬНОЕ ОКНО ВЫБОРА СЛОЖНОСТИ ПОРТАЛА -->
     <div id="rift-diff-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 8000; align-items: center; justify-content: center;">
-        <div style="width: 90%; max-width: 400px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #d4af37; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); padding: 25px; text-align: center; font-family: 'Cinzel', serif; color: #e0e0e0;">
+        <div style="width: 90%; max-width: 400px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #d4af37; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); padding: 25px; text-align: center; font-family: 'Lora', serif; color: #e0e0e0;">
             <h3 style="color: #d4af37; margin-top: 0;">ВЫБОР СЛОЖНОСТИ НП</h3>
             <p id="rift-diff-cost-display" style="font-family: 'Lora', serif; font-size: 0.9rem; color: #aaa; margin-bottom: 15px;"></p>
             <div id="rift-diff-buttons-container" style="display: flex; flex-direction: column; gap: 10px; margin: 20px 0;">
@@ -662,7 +703,7 @@
 
     <!-- МОДАЛЬНОЕ ОКНО АКТИВНОГО ПОРТАЛА -->
     <div id="active-rift-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9000; align-items: center; justify-content: center; flex-direction: column;">
-        <div style="width: 90%; max-width: 400px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #d4af37; box-shadow: 0 0 50px rgba(212, 175, 55, 0.3); padding: 30px; text-align: center; font-family: 'Cinzel', serif; color: #e0e0e0;">
+        <div style="width: 90%; max-width: 400px; background: linear-gradient(160deg, #1a0505 0%, #000 100%); border: 2px solid #d4af37; box-shadow: 0 0 50px rgba(212, 175, 55, 0.3); padding: 30px; text-align: center; font-family: 'Lora', serif; color: #e0e0e0;">
             <h2 style="color: #d4af37; margin-top: 0; text-shadow: 0 0 10px #d4af37;">🌀 ПОРТАЛ ОТКРЫТ</h2>
             <p id="active-rift-info" style="font-family: 'Lora', serif; font-size: 1rem; color: #aaa; margin-bottom: 25px;"></p>
             
@@ -704,9 +745,10 @@
         <button class="mobile-nav-btn" onclick="toggleEditModal()">✍️ КНИГА</button>
     </div>
 
-    <div id="save-load-controls" class="ui-element" style="position: fixed; left: 10px; top: 65px; z-index: 1000; display: flex; gap: 5px;">
-        <button class="mobile-nav-btn" onclick="exportSaveFile()" style="background: #1a0505; font-size: 0.7rem; padding: 5px 10px;">💾 СОХРАНИТЬ</button>
-        <button class="mobile-nav-btn" onclick="importSaveFile()" style="background: #1a0505; font-size: 0.7rem; padding: 5px 10px;">📂 ЗАГРУЗИТЬ</button>
+    <div id="save-load-controls" class="ui-element" style="position: fixed; left: 10px; top: 65px; z-index: 1000; display: flex; gap: 40px;">
+        <button id="save-btn" class="d2-button" onclick="exportSaveFile()">СОХРАНИТЬ<span class="btn-shimmer"></span></button>
+        <button id="load-btn" class="d2-button" onclick="importSaveFile()">ЗАГРУЗИТЬ<span class="btn-shimmer"></span></button>
+        <button id="code-btn" class="d2-button" onclick="openSaveCodeModal()">КОД<span class="btn-shimmer"></span></button>
         <input type="file" id="load-file-input" style="display: none;" onchange="handleFileSelect(this)" accept=".txt,.json">
     </div>
 
@@ -736,11 +778,11 @@
                 <div class="stat-group-title"><span class="group-toggle" onclick="window.toggleStatGroup(this)">[-]</span> Финансы <span class="add-money-btn" onclick="openAddMoneyModal()" title="Добавить средства">[+]</span></div>
                 <div class="stat-group-content">
                     <div class="money-row" style="justify-content: center; gap: 2px;">
-                        <span class="money-unit"><input type="number" id="input-mithril" class="char-input money-input" value="0" style="width: 25px; color: #00ffff;" onchange="savePlayerData()">💠</span>
-                        <span class="money-unit"><input type="number" id="input-gold-g" class="char-input money-input" value="0" style="width: 30px;" onchange="savePlayerData()">🥇</span>
-                        <span class="money-unit"><input type="number" id="input-gold-s" class="char-input money-input" value="0" style="width: 30px;" onchange="savePlayerData()">🥈</span>
-                        <span class="money-unit"><input type="number" id="input-gold-c" class="char-input money-input" value="0" style="width: 30px;" onchange="savePlayerData()">🥉</span>
-                        <span class="money-unit"><input type="number" id="input-gold-y" class="char-input money-input" value="0" style="width: 30px;" onchange="savePlayerData()">🧧</span>
+                        <span class="money-unit">💠<input type="number" id="input-mithril" class="char-input money-input" value="0" style="width: 25px; color: #00ffff;" onchange="savePlayerData()"></span>
+                        <span class="money-unit">🥇<input type="number" id="input-gold-g" class="char-input money-input" value="0" style="width: 30px;" onchange="savePlayerData()"></span>
+                        <span class="money-unit">🥈<input type="number" id="input-gold-s" class="char-input money-input" value="0" style="width: 30px;" onchange="savePlayerData()"></span>
+                        <span class="money-unit">🥉<input type="number" id="input-gold-c" class="char-input money-input" value="0" style="width: 30px;" onchange="savePlayerData()"></span>
+                        <span class="money-unit">🧧<input type="number" id="input-gold-y" class="char-input money-input" value="0" style="width: 30px;" onchange="savePlayerData()"></span>
                     </div>
                     <div class="stat-row" style="margin-top:8px;">Руны: <input type="number" id="input-runes" class="char-input" value="0" step="0.1" onchange="savePlayerData()"> 📖</div>
                     <div class="stat-row">Парагон: <input type="number" id="input-para" class="char-input" value="0" step="0.1" onchange="savePlayerData()"> ⏳</div>
@@ -778,7 +820,7 @@
             <div class="stat-group">
                 <div class="stat-group-title"><span class="group-toggle" onclick="window.toggleStatGroup(this)">[-]</span> Бой и Прогресс</div>
                 <div class="stat-group-content">
-                    <div class="stat-row">Убито мобов: <input type="number" id="input-kills" class="char-input" value="0" onchange="savePlayerData()"> 💀</div>
+                    <div class="stat-row">Убито мобов: <input type="number" id="input-kills" class="char-input" value="0" oninput="savePlayerData()"> 💀</div>
                     <div class="stat-row">Элита (соло): <input type="number" id="input-elites-solo" class="char-input" value="0" onchange="savePlayerData()"> ☠️</div>
                     <div class="stat-row">Боссы: <input type="number" id="input-bosses" class="char-input" value="0" onchange="savePlayerData()"> 👹</div>
                     <div class="stat-row" style="font-size: 0.7rem; color: #888;">Изначально: <input type="number" id="input-base-kills" class="char-input" style="width: 35px;" value="0" onchange="savePlayerData()">💀 / <input type="number" id="input-base-elites" class="char-input" style="width: 35px;" value="0" onchange="savePlayerData()">☠️</div>
@@ -806,13 +848,13 @@
 <div id="right-panels-stack" style="position: fixed; right: 15px; top: 120px; width: 240px; z-index: 3000; display: flex; flex-direction: column; gap: 10px;">
     
     <!-- Свиток ГИЛЬДИИ -->
-    <div id="active-guild-bonus" class="right-panel-bonus" style="display: none; background: linear-gradient(180deg, #1a1a1a 0%, #050505 100%); border: 1px solid #d4af37; padding: 12px; color: #e0e0e0; font-family: 'Marcellus', serif; box-shadow: 0 5px 15px rgba(0,0,0,0.8); border-radius: 2px;">
+    <div id="active-guild-bonus" class="sidebar-widget" style="display: none;">
         <h4 id="bonus-guild-name" style="margin: 0 0 10px 0; color: #d4af37; text-align: center; border-bottom: 1px solid #5a0000; font-size: 0.9rem;">ГИЛЬДИЯ</h4>
         <div id="bonus-content" style="font-size: 0.7rem;"></div>
     </div>
 
     <!-- Свиток КЛАССА -->
-    <div id="active-class-bonus" class="right-panel-bonus" style="display: none; background: linear-gradient(180deg, #1a1a1a 0%, #0a0a1a 100%); border: 1px solid #66ccff; padding: 12px; color: #e0e0e0; font-family: 'Marcellus', serif; box-shadow: 0 5px 15px rgba(0,0,0,0.8); border-radius: 2px;">
+    <div id="active-class-bonus" class="sidebar-widget" style="display: none;">
         <h4 id="bonus-class-name" style="margin: 0 0 10px 0; color: #66ccff; text-align: center; border-bottom: 1px solid #003366; font-size: 0.9rem;">БИЛД</h4>
         <div id="class-bonus-content" style="font-size: 0.7rem;"></div>
     </div>
@@ -821,7 +863,6 @@
 
 <!-- ЭКРАН БЕЗДЕЙСТВИЯ (DIABLO) -->
 <div id="idle-screen">
-        <img id="idle-diablo-img" src="https://upload.wikimedia.org/wikipedia/en/d/d5/Diablo_III_cover.png" onerror="this.style.display='none'" alt="Diablo">
     <div class="fire-wrapper">
         <h1 class="fire-text">ЗЛО НЕ ДРЕМЛЕТ...</h1>
         <div class="spark spark-1"></div>
@@ -830,6 +871,22 @@
         <div class="spark spark-4"></div>
         <div class="spark spark-5"></div>
         <div class="spark spark-6"></div>
+    </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО ОБМЕНА КОДОМ -->
+<div id="save-code-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 500px; background: #1a1a1a; border: 2px solid #d4af37; z-index: 7000; padding: 20px; box-shadow: 0 0 50px #000;">
+    <span class="close-x" onclick="document.getElementById('save-code-modal').style.display='none'">[X]</span>
+    <h3 style="color: #d4af37; text-align: center; font-family: 'Exocet', serif; margin-top: 0;">ОБМЕН ДАННЫМИ</h3>
+    <div style="display:flex; justify-content:center; gap:10px; margin-bottom:15px;">
+        <button class="mobile-nav-btn active" id="btn-mode-full" onclick="window.switchCodeMode('full')">ВЕСЬ ПРОГРЕСС</button>
+        <button class="mobile-nav-btn" id="btn-mode-stats" onclick="window.switchCodeMode('stats')">СТАТИСТИКА</button>
+    </div>
+    <p style="color: #aaa; font-size: 0.9rem; text-align: center;">Скопируйте код для переноса или вставьте код друга для загрузки.</p>
+    <textarea id="save-code-area" style="width: 100%; height: 150px; background: #000; color: #fff; border: 1px solid #444; padding: 10px; font-family: monospace; font-size: 0.8rem; resize: none; box-sizing: border-box;"></textarea>
+    <div style="display: flex; justify-content: center; gap: 15px; margin-top: 15px;">
+        <button class="craft-btn buy" onclick="copyCodeToClipboard()">КОПИРОВАТЬ</button>
+        <button class="craft-btn sell" onclick="loadFromCode()">ЗАГРУЗИТЬ</button>
     </div>
 </div>
 

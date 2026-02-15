@@ -22,8 +22,8 @@ window.onload = function() {
 
     // Восстановление состояния
     window.restorePanels();
+    window.restoreWidgetPositions();
     window.updateUI();
-    window.initInputTooltips();
     window.renderMenu('main', 'ГЛАВНАЯ', true);
 
     // Настройка и попытка автозапуска музыки
@@ -47,7 +47,7 @@ window.onload = function() {
             const modals = [
                 'add-money-modal', 'sell-leg-gem-modal', 'sell-craft-modal', 'buy-ancient-modal', 'buy-set-modal', 'buy-sell-agrade-modal',
                 'custom-prompt-modal', 'custom-confirm-modal', 'iframe-modal', 
-                'multi-sell-modal', 'gem-service-modal', 'sell-craft-modal', 
+                'multi-sell-modal', 'gem-service-modal', 'sell-craft-modal', 'save-code-modal',
                 'zaken-buy-modal', 'skill-calc-modal', 'exp-calc-modal', 'difficulty-calc-modal',
                 'death-modal', 'text-window'
             ]; // Ordered from most to least specific/top-level
@@ -102,17 +102,35 @@ window.onload = function() {
     startRandomGlitches();
 
     // Инициализация перетаскивания для всех модальных окон
-    const draggableIds = ['text-window', 'death-modal', 'skill-calc-modal', 'exp-calc-modal', 'difficulty-calc-modal', 'zaken-buy-modal', 'sell-craft-modal', 'gem-service-modal', 'multi-sell-modal', 'custom-confirm-modal', 'custom-prompt-modal', 'add-money-modal', 'sell-leg-gem-modal', 'buy-ancient-modal', 'buy-set-modal', 'buy-sell-agrade-modal', 'melt-item-modal', 'learned-skills-widget', 'inventory-widget'];
+    const draggableIds = ['text-window', 'death-modal', 'skill-calc-modal', 'exp-calc-modal', 'difficulty-calc-modal', 'zaken-buy-modal', 'sell-craft-modal', 'gem-service-modal', 'multi-sell-modal', 'custom-confirm-modal', 'custom-prompt-modal', 'add-money-modal', 'sell-leg-gem-modal', 'buy-ancient-modal', 'buy-set-modal', 'buy-sell-agrade-modal', 'melt-item-modal', 'learned-skills-widget', 'inventory-widget', 'save-code-modal'];
     draggableIds.forEach(id => {
         window.makeDraggable(document.getElementById(id));
     });
 
     // Звук клика
     document.addEventListener('click', function(e) {
-        if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.id === 'randomizer-btn') {
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
             const clickSound = new Audio('soundreality-button-4-214382.mp3');
             clickSound.volume = 0.5;
             clickSound.play().catch(() => {});
+        }
+        window.createClickSparks(e.clientX, e.clientY);
+    });
+
+    // Авто-ресайз полей ввода при вводе
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('char-input')) {
+            window.autoResizeInput(e.target);
+        }
+    });
+
+    // Огненный след за курсором при нажатии
+    let isCursorDown = false;
+    document.addEventListener('mousedown', () => isCursorDown = true);
+    document.addEventListener('mouseup', () => isCursorDown = false);
+    document.addEventListener('mousemove', (e) => {
+        if (isCursorDown) {
+            window.createFireTrail(e.clientX, e.clientY);
         }
     });
 
@@ -121,6 +139,9 @@ window.onload = function() {
 
     // Восстановление состояния активного портала
     window.updateActiveRiftModal();
+    
+    // Обновление раскладки свойств в модальных окнах (унификация)
+    window.updateModalLayouts();
 };
 
 // Функция для случайных глитч-эффектов
@@ -135,7 +156,7 @@ window.startRandomGlitches = function() {
                 window.screamerSound.play().catch(() => {});
             }
         }
-    }, 30000);
+    }, 90000);
 }
 
 // Таймер бездействия
@@ -164,6 +185,10 @@ window.showIdleScreen = function() {
 window.makeDraggable = function(elmnt) {
     if (!elmnt) return;
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    var obstacles = [];
+    var collisionSound = new Audio('forge.mp3');
+    collisionSound.volume = 0.4;
+    var lastCollisionTime = 0;
     
     // Ищем заголовок для перетаскивания
     const header = elmnt.querySelector('h2') || elmnt.querySelector('h3') || elmnt.querySelector('#window-title') || elmnt.querySelector('#prompt-title') || elmnt.querySelector('#confirm-title') || elmnt.querySelector('#learned-skills-title') || elmnt.querySelector('#inventory-title') || elmnt.querySelector('#bonus-guild-name') || elmnt.querySelector('#bonus-class-name') || elmnt.querySelector('#bonus-class-name-2');
@@ -178,16 +203,56 @@ window.makeDraggable = function(elmnt) {
 
     function dragMouseDown(e) {
         e = e || window.event;
+        // Игнорируем клики по элементам управления внутри окна
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON' || e.target.classList.contains('close-x')) {
+            return;
+        }
         e.preventDefault();
+
+        // Сбор препятствий (только видимые элементы)
+        obstacles = [];
+        
+        // Включаем физику коллизий ТОЛЬКО для виджетов главного экрана
+        const collisionEnabledIds = ['learned-skills-widget', 'inventory-widget', 'active-guild-bonus', 'active-class-bonus', 'active-class-bonus-2'];
+        const isCollisionEnabled = collisionEnabledIds.includes(elmnt.id);
+
+        if (isCollisionEnabled) {
+            const selectors = [
+                '#char-sheet', 
+                '.sidebar-widget', 
+                '.d2-button', 
+                '#save-load-controls',
+                '#reset-btn',
+                '#music-btn',
+                '.modal', 
+                '#text-window'
+            ];
+
+            selectors.forEach(sel => {
+                document.querySelectorAll(sel).forEach(el => {
+                    // Исключаем: сам элемент, скрытые элементы, дочерние элементы
+                    if (el !== elmnt && 
+                        el.style.display !== 'none' && 
+                        el.offsetParent !== null && 
+                        !elmnt.contains(el)) {
+                        obstacles.push(el.getBoundingClientRect());
+                    }
+                });
+            });
+        }
 
         // Принудительно делаем элемент фиксированным, чтобы его можно было вытащить из стека
         elmnt.style.position = 'fixed';
         elmnt.style.zIndex = '5000'; // Поверх всего
+        elmnt.style.margin = '0'; // Сброс отступов для предотвращения скачков
+        elmnt.style.transition = 'none'; // Отключаем плавность для мгновенного отклика
 
         // Рассчитываем позицию элемента в пикселях и отключаем transform
         const rect = elmnt.getBoundingClientRect();
         elmnt.style.top = rect.top + 'px';
         elmnt.style.left = rect.left + 'px';
+        elmnt.style.right = 'auto'; // Сброс привязки к правому краю
+        elmnt.style.bottom = 'auto'; // Сброс привязки к низу
         elmnt.style.transform = 'none';
 
         // get the mouse cursor position at startup:
@@ -205,14 +270,123 @@ window.makeDraggable = function(elmnt) {
         pos2 = pos4 - e.clientY;
         pos3 = e.clientX;
         pos4 = e.clientY;
-        // set the element's new position:
-        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        
+        let proposedTop = elmnt.offsetTop - pos2;
+        let proposedLeft = elmnt.offsetLeft - pos1;
+        
+        const rect = elmnt.getBoundingClientRect();
+        const w = rect.width;
+        const h = rect.height;
+        
+        let collided = false;
+        let collisionSide = null;
+
+        // 1. Границы экрана
+        if (proposedTop < 0) { proposedTop = 0; collided = true; collisionSide = 'top'; }
+        if (proposedLeft < 0) { proposedLeft = 0; collided = true; collisionSide = 'left'; }
+        if (proposedTop + h > window.innerHeight) { proposedTop = window.innerHeight - h; collided = true; collisionSide = 'bottom'; }
+        if (proposedLeft + w > window.innerWidth) { proposedLeft = window.innerWidth - w; collided = true; collisionSide = 'right'; }
+
+        // 2. Коллизии с объектами
+        // Проверяем движение по X
+        let rectX = { left: proposedLeft, top: elmnt.offsetTop, right: proposedLeft + w, bottom: elmnt.offsetTop + h };
+        if (checkCollision(rectX, obstacles)) {
+            proposedLeft = elmnt.offsetLeft; // Отменяем движение по X
+            collided = true;
+            if (pos1 > 0) collisionSide = 'left';
+            else if (pos1 < 0) collisionSide = 'right';
+        }
+
+        // Проверяем движение по Y (используя уже проверенный X, чтобы не застревать в углах)
+        let rectY = { left: proposedLeft, top: proposedTop, right: proposedLeft + w, bottom: proposedTop + h };
+        if (checkCollision(rectY, obstacles)) {
+            proposedTop = elmnt.offsetTop; // Отменяем движение по Y
+            collided = true;
+            if (pos2 > 0) collisionSide = 'top';
+            else if (pos2 < 0) collisionSide = 'bottom';
+        }
+
+        // Эффекты (Звук и отскок) - только для разрешенных виджетов
+        const collisionEnabledIds = ['learned-skills-widget', 'inventory-widget', 'active-guild-bonus', 'active-class-bonus', 'active-class-bonus-2'];
+        if (collided && collisionEnabledIds.includes(elmnt.id)) {
+            const now = Date.now();
+            if (now - lastCollisionTime > 400) { // Задержка звука 400мс (в 2 раза реже)
+                collisionSound.currentTime = 0;
+                collisionSound.play().catch(()=>{});
+                lastCollisionTime = now;
+                
+                // Создаем искры в точке удара
+                let sparkX = proposedLeft + w / 2;
+                let sparkY = proposedTop + h / 2;
+                
+                if (collisionSide === 'left') sparkX = proposedLeft;
+                else if (collisionSide === 'right') sparkX = proposedLeft + w;
+                else if (collisionSide === 'top') sparkY = proposedTop;
+                else if (collisionSide === 'bottom') sparkY = proposedTop + h;
+
+                window.createCollisionSparks(sparkX, sparkY, collisionSide);
+
+                // Визуальный эффект отскока (сжатие)
+                elmnt.style.transition = "transform 0.05s";
+                elmnt.style.transform = "scale(0.98)";
+                setTimeout(() => {
+                    elmnt.style.transform = "none";
+                    setTimeout(() => { elmnt.style.transition = "none"; }, 50);
+                }, 50);
+            }
+        }
+
+        elmnt.style.top = proposedTop + "px";
+        elmnt.style.left = proposedLeft + "px";
+    }
+
+    function checkCollision(r1, obstacles) {
+        for (let r2 of obstacles) {
+            // Проверка на пересечение прямоугольников
+            if (!(r2.left >= r1.right || 
+                  r2.right <= r1.left || 
+                  r2.top >= r1.bottom || 
+                  r2.bottom <= r1.top)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     function closeDragElement() {
         document.onmouseup = null;
         document.onmousemove = null;
+        elmnt.style.transition = ""; // Возвращаем CSS переходы
+        
+        // Сохранение позиции виджетов
+        const id = elmnt.id;
+        const saveableWidgets = ['char-sheet', 'learned-skills-widget', 'inventory-widget', 'active-guild-bonus', 'active-class-bonus', 'active-class-bonus-2'];
+        
+        if (saveableWidgets.includes(id)) {
+            if (!window.playerData.widgetPositions) window.playerData.widgetPositions = {};
+            window.playerData.widgetPositions[id] = {
+                top: elmnt.style.top,
+                left: elmnt.style.left
+            };
+            window.saveToStorage();
+        }
+    }
+}
+
+window.restoreWidgetPositions = function() {
+    if (!window.playerData.widgetPositions) return;
+    
+    for (const [id, pos] of Object.entries(window.playerData.widgetPositions)) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.position = 'fixed';
+            el.style.top = pos.top;
+            el.style.left = pos.left;
+            el.style.right = 'auto';
+            el.style.bottom = 'auto';
+            el.style.margin = '0';
+            el.style.zIndex = '4000'; // Чуть ниже модальных окон (5000+), но выше контента
+        }
     }
 }
 
@@ -251,7 +425,7 @@ window.ensureModalsExist = function() {
         div.style.boxShadow = '0 0 20px #000';
         
         div.innerHTML = `
-            <h3 style="color:#ff4444; margin-top:0; font-family:'Cinzel',serif;">🔥 РАСПЛАВИТЬ</h3>
+            <h3 style="color:#ff4444; margin-top:0; font-family:'Exocet',serif;">🔥 РАСПЛАВИТЬ</h3>
             <label style="display:block; margin:10px 0; color:#ccc;">Уровень: <input type="number" id="melt-level" class="char-input" style="width:50px; background:transparent; color:#fff; border:none; border-bottom:1px solid #555; text-align:center;"></label>
             <label style="display:block; margin:10px 0; color:#ccc;">Грейд: 
                 <select id="melt-grade" style="background:#000; color:#fff; border:1px solid #555; padding:5px;">
@@ -275,4 +449,58 @@ window.ensureModalsExist = function() {
         document.body.appendChild(div);
         window.makeDraggable(div);
     }
+}
+
+window.updateModalLayouts = function() {
+    const layoutHTML = `
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">40%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 40)">Основа оружия</span></div>
+            </div>
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">30%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 30)">Основа брони</span><br><span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 30)">Основа бижы</span><br><span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 30)">Живучесть</span><br><span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 30)">Осн.Хар.</span><br><span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 30)">Гнездо (голова/оруж)</span></div>
+            </div>
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">20%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 20)">Восстановление</span></div>
+            </div>
+            <div style="flex: 1 1 45%; background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">15%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 15)">Все сопротивления</span><br><span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 15)">Крит урон</span><br><span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 15)">Крит шанс</span></div>
+            </div>
+            <div style="flex: 1 1 100%; background: rgba(212, 175, 55, 0.05); border: 1px solid #888; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">10%</div>
+                <div style="font-size: 0.85rem; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; text-align: center;">
+                    <span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 10)">Не Осн.Хар.</span><span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 10)">Броня</span>
+                    <span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 10)">Здоровье</span><span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 10)">Ур. в бижутерии</span>
+                    <span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 10)">Скор. атак</span><span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 10)">Гнездо (броня)</span>
+                    <span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 10)">Урон стихии</span><span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 10)">Урон умения</span>
+                    <span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 10)">+ Ур. к скилу</span><span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 10)">Сниж. затрат / КДР</span>
+                    <span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 10)" style="grid-column: span 2;">Урон по области</span>
+                </div>
+            </div>
+            <div style="flex: 1 1 100%; background: rgba(212, 175, 55, 0.05); border: 1px solid #888; padding: 8px; border-radius: 4px;">
+                <div style="color: #d4af37; font-weight: bold; border-bottom: 1px solid #5a0000; margin-bottom: 5px; text-align: center;">5%</div>
+                <div style="font-size: 0.85rem; text-align: center;"><span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 5)">Одно сопрот.</span> | <span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 5)">Скор. передвижения</span> | <span class="PROP_CLASS" onclick="PROP_ONCLICK(this, 5)">Урон уменьшен</span></div>
+            </div>
+        </div>
+    `;
+
+    const updateContainer = (modalId, containerClass, propClass, onClickFunc) => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            const container = modal.querySelector('.' + containerClass);
+            if (container) {
+                let html = layoutHTML.replace(/PROP_CLASS/g, propClass).replace(/PROP_ONCLICK/g, onClickFunc);
+                container.innerHTML = html;
+            }
+        }
+    };
+
+    updateContainer('sell-craft-modal', 'craft-props-container', 'sell-prop-item', 'toggleSellProperty');
+    updateContainer('buy-sell-agrade-modal', 'agrade-props-container', 'buy-prop-item', 'toggleBuyProperty');
+    updateContainer('buy-ancient-modal', 'ancient-props-container', 'buy-prop-item', 'toggleBuyProperty');
+    updateContainer('buy-set-modal', 'set-props-container', 'buy-prop-item', 'toggleBuyProperty');
 }

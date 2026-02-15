@@ -113,7 +113,7 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
         
         const homeBtn = document.createElement('button');
         homeBtn.className = 'd2-button nav-btn';
-        homeBtn.innerText = '🏠 ГЛАВНОЕ МЕНЮ';
+        homeBtn.innerHTML = 'ГЛАВНОЕ МЕНЮ<span class="btn-shimmer"></span>';
         homeBtn.onclick = () => {
             window.historyStack = ['main'];
             window.pathNames = ['ГЛАВНАЯ'];
@@ -122,7 +122,7 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
 
         const backBtn = document.createElement('button');
         backBtn.className = 'd2-button nav-btn';
-        backBtn.innerText = '🔙 НАЗАД';
+        backBtn.innerHTML = 'НАЗАД<span class="btn-shimmer"></span>';
         backBtn.onclick = () => {
             if (window.historyStack.length > 1) {
                 window.historyStack.pop();
@@ -253,7 +253,7 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
                 }
             };
         } else {
-            btn.innerText = item.title;
+            btn.innerHTML = `${item.title}<span class="btn-shimmer"></span>`;
             if (!noAnim) {
                 btn.style.opacity = '0';
                 btn.style.animation = `fadeInUp 0.3s ease-out forwards ${index * 0.05}s`;
@@ -325,6 +325,13 @@ window.showText = function(title, content) {
 
     contentArea.innerHTML = btnHtml + html;
     
+    // Показываем селектор руки для Охотников в магазине
+    const handSelector = document.getElementById('hand-selector-main');
+    if (handSelector) {
+        const g = (window.playerData.guild || "").toLowerCase();
+        handSelector.style.display = (g.includes('охотник')) ? 'flex' : 'none';
+    }
+
     if (title.includes('Пентограмма')) {
         const vp = window.playerData.maxVp || 0;
         
@@ -335,7 +342,22 @@ window.showText = function(title, content) {
             const bossSpan = document.getElementById(`penta-boss-${i}`);
             
             if (boss) {
-                if (bossSpan) bossSpan.innerText = `Убить: ${boss}`;
+                // Расчет сложности
+                let targetDiff = window.playerData[`penta_${i}_diff`];
+                
+                if (!targetDiff) {
+                    const currentDiff = window.playerData.difficulty || "Высокий";
+                    const diffOrder = window.difficultyOrder || [];
+                    const currentIndex = diffOrder.indexOf(currentDiff);
+                    targetDiff = currentDiff;
+                    if (currentIndex !== -1) {
+                        const offset = i - 1; 
+                        const targetIndex = Math.min(currentIndex + offset, diffOrder.length - 1);
+                        targetDiff = diffOrder[targetIndex];
+                    }
+                }
+
+                if (bossSpan) bossSpan.innerHTML = `Убить: ${boss} <span style="color:#d4af37">(${targetDiff})</span>`;
                 if (btn) btn.style.display = 'none';
             } else {
                 if (vp >= req) {
@@ -358,6 +380,12 @@ window.showText = function(title, content) {
 }
 
 window.openIframe = function(url) {
+    // Fix for CSP errors with Blizzard/Battle.net
+    if (url.includes('battle.net') || url.includes('blizzard.com')) {
+        window.open(url, '_blank');
+        return;
+    }
+
     const modal = document.getElementById('iframe-modal');
     const frame = document.getElementById('web-frame');
 
@@ -616,6 +644,11 @@ window.updateUI = function() {
     if (currentMenuId && window.gameData && window.gameData[currentMenuId] && currentMenuId !== 'skills_study_menu') {
          window.renderMenu(currentMenuId, currentTitle, true, true);
     }
+
+    // Авто-ресайз полей
+    document.querySelectorAll('.char-input').forEach(input => {
+        window.autoResizeInput(input);
+    });
 }
 
 window.updateTheftTable = function() {
@@ -737,14 +770,14 @@ window.toggleMusic = function() {
     if (window.isMusicPlaying) {
         window.audioTrack.pause();
         window.audioTrack.currentTime = 0;
-        btn.innerHTML = '🎵 МУЗЫКА';
-        btn.style.borderColor = '#66ccff'; btn.style.color = '#66ccff';
+        btn.innerHTML = 'МУЗЫКА<span class="btn-shimmer"></span>';
+        btn.style.color = '#66ccff'; // Убрал изменение border, чтобы не ломать стиль
         slider.style.display = 'none';
         window.isMusicPlaying = false;
     } else {
         window.audioTrack.play().then(() => {
-            btn.innerHTML = '🔇 СТОП';
-            btn.style.borderColor = '#ff4444'; btn.style.color = '#ff4444';
+            btn.innerHTML = 'СТОП<span class="btn-shimmer"></span>';
+            btn.style.color = '#ff4444'; // Убрал изменение border
             slider.style.display = 'block';
             window.isMusicPlaying = true;
         }).catch(e => {
@@ -933,9 +966,11 @@ window.savePlayerData = function() {
     window.checkGuildProgression(); // Проверка на повышение
     window.saveToStorage();
     // checkGuildExitConditions теперь также проверяет аренду, так как она вызывается здесь
-    window.initInputTooltips(); // Инициализация подсказок для длинных чисел
 
-    window.updateUI();
+    // Авто-ресайз полей
+    document.querySelectorAll('.char-input').forEach(input => {
+        window.autoResizeInput(input);
+    });
 }
 
 window.renderLearnedSkillsWidget = function() {
@@ -965,7 +1000,7 @@ window.renderLearnedSkillsWidget = function() {
             if (sObj && sObj.category === "Пассивные") isPassive = true;
         }
 
-        let skillNameHtml = `<span style="color: #fff; font-weight: bold;">${skill}</span>`;
+        let skillNameHtml = `<span style="color: #b8a078; font-weight: bold;">${skill}</span>`;
         
         if (secondLifeSkills.includes(skill)) {
             skillNameHtml = `<span style="color: #ff7979; font-weight: bold; cursor: pointer; border-bottom: 1px dashed #ff7979;" onclick="window.handleSecondLifeClick('${skill}')" title="Нажмите для оплаты срабатывания">${skill} (2-я жизнь)</span>`;
@@ -1015,10 +1050,36 @@ window.renderInventoryWidget = function() {
         const propsStr = (item.properties || []).join(', ').replace(/'/g, "&apos;");
         const safeName = item.name.replace(/'/g, "&apos;");
         const isStolen = item.isStolen || false;
-        const nameColor = isStolen ? "#ff7979" : "#fff";
-        const icon = isStolen ? " 🧤" : "";
+        const g = (item.grade || "").toUpperCase();
+        
+        let nameColor = "#fff";
+        if (isStolen) nameColor = "#ff7979";
+        else {
+            if (g === 'N') nameColor = "#aaaaaa";
+            else if (g === 'D') nameColor = "#66ccff";
+            else if (g === 'C') nameColor = "#ffff00";
+            else if (g === 'B' || g === 'A') nameColor = "#ff8c00";
+            else if (g === 'S' || g === 'S+' || g === 'SPECTRUM') nameColor = "#00ff00";
+        }
 
-        return `<div class="widget-item" style="cursor: help;" onmousemove="window.showItemTooltip(event, '${safeName}', '${item.grade}', ${item.level}, ${item.buyPrice}, ${item.isCrafted}, '${propsStr}', ${isStolen})" onmouseleave="window.hideItemTooltip()">
+        const icon = isStolen ? " 🧤" : "";
+        
+        let borderStyle = "1px solid #333";
+        const isGreenGrade = (g === 'S+' || g === 'SPECTRUM');
+
+        if (item.isPrimal) {
+            borderStyle = isGreenGrade ? "2px solid #00ff00" : "2px solid #ff4444"; // Green for S+/Spectrum, else Red
+        } else if (item.isAncient) {
+            borderStyle = isGreenGrade ? "2px solid #00ff00" : "2px solid #ff9900"; // Green for S+/Spectrum, else Orange
+        }
+        
+        // Fallback check by name if flags are missing (for old items)
+        if (!item.isPrimal && !item.isAncient) {
+            if (item.name.includes('Первозданн')) borderStyle = isGreenGrade ? "2px solid #00ff00" : "2px solid #ff4444";
+            else if (item.name.includes('Древн') || item.name.includes('Ancient')) borderStyle = isGreenGrade ? "2px solid #00ff00" : "2px solid #ff9900";
+        }
+
+        return `<div class="widget-item" style="cursor: help; border: ${borderStyle};" onmousemove="window.showItemTooltip(event, '${safeName}', '${item.grade}', ${item.level}, ${item.buyPrice}, ${item.isCrafted}, '${propsStr}', ${isStolen})" onmouseleave="window.hideItemTooltip()">
             <span style="color: ${nameColor}; font-weight: bold;">${item.name}${icon}</span><br>
             <span style="color: #888; font-size: 0.7rem;">${item.grade} | Lvl ${item.level} | ${window.formatCurrency(item.buyPrice)}</span>
         </div>`;
@@ -1035,7 +1096,7 @@ window.renderInventoryWidget = function() {
         html += `</div>`;
     }
     if (others.length > 0) {
-        html += `<div style="color: #aaa; font-size: 0.75rem; font-weight: bold; margin: 5px 0 2px 0; border-bottom: 1px solid #555;">📦 РАЗНОЕ</div><div class="widget-grid">`;
+        html += `<div style="color: #40e0d0; font-size: 0.75rem; font-weight: bold; margin: 5px 0 2px 0; border-bottom: 1px solid #555;">💍 БИЖА</div><div class="widget-grid">`;
         others.forEach(i => html += renderItem(i));
         html += `</div>`;
     }
@@ -1090,51 +1151,6 @@ window.hideItemTooltip = function() {
     if (tooltip) tooltip.style.display = 'none';
 }
 
-window.initInputTooltips = function() {
-    const inputs = document.querySelectorAll('.char-input');
-    let tooltip = document.getElementById('input-tooltip');
-    
-    if (!tooltip) {
-        tooltip = document.createElement('div');
-        tooltip.id = 'input-tooltip';
-        tooltip.style.position = 'fixed';
-        tooltip.style.background = 'rgba(0, 0, 0, 0.9)';
-        tooltip.style.border = '1px solid #d4af37';
-        tooltip.style.color = '#fff';
-        tooltip.style.padding = '2px 5px';
-        tooltip.style.fontSize = '0.8rem';
-        tooltip.style.borderRadius = '3px';
-        tooltip.style.pointerEvents = 'none';
-        tooltip.style.zIndex = '10000';
-        tooltip.style.display = 'none';
-        document.body.appendChild(tooltip);
-    }
-
-    inputs.forEach(input => {
-        input.onmouseenter = function(e) {
-            if (this.value.length > 3) { // Показываем только если число длинное
-                // Форматируем число с разделителями (точками)
-                const val = this.value.replace(/\D/g, ''); // Убираем все нецифровые символы на всякий случай
-                const formatted = val.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                
-                tooltip.innerText = formatted;
-                tooltip.style.display = 'block';
-                tooltip.style.top = (e.clientY - 25) + 'px';
-                tooltip.style.left = (e.clientX + 10) + 'px';
-            }
-        };
-        input.onmousemove = function(e) {
-            tooltip.style.top = (e.clientY - 25) + 'px';
-            tooltip.style.left = (e.clientX + 10) + 'px';
-        };
-        input.onmouseleave = function() {
-            tooltip.style.display = 'none';
-        };
-    });
-}
-
-
-
 window.filterItems = function(inputElement) {
     const searchTerm = inputElement.value;
     const searchTermLower = searchTerm.toLowerCase();
@@ -1164,4 +1180,10 @@ window.filterItems = function(inputElement) {
             item.style.display = 'block';
         }
     });
+}
+
+window.autoResizeInput = function(input) {
+    if (!input || input.classList.contains('name-input')) return;
+    const val = input.value.toString();
+    input.style.width = (Math.max(1, val.length) + 3) + 'ch';
 }
