@@ -165,6 +165,7 @@ window.worldData = {
             <p>✅ +2 Активных умения</p>
             <p>✅ +1 Пассивное умение</p>
             <p>✅ +10 🥈</p>
+            <p>✅ Опыт за босса (3 📖 и ⏳)</p>
             <div style="text-align: center; margin-top: 15px;">
                 <button class="claim-reward-btn" id="btn-prof-2" onclick="window.claimProfessionReward(2)">Получить профессию</button>
             </div>

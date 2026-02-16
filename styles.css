@@ -173,6 +173,7 @@ body::after {
     overflow: visible; /* Для наконечников */
 }
 
+
 /* Каменные наконечники (Слева и Справа) */
 .d2-button::before, .d2-button::after {
     content: "";
@@ -245,6 +246,15 @@ body::after {
     box-shadow: inset 0 0 25px #000 !important; /* Эффект нажатия */
     top: 1px;
 }
+
+/* Классовые темы для кнопок меню (границы) */
+.menu-btn-barbarian { border-color: #8a0000; }
+.menu-btn-wizard { border-color: #4834d4; }
+.menu-btn-dh { border-color: #444; }
+.menu-btn-monk { border-color: #b8860b; }
+.menu-btn-wd { border-color: #006400; }
+.menu-btn-crusader { border-color: #77aaff; }
+.menu-btn-necromancer { border-color: #3d3d3d; }
 
 .d2-button.locked-btn {
     cursor: not-allowed;
@@ -503,22 +513,21 @@ th { color: var(--theme-highlight); }
 #music-btn:hover { transform: scale(1.05); }
 
 /* Стили для кнопок сохранения/загрузки */
-#save-btn, #load-btn, #code-btn {
+#save-btn, #load-btn {
     width: auto; margin: 0;
     padding: 5px 15px;
     color: #d4af37;
     font-size: 0.6rem;
 }
-#save-btn:hover, #load-btn:hover, #code-btn:hover { transform: scale(1.05); }
+#save-btn:hover, #load-btn:hover { transform: scale(1.05); }
 
 /* Уменьшенные наконечники для кнопок Сохранить/Загрузить (на 30%) */
 #save-btn::before, #save-btn::after,
-#load-btn::before, #load-btn::after,
-#code-btn::before, #code-btn::after {
+#load-btn::before, #load-btn::after {
     width: 21px; height: 21px;
 }
-#save-btn::before, #load-btn::before, #code-btn::before { left: -10px; }
-#save-btn::after, #load-btn::after, #code-btn::after { right: -10px; }
+#save-btn::before, #load-btn::before { left: -10px; }
+#save-btn::after, #load-btn::after { right: -10px; }
 
 /* Стили для ползунка громкости */
 
@@ -613,6 +622,7 @@ th { color: var(--theme-highlight); }
     padding: 8px;
     margin-bottom: 10px;
     background: rgba(255, 255, 255, 0.03);
+    position: relative; /* Для позиционирования пула */
 }
 
 .stat-group-title {
@@ -895,4 +905,173 @@ th { color: var(--theme-highlight); }
 @keyframes collisionSparkAnim {
     0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     100% { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0); }
+}
+
+/* Анимированный пул ресурсов */
+.resource-pool {
+    position: absolute;
+    top: 45%;
+    transform: translateY(-50%);
+    right: 10px;
+    width: 72px;
+    height: 72px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 3px solid #444;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: inset 0 0 10px #000, 0 0 5px rgba(0,0,0,0.5);
+    display: none; /* Скрыт по умолчанию */
+    z-index: 5;
+}
+
+.resource-liquid {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 85%; /* Уровень заполнения */
+    background: linear-gradient(to top, var(--res-dark, #444), var(--res-light, #888));
+    box-shadow: 0 0 15px var(--res-light, #888);
+    opacity: 0.9;
+    transition: all 0.5s ease-out;
+}
+
+/* Частицы (пузырьки) */
+.resource-particle { position: absolute; bottom: 0; width: 3px; height: 3px; background: rgba(255,255,255,0.4); border-radius: 50%; animation: particleRise 2s infinite linear; }
+.p1 { left: 20%; animation-duration: 2.5s; animation-delay: 0s; }
+.p2 { left: 60%; animation-duration: 3s; animation-delay: 1s; }
+.p3 { left: 40%; animation-duration: 2.2s; animation-delay: 0.5s; }
+.p4 { left: 80%; animation-duration: 2.8s; animation-delay: 1.5s; }
+
+@keyframes particleRise {
+    0% { bottom: 0; opacity: 0; }
+    20% { opacity: 1; }
+    100% { bottom: 100%; opacity: 0; }
+}
+
+/* Стопки монет (вид сбоку) */
+.coin-stacks-container {
+    position: absolute;
+    right: 0px; /* Сдвиг вправо */
+    bottom: 20px; /* Подняли на 15px (высота кнопки) */
+    display: flex;
+    gap: 4px;
+    z-index: 5;
+    height: 75px; /* Уменьшена высота, чтобы не перекрывать ввод */
+    align-items: flex-end;
+}
+
+.coin-stack {
+    width: 14px;
+    height: 100%;
+    position: relative;
+}
+
+.coin {
+    width: 14px;
+    height: 4px;
+    border-radius: 50% / 30%; /* Овал для перспективы */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    border: none; /* Убираем черную рамку, чтобы стопка не темнела */
+    box-sizing: border-box;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.3);
+    transition: bottom 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s;
+}
+
+/* Цвета монет */
+.coin-c { background: linear-gradient(to right, #8b4513, #cd7f32, #8b4513); }
+.coin-s { background: linear-gradient(to right, #696969, #c0c0c0, #696969); }
+.coin-g { background: linear-gradient(to right, #b8860b, #ffd700, #b8860b); }
+.coin-y { background: radial-gradient(circle at 30% 30%, #8d6e63, #4e342e); box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.5); }
+
+/* Мифрил */
+.mithril-stack {
+    width: 22px; /* Чуть шире для камней */
+    margin-right: 4px;
+    background: none;
+    border: none;
+}
+
+.mithril-gem {
+    width: 14px;
+    height: 11px;
+    position: absolute;
+    bottom: 0;
+    left: 2px;
+    background: radial-gradient(circle at 30% 30%, #90EE90 0%, #00A86B 40%, #228B22 80%, #002200 100%);
+    border: 1px solid #004d00;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.3);
+    clip-path: polygon(20% 0%, 80% 0%, 100% 40%, 80% 100%, 20% 100%, 0% 40%); /* Форма кристалла */
+    z-index: 1;
+    transition: bottom 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s;
+}
+
+/* Tooltip для валюты */
+#currency-tooltip {
+    position: fixed;
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid #d4af37;
+    color: #fff;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 10000;
+    box-shadow: 0 0 10px #000;
+    display: none;
+    white-space: nowrap;
+}
+
+/* Контейнер для кнопок +/- валюты */
+.currency-controls {
+    position: absolute;
+    right: 0px; /* Сдвиг вправо, синхронно со стопками */
+    bottom: 100px; /* Подняли на 15px (85 + 15) */
+    display: flex;
+    gap: 4px;
+    z-index: 6;
+    height: 40px;
+    align-items: flex-end;
+    padding-left: 2px;
+    pointer-events: auto; /* Возвращаем кликабельность кнопкам */
+}
+
+.currency-controls .control-group {
+    width: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.currency-controls .control-group:first-child {
+    /* Keep margin to account for wider mithril stack, but width is same as others */
+    margin-right: 8px; 
+}
+
+.currency-controls button {
+    width: 100%;
+    height: 15px;
+    padding: 0;
+    font-size: 12px;
+    line-height: 15px;
+    background: #222;
+    border: 1px solid #555;
+    color: #888;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.currency-controls button:hover {
+    background: #444;
+    color: #fff;
+    border-color: #888;
+}
+
+.currency-controls button:active {
+    background: #666;
+    transform: scale(0.95);
 }

@@ -106,6 +106,8 @@ if (typeof window.playerData.gambler_bonus_sales_left === 'undefined') window.pl
 if (typeof window.playerData.theft_attempts_level === 'undefined') window.playerData.theft_attempts_level = window.playerData.level || 1;
 if (typeof window.playerData.theft_attempts_count === 'undefined') window.playerData.theft_attempts_count = 0;
 if (typeof window.playerData.current_rift_cost === 'undefined') window.playerData.current_rift_cost = 0;
+if (typeof window.playerData.refused_thief_promotion === 'undefined') window.playerData.refused_thief_promotion = false;
+
 
 if (typeof window.playerData.base_vp_at_70 === 'undefined') {
     if (window.playerData.level >= 70) {
@@ -165,6 +167,10 @@ window.setMoneyFromYen = function(totalYen) {
             console.warn("Audio play failed:", e);
         });
     }
+    
+    // Принудительно обновляем стопки монет при любом изменении баланса
+
+    if (window.updateCoinStacks) window.updateCoinStacks();
 }
 
 window.addYen = function(yenAmount) {
@@ -172,6 +178,30 @@ window.addYen = function(yenAmount) {
     const currentYen = window.getAllMoneyInYen();
     window.setMoneyFromYen(currentYen + Math.floor(yenAmount));
     // setMoneyFromYen уже включает звук, так что дополнительный вызов не нужен
+}
+
+window.addCurrency = function(type, amount) {
+    const keyMap = {
+        m: 'mithril',
+        g: 'gold_g',
+        s: 'gold_s',
+        c: 'gold_c',
+        y: 'gold_y'
+    };
+    const key = keyMap[type];
+    if (!key) return;
+
+    let currentYen = window.getAllMoneyInYen();
+    let change = 0;
+    switch(type) {
+        case 'm': change = amount * 100000000; break;
+        case 'g': change = amount * 1000000; break;
+        case 's': change = amount * 10000; break;
+        case 'c': change = amount * 100; break;
+        case 'y': change = amount; break;
+    }
+    window.setMoneyFromYen(currentYen + change);
+    window.updateUI(); // updateUI вызывает saveToStorage
 }
 
 window.getZakenPrice = function(level) {
@@ -353,126 +383,6 @@ window.handleFileSelect = function(input) {
         input.value = ''; // Сброс, чтобы можно было выбрать тот же файл снова
     };
     reader.readAsText(file);
-}
-
-// --- ФУНКЦИИ ОБМЕНА КОДОМ ---
-
-window.currentCodeMode = 'full';
-
-window.switchCodeMode = function(mode) {
-    window.currentCodeMode = mode;
-    document.getElementById('btn-mode-full').classList.toggle('active', mode === 'full');
-    document.getElementById('btn-mode-stats').classList.toggle('active', mode === 'stats');
-    window.openSaveCodeModal(); // Перегенерировать код
-}
-
-window.openSaveCodeModal = function() {
-    const modal = document.getElementById('save-code-modal');
-    const textarea = document.getElementById('save-code-area');
-    
-    // Генерируем код из текущих данных
-    try {
-        let dataToExport;
-        
-        if (window.currentCodeMode === 'stats') {
-            // Экспорт только статистики для напарника
-            dataToExport = {
-                type: 'stats',
-                name: window.playerData.name,
-                dmg: window.playerData.calculated_dmg || 0,
-                tough: window.playerData.calculated_tough || 0,
-                last_kills: window.playerData.last_run_kills || 0,
-                timestamp: Date.now()
-            };
-        } else {
-            // Полный экспорт
-            dataToExport = window.playerData;
-            dataToExport.type = 'full'; // Маркер типа
-        }
-
-        const json = JSON.stringify(dataToExport);
-        // Кодируем в Base64 с поддержкой Unicode (русских букв)
-        const code = btoa(unescape(encodeURIComponent(json)));
-        textarea.value = code;
-    } catch (e) {
-        console.error("Error generating save code", e);
-        textarea.value = "Ошибка генерации кода";
-    }
-    
-    modal.style.display = 'block';
-    // Центрирование (на всякий случай, хотя CSS есть)
-    modal.style.top = '50%';
-    modal.style.left = '50%';
-    modal.style.transform = 'translate(-50%, -50%)';
-}
-
-window.loadFromCode = function() {
-    const textarea = document.getElementById('save-code-area');
-    const code = textarea.value.trim();
-    
-    if (!code) {
-        window.showCustomAlert("❌ Введите код сохранения.");
-        return;
-    }
-    
-    try {
-        // Декодируем Base64
-        const json = decodeURIComponent(escape(atob(code)));
-        const data = JSON.parse(json);
-        
-        // Обработка статистики напарника
-        if (data.type === 'stats') {
-            window.partnerData = data;
-            window.showCustomAlert(`✅ <b>Статистика напарника загружена!</b><br>Имя: ${data.name}<br>Урон: ${parseInt(data.dmg).toLocaleString()}<br>Живучесть: ${parseInt(data.tough).toLocaleString()}<br>Убийств за ран: ${data.last_kills}`);
-            document.getElementById('save-code-modal').style.display = 'none';
-            // Обновляем UI калькуляторов если они открыты
-            if (document.getElementById('difficulty-calc-modal').style.display === 'block') window.openDifficultyCalculator();
-            if (document.getElementById('exp-calc-modal').style.display === 'block') window.calculateExp();
-            return;
-        }
-
-        if (data && typeof data === 'object') {
-            // Объединяем и восстанавливаем (логика как в handleFileSelect)
-            window.playerData = { ...window.playerData, ...data };
-            
-            // Восстанавливаем сложные объекты если их нет
-            if (!window.playerData.learnedSkills) window.playerData.learnedSkills = {};
-            if (!window.playerData.inventory) window.playerData.inventory = [];
-            if (!window.playerData.active_rents) window.playerData.active_rents = [];
-            if (!window.playerData.forgottenSkills) window.playerData.forgottenSkills = {};
-            if (!window.playerData.professions) window.playerData.professions = { 1: false, 2: false, 3: false };
-            if (!window.playerData.claimed_torments) window.playerData.claimed_torments = [];
-            if (!window.playerData.claimed_ranks) window.playerData.claimed_ranks = [];
-
-            window.saveToStorage();
-            window.restorePanels();
-            window.updateUI();
-            document.getElementById('save-code-modal').style.display = 'none';
-            window.showCustomAlert("✅ Данные успешно загружены из кода!");
-        } else {
-            window.showCustomAlert("❌ Ошибка: Некорректный код.");
-        }
-    } catch (err) {
-        console.error(err);
-        window.showCustomAlert("❌ Ошибка: Некорректный код или формат.");
-    }
-}
-
-window.copyCodeToClipboard = function() {
-    const textarea = document.getElementById('save-code-area');
-    textarea.select();
-    textarea.setSelectionRange(0, 99999); /* Для мобильных */
-    
-    try {
-        const successful = document.execCommand('copy');
-        if (successful) {
-            window.showCustomAlert("✅ Код скопирован в буфер обмена!");
-        } else {
-            window.showCustomAlert("❌ Не удалось скопировать.");
-        }
-    } catch (err) {
-        window.showCustomAlert("❌ Ошибка копирования.");
-    }
 }
 
 // --- DEBUG AND VALIDATION FUNCTIONS ---

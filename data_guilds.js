@@ -267,7 +267,7 @@ window.guildsData = {
             <p style="font-size: 0.8rem; margin: 10px 0; color: #888;">* Нажмите "УКРАСТЬ", затем выберите ячейку.</p>
             <hr>
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <p style="color: #d4af37; margin: 0;">🔖 ЗАКЕНЫ (1 🔖 = Кадала):</p>
+                <p style="color: #d4af37; margin: 0;">🔖 ЗАКЕНЫ (Только Братство):</p>
                 <button class="calc-nav-btn" onclick="buyZakens('buy')">💰 КУПИТЬ</button>
             </div>
             <div style="column-count: 2; font-size: 0.85rem;">
@@ -280,15 +280,14 @@ window.guildsData = {
         content: `
             <div style="border: 2px solid #66ff66; padding: 10px; background: rgba(102, 255, 102, 0.05); margin-bottom: 10px;">
                 <b style="color: #66ff66;">Плюсы ⬆️:</b><br>
-                📜🔺 Продажа 💍 х1.25💰 (после 2 покупок на ч.рынке, след. 10💍 по х5💰)<br>
-                📜🔺 Купленные на ч.рынке 💍 на 25%⏬ (Spectrum > х1 на 10%⏬)
+                📜🔺 Продажа 💍 х1.25💰 (после 2 покупок на ч.рынке, след. 10💍 по х5💰)
             </div>
             <div style="border: 2px solid #ff4444; padding: 10px; background: rgba(255, 68, 68, 0.05); margin-bottom: 10px;">
                 <b style="color: #ff4444;">Минусы ⬇️:</b><br>
-                📜🔻 Покупка выпавших 💍 на 25%⏫<br>
-                📜🔻 Опыт на 25%⏬ | 💊 на 50%⏫
+                📜🔻 Опыт на 25%⏬ | 💊 на 50%⏫<br>
+                📜🔻 Продажа ресурсов и камней на 25%⏬
             </div>
-            <p>❗ 🔖 можно покупать через гоблина без вступления в Братство.</p>
+            <p>❗ Только темное братство может покупать закены.</p>
             <p>📢 <b>Условие:</b> При выходе < 30 купленных 🔖 — штраф 10 🔖.</p>
             <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse; text-align: left;">
                 <tr style="color: #d4af37; border-bottom: 1px solid #5a0000;"><th>Ранг</th><th>🥢/сд.</th><th>🔖</th></tr>

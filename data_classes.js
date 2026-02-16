@@ -99,6 +99,7 @@ window.classesData = {
             </div>
             <div id="selected-agrade-item-display" style="text-align: center; color: #ffd700; margin-bottom: 10px; font-weight: bold; min-height: 1.2em;"></div>
             <input type="text" oninput="window.filterItems(this)" placeholder="Поиск предмета..." style="width: 100%; padding: 8px; background: #000; border: 1px solid #555; color: #fff; margin-bottom: 15px; box-sizing: border-box;">
+            <input type="text" name="search-items-150" oninput="window.filterItems(this)" placeholder="Поиск предмета..." style="width: 100%; padding: 8px; background: #000; border: 1px solid #555; color: #fff; margin-bottom: 15px; box-sizing: border-box;">
             <div class="item-list-container" style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
                 <div style="display: flex; flex-wrap: wrap; gap: 20px;">
                     <div style="flex: 1; min-width: 250px;">
@@ -148,6 +149,7 @@ window.classesData = {
             </div>
             <div id="selected-agrade-item-display" style="text-align: center; color: #ffd700; margin-bottom: 10px; font-weight: bold; min-height: 1.2em;"></div>
             <input type="text" oninput="window.filterItems(this)" placeholder="Поиск предмета..." style="width: 100%; padding: 8px; background: #000; border: 1px solid #555; color: #fff; margin-bottom: 15px; box-sizing: border-box;">
+            <input type="text" name="search-items-100" oninput="window.filterItems(this)" placeholder="Поиск предмета..." style="width: 100%; padding: 8px; background: #000; border: 1px solid #555; color: #fff; margin-bottom: 15px; box-sizing: border-box;">
             <div class="item-list-container" style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
                 <div style="display: flex; flex-wrap: wrap; gap: 20px;">
                     <div style="flex: 1; min-width: 250px;">
@@ -197,6 +199,7 @@ window.classesData = {
             </div>
             <div id="selected-agrade-item-display" style="text-align: center; color: #ffd700; margin-bottom: 10px; font-weight: bold; min-height: 1.2em;"></div>
             <input type="text" oninput="window.filterItems(this)" placeholder="Поиск предмета..." style="width: 100%; padding: 8px; background: #000; border: 1px solid #555; color: #fff; margin-bottom: 15px; box-sizing: border-box;">
+            <input type="text" name="search-items-50" oninput="window.filterItems(this)" placeholder="Поиск предмета..." style="width: 100%; padding: 8px; background: #000; border: 1px solid #555; color: #fff; margin-bottom: 15px; box-sizing: border-box;">
             <div class="item-list-container" style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
                 <div style="display: flex; flex-wrap: wrap; gap: 20px;">
                     <div style="flex: 1; min-width: 250px;">

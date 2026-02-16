@@ -1,5 +1,78 @@
 // --- ИНТЕРФЕЙС И ОТРИСОВКА ---
 
+window.currencyTooltipTimer = null;
+
+window.showCurrencyTooltip = function(event, type, amount) {
+    // Clear any existing timer
+    if (window.currencyTooltipTimer) {
+        clearTimeout(window.currencyTooltipTimer);
+    }
+
+    window.currencyTooltipTimer = setTimeout(() => {
+        let tooltip = document.getElementById('currency-tooltip');
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.id = 'currency-tooltip';
+            document.body.appendChild(tooltip);
+        }
+        
+        const typeMap = {
+            m: 'Мифрил',
+            g: 'Золото',
+            s: 'Серебро',
+            c: 'Медь',
+            y: 'Йена'
+        };
+
+        tooltip.innerHTML = `${typeMap[type]}: ${amount.toLocaleString('ru-RU')}`;
+        
+        tooltip.style.display = 'block';
+        tooltip.style.left = (event.clientX + 15) + 'px';
+        tooltip.style.top = (event.clientY + 15) + 'px';
+    }, 1000); // 1-секундная задержка
+}
+
+window.hideCurrencyTooltip = function() {
+    if (window.currencyTooltipTimer) {
+        clearTimeout(window.currencyTooltipTimer);
+        window.currencyTooltipTimer = null;
+    }
+    const tooltip = document.getElementById('currency-tooltip');
+    if (tooltip) tooltip.style.display = 'none';
+}
+
+window.closeAllWindows = function() {
+    const modalIds = [
+        'text-window',
+        'death-modal',
+        'skill-calc-modal',
+        'exp-calc-modal',
+        'difficulty-calc-modal',
+        'sell-leg-gem-modal',
+        'sell-craft-modal',
+        'buy-ancient-modal',
+        'buy-set-modal',
+        'buy-sell-agrade-modal',
+        'zaken-buy-modal',
+        'custom-prompt-modal',
+        'add-money-modal',
+        'gem-service-modal',
+        'multi-sell-modal',
+        'enchant-item-modal',
+        'theft-modal',
+        'rift-diff-modal',
+        'iframe-modal',
+        'custom-confirm-modal'
+    ];
+
+    modalIds.forEach(id => {
+        const modal = document.getElementById(id);
+        if (modal && modal.style.display !== 'none') {
+            modal.style.display = 'none';
+        }
+    });
+}
+
 window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) {
     const area = document.getElementById('buttons-area');
     const menuTitle = document.getElementById('menu-title');
@@ -88,16 +161,6 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
         infoMsg.innerHTML = `<p>❗❗ <b>НГ+:</b> после 5 актов герои проходят их в режиме приключений на сложности +1 (сундуки в конце акта).</p><p>❗ <b>НП:</b> макс. 6 за акт (12 на НГ+). Скидка: 10% (до 50%) на обычной, 5% на НГ+.</p><p>❗ <b>В ВП🏛️:</b> за убийство 👹 вовремя — возврат 25% 💰.</p><p style="color: #ff7979;">❗ Портал -1 и ниже: лег. камни не выпадают.</p>`;
         area.appendChild(infoMsg);
     }
-    if (menuId === 'professions_menu') {
-        const infoMsg = document.createElement('div');
-        infoMsg.style.background = 'rgba(212, 175, 55, 0.1)';
-        infoMsg.style.border = '1px solid #d4af37';
-        infoMsg.style.padding = '10px';
-        infoMsg.style.marginBottom = '15px';
-        infoMsg.style.fontSize = '0.9rem';
-        infoMsg.innerHTML = `<p><b>1️⃣ Профессия (20🌒):</b> Убить 2☠️ в локации класса.</p><p><b>2️⃣ Профессия (40🌒):</b> Убить 1 конкретного 👹.</p><p><b>3️⃣ Профессия (70🌒):</b> Пройти 🏛️ в одиночку.</p>`;
-        area.appendChild(infoMsg);
-    }
 
     // Управление историей
     if (!isBack && menuId !== window.historyStack[window.historyStack.length - 1]) {
@@ -115,6 +178,7 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
         homeBtn.className = 'd2-button nav-btn';
         homeBtn.innerHTML = 'ГЛАВНОЕ МЕНЮ<span class="btn-shimmer"></span>';
         homeBtn.onclick = () => {
+            window.closeAllWindows();
             window.historyStack = ['main'];
             window.pathNames = ['ГЛАВНАЯ'];
             window.renderMenu('main', 'Diablo III Mod', true);
@@ -124,6 +188,7 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
         backBtn.className = 'd2-button nav-btn';
         backBtn.innerHTML = 'НАЗАД<span class="btn-shimmer"></span>';
         backBtn.onclick = () => {
+            window.closeAllWindows();
             if (window.historyStack.length > 1) {
                 window.historyStack.pop();
                 window.pathNames.pop();
@@ -397,6 +462,27 @@ window.openIframe = function(url) {
     modal.style.display = 'flex';
 }
 
+window.applyMenuButtonTheme = function(className) {
+    const buttons = document.querySelectorAll('.d2-button');
+    buttons.forEach(btn => {
+        btn.classList.remove('menu-btn-barbarian', 'menu-btn-wizard', 'menu-btn-dh', 'menu-btn-monk', 'menu-btn-wd', 'menu-btn-crusader', 'menu-btn-necromancer');
+        
+        const map = {
+            "Варвар": "menu-btn-barbarian",
+            "Чародей": "menu-btn-wizard",
+            "Охотник на демонов": "menu-btn-dh",
+            "Монах": "menu-btn-monk",
+            "Колдун": "menu-btn-wd",
+            "Крестоносец": "menu-btn-crusader",
+            "Некромант": "menu-btn-necromancer"
+        };
+        
+        if (map[className]) {
+            btn.classList.add(map[className]);
+        }
+    });
+}
+
 window.applyTheme = function(className) {
     document.body.className = ''; // Сброс классов
     if (!className) return;
@@ -413,15 +499,47 @@ window.applyTheme = function(className) {
     
     if (map[className]) {
         document.body.classList.add(map[className]);
+        window.applyMenuButtonTheme(className); // Обновляем кнопки тоже
+    }
+
+    // Настройка пула ресурсов
+    const pool = document.getElementById('resource-pool');
+    if (pool) {
+        const resColors = {
+            "Варвар": { dark: "#8b0000", light: "#ff4500", name: "Ярость" }, // Оранжево-красный
+            "Чародей": { dark: "#4834d4", light: "#a29bfe", name: "Магическая энергия" }, // Фиолетовый
+            "Монах": { dark: "#b8860b", light: "#ffd700", name: "Дух" }, // Желтый
+            "Колдун": { dark: "#00008b", light: "#4169e1", name: "Мана" }, // Синий
+            "Охотник на демонов": { dark: "#5a0000", light: "#ff4444", name: "Ненависть" }, // Красный
+            "Крестоносец": { dark: "#005f99", light: "#00bfff", name: "Гнев" }, // Голубой
+            "Некромант": { dark: "#2f4f4f", light: "#00ced1", name: "Эссенция" } // Бирюзовый
+        };
+        const theme = resColors[className];
+        if (theme) {
+            pool.style.display = 'block';
+            pool.style.setProperty('--res-dark', theme.dark);
+            pool.style.setProperty('--res-light', theme.light);
+            pool.title = theme.name;
+        } else {
+            pool.style.display = 'none';
+        }
     }
 }
 
 window.updateUI = function() {
     if (!window.playerData || !window.playerData.name) return;
     
+    // Хелпер: обновляет значение input, только если он не в фокусе (чтобы не мешать вводу)
+    const setInput = (id, val) => {
+        const el = document.getElementById(id);
+        if (el && document.activeElement !== el) {
+            el.value = val;
+        }
+    };
+
     window.calculateRank();
 
-    document.getElementById('input-name').value = window.playerData.name;
+    setInput('input-name', window.playerData.name);
     
     const bestRank = window.playerData.claimed_ranks && window.playerData.claimed_ranks.length > 0 
         ? Math.min(...window.playerData.claimed_ranks) 
@@ -441,46 +559,39 @@ window.updateUI = function() {
     }
     const profEl = document.getElementById('view-profession');
     if (profEl) profEl.innerText = profText;
-
+    
     let xpBonusText = window.playerData.xp_bonus ? `(XP: ${window.playerData.xp_bonus})` : "";
-    document.getElementById('input-lvl').value = window.playerData.level;
+    setInput('input-lvl', window.playerData.level);
     document.getElementById('view-xp-bonus').innerText = xpBonusText;
     
     // Блокировка ввода уровня после 70
     const lvlInput = document.getElementById('input-lvl');
     if (lvlInput) lvlInput.disabled = (window.playerData.level >= 70);
-
-    document.getElementById('input-gold-g').value = window.playerData.gold_g;
-    document.getElementById('input-gold-s').value = window.playerData.gold_s;
-    document.getElementById('input-gold-c').value = window.playerData.gold_c;
-    const mithrilEl = document.getElementById('input-mithril');
-    if (mithrilEl) mithrilEl.value = window.playerData.mithril || 0;
-    document.getElementById('input-gold-y').value = window.playerData.gold_y;
-    document.getElementById('input-runes').value = window.playerData.runes;
-    document.getElementById('input-para').value = window.playerData.para;
-    document.getElementById('input-potions').value = window.playerData.potions;
+    setInput('input-runes', window.playerData.runes);
+    setInput('input-para', window.playerData.para);
+    setInput('input-potions', window.playerData.potions);
     
-    document.getElementById('input-stat-str').value = window.playerData.stat_str;
-    document.getElementById('input-stat-dex').value = window.playerData.stat_dex;
-    document.getElementById('input-stat-int').value = window.playerData.stat_int;
-    document.getElementById('input-stat-vit').value = window.playerData.stat_vit;
+    setInput('input-stat-str', window.playerData.stat_str);
+    setInput('input-stat-dex', window.playerData.stat_dex);
+    setInput('input-stat-int', window.playerData.stat_int);
+    setInput('input-stat-vit', window.playerData.stat_vit);
     
-    document.getElementById('input-kills').value = window.playerData.kills;
-    document.getElementById('input-elites-solo').value = window.playerData.elites_solo;
+    setInput('input-kills', window.playerData.kills);
+    setInput('input-elites-solo', window.playerData.elites_solo);
     
     const baseKillsInput = document.getElementById('input-base-kills');
     const baseElitesInput = document.getElementById('input-base-elites');
-    baseKillsInput.value = window.playerData.base_kills || 0;
-    baseElitesInput.value = window.playerData.base_elites || 0;
+    if (baseKillsInput && document.activeElement !== baseKillsInput) baseKillsInput.value = window.playerData.base_kills || 0;
+    if (baseElitesInput && document.activeElement !== baseElitesInput) baseElitesInput.value = window.playerData.base_elites || 0;
     
-    document.getElementById('input-bosses').value = window.playerData.bosses;
-    document.getElementById('input-gobs-solo').value = window.playerData.gobs_solo;
-    document.getElementById('input-gobs-assist').value = window.playerData.gobs_assist;
-    document.getElementById('input-max-vp').value = window.playerData.maxVp;
+    setInput('input-bosses', window.playerData.bosses);
+    setInput('input-gobs-solo', window.playerData.gobs_solo);
+    setInput('input-gobs-assist', window.playerData.gobs_assist);
+    setInput('input-max-vp', window.playerData.maxVp);
     document.getElementById('view-difficulty').innerText = window.playerData.difficulty || "Высокий";
     
     const actInput = document.getElementById('input-act');
-    if (actInput) {
+    if (actInput && document.activeElement !== actInput) {
         actInput.type = 'text'; // Разрешаем текст для "1+"
         const currentAct = window.playerData.act || 1;
         // Если акт > 5, показываем как НГ+ (1+, 2+ и т.д.)
@@ -488,27 +599,67 @@ window.updateUI = function() {
     }
     
     // Отображение скидки на НП
+    const currentAct = window.playerData.act || 1;
     const npCount = window.playerData.np_count || 0;
-    const npDiscount = Math.min(50, npCount * 10);
+    const isNGPlus = currentAct > 5;
+    const discountStep = isNGPlus ? 5 : 10;
+    const maxDiscount = isNGPlus ? 60 : 50;
+    const npDiscount = Math.min(maxDiscount, npCount * discountStep);
     const npDiscountEl = document.getElementById('view-np-discount');
     if (npDiscountEl) npDiscountEl.innerText = npDiscount > 0 ? `(-${npDiscount}%)` : "";
 
-    document.getElementById('input-lvl70-portal').value = window.playerData.lvl70_portal || "";
+    // Отображение бонусов к продаже
+    const sellBonusEl = document.getElementById('view-sell-bonus');
+    if (sellBonusEl) {
+        const g = (window.playerData.guild || "").toLowerCase();
+        const rank = window.playerData.rank || 0;
+        let bonuses = [];
 
-    document.getElementById('input-found-legs').value = window.playerData.found_legs;
-    document.getElementById('input-found-yellows').value = window.playerData.found_yellows;
-    document.getElementById('input-res-n').value = window.playerData.res_n || 0;
-    document.getElementById('input-res-dc').value = window.playerData.res_dc || 0;
-    document.getElementById('input-res-b').value = window.playerData.res_b || 0;
-    document.getElementById('input-res-a').value = window.playerData.res_a || 0;
-    document.getElementById('input-reagents').value = window.playerData.reagents || 0;
-    document.getElementById('input-death-breath').value = window.playerData.death_breath;
+        // Торговцы
+        if (g.includes('торговц')) {
+            const sellPercents = [10, 13, 15, 17, 19, 21, 23, 25, 28, 32, 35];
+            const p = sellPercents[rank] || 10;
+            bonuses.push(`<span style="color:#66ff66">Торговцы: +${p}% (Все)</span>`);
+        }
+        // Вампир
+        if (g.includes('вампир')) {
+            bonuses.push(`<span style="color:#ff4444">Вампир: -50% (Все)</span>`);
+        }
+        // Гэмблер
+        if (g.includes('гэмблер')) {
+            bonuses.push(`<span style="color:#66ff66">Гэмблер: +25% (Предметы)</span>`);
+            bonuses.push(`<span style="color:#ff4444">Гэмблер: -25% (Рес/Камни)</span>`);
+        }
+        // Воры
+        if (g.includes('вор') && !g.includes('воришка')) bonuses.push(`<span style="color:#66ff66">Вор: +50% (Предметы)</span>`);
+        if (g.includes('воришка')) bonuses.push(`<span style="color:#66ff66">Воришка: +20% (Предметы)</span>`);
+        // Маги (штраф на предметы)
+        if (g.includes('чародей') && !g.includes('ученик')) {
+            const wizPenalties = [10, 12, 14, 16, 18, 20, 22, 25, 28, 30];
+            const p = wizPenalties[Math.max(0, Math.min(rank - 1, 9))] || 10;
+            bonuses.push(`<span style="color:#ff4444">Чародей: -${p}% (Предметы)</span>`);
+        }
+        if (g.includes('ученик чародея')) bonuses.push(`<span style="color:#ff4444">Ученик: -9% (Предметы)</span>`);
+
+        sellBonusEl.innerHTML = bonuses.length > 0 ? bonuses.join('<br>') : "Нет бонусов к продаже";
+    }
+
+    setInput('input-lvl70-portal', window.playerData.lvl70_portal || "");
+
+    setInput('input-found-legs', window.playerData.found_legs);
+    setInput('input-found-yellows', window.playerData.found_yellows);
+    setInput('input-res-n', window.playerData.res_n || 0);
+    setInput('input-res-dc', window.playerData.res_dc || 0);
+    setInput('input-res-b', window.playerData.res_b || 0);
+    setInput('input-res-a', window.playerData.res_a || 0);
+    setInput('input-reagents', window.playerData.reagents || 0);
+    setInput('input-death-breath', window.playerData.death_breath);
 
     document.getElementById('view-rank').innerText = `${window.playerData.rank} (${window.playerData.rankName})`;
 
-    document.getElementById('input-runes-sold').value = window.playerData.runes_sold;
-    document.getElementById('input-reputation').value = window.playerData.reputation;
-    document.getElementById('input-deals').value = window.playerData.deals;
+    setInput('input-runes-sold', window.playerData.runes_sold);
+    setInput('input-reputation', window.playerData.reputation);
+    setInput('input-deals', window.playerData.deals);
 
     // Отображение текущей цены продажи руны
     const inputRunesSold = document.getElementById('input-runes-sold');
@@ -547,8 +698,8 @@ window.updateUI = function() {
         runePriceEl.innerText = price > 0 ? `(${window.formatCurrency(Math.floor(price))})` : "";
     }
 
-    document.getElementById('input-chests').value = window.playerData.chests_found;
-    document.getElementById('input-steals').value = window.playerData.steals;
+    setInput('input-chests', window.playerData.chests_found);
+    setInput('input-steals', window.playerData.steals);
     
     // Отображение оставшихся попыток кражи
     const stealsInput = document.getElementById('input-steals');
@@ -595,7 +746,7 @@ window.updateUI = function() {
     }
 
     window.updateTheftTable(); // Обновление таблицы краж
-    document.getElementById('input-zakens').value = window.playerData.zakens;
+    setInput('input-zakens', window.playerData.zakens);
     
     document.getElementById('view-potion-price').innerText = window.playerData.potion_price ? `(${window.playerData.potion_price})` : "";
     document.getElementById('view-zaken-discount').innerText = window.playerData.zaken_discount || "-";
@@ -638,17 +789,31 @@ window.updateUI = function() {
     // Обновляем состояние кнопок профессий в открытом окне (если оно открыто)
     if (window.updateProfessionButtonState) window.updateProfessionButtonState();
 
-    // Re-render current menu to update locks without animation
-    const currentMenuId = window.historyStack[window.historyStack.length - 1];
-    const currentTitle = window.pathNames[window.pathNames.length - 1];
-    if (currentMenuId && window.gameData && window.gameData[currentMenuId] && currentMenuId !== 'skills_study_menu') {
-         window.renderMenu(currentMenuId, currentTitle, true, true);
+    // Обновление кнопок меню (снятие замков)
+    if (window.historyStack && window.pathNames && window.gameData && window.renderMenu) {
+        const currentMenuId = window.historyStack[window.historyStack.length - 1];
+        const currentTitle = window.pathNames[window.pathNames.length - 1];
+        if (currentMenuId && (window.gameData[currentMenuId] || currentMenuId === 'main') && currentMenuId !== 'skills_study_menu') {
+             window.renderMenu(currentMenuId, currentTitle, true, true);
+        }
+    }
+
+    // Обновление контента открытого текстового окна (для таблицы кражи и кнопок внутри текста)
+    const textWindow = document.getElementById('text-window');
+    if (textWindow && textWindow.style.display === 'block') {
+        // Если открыта таблица кражи, обновляем её
+        if (document.getElementById('tr-theft-1')) {
+            window.updateTheftTable();
+        }
+        // Обновляем кнопки профессий внутри текста
+        if (window.updateProfessionButtonState) window.updateProfessionButtonState();
     }
 
     // Авто-ресайз полей
     document.querySelectorAll('.char-input').forEach(input => {
         window.autoResizeInput(input);
     });
+    window.updateResourcePool();
 }
 
 window.updateTheftTable = function() {
@@ -876,11 +1041,51 @@ window.savePlayerData = function() {
     const baseKills = getVal('input-base-kills'); if (baseKills !== null) window.playerData.base_kills = baseKills;
     const baseElites = getVal('input-base-elites'); if (baseElites !== null) window.playerData.base_elites = baseElites;
     
-    const gg = getVal('input-gold-g', true); if (gg !== null) window.playerData.gold_g = gg;
-    const gs = getVal('input-gold-s', true); if (gs !== null) window.playerData.gold_s = gs;
-    const gc = getVal('input-gold-c', true); if (gc !== null) window.playerData.gold_c = gc;
-    const gy = getVal('input-gold-y', true); if (gy !== null) window.playerData.gold_y = gy;
-    const mithril = getVal('input-mithril'); if (mithril !== null) window.playerData.mithril = mithril;
+    let gg = getVal('input-gold-g', true);
+    let gs = getVal('input-gold-s', true);
+    let gc = getVal('input-gold-c', true);
+    let gy = getVal('input-gold-y', true);
+    let mithril = getVal('input-mithril');
+
+    // Автоматическая конвертация валют при вводе >= 100
+    if (gy !== null && gy >= 100) {
+        const extra = Math.floor(gy / 100);
+        gy = gy % 100;
+        if (gc !== null) gc += extra; else gc = extra;
+        document.getElementById('input-gold-y').value = gy;
+        document.getElementById('input-gold-c').value = gc;
+    }
+    if (gc !== null && gc >= 100) {
+        const extra = Math.floor(gc / 100);
+        gc = gc % 100;
+        if (gs !== null) gs += extra; else gs = extra;
+        document.getElementById('input-gold-c').value = gc;
+        document.getElementById('input-gold-s').value = gs;
+    }
+    if (gs !== null && gs >= 100) {
+        const extra = Math.floor(gs / 100);
+        gs = gs % 100;
+        if (gg !== null) gg += extra; else gg = extra;
+        document.getElementById('input-gold-s').value = gs;
+        document.getElementById('input-gold-g').value = gg;
+    }
+    if (gg !== null && gg >= 100) {
+        const extra = Math.floor(gg / 100);
+        gg = gg % 100;
+        if (mithril !== null) mithril += extra; else mithril = extra;
+        document.getElementById('input-gold-g').value = gg;
+        document.getElementById('input-mithril').value = mithril;
+    }
+
+    if (gg !== null) window.playerData.gold_g = gg;
+    if (gs !== null) window.playerData.gold_s = gs;
+    if (gc !== null) window.playerData.gold_c = gc;
+    if (gy !== null) window.playerData.gold_y = gy;
+    
+    if (mithril !== null) {
+        window.playerData.mithril = Math.min(mithril, 10); // Ограничение 10
+        if (mithril > 10) document.getElementById('input-mithril').value = 10;
+    }
     
     const runes = getVal('input-runes', true); if (runes !== null) window.playerData.runes = runes;
     const para = getVal('input-para', true); if (para !== null) window.playerData.para = para;
@@ -951,7 +1156,12 @@ window.savePlayerData = function() {
         else if (g.includes('громила')) mult = 1.75;
         else if (g.includes('лорд войны')) mult = 1.23;
         
-        const reward = Math.floor(dKills * mult * window.playerData.level);
+        // Учитываем бонус ранга
+        const rank = window.playerData.rank || 0;
+        const rankMultipliers = [0, 1.5, 2.5, 4, 6, 9, 12, 15, 18, 21.5, 27];
+        const rankMult = (rank > 0) ? (rankMultipliers[rank] || 1) : 1;
+
+        const reward = Math.floor(dKills * mult * window.playerData.level * rankMult);
         window.addYen(reward);
     }
     
@@ -961,6 +1171,8 @@ window.savePlayerData = function() {
     }
 
     window.calculateRank();
+    // Обновляем отображение ранга сразу
+    document.getElementById('view-rank').innerText = `${window.playerData.rank} (${window.playerData.rankName})`;
     window.applyGuildRewards(oldData);
     window.checkGuildExitConditions();
     window.checkGuildProgression(); // Проверка на повышение
@@ -971,6 +1183,8 @@ window.savePlayerData = function() {
     document.querySelectorAll('.char-input').forEach(input => {
         window.autoResizeInput(input);
     });
+    window.updateResourcePool();
+    window.updateCoinStacks();
 }
 
 window.renderLearnedSkillsWidget = function() {
@@ -1185,5 +1399,184 @@ window.filterItems = function(inputElement) {
 window.autoResizeInput = function(input) {
     if (!input || input.classList.contains('name-input')) return;
     const val = input.value.toString();
-    input.style.width = (Math.max(1, val.length) + 3) + 'ch';
+// Для парагона делаем отступ меньше (1 символ вместо 3)
+    const extra = (input.id === 'input-para') ? 1 : 3;
+    input.style.width = (Math.max(1, val.length) + extra) + 'ch';}
+
+window.updateResourcePool = function() {
+    const pool = document.getElementById('resource-pool');
+    const liquid = pool ? pool.querySelector('.resource-liquid') : null;
+    if (!pool || !liquid) return;
+
+    const g = (window.playerData.guild || "").toLowerCase();
+    const rank = window.playerData.rank || 0;
+    
+    // Если ранг максимальный (10), заполняем полностью
+    if (rank >= 10) {
+        liquid.style.height = '100%';
+        // pool.title сохраняем от темы или ставим свой
+        return;
+    }
+
+    let progress = 0;
+    let tooltip = "";
+
+    const calcPct = (current, target) => Math.min(100, Math.max(0, (current / target) * 100));
+    const kills = (window.playerData.kills || 0) + (window.playerData.base_kills || 0);
+
+    if (g.includes('салага')) {
+        const pStr = calcPct(window.playerData.stat_str, 1000);
+        const pKills = calcPct(kills, 1700);
+        progress = Math.max(pStr, pKills);
+        tooltip = `Салага -> Громила/Лорд\nСила: ${window.playerData.stat_str} / 1000\nУбийства: ${kills} / 1700`;
+    } 
+    else if (g.includes('торговц')) {
+        const targets = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000];
+        const target = targets[rank] || 10000;
+        progress = calcPct(window.playerData.stat_vit, target);
+        tooltip = `Торговцы: Ранг ${rank} -> ${rank+1}\nЖивучесть: ${window.playerData.stat_vit} / ${target}`;
+    }
+    else if (g.includes('охотник на гоблинов')) {
+        const targets = [85, 215, 430, 685, 1330, 1870, 2315, 2750, 3200, 4000];
+        const target = targets[rank] || 4000;
+        progress = calcPct(window.playerData.reputation, target);
+        tooltip = `Охотник на гоблинов: Ранг ${rank} -> ${rank+1}\nРепутация: ${window.playerData.reputation} / ${target}`;
+    }
+    else if (g.includes('охотник на ☠️')) {
+        const targets = [85, 215, 430, 685, 1030, 1370, 1715, 2050, 2400, 3000];
+        const target = targets[rank] || 3000;
+        progress = calcPct(window.playerData.reputation, target);
+        tooltip = `Охотник на Элиту: Ранг ${rank} -> ${rank+1}\nРепутация: ${window.playerData.reputation} / ${target}`;
+    }
+    else if (g.includes('вампир') || g.includes('чародей')) {
+        const tInt = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000];
+        const tPara = [50, 100, 200, 300, 450, 600, 700, 800, 900, 1000];
+        const targetInt = tInt[rank] || 10000;
+        const targetPara = tPara[rank] || 1000;
+        const pInt = calcPct(window.playerData.stat_int, targetInt);
+        const pPara = calcPct(window.playerData.para, targetPara);
+        progress = Math.max(pInt, pPara);
+        tooltip = `Маги: Ранг ${rank} -> ${rank+1}\nИнтеллект: ${window.playerData.stat_int} / ${targetInt}\nПарагон: ${window.playerData.para} / ${targetPara}`;
+    }
+    else if (g.includes('гэмблер')) {
+        const tDex = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000];
+        const tDeals = [7, 20, 45, 70, 100, 135, 170, 210, 255, 313];
+        const targetDex = tDex[rank] || 10000;
+        const targetDeals = tDeals[rank] || 313;
+        const pDex = calcPct(window.playerData.stat_dex, targetDex);
+        const pDeals = calcPct(window.playerData.deals, targetDeals);
+        progress = Math.max(pDex, pDeals);
+        tooltip = `Гэмблер: Ранг ${rank} -> ${rank+1}\nЛовкость: ${window.playerData.stat_dex} / ${targetDex}\nСделки: ${window.playerData.deals} / ${targetDeals}`;
+    }
+    else if (g.includes('вор') && !g.includes('воришка')) {
+        const targets = [7, 20, 45, 70, 100, 135, 170, 210, 255, 300];
+        const target = targets[rank] || 300;
+        progress = calcPct(window.playerData.steals, target);
+        tooltip = `Вор: Ранг ${rank} -> ${rank+1}\nКражи: ${window.playerData.steals} / ${target}`;
+    }
+    else if (g.includes('искатель') || g.includes('джимми')) {
+        // Для искателей приключений и богатства (Джимми не имеет рангов, но пусть будет)
+        const targets = g.includes('богатства') ? [8, 15, 24, 35, 47, 60, 75, 92, 110, 135] : [5, 10, 16, 23, 31, 40, 50, 61, 73, 90];
+        const target = targets[rank] || 135;
+        progress = calcPct(window.playerData.found_legs, target);
+        tooltip = `Искатель: Ранг ${rank} -> ${rank+1}\nЛегендарки: ${window.playerData.found_legs} / ${target}`;
+    }
+    else if (g.includes('громила') || g.includes('лорд войны')) {
+        const tStr = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000];
+        const tKills = [1700, 4300, 8600, 13700, 20600, 27400, 34300, 41000, 48000, 60000];
+        const targetStr = tStr[rank] || 10000;
+        const targetKills = tKills[rank] || 60000;
+        const pStr = calcPct(window.playerData.stat_str, targetStr);
+        const pKills = calcPct(kills, targetKills);
+        progress = Math.max(pStr, pKills);
+        tooltip = `Соратники: Ранг ${rank} -> ${rank+1}\nСила: ${window.playerData.stat_str} / ${targetStr}\nУбийства: ${kills} / ${targetKills}`;
+    }
+    else {
+        progress = 100;
+    }
+
+    liquid.style.height = `${progress}%`;
+    if (tooltip) pool.title = tooltip;
+}
+
+window.updateCoinStacks = function() {
+    const types = ['m', 'g', 's', 'c', 'y']; // Мифрил, Золото, Серебро, Медь, Йена
+    const containerHeight = 75; // Макс высота стопки в пикселях
+    const coinHeight = 4; // Высота одной монеты
+
+    types.forEach(type => {
+        const stackEl = document.getElementById(`stack-${type}`);
+        if (!stackEl) return;
+        
+        let val = 0;
+        let count = 0;
+
+        if (type === 'm') {
+            val = window.playerData.mithril || 0;
+            count = Math.min(val, 10); // Ограничение мифрила до 10
+        } else {
+            val = window.playerData[`gold_${type}`] || 0;
+            count = Math.min(val, 100); // Ограничение монет до 100
+        }
+        
+        // Синхронизация количества элементов (чтобы анимировать только новые)
+        const currentCount = stackEl.children.length;
+
+        if (count > currentCount) {
+            // Добавляем новые монеты
+            const step = (containerHeight - coinHeight) / 99;
+
+            for (let i = currentCount; i < count; i++) {
+                let el;
+                let targetBottom;
+
+                if (type === 'm') {
+                    el = document.createElement('div');
+                    el.className = 'mithril-gem';
+                    const seed = i * 123.45;
+                    const rndOffset = (Math.sin(seed) * 3);
+                    const rndRot = (Math.cos(seed) * 30);
+                    
+                    targetBottom = `${i * 7}px`;
+                    el.style.left = `calc(50% - 7px + ${rndOffset}px)`;
+                    el.style.transform = `rotate(${rndRot}deg)`;
+                } else {
+                    el = document.createElement('div');
+                    el.className = `coin coin-${type}`;
+                    targetBottom = `${i * step}px`;
+                }
+
+                el.style.zIndex = i;
+                // Начальная позиция для анимации (сверху)
+                el.style.bottom = '100px'; 
+                el.style.opacity = '0';
+                
+                stackEl.appendChild(el);
+
+                // Запуск анимации падения
+                // Используем setTimeout вместо requestAnimationFrame для надежности при загрузке
+                setTimeout(() => {
+                    el.style.bottom = targetBottom;
+                    el.style.opacity = '1';
+                }, 50);
+            }
+        } else if (count < currentCount) {
+            // Удаляем лишние сверху
+            while (stackEl.children.length > count) {
+                stackEl.lastChild.remove();
+            }
+        }
+        
+        let typeName = '';
+        if (type === 'm') typeName = 'Мифрила';
+        else if (type === 'g') typeName = 'Золота';
+        else if (type === 's') typeName = 'Серебра';
+        else if (type === 'c') typeName = 'Меди';
+        else if (type === 'y') typeName = 'Йен';
+        
+        // Убираем стандартный title, чтобы использовать кастомный тултип
+        stackEl.removeAttribute('title');
+        stackEl.onmousemove = (e) => window.showCurrencyTooltip(e, type, val);
+        stackEl.onmouseleave = () => window.hideCurrencyTooltip();
+    });
 }

@@ -1,5 +1,25 @@
 // --- ИНИЦИАЛИЗАЦИЯ ---
 
+let currencyInterval;
+let currencyTimeout;
+
+window.startCurrencyChange = function(type, amount) {
+    // Первое изменение сразу при нажатии
+    window.addCurrency(type, amount);
+    
+    // Запускаем таймаут, а после него - интервал для ускоренного изменения
+    currencyTimeout = setTimeout(() => {
+        currencyInterval = setInterval(() => {
+            window.addCurrency(type, amount);
+        }, 100); // Повторять каждые 100мс
+    }, 500); // Задержка перед ускорением 500мс
+}
+
+window.stopCurrencyChange = function() {
+    clearTimeout(currencyTimeout);
+    clearInterval(currencyInterval);
+}
+
 window.screamerSound = new Audio('screamer.mp3');
 window.craftSound = new Audio('diablo-3-craft-done.mp3');
 
@@ -24,6 +44,7 @@ window.onload = function() {
     window.restorePanels();
     window.restoreWidgetPositions();
     window.updateUI();
+    window.updateCoinStacks(); // перемещенный вызов
     window.renderMenu('main', 'ГЛАВНАЯ', true);
 
     // Настройка и попытка автозапуска музыки
@@ -47,7 +68,7 @@ window.onload = function() {
             const modals = [
                 'add-money-modal', 'sell-leg-gem-modal', 'sell-craft-modal', 'buy-ancient-modal', 'buy-set-modal', 'buy-sell-agrade-modal',
                 'custom-prompt-modal', 'custom-confirm-modal', 'iframe-modal', 
-                'multi-sell-modal', 'gem-service-modal', 'sell-craft-modal', 'save-code-modal',
+                'multi-sell-modal', 'gem-service-modal', 'sell-craft-modal',
                 'zaken-buy-modal', 'skill-calc-modal', 'exp-calc-modal', 'difficulty-calc-modal',
                 'death-modal', 'text-window'
             ]; // Ordered from most to least specific/top-level
@@ -102,7 +123,7 @@ window.onload = function() {
     startRandomGlitches();
 
     // Инициализация перетаскивания для всех модальных окон
-    const draggableIds = ['text-window', 'death-modal', 'skill-calc-modal', 'exp-calc-modal', 'difficulty-calc-modal', 'zaken-buy-modal', 'sell-craft-modal', 'gem-service-modal', 'multi-sell-modal', 'custom-confirm-modal', 'custom-prompt-modal', 'add-money-modal', 'sell-leg-gem-modal', 'buy-ancient-modal', 'buy-set-modal', 'buy-sell-agrade-modal', 'melt-item-modal', 'learned-skills-widget', 'inventory-widget', 'save-code-modal'];
+    const draggableIds = ['text-window', 'death-modal', 'skill-calc-modal', 'exp-calc-modal', 'difficulty-calc-modal', 'zaken-buy-modal', 'sell-craft-modal', 'gem-service-modal', 'multi-sell-modal', 'custom-confirm-modal', 'custom-prompt-modal', 'add-money-modal', 'sell-leg-gem-modal', 'buy-ancient-modal', 'buy-set-modal', 'buy-sell-agrade-modal', 'melt-item-modal', 'learned-skills-widget', 'inventory-widget'];
     draggableIds.forEach(id => {
         window.makeDraggable(document.getElementById(id));
     });

@@ -651,7 +651,7 @@ window.skillDB = {
             name: "Бешенство",
             category: "Основное",
             runes: [
-                { name: "⚔️ Базовая", dmg: 220, aoe: 1, buffDmg: 75, buffDuration: 4, desc: "Накапливает 4 ярости. С каждым ударом +15% Скор. атаки (до 75%) на 4 сек." },
+                { name: "⚔️ Базовая", dmg: 220, aoe: 1, effInc: 75, buffDuration: 4, desc: "Накапливает 4 ярости. С каждым ударом +15% Скор. атаки (до 75%) на 4 сек." },
                 { name: "❄️ Летящий топор", dmg: 220, aoe: 1, dmg2: 75, aoe2: 1.5, buffDmg: 75, buffDuration: 4, desc: "25% шанс метнуть топор (300% урона по линии) (Холод)." },
                 { name: "❄️ Берсерк", dmg: 220, aoe: 1, resGain: 2, buffDmg: 75, buffDuration: 4, desc: "Накапливает 6 ярости (+2) (Холод)." },
                 { name: "⚔️ Авангард", dmg: 220, aoe: 1, customCost: 5, customCostDesc: "Скорость 25%", buffDmg: 75, buffDuration: 4, desc: "+25% скорости передвижения (5 стаков)." },

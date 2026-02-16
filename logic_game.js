@@ -473,17 +473,24 @@ window.checkGuildProgression = function() {
     
     // 1. Воришка -> Вор
     if (g.includes('воришка') && window.playerData.steals >= 7) {
+        if (window.playerData.refused_thief_promotion) return false;
+
         window.showCustomConfirm(
             "Вы достигли мастерства! Хотите стать Вором?",
             () => {
                 window.selectProfileItem('Вор', 'Гильдии > Темное Братство', true);
+            },
+            () => {
+                window.playerData.refused_thief_promotion = true;
+                window.saveToStorage();
             }
         );
+        return true;
     }
 
     // 2. Салага -> Громила или Лорд Войны
     else if (g.includes('салага') && (window.playerData.stat_str >= 1000 || (window.playerData.kills + (window.playerData.base_kills || 0)) >= 1700)) {
-        if (window.playerData.refused_salaga_promotion) return;
+        if (window.playerData.refused_salaga_promotion) return false;
 
         // Тут выбор из двух, поэтому просто уведомляем или открываем меню
         // Но по заданию нужно окно выбора. Реализуем через кастомное окно с 2 кнопками
@@ -537,6 +544,7 @@ window.checkGuildProgression = function() {
         };
         
         modal.style.display = 'block';
+        return true;
     }
     // 3. Ученик чародея -> Чародей
     else if (g.includes('ученик чародея')) {
@@ -552,6 +560,7 @@ window.checkGuildProgression = function() {
                     window.saveToStorage();
                 }
             );
+            return true;
         }
     }
     // 4. Помощник охотника -> Охотник на гоблинов или Охотник на элиту
@@ -585,7 +594,9 @@ window.checkGuildProgression = function() {
         };
         
         modal.style.display = 'block';
+        return true;
     }
+    return false;
 }
 
 window.checkTormentReward = function() {
@@ -1327,13 +1338,69 @@ window.claimProfessionReward = function(profNum) {
     // Выдача наград
     if (profNum === 1) {
         window.playerData.gold_s += 1;
-        window.playerData.runes += 1.5;
-        window.playerData.para += 1.5;
-        window.showCustomAlert("💰 Получено: 1🥈, 1.5 📖, 1.5 ⏳<br>🔓 Открыто: +2 Активных, +1 Пассивный слот.");
+        
+        // Расчет опыта с учетом бонусов гильдии
+        let baseRunes = 1.5;
+        let basePara = 1.5;
+        const g = (window.playerData.guild || "").toLowerCase();
+        let mod = 1;
+
+        if (g.includes('охотник на гоблинов')) { mod += 0.2; }
+        else if (g.includes('охотник на ☠️')) { mod += 0.33; }
+        else if (g.includes('помощник охотника')) { mod += 0.15; }
+        else if (g.includes('ученик чародея')) { mod += 0.1; }
+        else if (g.includes('вампир')) {
+            const ranks = [0.10, 0.13, 0.16, 0.20, 0.25, 0.40, 0.50, 0.60, 0.75, 1.00];
+            const r = (window.playerData.rank || 1) - 1;
+            mod += (ranks[Math.min(r, 9)] || 0.10);
+        }
+        else if (g.includes('гэмблер')) { mod -= 0.25; }
+        else if (g.includes('вор') && !g.includes('воришка')) { mod -= 0.175; }
+        else if (g.includes('воришка')) { mod -= 0.1; }
+        else if (g.includes('салага')) { mod -= 0.1; }
+        else if (g.includes('громила')) { mod -= 0.2; }
+        else if (g.includes('лорд войны')) { mod += 0.07; }
+
+        let finalRunes = baseRunes * mod;
+        let finalPara = basePara * mod;
+
+        window.playerData.runes = parseFloat((window.playerData.runes + finalRunes).toFixed(2));
+        window.playerData.para = parseFloat((window.playerData.para + finalPara).toFixed(2));
+        
+        window.showCustomAlert(`💰 Получено: 1🥈<br>⚔️ Опыт: ${finalRunes.toFixed(2)} 📖, ${finalPara.toFixed(2)} ⏳<br>🔓 Открыто: +2 Активных, +1 Пассивный слот.`);
     }
     else if (profNum === 2) {
         window.playerData.gold_s += 10;
-        window.showCustomAlert("💰 Получено: 10🥈<br>🔓 Открыто: +2 Активных, +1 Пассивный слот.");
+        
+        // Начисление опыта за босса (3 руны / 3 парагона) с учетом гильдии
+        let bossRunes = 3;
+        let bossPara = 3;
+        const g = (window.playerData.guild || "").toLowerCase();
+        let mod = 1;
+
+        if (g.includes('охотник на гоблинов')) { mod += 0.2; }
+        else if (g.includes('охотник на ☠️')) { bossRunes *= 1.33; bossPara *= 1.33; }
+        else if (g.includes('помощник охотника')) { bossRunes *= 1.15; bossPara *= 1.15; }
+        else if (g.includes('ученик чародея')) { mod += 0.1; }
+        else if (g.includes('вампир')) {
+            const ranks = [0.10, 0.13, 0.16, 0.20, 0.25, 0.40, 0.50, 0.60, 0.75, 1.00];
+            const r = (window.playerData.rank || 1) - 1;
+            mod += (ranks[Math.min(r, 9)] || 0.10);
+        }
+        else if (g.includes('гэмблер')) { mod -= 0.25; }
+        else if (g.includes('вор') && !g.includes('воришка')) { mod -= 0.175; }
+        else if (g.includes('воришка')) { mod -= 0.1; }
+        else if (g.includes('салага')) { mod -= 0.1; }
+        else if (g.includes('громила')) { mod -= 0.2; }
+        else if (g.includes('лорд войны')) { mod += 0.07; }
+
+        bossRunes *= mod;
+        bossPara *= mod;
+
+        window.playerData.runes = parseFloat((window.playerData.runes + bossRunes).toFixed(2));
+        window.playerData.para = parseFloat((window.playerData.para + bossPara).toFixed(2));
+
+        window.showCustomAlert(`💰 Получено: 10🥈<br>⚔️ Опыт за босса: ${bossRunes.toFixed(2)} 📖, ${bossPara.toFixed(2)} ⏳<br>🔓 Открыто: +2 Активных, +1 Пассивный слот.`);
     }
     else if (profNum === 3) {
         window.showCustomAlert("🔓 Открыто: +1 Активный, +2 Пассивных слота.<br>💍 Кольца с боссов теперь ваши!");

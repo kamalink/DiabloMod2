@@ -217,14 +217,40 @@
     text-transform: uppercase;
 }
 
-#skill-calc-modal #calc-skill-select option {
+#skill-calc-modal select option {
     background: #111;
     color: #ccc;
 }
 
-#skill-calc-modal #calc-skill-select option[disabled] {
+#skill-calc-modal select option[disabled] {
     color: #888 !important;
     font-style: italic;
     font-weight: normal;
-    background: #222;
+    background: #222222;
+}
+
+.finance-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.finance-inputs {
+    flex-grow: 1;
+}
+.coin-area-wrapper {
+    position: relative;
+    height: 145px; /* Увеличили высоту, чтобы кнопки не обрезались */
+    margin-top: 10px;
+        width: 130px; /* Немного увеличил ширину для отступа */
+
+}
+/* Увеличенный текст в калькуляторе навыков */
+#skill-calc-modal select {
+    font-size: 1.1rem;
+    padding: 8px;
+}
+#skill-calc-modal label {
+    font-size: 1rem;
 }
