@@ -1379,10 +1379,13 @@ window.openSellInventory = function(mode) {
             sellPrice = Math.floor(item.buyPrice);
         } else {
             sellPrice = Math.floor(item.buyPrice * 0.5);
-
             
             const g = (window.playerData.guild || "").toLowerCase();
-
+            if (g.includes('вампир')) {
+                const vampMults = [0.50, 0.48, 0.46, 0.44, 0.42, 0.40, 0.38, 0.36, 0.34, 0.30];
+                const mult = vampMults[Math.min(playerRank, 9)] || 0.5;
+                sellPrice = Math.floor(sellPrice * mult);
+            }
             if (g.includes('чародей') && !g.includes('ученик')) {
                 const wizPenalties = [0.90, 0.88, 0.86, 0.84, 0.82, 0.80, 0.78, 0.75, 0.72, 0.70];
                 const mult = wizPenalties[Math.min(playerRank, 9)] || 0.9;
