@@ -544,9 +544,13 @@ window.confirmRiftEntry = function(offset, specificCost) {
             window.playerData.np_count = (window.playerData.np_count || 0) + 1;
         }
         window.playerData.current_run_diff = offset;
+        
+        // Явно устанавливаем флаг ВП (true/false), чтобы сбросить его для НП
+        window.playerData.is_vp = !!params.isVP;
+        
         if (params.isVP) {
-            window.playerData.is_vp = true;
             window.playerData.vp_empowered = (empCheckbox && empCheckbox.checked);
+            window.playerData.vp_close_mode = false; // Сброс режима закрытия
         }
         window.playerData.current_rift_cost = Math.floor(finalCost);
 
@@ -631,16 +635,19 @@ window.closeNephalemRift = function(success) {
             return;
         }
 
-        let options = `<option value=">15">> 15 мин</option>`;
-        for (let i = 15; i >= 1; i--) {
-            options += `<option value="${i}">${i} мин</option>`;
-        }
-        
-        const msg = `<p>Выберите время прохождения:</p><select id="vp-close-time" style="background:#000; color:#fff; padding:5px; font-size:1rem;"></select>`;
-        
-        window.showCustomConfirm(msg, () => {
-            const timeVal = document.getElementById('vp-close-time').value;
-            window.finishVPClose(timeVal);
+        // HTML для выбора времени (ПОЛЗУНОК)
+        const html = `
+            ⚠️ ВНИМАНИЕ<br>Выберите время прохождения:<br><br>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+                <input type="range" id="rift-time-slider" min="1" max="15" value="10" style="width:80%;" oninput="document.getElementById('rift-time-val').innerText = this.value + ' мин'">
+                <div id="rift-time-val" style="color:#d4af37; font-weight:bold; font-size:1.2rem;">10 мин</div>
+            </div>
+        `;
+
+        window.showCustomConfirm(html, () => {
+            const slider = document.getElementById('rift-time-slider');
+            const minutes = slider ? parseInt(slider.value) : 15;
+            window.calculateRiftRewards(minutes);
         });
         return;
     }
@@ -671,55 +678,49 @@ window.closeNephalemRift = function(success) {
     }, 1500);
 }
 
-window.finishVPClose = function(timeVal) {
-    const offset = window.playerData.current_run_diff || 0;
-    
-    const timeMultMap = {
-        ">15": 2.0, "15": 1.8, "14": 1.6, "13": 1.4, "12": 1.2, "11": 1.1,
-        "10": 1.0, "9": 0.8, "8": 0.6, "7": 0.4, "6": 0.3, "5": 0.2,
-        "4": 0.1, "3": 0.066, "2": 0, "1": 0
+window.calculateRiftRewards = function(minutes) {
+    // Таблица множителей времени из data_world.js
+    const timeMap = {
+        15: 1.8, 14: 1.6, 13: 1.4, 12: 1.2, 11: 1.1, 10: 1.0,
+        9: 0.8, 8: 0.6, 7: 0.4, 6: 0.3, 5: 0.2, 4: 0.1, 3: 0.066, 2: 0, 1: 0
     };
-    const timeMult = timeMultMap[timeVal] || 0;
-
-    const isLate = (timeVal === ">15"); 
     
+    let timeMult = timeMap[minutes] !== undefined ? timeMap[minutes] : 0;
+    // Если каким-то образом > 15 (хотя слайдер до 15), даем x2.0 по таблице
+    if (minutes > 15) timeMult = 2.0;
+
+    // Логика множителя от сложности (для ВП)
+    const offset = window.playerData.current_run_diff || 0;
     let diffMult = 1.0;
-    if (isLate) {
-        if (offset === 0) diffMult = 1.0;
-        else if (offset === -1) diffMult = 0.67;
-        else if (offset === -2) diffMult = 0.44;
-        else if (offset === -3) diffMult = 0.29;
-    } else {
-        if (offset === 0) diffMult = 1.75;
-        else if (offset === -1) diffMult = 1.17;
-        else if (offset === -2) diffMult = 0.78;
-        else if (offset === -3) diffMult = 0.52;
-    }
-
-    const totalMultiplier = timeMult * diffMult;
-    window.activeRiftMultiplier = totalMultiplier;
     
-    let refundMsg = "";
-    if (!isLate) {
-        const totalCost = window.playerData.current_rift_cost || 0;
-        if (totalCost > 0) {
-            const refund = Math.floor(totalCost * 0.25);
-            window.addYen(refund);
-            refundMsg = `<br><span style="color:#66ff66">Возврат 25%: ${window.formatCurrency(refund)}</span>`;
-        }
+    if (offset === 0) diffMult = 1.75;
+    else if (offset === -1) diffMult = 1.17;
+    else if (offset === -2) diffMult = 0.78;
+    else if (offset === -3) diffMult = 0.52;
+
+    window.activeRiftMultiplier = timeMult * diffMult;
+    window.activeRiftExpMultiplier = timeMult * diffMult;
+    window.riftSuccess = true;
+    
+    // Возврат 25% золота
+    const cost = window.playerData.current_rift_cost || 0;
+    const returnAmount = Math.floor(cost * 0.25);
+    
+    if (returnAmount > 0) {
+        window.addYen(returnAmount);
     }
 
-    window.playerData.vp_close_mode = true;
-
+    window.playerData.vp_close_mode = true; // Режим начисления опыта
     document.getElementById('active-rift-modal').style.display = 'none';
     window.saveToStorage();
     window.updateUI();
 
-    window.showCustomAlert(`✅ ВП закрыт!<br>Время: ${timeVal} мин<br>Множитель: x${totalMultiplier.toFixed(2)}${refundMsg}<br>Введите статистику убийств для начисления наград.`);
+    window.showCustomAlert(
+        `✅ ВП закрыт!<br>Время: ${minutes} мин<br>Множитель: x${window.activeRiftMultiplier.toFixed(2)}<br>Возврат 25%: ${window.formatCurrency(returnAmount)}<br><br>Введите статистику убийств для начисления наград.`
+    );
     
-    setTimeout(() => {
-        window.nextRiftSequenceStep(1);
-    }, 1500);
+    // Автоматически открываем калькулятор опыта
+    setTimeout(() => window.openExpCalculator(), 1000);
 }
 
 window.nextRiftSequenceStep = function(step) {

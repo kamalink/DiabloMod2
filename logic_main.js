@@ -180,6 +180,7 @@ window.startRandomGlitches = function() {
     }, 90000);
 }
 
+
 // Таймер бездействия
 window.resetIdleTimer = function() {
     const screen = document.getElementById('idle-screen');

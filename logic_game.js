@@ -584,13 +584,15 @@ window.checkGuildProgression = function() {
         yesBtn.onclick = function() {
             modal.style.display = 'none';
             yesBtn.style.background = ''; yesBtn.style.borderColor = ''; // Сброс
-            window.selectProfileItem('Охотник на гоблинов', 'Гильдии > Гильдия Охотников', true);
+            const content = window.gameData['goblin_hunter'] ? window.gameData['goblin_hunter'].content : null;
+            window.selectProfileItem('Охотник на гоблинов', 'Гильдии > Гильдия Охотников', true, content);
         };
         
         noBtn.onclick = function() {
             modal.style.display = 'none';
             noBtn.style.background = ''; noBtn.style.borderColor = ''; // Сброс
-            window.selectProfileItem('Охотник на ☠️', 'Гильдии > Гильдия Охотников', true);
+            const content = window.gameData['elite_hunter'] ? window.gameData['elite_hunter'].content : null;
+            window.selectProfileItem('Охотник на ☠️', 'Гильдии > Гильдия Охотников', true, content);
         };
         
         modal.style.display = 'block';
@@ -1529,6 +1531,11 @@ window.handleSecondLifeClick = function(skillName) {
             };
 
             btn2.innerText = "10 ⏳ (Парагон)";
+            
+            // Сброс состояния перед проверкой
+            btn2.disabled = false;
+            btn2.style.opacity = "1";
+            btn2.title = "";
             
             // Торговцы не могут платить парагоном
             if (g.includes('торговц')) {
