@@ -485,6 +485,7 @@ window.applyMenuButtonTheme = function(className) {
 
 window.applyTheme = function(className) {
     document.body.className = ''; // Сброс классов
+
     if (!className) return;
     
     const map = {
@@ -591,7 +592,7 @@ window.updateUI = function() {
     document.getElementById('view-difficulty').innerText = window.playerData.difficulty || "Высокий";
     
     const actInput = document.getElementById('input-act');
-    if (actInput && document.activeElement !== actInput) {
+    if (actInput) {
         actInput.type = 'text'; // Разрешаем текст для "1+"
         const currentAct = window.playerData.act || 1;
         // Если акт > 5, показываем как НГ+ (1+, 2+ и т.д.)
@@ -1544,6 +1545,9 @@ window.updateCoinStacks = function() {
                     el = document.createElement('div');
                     el.className = `coin coin-${type}`;
                     targetBottom = `${i * step}px`;
+                    if (type !== 'y') {
+                        el.style.animationDelay = `${Math.random() * 5}s`;
+                    }
                 }
 
                 el.style.zIndex = i;

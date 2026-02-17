@@ -11,16 +11,22 @@ window.openExpCalculator = function() {
     document.getElementById('exp-elites').value = 0;
     document.getElementById('exp-bosses').value = 0;
     
-    const contractLabel = document.getElementById('exp-contract-label');
-    const contractCheck = document.getElementById('exp-contract-check');
-    if (contractLabel && contractCheck) {
-        contractCheck.checked = false;
-        const g = (window.playerData.guild || "").toLowerCase();
-        if (g.includes('громила') || g.includes('лорд войны')) {
-            contractLabel.style.display = 'inline-block';
-        } else {
-            contractLabel.style.display = 'none';
-        }
+    const mobsContractLabel = document.getElementById('exp-mobs-contract-label');
+    const mobsContractCheck = document.getElementById('exp-mobs-contract-check');
+    const elitesContractLabel = document.getElementById('exp-elites-contract-label');
+    const elitesContractCheck = document.getElementById('exp-elites-contract-check');
+
+    // Hide both first
+    if (mobsContractLabel) mobsContractLabel.style.display = 'none';
+    if (elitesContractLabel) elitesContractLabel.style.display = 'none';
+    if (mobsContractCheck) mobsContractCheck.checked = false;
+    if (elitesContractCheck) elitesContractCheck.checked = false;
+
+    const g = (window.playerData.guild || "").toLowerCase();
+    if (g.includes('громила') || g.includes('лорд войны')) {
+        if (mobsContractLabel) mobsContractLabel.style.display = 'inline-block';
+    } else if (g.includes('охотник на ☠️')) {
+        if (elitesContractLabel) elitesContractLabel.style.display = 'inline-block';
     }
     
     const chestRow = document.getElementById('exp-chests-row');
@@ -28,7 +34,6 @@ window.openExpCalculator = function() {
     if (chestRow) { chestRow.style.display = 'none'; document.getElementById('exp-chests').value = 0; }
     if (bigChestRow) { bigChestRow.style.display = 'none'; document.getElementById('exp-big-chests').value = 0; }
 
-    const g = (window.playerData.guild || "").toLowerCase();
     
     const bossRow = document.getElementById('exp-bosses').parentNode;
     if (window.activeRiftMultiplier !== null && window.riftSuccess === false) {
@@ -187,12 +192,14 @@ window.applyExpCalculation = function() {
     const dElites = Math.max(0, elites - (window.playerData.last_input_elites || 0));
     
     window.playerData.last_run_kills = dMobs;
-
+    
     const g = (window.playerData.guild || "").toLowerCase();
-    const contractCheck = document.getElementById('exp-contract-check');
+    const mobsContractCheck = document.getElementById('exp-mobs-contract-check');
+    const elitesContractCheck = document.getElementById('exp-elites-contract-check');
+
     if ((g.includes('громила') || g.includes('лорд войны')) && window.partnerData && window.partnerData.last_kills !== undefined) {
         if (dMobs > window.partnerData.last_kills) {
-            if (contractCheck) contractCheck.checked = true;
+            if (mobsContractCheck) mobsContractCheck.checked = true;
         }
     }
 
@@ -241,7 +248,7 @@ window.applyExpCalculation = function() {
         const rankMultipliers = [0, 1.5, 2.5, 4, 6, 9, 12, 15, 18, 21.5, 27];
         const rankMult = (rank > 0) ? (rankMultipliers[rank] || 1) : 1;
 
-        if (contractCheck && contractCheck.checked && (g.includes('громила') || g.includes('лорд войны'))) {
+        if (mobsContractCheck && mobsContractCheck.checked && (g.includes('громила') || g.includes('лорд войны'))) {
             mult *= 3;
         }
         
@@ -266,7 +273,11 @@ window.applyExpCalculation = function() {
             }
         } else if (g.includes('охотник на ☠️')) {
             if (dElites > 0) {
-                hYen += dElites * 100 * lvl * rankMult;
+                let eliteGold = dElites * 100 * lvl * rankMult;
+                if (elitesContractCheck && elitesContractCheck.checked) {
+                    eliteGold *= 3;
+                }
+                hYen += eliteGold;
                 hRep += dElites * 3;
             }
             if (bosses > 0) {
@@ -318,13 +329,7 @@ window.applyExpCalculation = function() {
         rewardMsg += `<br><br><span style="color:#ff4444">💔 СЛОМАНО ПРЕДМЕТОВ:</span><br>${brokenItems.join('<br>')}`;
     }
 
-    if (window.playerData.vp_close_mode) {
-        window.playerData.is_vp = false;
-        window.playerData.vp_close_mode = false;
-        window.playerData.is_in_np = false;
-        window.playerData.vp_empowered = false;
-        window.playerData.current_rift_cost = 0;
-    }
+    
     
     if (window.playerData.adventurer_loc_penalty) {
         window.playerData.adventurer_loc_penalty = false;
@@ -341,6 +346,17 @@ window.applyExpCalculation = function() {
 
     if (!progressionTriggered) {
         window.showCustomAlert(`✅ Получено: ${addRunes} 📖 и ${addPara} ⏳${rewardMsg}<br>Статистика обновлена.`);
+        
+        // Если активен множитель портала, запускаем цепочку продажи и сбрасываем состояние
+        if (window.activeRiftMultiplier) {
+            window.playerData.is_vp = false;
+            window.playerData.vp_close_mode = false;
+            window.playerData.is_in_np = false;
+            window.playerData.vp_empowered = false;
+            window.playerData.current_rift_cost = 0;
+            window.playerData.current_run_diff = 0;
+            setTimeout(() => window.sellItemsBulk(), 1000);
+        }
     }
 }
 

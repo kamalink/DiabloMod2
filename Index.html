@@ -136,15 +136,20 @@
             <label for="exp-mobs">💀 Мобы:</label>
             <div style="display:flex; align-items:center; gap:5px;">
                 <span id="exp-partner-kills" style="font-size:0.7rem; color:#888; display:none;" title="Убийства напарника">(Нап: 0)</span>
-                <label id="exp-contract-label" style="font-size:0.7rem; color:#d4af37; display:none; cursor:pointer; margin-right:5px;" title="Контракт: х3 золото">
-                    <input type="checkbox" id="exp-contract-check"> x3
+                <label id="exp-mobs-contract-label" style="font-size:0.7rem; color:#d4af37; display:none; cursor:pointer; margin-right:5px;" title="Контракт: х3 золото">
+                    <input type="checkbox" id="exp-mobs-contract-check"> x3
                 </label>
                 <input type="number" id="exp-mobs" value="0" oninput="calculateExp()">
             </div>
         </div>
         <div class="exp-input-row">
             <label for="exp-elites">☠️ Элита:</label>
-            <input type="number" id="exp-elites" value="0" oninput="calculateExp()">
+            <div style="display:flex; align-items:center; gap:5px;">
+                <label id="exp-elites-contract-label" style="font-size:0.7rem; color:#d4af37; display:none; cursor:pointer; margin-right:5px;" title="Контракт: х3 золото">
+                    <input type="checkbox" id="exp-elites-contract-check"> x3
+                </label>
+                <input type="number" id="exp-elites" value="0" oninput="calculateExp()">
+            </div>
         </div>
         <div class="exp-input-row">
             <label for="exp-bosses">👹 Боссы:</label>
@@ -762,9 +767,9 @@
                 <div class="stat-group-title"><span class="group-toggle" onclick="window.toggleStatGroup(this)">[-]</span> Финансы</div>
                 <div class="stat-group-content finance-content" style="position: relative; min-height: 150px;">
                     <div class="finance-inputs">
-                        <div class="stat-row">Руны: <input type="number" id="input-runes" class="char-input" value="0" step="0.1" oninput="savePlayerData()"> 📖</div>
-                        <div class="stat-row">Парагон: <input type="number" id="input-para" class="char-input" value="0" step="0.1" oninput="savePlayerData()"> ⏳</div>
-                        <div class="stat-row">Закены: <input type="number" id="input-zakens" class="char-input" value="0" oninput="savePlayerData()"> 🔖 <span id="view-zaken-discount" style="font-size: 0.7rem;"></span></div>
+                        <div class="stat-row">Руны: <input type="number" id="input-runes" class="char-input" value="0" step="0.1" onchange="savePlayerData()"> 📖</div>
+                        <div class="stat-row">Парагон: <input type="number" id="input-para" class="char-input" value="0" step="0.1" onchange="savePlayerData()"> ⏳</div>
+                        <div class="stat-row">Закены: <input type="number" id="input-zakens" class="char-input" value="0" onchange="savePlayerData()"> 🔖 <span id="view-zaken-discount" style="font-size: 0.7rem;"></span></div>
                     </div>
                     <div class="coin-area-wrapper">
                         <div class="currency-controls">
@@ -772,7 +777,7 @@
                             <div class="control-group"><button onmousedown="startCurrencyChange('g', 1)" onmouseup="stopCurrencyChange()" onmouseleave="stopCurrencyChange()">+</button><button onmousedown="startCurrencyChange('g', -1)" onmouseup="stopCurrencyChange()" onmouseleave="stopCurrencyChange()">-</button></div>
                             <div class="control-group"><button onmousedown="startCurrencyChange('s', 1)" onmouseup="stopCurrencyChange()" onmouseleave="stopCurrencyChange()">+</button><button onmousedown="startCurrencyChange('s', -1)" onmouseup="stopCurrencyChange()" onmouseleave="stopCurrencyChange()">-</button></div>
                             <div class="control-group"><button onmousedown="startCurrencyChange('c', 1)" onmouseup="stopCurrencyChange()" onmouseleave="stopCurrencyChange()">+</button><button onmousedown="startCurrencyChange('c', -1)" onmouseup="stopCurrencyChange()" onmouseleave="stopCurrencyChange()">-</button></div>
-                            <div class="control-group"><button onmousedown="startCurrencyChange('y', 10)" onmouseup="stopCurrencyChange()" onmouseleave="stopCurrencyChange()">+</button><button onmousedown="startCurrencyChange('y', -10)" onmouseup="stopCurrencyChange()" onmouseleave="stopCurrencyChange()">-</button></div>
+                            <div class="control-group"><button onmousedown="startCurrencyChange('y', 1)" onmouseup="stopCurrencyChange()" onmouseleave="stopCurrencyChange()">+</button><button onmousedown="startCurrencyChange('y', -1)" onmouseup="stopCurrencyChange()" onmouseleave="stopCurrencyChange()">-</button></div>
                         </div>
                         <div id="coin-stacks" class="coin-stacks-container">
                             <div id="stack-m" class="coin-stack mithril-stack"></div>
@@ -792,21 +797,21 @@
                     <div class="stat-row">Профессия: <span id="view-profession" class="stat-value">Нет</span></div>
                     <div class="stat-row">Орден: <span id="view-guild" class="stat-value">Нет</span></div>
                     <div class="stat-row">Ранг: <span id="view-rank" class="stat-value">0</span> 🧾</div>
-                    <div class="stat-row">Продано рун: <input type="number" id="input-runes-sold" class="char-input" value="0" oninput="savePlayerData()" onclick="savePlayerData()" onkeyup="savePlayerData()"> 📖</div>
-                    <div class="stat-row">Репутация: <input type="number" id="input-reputation" class="char-input" value="0" oninput="savePlayerData()" onclick="savePlayerData()" onkeyup="savePlayerData()"> 🎭</div>
-                    <div class="stat-row">Сделки: <input type="number" id="input-deals" class="char-input" value="0" oninput="savePlayerData()" onclick="savePlayerData()" onkeyup="savePlayerData()"> 🤝</div>
-                    <div class="stat-row">Сундуки: <input type="number" id="input-chests" class="char-input" value="0" oninput="savePlayerData()" onclick="savePlayerData()" onkeyup="savePlayerData()"> 📦</div>
-                    <div class="stat-row">Украдено: <span id="view-theft-chance" style="font-size: 0.7rem; color: #aaa; margin-right: 3px;"></span><input type="number" id="input-steals" class="char-input" value="0" oninput="savePlayerData()" onclick="savePlayerData()" onkeyup="savePlayerData()"> <span id="view-theft-fine" style="font-size: 0.6rem;"></span></div>
+                    <div class="stat-row">Продано рун: <input type="number" id="input-runes-sold" class="char-input" value="0" onchange="savePlayerData()"> 📖</div>
+                    <div class="stat-row">Репутация: <input type="number" id="input-reputation" class="char-input" value="0" onchange="savePlayerData()"> 🎭</div>
+                    <div class="stat-row">Сделки: <input type="number" id="input-deals" class="char-input" value="0" onchange="savePlayerData()"> 🤝</div>
+                    <div class="stat-row">Сундуки: <input type="number" id="input-chests" class="char-input" value="0" onchange="savePlayerData()"> 📦</div>
+                    <div class="stat-row">Украдено: <span id="view-theft-chance" style="font-size: 0.7rem; color: #aaa; margin-right: 3px;"></span><input type="number" id="input-steals" class="char-input" value="0" onchange="savePlayerData()"> <span id="view-theft-fine" style="font-size: 0.6rem;"></span></div>
                 </div>
             </div>
 
             <div class="stat-group">
                 <div class="stat-group-title"><span class="group-toggle" onclick="window.toggleStatGroup(this)">[-]</span> Атрибуты</div>
                 <div class="stat-group-content">
-                    <div class="stat-row" id="input-stat-str-box">Сила: <input type="number" id="input-stat-str" class="char-input" value="0" oninput="savePlayerData()" onclick="savePlayerData()" onkeyup="savePlayerData()"> 🏮</div>
-                    <div class="stat-row" id="input-stat-dex-box">Ловкость: <input type="number" id="input-stat-dex" class="char-input" value="0" oninput="savePlayerData()" onclick="savePlayerData()" onkeyup="savePlayerData()"> 🥢</div>
-                    <div class="stat-row" id="input-stat-int-box">Интеллект: <input type="number" id="input-stat-int" class="char-input" value="0" oninput="savePlayerData()" onclick="savePlayerData()" onkeyup="savePlayerData()"> 🔮</div>
-                    <div class="stat-row" id="input-stat-vit-box">Живучесть: <input type="number" id="input-stat-vit" class="char-input" value="0" oninput="savePlayerData()" onclick="savePlayerData()" onkeyup="savePlayerData()"> ⛑️</div>
+                    <div class="stat-row" id="input-stat-str-box">Сила: <input type="number" id="input-stat-str" class="char-input" value="0" onchange="savePlayerData()"> 🏮</div>
+                    <div class="stat-row" id="input-stat-dex-box">Ловкость: <input type="number" id="input-stat-dex" class="char-input" value="0" onchange="savePlayerData()"> 🥢</div>
+                    <div class="stat-row" id="input-stat-int-box">Интеллект: <input type="number" id="input-stat-int" class="char-input" value="0" onchange="savePlayerData()"> 🔮</div>
+                    <div class="stat-row" id="input-stat-vit-box">Живучесть: <input type="number" id="input-stat-vit" class="char-input" value="0" onchange="savePlayerData()"> ⛑️</div>
                 </div>
             </div>
         </div>
@@ -816,11 +821,11 @@
             <div class="stat-group">
                 <div class="stat-group-title"><span class="group-toggle" onclick="window.toggleStatGroup(this)">[-]</span> Бой и Прогресс</div>
                 <div class="stat-group-content">
-                    <div class="stat-row">Убито мобов: <input type="number" id="input-kills" class="char-input" value="0" oninput="savePlayerData()" onclick="savePlayerData()" onkeyup="savePlayerData()"> 💀</div>
-                    <div class="stat-row">Элита (соло): <input type="number" id="input-elites-solo" class="char-input" value="0" oninput="savePlayerData()" onclick="savePlayerData()" onkeyup="savePlayerData()"> ☠️</div>
-                    <div class="stat-row">Боссы: <input type="number" id="input-bosses" class="char-input" value="0" oninput="savePlayerData()" onclick="savePlayerData()" onkeyup="savePlayerData()"> 👹</div>
+                    <div class="stat-row">Убито мобов: <input type="number" id="input-kills" class="char-input" value="0" onchange="savePlayerData()"> 💀</div>
+                    <div class="stat-row">Элита (соло): <input type="number" id="input-elites-solo" class="char-input" value="0" onchange="savePlayerData()"> ☠️</div>
+                    <div class="stat-row">Боссы: <input type="number" id="input-bosses" class="char-input" value="0" onchange="savePlayerData()"> 👹</div>
                     <div class="stat-row" style="font-size: 0.7rem; color: #888;">Изначально: <input type="number" id="input-base-kills" class="char-input" style="width: 35px;" value="0" onchange="savePlayerData()">💀 / <input type="number" id="input-base-elites" class="char-input" style="width: 35px;" value="0" onchange="savePlayerData()">☠️</div>
-                    <div class="stat-row">Гоблины: <input type="number" id="input-gobs-solo" class="char-input" value="0" oninput="savePlayerData()" onclick="savePlayerData()" onkeyup="savePlayerData()">(С) / <input type="number" id="input-gobs-assist" class="char-input" value="0" oninput="savePlayerData()" onclick="savePlayerData()" onkeyup="savePlayerData()">(П)</div>
+                    <div class="stat-row">Гоблины: <input type="number" id="input-gobs-solo" class="char-input" value="0" onchange="savePlayerData()">(С) / <input type="number" id="input-gobs-assist" class="char-input" value="0" onchange="savePlayerData()">(П)</div>
                     <div class="stat-row" style="font-size: 0.7rem;">Портал 70: <input type="text" id="input-lvl70-portal" class="char-input" style="width: 30px;" onchange="savePlayerData()"></div>
                     <div class="stat-row">Сложность: <span id="view-difficulty" class="stat-value">T1</span></div>
                     <div class="stat-row">Акт: <input type="number" id="input-act" class="char-input" value="1" min="1" max="5" onchange="savePlayerData()"> <span id="view-np-discount" style="font-size: 0.7rem; color: #aaa;"></span></div>
@@ -830,8 +835,8 @@
             <div class="stat-group">
                 <div class="stat-group-title"><span class="group-toggle" onclick="window.toggleStatGroup(this)">[-]</span> Лут и Крафт</div>
                 <div class="stat-group-content">
-                    <div class="stat-row">Найдено Лег: <input type="number" id="input-found-legs" class="char-input" value="0" oninput="savePlayerData()" onclick="savePlayerData()" onkeyup="savePlayerData()"> 📙</div>
-                    <div class="stat-row">Найдено Желтых: <input type="number" id="input-found-yellows" class="char-input" value="0" oninput="savePlayerData()" onclick="savePlayerData()" onkeyup="savePlayerData()"> </div>
+                    <div class="stat-row">Найдено Лег: <input type="number" id="input-found-legs" class="char-input" value="0" onchange="savePlayerData()"> 📙</div>
+                    <div class="stat-row">Найдено Желтых: <input type="number" id="input-found-yellows" class="char-input" value="0" onchange="savePlayerData()"> </div>
                     <div class="stat-row">Ресурсы: <input type="number" id="input-res-n" class="char-input" value="0" style="width:25px;" onchange="savePlayerData()">📓 <input type="number" id="input-res-dc" class="char-input" value="0" style="width:25px;" onchange="savePlayerData()">📘📒 <input type="number" id="input-res-b" class="char-input" value="0" style="width:25px;" onchange="savePlayerData()">📙 <input type="number" id="input-res-a" class="char-input" value="0" style="width:25px;" onchange="savePlayerData()">📕</div>
                     <div class="stat-row">Реагенты: <input type="number" id="input-reagents" class="char-input" value="0" onchange="savePlayerData()"></div>
                     <div class="stat-row">Дыхание смерти: <input type="number" id="input-death-breath" class="char-input" value="0" onchange="savePlayerData()"> 🧪</div>

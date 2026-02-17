@@ -236,6 +236,20 @@ window.showCustomConfirm = function(msg, onYes, onNo) {
 
     yesBtn.style.display = 'inline-block';
     noBtn.style.display = 'inline-block';
+    
+    // Полный сброс состояния кнопок (фикс залипания disabled/opacity)
+    yesBtn.disabled = false;
+    yesBtn.style.opacity = '1';
+    yesBtn.title = '';
+    yesBtn.style.background = '';
+    yesBtn.style.borderColor = '';
+
+    noBtn.disabled = false;
+    noBtn.style.opacity = '1';
+    noBtn.title = '';
+    noBtn.style.background = '';
+    noBtn.style.borderColor = '';
+
     yesBtn.innerText = 'ДА';
     noBtn.innerText = 'ОТМЕНА';
     

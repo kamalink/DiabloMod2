@@ -927,13 +927,21 @@ th { color: var(--theme-highlight); }
 .resource-liquid {
     position: absolute;
     bottom: 0;
-    left: 0;
-    width: 100%;
+    left: -50%;
+    width: 200%;
     height: 85%; /* Уровень заполнения */
     background: linear-gradient(to top, var(--res-dark, #444), var(--res-light, #888));
     box-shadow: 0 0 15px var(--res-light, #888);
     opacity: 0.9;
-    transition: all 0.5s ease-out;
+    transition: height 0.5s ease-out;
+    animation: liquidSlosh 3s ease-in-out infinite;
+    transform-origin: 50% 100%;
+}
+
+@keyframes liquidSlosh {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-3deg); }
+    75% { transform: rotate(3deg); }
 }
 
 /* Частицы (пузырьки) */
@@ -959,6 +967,7 @@ th { color: var(--theme-highlight); }
     z-index: 5;
     height: 75px; /* Уменьшена высота, чтобы не перекрывать ввод */
     align-items: flex-end;
+    pointer-events: auto;
 }
 
 .coin-stack {
@@ -980,10 +989,17 @@ th { color: var(--theme-highlight); }
     transition: bottom 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s;
 }
 
+@keyframes coinShimmer {
+    0%, 90% { filter: brightness(1); }
+    95% { filter: brightness(1.5); }
+    100% { filter: brightness(1); }
+}
+
 /* Цвета монет */
 .coin-c { background: linear-gradient(to right, #8b4513, #cd7f32, #8b4513); }
 .coin-s { background: linear-gradient(to right, #696969, #c0c0c0, #696969); }
 .coin-g { background: linear-gradient(to right, #b8860b, #ffd700, #b8860b); }
+.coin-c, .coin-s, .coin-g { animation: coinShimmer 5s infinite; }
 .coin-y { background: radial-gradient(circle at 30% 30%, #8d6e63, #4e342e); box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.5); }
 
 /* Мифрил */

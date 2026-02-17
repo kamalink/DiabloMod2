@@ -538,6 +538,11 @@ window.sellCraftedItemFromModal = function() {
             window.updateUI();
             window.showCustomAlert(`✅ Предмет продан! Получено: ${window.formatCurrency(totalYen)}`);
             selectedProps.forEach(el => el.classList.remove('selected'));
+            
+            // Если мы в цепочке наград, открываем окно снова, чтобы можно было нажать "Далее"
+            if (window.activeRiftMultiplier) {
+                setTimeout(() => window.openSellCraftedModal(), 500);
+            }
         }
     );
 }
@@ -809,7 +814,7 @@ window.buyAncientImmediate = function(mode = 'buy') {
     const playerGradeIdx = window.getPlayerGradeIndex(window.playerData.level);
     const diff = Math.max(0, itemGradeIdx - playerGradeIdx);
     const gradePenaltyMult = 1 + (diff * 0.2);
-    if (gradePenaltyMult > 1) bonuses.push(`Грейд +${Math.round((gradePenaltyMult-1)*100)}%`);
+    if (mode === 'buy' && gradePenaltyMult > 1) bonuses.push(`Грейд +${Math.round((gradePenaltyMult-1)*100)}%`);
 
     let totalPercent = 0;
     let propsList = [];
@@ -828,7 +833,10 @@ window.buyAncientImmediate = function(mode = 'buy') {
         propsList.push(el.innerText);
     });
     
-    let finalPrice = basePrice * typeMult * (totalPercent / 100) * gradePenaltyMult;
+    let finalPrice = basePrice * typeMult * (totalPercent / 100);
+    if (mode === 'buy') {
+        finalPrice *= gradePenaltyMult;
+    }
     
     const g = (window.playerData.guild || "").toLowerCase();
     let buyMult = 1.0;
@@ -954,7 +962,7 @@ window.buySetImmediate = function(mode = 'buy') {
     const playerGradeIdx = window.getPlayerGradeIndex(window.playerData.level);
     const diff = Math.max(0, itemGradeIdx - playerGradeIdx);
     const gradePenaltyMult = 1 + (diff * 0.2);
-    if (gradePenaltyMult > 1) bonuses.push(`Грейд +${Math.round((gradePenaltyMult-1)*100)}%`);
+    if (mode === 'buy' && gradePenaltyMult > 1) bonuses.push(`Грейд +${Math.round((gradePenaltyMult-1)*100)}%`);
 
     let countMult = 1;
     if (grade === 'S+') {
