@@ -55,7 +55,7 @@ window.openDifficultyCalculator = function() {
                         const totalRuneDmg = (runeObj.dmg || 0) + (runeObj.dmg2 || 0) + (runeObj.passiveDmg || 0);
                         if (totalRuneDmg > maxDmg) {
                             maxDmg = totalRuneDmg;
-                            bestSkillName = `${sName} ()`;
+                            bestSkillName = `${sName} (${rName})`;
                         }
                     }
                 });

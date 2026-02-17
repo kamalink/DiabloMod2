@@ -200,6 +200,10 @@ window.addCurrency = function(type, amount) {
         case 'c': change = amount * 100; break;
         case 'y': change = amount; break;
     }
+    
+    // Защита от ухода в минус при ручном изменении
+    if (currentYen + change < 0) return;
+
     window.setMoneyFromYen(currentYen + change);
     window.updateUI(); // updateUI вызывает saveToStorage
 }

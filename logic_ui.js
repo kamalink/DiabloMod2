@@ -1514,10 +1514,10 @@ window.updateCoinStacks = function() {
 
         if (type === 'm') {
             val = window.playerData.mithril || 0;
-            count = Math.min(val, 10); // Ограничение мифрила до 10
+            count = Math.max(0, Math.min(val, 10)); // Ограничение мифрила до 10
         } else {
             val = window.playerData[`gold_${type}`] || 0;
-            count = Math.min(val, 100); // Ограничение монет до 100
+            count = Math.max(0, Math.min(val, 100)); // Ограничение монет до 100
         }
         
         // Синхронизация количества элементов (чтобы анимировать только новые)

@@ -240,9 +240,9 @@
     flex-grow: 1;
 }
 .coin-area-wrapper {
-    position: relative;
+    
     position: absolute; /* Вырываем из потока, чтобы наложить сверху */
-    right: 10px;
+    right: -5px;
     bottom: 5px;
     height: 145px; /* Увеличили высоту, чтобы кнопки не обрезались */
      width: 130px;
