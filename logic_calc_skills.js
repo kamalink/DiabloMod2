@@ -282,6 +282,15 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
         }
     }
     const cdDiscount = 1 + (cooldown * 0.1);
+    
+    // Парсинг длительности для DoT (Урон со временем)
+    let duration = 0;
+    const descText = runeData.desc || "";
+    // Ищем "в течение X сек" или "за X сек"
+    let durMatch = descText.match(/(?:в течение|за)\s*(\d+(?:\.\d+)?)\s*сек/i);
+    if (durMatch) {
+        duration = parseFloat(durMatch[1]);
+    }
 
     if (dmg > 0) {
         let baseDmgCost = (dmg / 100) * 2 * aoeMult;
@@ -289,6 +298,22 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
 
         let finalDmgCost = baseDmgCost;
         let formula = `Урон (${dmg}% / 100 * 2 [База] * ${aoeMult} [AOE])`;
+        
+        // Новое правило для DoT (DPS + Множители времени)
+        if (duration > 0) {
+            const dps = dmg / duration;
+            let timeMult = 1;
+            if (duration >= 15) timeMult = 2;
+            else if (duration >= 10) timeMult = 3;
+            else if (duration >= 5) timeMult = 4;
+            
+            baseDmgCost = (dps / 100) * 2 * aoeMult * timeMult;
+            if (cooldown > 0) baseDmgCost /= cdDiscount;
+            
+            finalDmgCost = baseDmgCost;
+            formula = `DoT (${dps.toFixed(1)}% DPS / 100 * 2 * ${aoeMult} [AOE] * ${timeMult} [Время ${duration}с])`;
+        }
+
         if (cooldown > 0) formula += ` / ${cdDiscount.toFixed(1)} [КД]`;
 
         if (totalEffInc > 0) {
@@ -448,9 +473,19 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
     if (resGain > 0 && maxResources[className]) {
         const maxRes = maxResources[className];
         const resGainPercent = (resGain / maxRes) * 100;
-        let val = (resGainPercent / 2) * 1;
+        
+        let val = 0;
+        let formula = "";
+        
+        if (runeData.resGainInstant) {
+            val = (resGainPercent / 5) * 1; // 5% = 1 руна (Мгновенное)
+            formula = `Мгновенное восст. (${resGain} / ${maxRes} = ${resGainPercent.toFixed(1)}% / 5 [База])`;
+        } else {
+            val = (resGainPercent / 2) * 1; // 2% = 1 руна (Обычное)
+            formula = `Восст. ресурса (${resGain} / ${maxRes} = ${resGainPercent.toFixed(1)}% / 2 [База])`;
+        }
+
         cost += val;
-        let formula = `Восст. ресурса (${resGain} / ${maxRes} [Макс] / 2% [База])`;
         details.push(`${formula} = ${val.toFixed(2)}`);
     }
 
