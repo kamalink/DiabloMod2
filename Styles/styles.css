@@ -5,7 +5,7 @@
 
 @font-face {
     font-family: 'Exocet';
-    src: local('Exocet'), url('Exocet.ttf') format('truetype'), url('exocet.ttf') format('truetype');
+    src: local('Exocet'), url('../Media/Exocet.ttf') format('truetype'), url('../Media/exocet.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
 }
@@ -14,7 +14,7 @@ body, html {
     margin: 0; padding: 0; width: 100%; height: 100%;
     background-color: transparent; color: #b8a078;
     font-family: 'Lora', serif;
-    cursor: url('cursor.png'), auto; /* Локальный курсор */
+    cursor: url('../Media/cursor.png'), auto; /* Локальный курсор */
     overflow-y: scroll; /* Сохраняем функционал скролла */
     scrollbar-width: none; /* Firefox: скрываем скроллбар */
     -ms-overflow-style: none; /* IE/Edge */
@@ -55,12 +55,12 @@ body.theme-crusader { --theme-border: #77aaff; --theme-highlight: #add8e6; --the
 }
 
 * {
-    cursor: url('cursor.png'), auto;
+    cursor: url('../Media/cursor.png'), auto;
 }
 
 /* Курсор при наведении на активные элементы */
 button, a, .select-btn, .close-x, input, select, label, .penta-slot {
-    cursor: url('cursor.png'), pointer !important;
+    cursor: url('../Media/cursor.png'), pointer !important;
 }
 
 /* Скрываем скроллбар для Chrome/Safari/Opera */
@@ -94,7 +94,7 @@ body::after {
 .wallpaper {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background-color: #1a0505; /* Цвет фона, если картинка не грузится */
-    background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('bg.jpg');
+    background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('../Media/bg.jpg');
     background-size: cover; background-position: center; z-index: -1;
     transform: scale(1.1);
     animation: diabloShake 40s ease-in-out infinite;

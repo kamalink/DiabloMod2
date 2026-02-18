@@ -20,8 +20,8 @@ window.stopCurrencyChange = function() {
     clearInterval(currencyInterval);
 }
 
-window.screamerSound = new Audio('screamer.mp3');
-window.craftSound = new Audio('diablo-3-craft-done.mp3');
+window.screamerSound = new Audio('Media/screamer.mp3');
+window.craftSound = new Audio('Media/diablo-3-craft-done.mp3');
 
 window.onload = function() {
     // Агрегация данных
@@ -131,7 +131,7 @@ window.onload = function() {
     // Звук клика
     document.addEventListener('click', function(e) {
         if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
-            const clickSound = new Audio('soundreality-button-4-214382.mp3');
+            const clickSound = new Audio('Media/soundreality-button-4-214382.mp3');
             clickSound.volume = 0.5;
             clickSound.play().catch(() => {});
         }
@@ -208,7 +208,7 @@ window.makeDraggable = function(elmnt) {
     if (!elmnt) return;
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
     var obstacles = [];
-    var collisionSound = new Audio('forge.mp3');
+    var collisionSound = new Audio('Media/forge.mp3');
     collisionSound.volume = 0.4;
     var lastCollisionTime = 0;
     
