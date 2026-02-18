@@ -191,6 +191,22 @@ window.loadCalcSkillData = function() {
             } else {
                 synergyBox.style.display = 'none';
             }
+
+            let blockBox = document.getElementById('calc-block-box');
+            if (!blockBox) {
+                const synergyBox = document.getElementById('calc-synergy-box');
+                if (synergyBox && synergyBox.parentNode) {
+                    blockBox = document.createElement('div');
+                    blockBox.id = 'calc-block-box';
+                    blockBox.style.display = 'none';
+                    blockBox.style.marginTop = '10px';
+                    blockBox.innerHTML = `<label style="color:#d4af37;">🛡️ Шанс блока (%): <input type="number" id="calc-block-chance" value="20" style="width:50px; background:#000; color:#fff; border:1px solid #444; text-align:center;" oninput="window.calculateSkillCost()"></label>`;
+                    synergyBox.parentNode.insertBefore(blockBox, synergyBox.nextSibling);
+                }
+            }
+            if (blockBox) {
+                blockBox.style.display = (runeData.blockDmg > 0) ? 'block' : 'none';
+            }
             
             const skillName = window.skillDB[cls][skillIdx].name;
             const runeName = window.skillDB[cls][skillIdx].runes[runeIdx].name;
@@ -240,6 +256,8 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
     const isBuffAoe = runeData.buffIsAoe || false;
     const passiveDmg = runeData.passiveDmg || 0;
     const passiveSlow = runeData.passiveSlow || 0;
+    const blockDmg = runeData.blockDmg || 0;
+    const thornsDmg = runeData.thornsDmg || 0;
     
     const mainSkillCost = parseFloat(document.getElementById('calc-main-skill-cost').value) || 0;
     const synVal = document.getElementById('calc-synergy-skill').value;
@@ -323,6 +341,36 @@ window.calculateRuneCostFromDB = function(className, skillIdx, runeIdx) {
         
         cost += finalDmgCost;
         details.push(`${formula} = ${finalDmgCost.toFixed(2)}`);
+    }
+
+    if (blockDmg > 0) {
+        const blockChance = parseFloat(document.getElementById('calc-block-chance')?.value) || 0;
+        const addedDmg = blockDmg * (blockChance / 100);
+        
+        let blockCost = (addedDmg / 100) * 2 * aoeMult;
+        if (cooldown > 0) blockCost /= cdDiscount;
+        
+        if (totalEffInc > 0) {
+            blockCost = blockCost * (1 + totalEffInc / 100);
+        }
+        
+        cost += blockCost;
+        details.push(`Урон от Блока (${blockDmg}% от ${blockChance}% Блока = ${addedDmg.toFixed(1)}% / 100 * 2 * ${aoeMult} [AOE]) = ${blockCost.toFixed(2)}`);
+    }
+
+    if (thornsDmg > 0) {
+        let thornsCost = (thornsDmg / 100) * 2 * aoeMult;
+        let formula = `Урон от Шипов (${thornsDmg}% / 100 * 2 * ${aoeMult} [AOE])`;
+
+        if (cooldown > 0) {
+            thornsCost /= cdDiscount;
+            formula += ` / ${cdDiscount.toFixed(1)} [КД]`;
+        }
+        if (totalEffInc > 0) {
+            thornsCost *= (1 + totalEffInc / 100);
+        }
+        cost += thornsCost;
+        details.push(`${formula} = ${thornsCost.toFixed(2)}`);
     }
 
     if (dmg2 > 0) {

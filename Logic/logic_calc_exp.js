@@ -103,18 +103,24 @@ window.calculateExp = function() {
     } else if (g.includes('охотник на ☠️')) {
         const eliteBossBase = (dElites * 0.1) + (bosses * 3);
         const bonus = eliteBossBase * 0.33;
-        runesBase += bonus; paraBase += bonus;
+        runesBase += bonus; 
+        paraBase += bonus;
     } else if (g.includes('помощник охотника')) {
         const eliteBossBase = (dElites * 0.1) + (bosses * 3);
         const bonus = eliteBossBase * 0.15;
-        runesBase += bonus; paraBase += bonus;
+        runesBase += bonus; 
+        paraBase += bonus;
     } else if (g.includes('ученик чародея')) {
-        runesMod += 0.1; paraMod += 0.1;
+        const mobsExp = dMobs * 0.01;
+        runesBase += mobsExp * 0.1;
+        paraBase += mobsExp * 0.1;
     } else if (g.includes('вампир')) {
         const ranks = [0.10, 0.13, 0.16, 0.20, 0.25, 0.40, 0.50, 0.60, 0.75, 1.00];
         const r = (window.playerData.rank || 1) - 1;
         const bonus = ranks[Math.min(r, 9)] || 0.10;
-        runesMod += bonus; paraMod += bonus;
+        const mobsExp = dMobs * 0.01;
+        runesBase += mobsExp * bonus;
+        paraBase += mobsExp * bonus;
     } else if (g.includes('чародей')) {
         const ranks = [0.15, 0.20, 0.28, 0.35, 0.50, 0.75, 1.00, 1.25, 1.50, 2.00];
         const r = (window.playerData.rank || 1) - 1;

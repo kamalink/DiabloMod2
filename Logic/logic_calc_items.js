@@ -1384,7 +1384,7 @@ window.openSellInventory = function(mode) {
         let sellPrice = 0;
         
         if (mode === 'smith') {
-            sellPrice = Math.floor(item.buyPrice);
+            sellPrice = Math.floor(window.getCraftedItemBasePrice(item.level, item.grade));
         } else {
             sellPrice = Math.floor(item.buyPrice * 0.5);
             
@@ -1420,7 +1420,7 @@ window.openSellInventory = function(mode) {
         closeAction = "document.getElementById('custom-confirm-modal').style.display='none'; window.sellResources();";
         closeText = "ДАЛЕЕ (Ресурсы) >>";
     }
-    html += `<div style="text-align:center; margin-top:10px;"><button class="death-cancel-btn" onclick=""></button></div>`;
+    html += `<div style="text-align:center; margin-top:10px;"><button class="death-cancel-btn" onclick="${closeAction}">${closeText}</button></div>`;
     window.showCustomAlert(html);
     document.getElementById('confirm-yes-btn').style.display = 'none';
 }
