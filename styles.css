@@ -1,0 +1,1195 @@
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@font-face {
+    font-family: 'Exocet';
+    src: local('Exocet'), url('Exocet.ttf') format('truetype'), url('exocet.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body, html {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    background-color: transparent; color: #b8a078;
+    font-family: 'Lora', serif;
+    cursor: url('cursor.png'), auto; /* Локальный курсор */
+    overflow-y: scroll; /* Сохраняем функционал скролла */
+    scrollbar-width: none; /* Firefox: скрываем скроллбар */
+    -ms-overflow-style: none; /* IE/Edge */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8); /* Глубина текста */
+}
+
+/* Скрываем скроллбар для всех элементов */
+*::-webkit-scrollbar { display: none; }
+* {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+:root {
+    --theme-border: #d4af37;
+    --theme-highlight: #d4af37;
+    --theme-bg-tint: rgba(212, 175, 55, 0.05);
+}
+
+body.theme-barbarian { --theme-border: #8a0000; --theme-highlight: #ff4444; --theme-bg-tint: rgba(138, 0, 0, 0.1); }
+body.theme-wizard { --theme-border: #4834d4; --theme-highlight: #a29bfe; --theme-bg-tint: rgba(72, 52, 212, 0.1); }
+body.theme-monk { --theme-border: #b8860b; --theme-highlight: #ffd700; --theme-bg-tint: rgba(184, 134, 11, 0.1); }
+body.theme-wd { --theme-border: #006400; --theme-highlight: #32cd32; --theme-bg-tint: rgba(0, 100, 0, 0.1); }
+body.theme-dh { --theme-border: #7f8c8d; --theme-highlight: #ecf0f1; --theme-bg-tint: rgba(127, 140, 141, 0.2); }
+body.theme-crusader { --theme-border: #77aaff; --theme-highlight: #add8e6; --theme-bg-tint: rgba(119, 170, 255, 0.1); }
+
+/* Контейнеры, которые будут плавно появляться */
+.menu-container,
+#char-sheet,
+#right-panels-stack,
+#reset-btn,
+#music-btn,
+#breadcrumb,
+#learned-skills-widget,
+#widgets-container,
+#inventory-widget {
+    opacity: 0;
+    animation: fadeIn 5s ease-in forwards;
+}
+
+* {
+    cursor: url('cursor.png'), auto;
+}
+
+/* Курсор при наведении на активные элементы */
+button, a, .select-btn, .close-x, input, select, label, .penta-slot {
+    cursor: url('cursor.png'), pointer !important;
+}
+
+/* Скрываем скроллбар для Chrome/Safari/Opera */
+body::-webkit-scrollbar, html::-webkit-scrollbar {
+    display: none;
+}
+
+/* Эффект зернистости (шум) */
+body::before {
+    content: "";
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.07'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9999; opacity: 0.5;
+}
+
+/* Эффект ряби (скан-линии) */
+body::after {
+    content: "";
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 3px, 3px 100%;
+    pointer-events: none; z-index: 9998;
+}
+
+/* Хак для замены шрифта в старом контенте (data.js) */
+[style*="Cinzel Decorative"] {
+    font-family: 'Cinzel', serif !important;
+    font-weight: 700 !important;
+}
+
+.wallpaper {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: #1a0505; /* Цвет фона, если картинка не грузится */
+    background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('bg.jpg');
+    background-size: cover; background-position: center; z-index: -1;
+    transform: scale(1.1);
+    animation: diabloShake 40s ease-in-out infinite;
+}
+
+@keyframes diabloShake {
+    0%, 90% { transform: scale(1.1); }
+    91% { transform: scale(1.11) translate(1px, 1px) rotate(0.5deg); }
+    92% { transform: scale(1.1) translate(-1px, -2px) rotate(-0.5deg); }
+    93% { transform: scale(1.11) translate(-2px, 0px) rotate(0.5deg); }
+    94% { transform: scale(1.1) translate(2px, 2px) rotate(-0.5deg); }
+    95% { transform: scale(1.11) translate(1px, -1px) rotate(0.5deg); }
+    96% { transform: scale(1.1) translate(-1px, 2px) rotate(-0.5deg); }
+    97% { transform: scale(1.11) translate(-2px, 1px) rotate(0.5deg); }
+    98% { transform: scale(1.1) translate(1px, 1px) rotate(0deg); }
+    100% { transform: scale(1.1); }
+}
+
+/* ПУТЬ (BREADCRUMBS) */
+#breadcrumb {
+    position: fixed; top: 10px; left: 15px;
+    font-size: 0.8rem; color: #888; font-family: 'Cinzel', serif; font-weight: 700;
+    z-index: 1001; text-transform: uppercase;
+}
+
+.menu-container {
+    display: block; width: 90%; max-width: 500px;
+    margin: 0 auto; padding-top: 60px; text-align: center;
+}
+
+.header-title {
+    font-family: 'Exocet', serif; font-weight: 700;
+    font-size: 3rem; margin-bottom: 40px;
+    
+    /* Эффект гравированного камня */
+    color: #8a8a8a;
+    text-shadow: 
+        -1px -1px 2px #000, 
+        1px 1px 1px rgba(255, 255, 255, 0.15),
+        0 0 15px rgba(0,0,0,0.8);
+}
+
+@keyframes shimmer {
+    0% { left: -150%; }
+    100% { left: 150%; }
+}
+
+/* КНОПКИ */
+.d2-button {
+    display: block;
+    position: relative;
+    margin: 20px auto; width: 100%;
+    /* Типографика */
+    font-family: 'Exocet', serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #b8a078;
+    text-shadow: 3px 3px 2px #000;
+    letter-spacing: 1px;
+    text-align: center;
+    
+    /* Фон */
+    background: linear-gradient(to bottom, #2b1d1d, #1a0b0b);
+    
+    /* Границы (только верх и низ) */
+    border: none;
+    border-top: 2px solid #5a4a2d;
+    border-bottom: 2px solid #5a4a2d;
+    box-shadow: 0 5px 15px #000;
+
+    padding-left: 30px; padding-right: 30px;
+
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    z-index: 1;
+    overflow: visible; /* Для наконечников */
+}
+
+
+/* Каменные наконечники (Слева и Справа) */
+.d2-button::before, .d2-button::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, #2b1d1d, #1a0b0b);
+    border: 2px solid #5a4a2d;
+    transform: translateY(-50%) rotate(45deg);
+    z-index: -1;
+    box-shadow: 0 5px 10px #000;
+    transition: all 0.2s ease-in-out;
+}
+
+.d2-button::before {
+    left: -15px;
+    border-top: none; border-right: none;
+}
+
+.d2-button::after {
+    right: -15px;
+    border-bottom: none; border-left: none;
+}
+
+/* Главное меню: +50% */
+.main-btn { 
+    padding: 25px; 
+    font-size: 1.8rem; 
+    margin: 30px auto;
+    font-family: 'Exocet', serif;
+    background: linear-gradient(to bottom, #2a0505, #1a0000);
+}
+
+/* Подразделы: +30% */
+.sub-btn { 
+    padding: 18px; 
+    font-size: 1.4rem;
+    background: linear-gradient(to bottom, #151515, #0a0a0a);
+    color: #a0a0a0;
+}
+
+.d2-button:hover {
+    color: #fff;
+    text-shadow: 0 0 10px #ff4444; /* Красное свечение текста */
+    transform: scale(1.05);
+    border-color: #d4af37;
+    background: linear-gradient(to bottom, #3a2a2a, #2a1b1b);
+    z-index: 5;
+}
+
+.d2-button:hover::before, .d2-button:hover::after {
+    border-color: #d4af37;
+    background: linear-gradient(135deg, #3a2a2a, #2a1b1b);
+}
+
+/* Состояния наведения для разных типов */
+.main-btn:hover {
+    background: linear-gradient(to bottom, #3a0a0a, #2a0000);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); /* Внешнее свечение */
+}
+
+.sub-btn:hover {
+    background: linear-gradient(to bottom, #252525, #151515);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(200, 200, 200, 0.2);
+}
+
+.d2-button:active {
+    transform: scale(0.98);
+    box-shadow: inset 0 0 25px #000 !important; /* Эффект нажатия */
+    top: 1px;
+}
+
+/* Классовые темы для кнопок меню (границы) */
+.menu-btn-barbarian { border-color: #8a0000; }
+.menu-btn-wizard { border-color: #4834d4; }
+.menu-btn-dh { border-color: #444; }
+.menu-btn-monk { border-color: #b8860b; }
+.menu-btn-wd { border-color: #006400; }
+.menu-btn-crusader { border-color: #77aaff; }
+
+.d2-button.locked-btn {
+    cursor: not-allowed;
+    opacity: 0.7;
+    border-color: #444;
+    background: #222;
+}
+.d2-button.locked-btn::before, .d2-button.locked-btn::after {
+    border-color: #444;
+    background: #222;
+}
+
+/* Простая кнопка (для калькуляторов и селектов) - без наконечников и Exocet */
+.simple-btn {
+    display: inline-block;
+    background: linear-gradient(to bottom, #2b1d1d, #1a0b0b);
+    border: 1px solid #5a4a2d;
+    color: #b8a078;
+    font-family: 'Cinzel', serif; /* Возвращаем шрифт Cinzel */
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px #000;
+    transition: all 0.2s;
+}
+.simple-btn:hover {
+    color: #fff;
+    border-color: #d4af37;
+    background: linear-gradient(to bottom, #3a2a2a, #2a1b1b);
+}
+
+.d2-button.locked-btn:hover {
+    transform: none;
+    box-shadow: 0 5px 15px #000;
+}
+
+/* Эффект Shimmer (Блик) через span */
+.btn-shimmer {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 2;
+}
+.btn-shimmer::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 150%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+    transform: skewX(-20deg);
+}
+.d2-button:hover .btn-shimmer::after {
+    animation: shimmer 0.6s ease-in-out;
+}
+
+/* Кнопки навигации */
+.nav-box { 
+    margin-bottom: 30px; border-bottom: 1px dashed #333; padding-bottom: 20px;
+    display: flex; justify-content: center; gap: 40px; /* Разводим кнопки */
+}
+.nav-btn { 
+    width: auto; flex: 1; max-width: 200px; margin: 0;
+    padding: 10px; font-size: 0.9rem; 
+    /* Убрал переопределение фона, чтобы они были как d2-button */
+}
+
+#window-title { font-family: 'Cinzel', serif; font-weight: 700; color: var(--theme-highlight); text-align: center; border-bottom: 1px solid #5a0000; padding-bottom: 10px; }
+#window-content { font-size: 1.15rem; line-height: 1.6; color: #ccc; margin-top: 20px; }
+.close-x { position: absolute; top: 15px; right: 15px; color: #ff4444; cursor: pointer; font-size: 1.5rem; text-shadow: 0 0 5px #000; }
+
+/* Режим предпросмотра для окна (не перехватывает мышь) */
+#text-window.preview-mode {
+    pointer-events: none;
+    opacity: 0.95;
+    border-color: #888;
+}
+
+table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+th, td { border: 1px solid #333; padding: 8px; text-align: center; }
+th { color: var(--theme-highlight); }
+
+/* АДАПТАЦИЯ ПОД ТЕЛЕФОН */
+@media (max-width: 768px) {
+    .header-title { font-size: 1.5rem; margin-top: 20px; }
+    
+    /* Кнопки меню */
+    .main-btn { padding: 15px; font-size: 1.2rem; margin: 15px auto; width: 95%; }
+    .sub-btn { padding: 12px; font-size: 1rem; margin: 8px auto; }
+
+    /* Контейнер */
+    .menu-container { padding-top: 80px; padding-bottom: 80px; width: 95%; }
+
+    /* Скрываем боковые панели по умолчанию и делаем их полноэкранными при открытии */
+    #char-sheet {
+        display: none !important; /* Скрыто */
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        max-height: 100vh; z-index: 4000;
+        border-radius: 0; border: none;
+        padding-bottom: 80px; /* Место для нижнего меню */
+        box-sizing: border-box;
+    }
+    #char-sheet.mobile-visible { display: block !important; }
+
+    #right-panels-stack {
+        display: none !important; /* Скрыто */
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 4000;
+        background: rgba(0,0,0,0.95);
+        padding: 20px;
+        overflow-y: auto;
+        padding-bottom: 80px;
+        box-sizing: border-box;
+    }
+    #right-panels-stack.mobile-visible { display: block !important; }
+
+    /* Кнопки управления */
+    #reset-btn { top: 10px; right: 10px; padding: 5px 10px; font-size: 0.7rem; }
+    #music-btn { top: 45px; right: 10px; padding: 5px 10px; font-size: 0.7rem; }
+    #edit-char-btn { display: none; } /* Скрываем кнопку, она будет в нижнем меню */
+    
+    #breadcrumb { top: 15px; left: 10px; font-size: 0.7rem; max-width: 150px; }
+
+    #credits-label {
+        top: 52px;
+        right: 100px;
+        font-size: 0.5rem;
+    }
+
+    #text-window { width: 95%; max-height: 80vh; padding: 15px; }
+
+    /* Нижнее меню */
+    #mobile-nav-bar { display: flex !important; }
+}
+
+/* Нижнее меню (скрыто на ПК) */
+#mobile-nav-bar {
+    display: none;
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    background: #1a0505; border-top: 2px solid #d4af37;
+    z-index: 5000; justify-content: space-around; padding: 10px 0;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
+}
+.mobile-nav-btn {
+    background: none; border: 1px solid #5a0000; color: #d4af37;
+    padding: 8px 12px; font-family: 'Cinzel', serif; font-weight: 700;
+    font-size: 0.8rem; border-radius: 4px; cursor: pointer;
+}
+.mobile-nav-btn.active { background: #d4af37; color: #000; }
+
+/* Цвета для грейдов */
+.grade-b { color: #d2b48c; font-weight: bold; } /* тускло оранжево-бежевый */
+.grade-a { color: #ffcc66; font-weight: bold; } /* ярко оранжево-бежевый */
+
+/* Рамки для Древних и Первозданных */
+.frame-drev {
+    border: 2px solid #ff9900; /* ярко-оранжевый */
+    padding: 1px 4px;
+    display: inline-block;
+    border-radius: 3px;
+    line-height: 1;
+}
+
+.frame-perv {
+    border: 2px solid #ff0000; /* ярко-красный */
+    padding: 1px 4px;
+    display: inline-block;
+    border-radius: 3px;
+    line-height: 1;
+}
+/* Мягкие цвета для кнопок классов и гильдий */
+.btn-barbarian { border-color: #8a0000 !important; background: linear-gradient(to bottom, #5a2d2d, #3a1d1d) !important; }
+.btn-barbarian::before, .btn-barbarian::after { border-color: #8a0000 !important; background: linear-gradient(135deg, #5a2d2d, #3a1d1d) !important; }
+
+.btn-wizard { border-color: #4834d4 !important; background: linear-gradient(to bottom, #44335a, #2a1f38) !important; }
+.btn-wizard::before, .btn-wizard::after { border-color: #4834d4 !important; background: linear-gradient(135deg, #44335a, #2a1f38) !important; }
+
+.btn-dh { border-color: #444 !important; background: linear-gradient(to bottom, #2d3a5a, #1d2538) !important; }
+.btn-dh::before, .btn-dh::after { border-color: #444 !important; background: linear-gradient(135deg, #2d3a5a, #1d2538) !important; }
+
+.btn-wd { border-color: #006400 !important; background: linear-gradient(to bottom, #2d5a3a, #1d3824) !important; }
+.btn-wd::before, .btn-wd::after { border-color: #006400 !important; background: linear-gradient(135deg, #2d5a3a, #1d3824) !important; }
+
+.btn-monk { border-color: #b8860b !important; background: linear-gradient(to bottom, #5a4a2d, #382d1d) !important; }
+.btn-monk::before, .btn-monk::after { border-color: #b8860b !important; background: linear-gradient(135deg, #5a4a2d, #382d1d) !important; }
+
+.btn-crusader { border-color: #77aaff !important; background: linear-gradient(to bottom, #5a5a4d, #38382d) !important; }
+.btn-crusader::before, .btn-crusader::after { border-color: #77aaff !important; background: linear-gradient(135deg, #5a5a4d, #38382d) !important; }
+
+#reset-btn {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 1000;
+    width: auto; margin: 0; /* Сброс стилей d2-button */
+    padding: 8px 25px; /* Чуть шире для наконечников */
+    color: #ff4444;
+    font-size: 0.8rem;
+}
+#reset-btn:hover {
+    color: #fff;
+    text-shadow: 0 0 10px #ff4444;
+}
+
+/* Стили для кнопок крафта/покупки в окнах */
+.craft-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 5px 0;
+    border-bottom: 1px solid #2a2a2a;
+}
+.craft-row p {
+    margin: 0;
+}
+.craft-btn {
+    padding: 5px 15px;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    border: 1px solid;
+    cursor: pointer;
+    transition: 0.2s;
+    background: transparent;
+}
+.craft-btn.buy {
+    border-color: #66ff66;
+    color: #66ff66;
+}
+.craft-btn.buy:hover { background: #1d3824; color: #fff; }
+.craft-btn.sell {
+    border-color: #ff4444;
+    color: #ff4444;
+}
+.craft-btn.smith-sell {
+    border-color: #d4af37;
+    color: #d4af37;
+}
+.craft-btn.smith-sell:hover { background: #463c23; color: #fff; }
+.craft-btn.sell:hover { background: #3a0404; color: #fff; }
+.craft-btn.craft {
+    border-color: #a29bfe;
+    color: #a29bfe;
+}
+.craft-btn.craft:hover { background: #1a1a2e; color: #fff; }
+
+#music-btn {
+    position: fixed;
+    top: 15px;
+    right: 230px;
+    z-index: 1000;
+    width: auto; margin: 0; /* Сброс стилей d2-button */
+    padding: 8px 25px;
+    color: #66ccff;
+    font-size: 0.8rem;
+}
+#music-btn:hover { transform: scale(1.05); }
+
+/* Стили для кнопок сохранения/загрузки */
+#save-btn, #load-btn, #import-stats-btn, #import-career-btn {
+    width: auto; margin: 0;
+    padding: 3px 4px;
+    color: #d4af37;
+    font-size: 0.55rem;
+}
+#save-btn:hover, #load-btn:hover, #import-stats-btn:hover, #import-career-btn:hover { transform: scale(1.05); }
+
+#load-btn, #import-stats-btn, #import-career-btn {
+    margin-left: 20px;
+}
+
+/* Уменьшенные наконечники для кнопок Сохранить/Загрузить */
+#save-btn::before, #save-btn::after,
+#load-btn::before, #load-btn::after,
+#import-stats-btn::before, #import-stats-btn::after,
+#import-career-btn::before, #import-career-btn::after {    width: 17px; height: 17px;
+}
+#save-btn::before, #load-btn::before, #import-stats-btn::before, #import-career-btn::before { left: -8px; }
+#save-btn::after, #load-btn::after, #import-stats-btn::after, #import-career-btn::after { right: -8px; }
+
+/* Стили для ползунка громкости */
+
+#volume-slider {
+    -webkit-appearance: none;
+    appearance: none;
+     width: 100px;
+    height: 5px;
+    background: #444;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity .2s;
+    border-radius: 3px;
+}
+#volume-slider:hover { opacity: 1; }
+#volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 15px; height: 15px;
+    background: #66ccff; border-radius: 50%; cursor: pointer;
+    border: 2px solid #1a1a1a;
+}
+#volume-slider::-moz-range-thumb {
+    width: 15px; height: 15px;
+    background: #66ccff; border-radius: 50%; cursor: pointer;
+    border: 2px solid #1a1a1a;
+
+}
+
+#credits-label {
+    position: fixed;
+    top: 22px;
+    right: 380px;
+    font-size: 0.6rem;
+    color: #999;
+    z-index: 1000;
+    font-family: 'Cinzel', serif;
+    pointer-events: none;
+    text-shadow: 0 0 2px #000;
+}
+
+/* Левая панель статов */
+#char-sheet {
+    position: fixed;
+    left: 10px;
+    top: 100px;
+    width: 550px; /* Увеличена ширина для 2 колонок */
+    /* Новый темный стиль */
+    background: linear-gradient(180deg, rgba(26, 26, 26, 0.85) 0%, rgba(5, 5, 5, 0.92) 100%);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 4px;
+    padding: 15px;
+    color: #b8a078;
+    font-family: 'Lora', serif; font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 40px rgba(0, 0, 0, 0.5);
+    z-index: 900;
+    max-height: 80vh;
+    overflow-y: auto;
+    transition: transform 0.3s;
+}
+
+/* Общий стиль для виджетов (как у карточки игрока) */
+.sidebar-widget {
+    background: linear-gradient(180deg, rgba(26, 26, 26, 0.85) 0%, rgba(5, 5, 5, 0.92) 100%);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 4px;
+    padding: 15px;
+    color: #b8a078;
+    font-family: 'Lora', serif; font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 40px rgba(0, 0, 0, 0.5);
+    resize: both;
+    overflow: auto;
+    min-width: 200px;
+    min-height: 100px;
+}
+
+/* Сетка для содержимого виджетов */
+.widget-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+.widget-item {
+    flex: 1 1 140px; /* Растягивается, база 140px */
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 5px;
+    border-radius: 3px;
+    box-sizing: border-box;
+    transition: background 0.2s;
+}
+.widget-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(212, 175, 55, 0.5);
+}
+
+.char-sheet-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.char-sheet-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-group {
+    border: 1px solid #333;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+    position: relative; /* Для позиционирования пула */
+}
+
+.stat-group-title {
+    font-size: 0.75rem;
+    color: var(--theme-highlight);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #a67c52;
+    text-align: center;
+}
+
+.group-toggle {
+    cursor: pointer;
+    color: #888;
+    margin-right: 5px;
+    font-family: monospace;
+}
+.group-toggle:hover { color: #fff; }
+
+.add-money-btn {
+    cursor: pointer;
+    color: #66ff66;
+    font-size: 0.8rem;
+    margin-left: 5px;
+}
+.add-money-btn:hover { color: #fff; text-shadow: 0 0 5px #66ff66; }
+
+.stat-value {
+    font-weight: bold;
+    color: #fff;
+}
+
+.char-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed #444;
+    color: #fff;
+    font-family: inherit;
+    font-weight: bold;
+    width: auto;
+    min-width: 30px;
+    text-align: center;
+    padding: 0;
+    transition: border-color 0.2s;
+}
+.char-input:focus {
+    outline: none;
+    border-bottom: 1px solid var(--theme-highlight);
+    background: rgba(255,255,255,0.05);
+}
+.name-input { width: 100%; text-align: center; font-size: 1.2rem; color: var(--theme-highlight); border-bottom: none; }
+.money-input { width: 35px; text-align: right; }
+
+/* Переопределение цветов для темного фона */
+#view-class { color: #66ccff !important; font-weight: bold; }
+#view-build { color: #888 !important; }
+#view-potion-price, #view-xp-bonus, #view-zaken-discount, #view-theft-fine { color: #aaa !important; }
+#view-guild { color: var(--theme-highlight) !important; font-weight: bold; }
+
+.money-row { display: flex; justify-content: space-around; font-size: 0.8rem; margin-top: 5px; }
+.money-unit { display: flex; align-items: center; gap: 3px; }
+
+/* Кнопки выбора пути (Гильдия/Класс) */
+.select-btn {
+    border: none;
+    padding: 8px 15px;
+    font-family: 'Cinzel', serif; font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 20px;
+    font-size: 0.85rem;
+    transition: 0.3s;
+}
+.btn-guild-join {
+    background: linear-gradient(to right, #1d3824, #0f1f13);
+    border: 1px solid #66ff66; color: #66ff66;
+}
+.btn-guild-join:hover {
+    background: #2d5a3a; box-shadow: 0 0 15px rgba(102, 255, 102, 0.4);
+}
+.btn-guild-leave {
+    background: linear-gradient(to right, #3a0404, #1a0101);
+    border: 1px solid #ff4444; color: #ff4444;
+}
+.btn-guild-leave:hover {
+    background: #5a0000; box-shadow: 0 0 15px rgba(255, 68, 68, 0.4);
+}
+.btn-class-select {
+    background: linear-gradient(to right, #1a1a2e, #16213e);
+    border: 1px solid #66ccff; color: #66ccff;
+}
+
+/* Кнопка смерти */
+.death-btn {
+    background: linear-gradient(to bottom, #8a0000, #500000);
+    border: 2px solid #ff4444;
+    color: #fff;
+    padding: 15px 30px;
+    font-family: 'Cinzel', serif; font-weight: 700;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 0 15px #ff0000;
+    transition: 0.3s;
+    text-transform: uppercase;
+}
+.death-btn:hover {
+    background: #ff0000;
+    box-shadow: 0 0 25px #ff4444;
+    transform: scale(1.05);
+}
+.death-confirm-btn {
+    background: #8a0000; color: white; border: 1px solid #ff4444;
+    padding: 10px 20px; cursor: pointer; font-family: inherit; margin: 5px;
+    transition: 0.2s;
+}
+.death-confirm-btn:hover { background: #ff0000; box-shadow: 0 0 10px #f00; }
+.death-cancel-btn {
+    background: #333; color: #aaa; border: 1px solid #555;
+    padding: 10px 20px; cursor: pointer; font-family: inherit; margin: 5px;
+}
+.death-cancel-btn:hover { background: #555; color: white; }
+
+/* Слоты пентограммы */
+.penta-slot {
+    width: 20px; height: 20px;
+    background: #222;
+    border: 1px solid #444;
+    display: inline-block;
+    margin: 0 3px;
+    border-radius: 2px;
+    transition: 0.3s;
+}
+.penta-slot.active {
+    background: #66ff66;
+    border-color: #ccffcc;
+    box-shadow: 0 0 8px #66ff66;
+}
+
+/* Сетка навыков */
+.skills-grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.skill-grid-btn {
+    font-size: 0.7rem !important;
+    padding: 10px !important;
+    margin: 0 !important;
+    height: 100%;
+}
+
+/* Отключение эффектов для кнопки ИЗУЧЕНО */
+.buy-skill-btn:disabled {
+    pointer-events: none;
+    opacity: 0.7;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Подсветка поиска */
+.search-highlight {
+    background-color: var(--theme-highlight);
+    color: #000;
+    font-weight: bold;
+}
+
+/* Анимация появления главного меню */
+@keyframes rpg-entry {
+    0% {
+        opacity: 0;
+        transform: scale(1.1) translateY(-15px);
+        filter: blur(4px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        filter: blur(0);
+    }
+}
+.rpg-entry-effect {
+    animation: rpg-entry 3.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.buy-prop-item {
+    cursor: pointer; padding: 2px 5px; border-radius: 3px; transition: all 0.2s; display: inline-block;
+}
+.buy-prop-item:hover { background: rgba(255, 255, 255, 0.1); }
+.buy-prop-item.selected {
+    background: rgba(102, 255, 102, 0.2); color: #66ff66; text-shadow: 0 0 5px #66ff66; border: 1px solid #66ff66;
+}
+.sell-prop-item {
+    cursor: pointer; padding: 2px 5px; border-radius: 3px; transition: all 0.2s; display: inline-block;
+}
+.sell-prop-item:hover { background: rgba(255, 255, 255, 0.1); }
+.sell-prop-item.selected {
+    background: rgba(255, 102, 102, 0.2); color: #ff6666; text-shadow: 0 0 5px #ff6666; border: 1px solid #ff6666;
+}
+
+.selectable-item {
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 1px dotted transparent;
+}
+.selectable-item:hover {
+    color: #fff;
+    text-shadow: 0 0 5px var(--theme-highlight);
+}
+.selectable-item.selected {
+    color: #66ff66;
+    text-shadow: 0 0 8px #66ff66;
+    font-weight: bold;
+    border-bottom: 1px dashed #66ff66;
+}
+
+/* Стили для таблицы краж */
+.theft-row {
+    transition: background 0.3s;
+}
+.theft-row.active {
+    background: rgba(102, 255, 102, 0.2);
+    box-shadow: 0 0 10px #66ff66;
+}
+.theft-cell {
+    cursor: pointer;
+}
+.theft-row.active .theft-cell:hover {
+    background: rgba(102, 255, 102, 0.4);
+    color: #fff;
+    font-weight: bold;
+}
+
+/* Искры при клике */
+.click-spark {
+    position: fixed;
+    width: 3px;
+    height: 3px;
+    background: #ffd700;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #ff4444;
+    pointer-events: none;
+    z-index: 10000;
+    animation: clickSparkFly 0.5s ease-out forwards;
+}
+
+@keyframes clickSparkFly {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0); opacity: 0; }
+}
+
+/* Огненный след за курсором */
+.fire-trail-particle {
+    position: fixed;
+    width: 8px; height: 8px;
+    background: #ff4444;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    box-shadow: 0 0 6px #ffd700;
+    animation: fireTrailAnim 0.6s linear forwards;
+}
+@keyframes fireTrailAnim {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -150%) scale(0); opacity: 0; }
+}
+
+/* Искры при столкновении окон */
+.collision-spark {
+    position: fixed;
+    width: 6px; height: 6px;
+    background: #fff;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    box-shadow: 0 0 10px #ffd700, 0 0 20px #ff4444;
+    animation: collisionSparkAnim 0.5s ease-out forwards;
+}
+@keyframes collisionSparkAnim {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0); }
+}
+
+/* Анимированный пул ресурсов */
+.resource-pool {
+    position: absolute;
+    top: 45%;
+    transform: translateY(-50%);
+    right: 10px;
+    width: 72px;
+    height: 72px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 3px solid #444;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: inset 0 0 10px #000, 0 0 5px rgba(0,0,0,0.5);
+    display: none; /* Скрыт по умолчанию */
+    z-index: 5;
+}
+
+.resource-liquid {
+    position: absolute;
+    bottom: 0;
+    left: -50%;
+    width: 200%;
+    height: 85%; /* Уровень заполнения */
+    background: linear-gradient(to top, var(--res-dark, #444), var(--res-light, #888));
+    box-shadow: 0 0 15px var(--res-light, #888);
+    opacity: 0.9;
+    transition: height 0.5s ease-out;
+    animation: liquidSlosh 3s ease-in-out infinite;
+    transform-origin: 50% 100%;
+}
+
+@keyframes liquidSlosh {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-3deg); }
+    75% { transform: rotate(3deg); }
+}
+
+/* Частицы (пузырьки) */
+.resource-particle { position: absolute; bottom: 0; width: 3px; height: 3px; background: rgba(255,255,255,0.4); border-radius: 50%; animation: particleRise 2s infinite linear; }
+.p1 { left: 20%; animation-duration: 2.5s; animation-delay: 0s; }
+.p2 { left: 60%; animation-duration: 3s; animation-delay: 1s; }
+.p3 { left: 40%; animation-duration: 2.2s; animation-delay: 0.5s; }
+.p4 { left: 80%; animation-duration: 2.8s; animation-delay: 1.5s; }
+
+@keyframes particleRise {
+    0% { bottom: 0; opacity: 0; }
+    20% { opacity: 1; }
+    100% { bottom: 100%; opacity: 0; }
+}
+
+/* Стопки монет (вид сбоку) */
+.coin-stacks-container {
+    position: absolute;
+    right: 0px; /* Сдвиг вправо */
+    bottom: 20px; /* Подняли на 15px (высота кнопки) */
+    display: flex;
+    gap: 4px;
+    z-index: 5;
+    height: 75px; /* Уменьшена высота, чтобы не перекрывать ввод */
+    align-items: flex-end;
+    pointer-events: auto;
+}
+
+.coin-stack {
+    width: 14px;
+    height: 100%;
+    position: relative;
+}
+
+.coin {
+    width: 14px;
+    height: 4px;
+    border-radius: 50% / 30%; /* Овал для перспективы */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    border: none; /* Убираем черную рамку, чтобы стопка не темнела */
+    box-sizing: border-box;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.3);
+    transition: bottom 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s;
+}
+
+@keyframes coinShimmer {
+    0%, 90% { filter: brightness(1); }
+    95% { filter: brightness(1.5); }
+    100% { filter: brightness(1); }
+}
+
+/* Цвета монет */
+.coin-c { background: linear-gradient(to right, #8b4513, #cd7f32, #8b4513); }
+.coin-s { background: linear-gradient(to right, #696969, #c0c0c0, #696969); }
+.coin-g { background: linear-gradient(to right, #b8860b, #ffd700, #b8860b); }
+.coin-c, .coin-s, .coin-g { animation: coinShimmer 5s infinite; }
+.coin-y { background: radial-gradient(circle at 30% 30%, #8d6e63, #4e342e); box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.5); }
+
+/* Мифрил */
+.mithril-stack {
+    width: 22px; /* Чуть шире для камней */
+    margin-right: 4px;
+    background: none;
+    border: none;
+}
+
+.mithril-gem {
+    width: 14px;
+    height: 11px;
+    position: absolute;
+    bottom: 0;
+    left: 2px;
+    background: radial-gradient(circle at 30% 30%, #90EE90 0%, #00A86B 40%, #228B22 80%, #002200 100%);
+    border: 1px solid #004d00;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.3);
+    clip-path: polygon(20% 0%, 80% 0%, 100% 40%, 80% 100%, 20% 100%, 0% 40%); /* Форма кристалла */
+    z-index: 1;
+    transition: bottom 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s;
+}
+
+/* Tooltip для валюты */
+#currency-tooltip {
+    position: fixed;
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid #d4af37;
+    color: #fff;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 10000;
+    box-shadow: 0 0 10px #000;
+    display: none;
+    white-space: nowrap;
+}
+
+/* Контейнер для кнопок +/- валюты */
+.currency-controls {
+    position: absolute;
+    right: 0px; /* Сдвиг вправо, синхронно со стопками */
+    bottom: 100px; /* Подняли на 15px (85 + 15) */
+    display: flex;
+    gap: 4px;
+    z-index: 6;
+    height: 40px;
+    align-items: flex-end;
+    padding-left: 2px;
+    pointer-events: auto; /* Возвращаем кликабельность кнопкам */
+}
+
+.currency-controls .control-group {
+    width: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.currency-controls .control-group:first-child {
+    /* Keep margin to account for wider mithril stack, but width is same as others */
+    margin-right: 8px; 
+}
+
+.currency-controls button {
+    width: 100%;
+    height: 15px;
+    padding: 0;
+    font-size: 12px;
+    line-height: 15px;
+    background: #222;
+    border: 1px solid #555;
+    color: #888;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.currency-controls button:hover {
+    background: #444;
+    color: #fff;
+    border-color: #888;
+}
+
+.currency-controls button:active {
+    background: #666;
+    transform: scale(0.95);
+}
+
+#death-modal {
+    z-index: 8005;
+}
+
+/* Стилизация всех модальных окон для "стеклянного" эффекта */
+#text-window, #death-modal, #skill-calc-modal, #exp-calc-modal, #difficulty-calc-modal, 
+#zaken-buy-modal, #sell-craft-modal, #gem-service-modal, #multi-sell-modal, 
+#custom-confirm-modal, #custom-prompt-modal, #add-money-modal, #sell-leg-gem-modal, 
+#buy-ancient-modal, #buy-set-modal, #buy-sell-agrade-modal, #enchant-item-modal, 
+#rift-diff-modal, #active-rift-modal, #melt-item-modal {
+    background: rgba(18, 14, 14, 0.94) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(212, 175, 55, 0.4) !important;
+    box-shadow: 0 0 40px rgba(0,0,0,0.9), inset 0 0 60px rgba(0,0,0,0.6) !important;
+    border-radius: 6px !important;
+}
+
+/* Глобальная стилизация полей ввода (кроме чар-листа) */
+input:not(.char-input), select, textarea {
+    background: rgba(0, 0, 0, 0.6) !important;
+    border: 1px solid #555 !important;
+    color: #fff !important;
+    font-family: 'Lora', serif !important;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+input:not(.char-input):focus, select:focus, textarea:focus {
+    border-color: #d4af37 !important;
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+    background: rgba(0, 0, 0, 0.9) !important;
+    outline: none;
+}
+
+/* Анимация обновления статов */
+@keyframes statFlash {
+    0% { color: #fff; text-shadow: none; transform: scale(1); }
+    50% { color: #66ff66; text-shadow: 0 0 10px #66ff66; transform: scale(1.1); }
+    100% { color: #fff; text-shadow: none; transform: scale(1); }
+}
+
+.stat-flash {
+    animation: statFlash 0.6s ease-out;
+}
+
+/* Напоминание о сохранении */
+#save-reminder {
+    position: fixed;
+    background: rgba(180, 0, 0, 0.9);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    pointer-events: none;
+    display: none;
+    z-index: 10000;
+    border: 1px solid #ff4444;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    animation: saveBounce 1s infinite ease-in-out;
+}
+@keyframes saveBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/* Журнал событий */
+.journal-entry { font-size: 0.7rem; padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.05); line-height: 1.2; }
+.journal-time { color: #666; margin-right: 5px; font-family: monospace; }
+.journal-type-info { color: #aaa; }
+.journal-type-loot { color: #ff9900; }
+.journal-type-gain { color: #66ff66; }
+.journal-type-loss { color: #ff4444; }
+.journal-type-death { color: #ff0000; font-weight: bold; text-shadow: 0 0 5px #ff0000; }

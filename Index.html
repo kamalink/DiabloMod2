@@ -8,22 +8,22 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    <script src="Data/data_economy.js"></script>
-    <script src="Data/data_guilds.js"></script>
-    <script src="Data/data_classes.js"></script>
-    <script src="Data/data_skills.js"></script>
-    <script src="Data/data_world.js"></script>
-    <script src="Logic/logic_core.js"></script>
-    <script src="Logic/logic_ui.js"></script>
-    <script src="Logic/logic_game.js"></script>
-    <script src="Logic/logic_calc_skills.js"></script>
-    <script src="Logic/logic_calc_exp.js"></script>
-    <script src="Logic/logic_calc_economy.js"></script>
-    <script src="Logic/logic_calc_items.js"></script>
-    <script src="Logic/logic_calc_gameplay.js"></script>
-    <script src="Logic/logic_main.js"></script>
-    <link rel="stylesheet" href="Styles/styles.css">
-    <link rel="stylesheet" href="Styles/styles_components.css">
+    <script src="data_economy.js"></script>
+    <script src="data_guilds.js"></script>
+    <script src="data_classes.js"></script>
+    <script src="data_skills.js"></script>
+    <script src="data_world.js"></script>
+    <script src="logic_core.js"></script>
+    <script src="logic_ui.js"></script>
+    <script src="logic_game.js"></script>
+    <script src="logic_calc_skills.js"></script>
+    <script src="logic_calc_exp.js"></script>
+    <script src="logic_calc_economy.js"></script>
+    <script src="logic_calc_items.js"></script>
+    <script src="logic_calc_gameplay.js"></script>
+    <script src="logic_main.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles_components.css">
 </head>
 <body>
 
@@ -56,6 +56,11 @@
         <div id="inventory-title" style="color: #d4af37; border-bottom: 1px solid #555; margin-bottom: 5px; font-weight: bold; text-align: center; cursor: move;">ИНВЕНТАРЬ</div>
         <div id="inventory-content"></div>
     </div>
+    <!-- Виджет журнала -->
+    <div id="journal-widget" class="sidebar-widget" style="position: fixed; top: 750px; right: 310px; width: 250px; max-height: 200px; z-index: 900; display: none;">
+        <div id="journal-title" style="color: #aaa; border-bottom: 1px solid #555; margin-bottom: 5px; font-weight: bold; text-align: center; cursor: move; font-size: 0.8rem;">ЖУРНАЛ СОБЫТИЙ</div>
+        <div id="journal-content"></div>
+    </div>
     <!-- Окно смерти -->
     <div id="death-modal">
         <h2>☠️ СМЕРТЬ ГЕРОЯ</h2>
@@ -65,7 +70,7 @@
 
     <!-- Контейнер для музыки -->
     <div id="audio-container" style="position: fixed; bottom: 0; right: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none;">
-        <audio id="screamer-sound" src="Media/screamer.mp3" preload="auto"></audio>
+        <audio id="screamer-sound" src="screamer.mp3" preload="auto"></audio>
     </div>
 
     <!-- МОДАЛЬНОЕ ОКНО КАЛЬКУЛЯТОРА НАВЫКОВ -->
@@ -181,7 +186,7 @@
             <div class="exp-input-row">
                 <label for="diff-skill-pct" style="font-size:0.8rem;">% Умения (Авто):</label>
                 <div style="text-align:right; flex:1; padding-right:10px; font-size:0.8rem; color:#66ccff;" id="diff-auto-skill-name">Нет</div>
-                <input type="number" id="diff-skill-pct" value="0" disabled style="background: transparent; border: none; color: #fff; cursor: default;">
+                <input type="number" id="diff-skill-pct" value="0" disabled style="background: transparent !important; border: none !important; color: #fff !important; cursor: default !important; width: 70px; text-align: right;">
             </div>
             
             <div class="exp-input-row" style="flex-direction:column; align-items:flex-start; gap:5px;">
@@ -229,8 +234,8 @@
                 </div>
             </div>
 
-            <div class="exp-input-row"><label for="diff-skill-tough">Навыки (%):</label><input type="number" id="diff-skill-tough" value="0" disabled style="background: transparent; border: none; color: #fff; cursor: default;"></div>
-            <div class="exp-input-row"><label for="diff-pass-tough">Пассивки (%):</label><input type="number" id="diff-pass-tough" value="0" disabled style="background: transparent; border: none; color: #fff; cursor: default;"></div>
+            <div class="exp-input-row"><label for="diff-skill-tough">Навыки (%):</label><input type="number" id="diff-skill-tough" value="0" disabled style="background: transparent !important; border: none !important; color: #fff !important; cursor: default !important; width: 70px; text-align: right;"></div>
+            <div class="exp-input-row"><label for="diff-pass-tough">Пассивки (%):</label><input type="number" id="diff-pass-tough" value="0" disabled style="background: transparent !important; border: none !important; color: #fff !important; cursor: default !important; width: 70px; text-align: right;"></div>
             
             <div class="exp-input-row" style="flex-direction:column; align-items:flex-start; gap:5px;">
                 <label for="diff-tough-multipliers" style="width:100%; font-size:0.8rem; color:#66ff66;">Доп. множители (%, через запятую):</label>
@@ -728,9 +733,10 @@
         <button class="mobile-nav-btn" onclick="toggleEditModal()">✍️ КНИГА</button>
     </div>
 
-    <div id="save-load-controls" class="ui-element" style="position: fixed; left: 10px; top: 65px; z-index: 1000; display: flex; gap: 40px;">
+    <div id="save-load-controls" class="ui-element" style="position: fixed; left: 10px; top: 65px; z-index: 1000; display: flex; gap: 10px;">
         <button id="save-btn" class="d2-button" onclick="exportSaveFile()">СОХРАНИТЬ<span class="btn-shimmer"></span></button>
         <button id="load-btn" class="d2-button" onclick="importSaveFile()">ЗАГРУЗИТЬ<span class="btn-shimmer"></span></button>
+        <button id="import-stats-btn" class="d2-button" onclick="importStatsFromBlizzard(event)">B.NET СТАТЫ<span class="btn-shimmer"></span></button>
         <input type="file" id="load-file-input" style="display: none;" onchange="handleFileSelect(this)" accept=".txt,.json">
     </div>
 
@@ -788,7 +794,7 @@
                             <div id="stack-y" class="coin-stack"></div>
                         </div>
                     </div>
-                    <div id="view-sell-bonus" style="position: absolute; bottom:-20px; left: 130px; width: 100%; text-align: left; font-size: 0.6rem; color: #aaa; pointer-events: none;"></div>
+                    <div id="view-sell-bonus" style="position: absolute; bottom:120px; left: 20px; width: 100%; text-align: left; font-size: 0.6rem; color: #aaa; pointer-events: none;"></div>
                 </div>
             </div>
 
