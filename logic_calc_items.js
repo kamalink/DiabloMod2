@@ -610,6 +610,7 @@ window.openBuySellAGradeModal = function(mode, classMult) {
 }
 
 window.confirmBuySellAGrade = function() {
+    const that = this;
     const modal = document.getElementById('buy-sell-agrade-modal');
     const mode = modal.dataset.mode;
     const classMult = parseFloat(modal.dataset.classMult);
@@ -617,6 +618,7 @@ window.confirmBuySellAGrade = function() {
     const g = (window.playerData.guild || "").toLowerCase();
 
     const basePrice = 3200 * Math.pow(1.1, level - 1);
+    let grade = 'A';
     let bonuses = [];
 
     let totalPercent = 0;
@@ -739,7 +741,7 @@ window.confirmBuySellAGrade = function() {
                             isCrafted: false,
                             properties: propsList
                         });
-                        window.logEvent(`Куплен предмет: ${name} (${grade})`, 'loot');
+                    window.logEvent(`Куплен предмет: ${name} (A)`, 'loot');
                         window.updateUI();
                     }, true);
 
