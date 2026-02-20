@@ -412,6 +412,9 @@ window.handleFileSelect = function(input) {
     const file = input.files[0];
     if (!file) return;
 
+    // Восстановление кастомного курсора после закрытия окна выбора файла
+    document.body.style.cursor = "url('cursor.png'), auto";
+
     const reader = new FileReader();
     reader.onload = function(e) {
         try {

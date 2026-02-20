@@ -285,7 +285,7 @@ window.sellItemsBulk = function() {
     modal.style.top = '50%';
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
-    levelInput.value = (window.lastResourceSellLevel && window.lastResourceSellLevel >= 5) ? window.lastResourceSellLevel : (window.playerData.level || 5);
+    levelInput.value = Math.min((window.lastResourceSellLevel && window.lastResourceSellLevel >= 5) ? window.lastResourceSellLevel : (window.playerData.level || 5), 70);
 
     document.getElementById('multi-sell-title').innerText = "Продажа предметов";
     const labelText = document.getElementById('multi-sell-label-text');
@@ -582,7 +582,7 @@ window.openBuySellAGradeModal = function(mode, classMult) {
     
     modal.dataset.mode = mode;
     modal.dataset.classMult = classMult;
-    
+        document.getElementById('agrade-level-input').value = Math.min(window.playerData.level, 70);
     itemName.innerText = window.selectedAGradeItemName;
 
     const handSelector = document.getElementById('hand-selector-agrade');
@@ -760,7 +760,7 @@ window.openBuyAncientModal = function() {
     if (handSelector) {
         handSelector.style.display = (g.includes('охотник')) ? 'flex' : 'none';
     }
-    document.getElementById('ancient-level-input').value = window.playerData.level;
+    document.getElementById('ancient-level-input').value = Math.min(window.playerData.level, 70);
     window.updateAncientInputs();
     modal.style.display = 'block';
 }
@@ -790,7 +790,7 @@ window.openBuySetModal = function() {
     if (handSelector) {
         handSelector.style.display = (g.includes('охотник')) ? 'flex' : 'none';
     }
-    document.getElementById('set-level-input').value = window.playerData.level;
+    document.getElementById('set-level-input').value = Math.min(window.playerData.level, 70);
     modal.style.display = 'block';
 }
 
@@ -1209,7 +1209,7 @@ window.openCraftModal = function() {
         handSelector.style.display = (g.includes('охотник')) ? 'flex' : 'none';
     }
     
-    document.getElementById('modal-sell-level').value = window.playerData.level || 1;
+    document.getElementById('modal-sell-level').value = Math.min(window.playerData.level || 1, 70);
 
     modal.style.top = '50%';
     modal.style.left = '50%';
@@ -1315,7 +1315,7 @@ window.craftItemFromModal = function() {
 window.openMeltModal = function() {
     const modal = document.getElementById('melt-item-modal');
     if (document.getElementById('melt-level')) {
-        document.getElementById('melt-level').value = window.playerData.level;
+        document.getElementById('melt-level').value = Math.min(window.playerData.level, 70);
     }
     modal.style.display = 'block';
 }

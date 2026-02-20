@@ -22,6 +22,10 @@ window.stopCurrencyChange = function() {
 
 window.screamerSound = new Audio('screamer.mp3');
 window.craftSound = new Audio('diablo-3-craft-done.mp3');
+window.igniteSound = new Audio('ignite.mp3');
+window.extinguishSound = new Audio('extinguish.mp3');
+window.igniteSound.volume = 0.4;
+window.extinguishSound.volume = 0.4;
 
 window.onload = function() {
     // Агрегация данных
@@ -52,20 +56,6 @@ window.onload = function() {
     window.audioTrack.volume = 0.15;
     if (slider) slider.value = 0.15;
     
-    // Блокировка музыки до конца интро (6.5 сек)
-    window.introFinished = false;
-    setTimeout(() => {
-        window.introFinished = true;
-        window.toggleMusic(); // Попытка автозапуска после интро
-    }, 6500); 
-
-    // Гарантированный запуск при первом клике
-    document.addEventListener('click', function initAudio() {
-       if (window.introFinished && !window.isMusicPlaying) {
-            window.toggleMusic();
-            document.removeEventListener('click', initAudio);
-        }
-    });
 
     // Глобальный обработчик клавиатуры для модальных окон
     document.addEventListener('keydown', (event) => {
@@ -140,9 +130,10 @@ window.onload = function() {
     // Запуск атмосферных эффектов (Вороны)
     window.startCrowFlocks();
 
+
     // Инициализация перетаскивания для всех модальных окон
-    const draggableIds = ['text-window', 'death-modal', 'skill-calc-modal', 'exp-calc-modal', 'difficulty-calc-modal', 'zaken-buy-modal', 'sell-craft-modal', 'gem-service-modal', 'multi-sell-modal', 'custom-confirm-modal', 'custom-prompt-modal', 'add-money-modal', 'sell-leg-gem-modal', 'buy-ancient-modal', 'buy-set-modal', 'buy-sell-agrade-modal', 'melt-item-modal', 'learned-skills-widget', 'inventory-widget', 'journal-widget'];
-    draggableIds.forEach(id => {
+// Оставляем перетаскивание только для виджетов
+    const draggableIds = ['learned-skills-widget', 'inventory-widget', 'journal-widget'];    draggableIds.forEach(id => {
         window.makeDraggable(document.getElementById(id));
     });
 
@@ -154,6 +145,16 @@ window.onload = function() {
             clickSound.play().catch(() => {});
         }
         window.createClickSparks(e.clientX, e.clientY);
+        // Отстрел воронов
+        if (e.target.classList.contains('flying-crow')) {
+            e.target.remove();
+            window.createBloodExplosion(e.clientX, e.clientY);
+            if (window.playerData) {
+                window.playerData.kills = (window.playerData.kills || 0) + 1;
+                window.updateUI();
+                window.saveToStorage();
+            }
+        }
     });
 
     // Авто-ресайз полей ввода при вводе
@@ -195,8 +196,7 @@ window.onload = function() {
         careerBtn.innerHTML = '<span class="text-gradient-gold">B.net Карьера</span><span class="btn-shimmer"></span>';
         careerBtn.onclick = function(e) { window.importCareerFromBlizzard(e); };
         statsBtn.parentNode.insertBefore(careerBtn, statsBtn.nextSibling);
-        // Добавляем небольшой отступ
-        careerBtn.style.marginLeft = "20px";
+        
 
         // Применяем тему класса к кнопке сразу после создания
         if (window.playerData && window.playerData.className) {
@@ -219,7 +219,83 @@ window.onload = function() {
     
     // Инициализация напоминания о сохранении
     window.initSaveReminder();
-};
+    }; 
+
+    // Функция запуска игры (вызывается кликом по экрану входа)
+window.startGame = function() {
+    if (window.gameStarted) return; // Защита от двойного клика
+    window.gameStarted = true;
+    const uiIds = [
+        'char-sheet', 'right-panels-stack', 'reset-btn', 'music-btn', 'volume-slider',
+        'breadcrumb', 'learned-skills-widget', 'widgets-container', 
+        'inventory-widget', 'journal-widget', 'save-load-controls', 
+        'buttons-area', 'credits-label'
+    ];
+    const overlay = document.getElementById('start-overlay');
+    if (overlay) {
+        overlay.style.opacity = '0'; // Плавное исчезновение
+        overlay.style.cursor = "url('cursor.png'), auto"; // Кастомный курсор
+        overlay.onclick = null; // Отключаем клик
+
+        // Удаляем блокирующий слой только когда весь интерфейс появится (6.5с интро + 3с появление UI)
+setTimeout(() => { 
+            overlay.style.display = 'none';
+            
+            // Разблокируем интерфейс
+            uiIds.forEach(id => {
+                const el = document.getElementById(id);
+if (el) {
+                    el.style.pointerEvents = '';
+                    el.style.opacity = '1'; // Принудительно фиксируем видимость
+                    el.classList.remove('fade-in-ui'); // Удаляем класс анимации, чтобы она не перезапускалась
+                }            });
+
+            // Последовательное зажигание кнопок главного меню
+            const buttons = document.querySelectorAll('.main-btn .btn-text');
+            buttons.forEach((btnText, index) => {
+                setTimeout(() => { btnText.classList.add('ignited'); }, index * 200);
+            });
+            window.mainMenuIgnited = true;
+        }, 9500);    }
+    // Запуск анимации заголовка
+    const title = document.getElementById('menu-title');
+    if (title) title.classList.add('animate-intro');
+
+    // Запуск анимации появления интерфейса (таймер пойдет с этого момента)
+    uiIds.forEach(id => {
+        const el = document.getElementById(id);
+ if (el) {
+            el.classList.add('fade-in-ui');
+            el.style.pointerEvents = 'none'; // Блокируем до конца анимации
+        }    });
+
+    // Таймер воспламенения (синхронизирован с анимацией)
+    setTimeout(() => {
+        if (title) {
+            title.classList.add('ignited');
+            if (window.igniteSound) { window.igniteSound.currentTime = 0; window.igniteSound.play().catch(() => {}); }
+
+            title.onclick = function() {
+                if (this.classList.contains('ignited')) {
+                    this.classList.remove('ignited');
+                    this.classList.add('extinguishing');
+                    if (window.extinguishSound) { window.extinguishSound.currentTime = 0; window.extinguishSound.play().catch(() => {}); }
+                    setTimeout(() => this.classList.remove('extinguishing'), 2500);
+                } else {
+                    this.classList.remove('extinguishing');
+                    this.classList.add('ignited');
+                    if (window.igniteSound) { window.igniteSound.currentTime = 0; window.igniteSound.play().catch(() => {}); }
+                }
+            };
+        }
+    }, 3000);
+
+    // Таймер музыки
+    setTimeout(() => {
+        window.introFinished = true;
+        window.toggleMusic();
+    }, 6500);
+}
 
 // Функция для случайных глитч-эффектов
 window.startRandomGlitches = function() {
@@ -233,7 +309,7 @@ window.startRandomGlitches = function() {
                 window.screamerSound.play().catch(() => {});
             }
         }
-    }, 90000);
+    }, 30000);
 }
 
 
@@ -336,7 +412,7 @@ window.makeDraggable = function(elmnt) {
 
         // Принудительно делаем элемент фиксированным, чтобы его можно было вытащить из стека
         elmnt.style.position = 'fixed';
-        elmnt.style.zIndex = '1500'; // Поверх контента, но ниже окон (2000+)
+        elmnt.style.zIndex = '10002'; // Поверх всего во время перетаскивания
         elmnt.style.margin = '0'; // Сброс отступов для предотвращения скачков
         elmnt.style.transition = 'none'; // Отключаем плавность для мгновенного отклика
 
@@ -450,7 +526,7 @@ window.makeDraggable = function(elmnt) {
         document.onmouseup = null;
         document.onmousemove = null;
         elmnt.style.transition = ""; // Возвращаем CSS переходы
-                elmnt.style.zIndex = '1100'; // Возвращаем нормальный z-index
+        elmnt.style.zIndex = ''; // Возвращаем z-index из CSS (5000+ для окон, 1100 для виджетов)
 
         
         // Сохранение позиции виджетов
@@ -487,7 +563,7 @@ window.restoreWidgetPositions = function() {
             if (pos.height) el.style.height = pos.height;
 
             el.style.margin = '0';
-            el.style.zIndex = '1100'; // Чуть ниже модальных окон (2000+), но выше кнопок (1000)
+            // el.style.zIndex = '1100'; // Убрано, чтобы использовался CSS
         }
     }
 }

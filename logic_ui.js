@@ -1872,6 +1872,13 @@ window.updateCoinStacks = function() {
     const types = ['m', 'g', 's', 'c', 'y']; // Мифрил, Золото, Серебро, Медь, Йена
     const containerHeight = 75; // Макс высота стопки в пикселях
     const coinHeight = 4; // Высота одной монеты
+    const negPrefixes = {
+        'm': 'мф.',
+        'g': 'з.',
+        's': 'с.',
+        'c': 'м.',
+        'y': 'й.'
+    };
 
     types.forEach(type => {
         const stackEl = document.getElementById(`stack-${type}`);
@@ -1886,6 +1893,20 @@ window.updateCoinStacks = function() {
         } else {
             val = window.playerData[`gold_${type}`] || 0;
             count = Math.max(0, Math.min(val, 100)); // Ограничение монет до 100
+        }
+
+        // Отображение отрицательного баланса
+        if (val < 0) {
+            stackEl.innerHTML = `<div class="neg-val" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); color:#ff4444; font-size:0.6rem; font-weight:bold; white-space:nowrap; text-shadow: 0 0 2px #000;">${negPrefixes[type]}${val}</div>`;
+            stackEl.removeAttribute('title');
+            stackEl.onmousemove = (e) => window.showCurrencyTooltip(e, type, val);
+            stackEl.onmouseleave = () => window.hideCurrencyTooltip();
+            return;
+        }
+
+        // Если баланс стал положительным, убираем текст
+        if (stackEl.querySelector('.neg-val')) {
+            stackEl.innerHTML = '';
         }
         
         // Синхронизация количества элементов (чтобы анимировать только новые)
@@ -1951,4 +1972,25 @@ window.updateCoinStacks = function() {
         stackEl.onmousemove = (e) => window.showCurrencyTooltip(e, type, val);
         stackEl.onmouseleave = () => window.hideCurrencyTooltip();
     });
+}
+
+window.createBloodExplosion = function(x, y) {
+    const count = 15;
+    for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'blood-particle';
+        p.style.left = x + 'px';
+        p.style.top = y + 'px';
+        
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = 50 + Math.random() * 50;
+        const tx = Math.cos(angle) * velocity;
+        const ty = Math.sin(angle) * velocity;
+        
+        p.style.setProperty('--tx', `${tx}px`);
+        p.style.setProperty('--ty', `${ty}px`);
+        
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 500);
+    }
 }

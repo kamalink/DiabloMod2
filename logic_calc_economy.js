@@ -341,8 +341,7 @@ window.sellResources = function() {
     const resources = [
         { type: 'n', name: 'N Grade 📓', mult: 1, stock: window.playerData.res_n || 0 },
         { type: 'dc', name: 'D/C Grade 📘/📒', mult: 3, stock: window.playerData.res_dc || 0 },
-        { type: 'b', name: 'B Grade 📙', mult: 4, stock: window.playerData.res_b || 0 },
-        { type: 'a', name: 'A Grade 📕', mult: 10.5, stock: window.playerData.res_a || 0 }
+                { type: 'b', name: 'B Grade 📙', mult: 4, stock: window.playerData.res_b || 0 }
     ];
 
     inputsContainer.innerHTML = resources.map(r => `

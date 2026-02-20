@@ -34,7 +34,7 @@
 #text-window {
     display: none; position: fixed; top: 50%; left: 50%;
     transform: translate(-50%, -50%); width: 90%; max-width: 550px;
-    max-height: 85vh; background: radial-gradient(circle at top, #252525 0%, #0f0f0f 100%);
+    max-height: 85vh; background: #1a1a1a;
     border: 2px solid #5a0000; outline: 1px solid var(--theme-border); outline-offset: -5px;
     padding: 35px 25px; overflow-y: auto; z-index: 2000;
 }
@@ -251,7 +251,7 @@
 }
 /* Увеличенный текст в калькуляторе навыков */
 #skill-calc-modal select {
-    font-size: 1.1rem;
+    font-size: 1rem;
     padding: 8px;
 }
 #skill-calc-modal label {

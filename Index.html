@@ -27,6 +27,11 @@
 </head>
 <body>
 
+    <!-- Экран запуска для разблокировки аудио -->
+    <div id="start-overlay" onclick="window.startGame()">
+        <div class="start-text">НАЖМИТЕ ДЛЯ ВХОДА</div>
+    </div>
+
     <div id="breadcrumb">ГЛАВНАЯ</div>
     <div class="wallpaper"></div>
 
@@ -872,14 +877,18 @@
 <!-- ЭКРАН БЕЗДЕЙСТВИЯ (DIABLO) -->
 <div id="idle-screen">
     <div class="fire-wrapper">
-        <h1 class="fire-text">ЗЛО НЕ ДРЕМЛЕТ...</h1>
-        <div class="spark spark-1"></div>
-        <div class="spark spark-2"></div>
-        <div class="spark spark-3"></div>
-        <div class="spark spark-4"></div>
-        <div class="spark spark-5"></div>
-        <div class="spark spark-6"></div>
+        <h1 class="fire-text" data-text="ЗЛО НЕ ДРЕМЛЕТ...">ЗЛО НЕ ДРЕМЛЕТ...</h1>
+        <div class="spark"></div>
+        <div class="spark"></div>
+        <div class="spark"></div>
+        <div class="spark"></div>
+        <div class="spark"></div>
+        <div class="spark"></div>
+        <div class="spark"></div>
+        <div class="spark"></div>
     </div>
+        <div class="idle-hint">Нажмите любую клавишу</div>
+
 </div>
 
 </body>

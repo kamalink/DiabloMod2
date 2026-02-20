@@ -108,14 +108,14 @@ window.economyData = {
                 <div class="craft-row"><p>🔹 Крафт предмета — 150%</p><button class="craft-btn craft" onclick="window.openCraftModal()">СКРАФТИТЬ</button></div>
                 <div class="craft-row"><p>🔹 Расплавление — 4.4%</p><button class="craft-btn sell" onclick="window.openMeltModal()">РАСПЛАВИТЬ</button></div>
                 <div class="craft-row" style="border-top: 1px solid #333; padding-top: 10px; margin-top: 10px;">
-                    <p>🔹 Продажа ресурсов (5%):</p>
+                    <p>🔹 Продажа ресурсов:</p>
                     <button class="craft-btn smith-sell" onclick="sellResources()">Продать ресурсы</button>
                 </div>
                 <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: center;">
                     <tr style="color: #d4af37; border-bottom: 1px solid #5a0000;">
                         <th>📜 LVL</th><th>Цена</th><th>Множитель</th>
                     </tr>
-                    <tr><td>1-5</td><td>📓 25🧧</td><td>📘,📒 х3 | 📙 х4 | <span class="grade-a">A</span> х10.5</td></tr>
+                    <tr><td>1-5</td><td>📓 25🧧</td><td>📘,📒 х3 | 📙 х4</td></tr>
                     <tr><td>6-10</td><td>📓 30🧧</td><td>—</td></tr>
                     <tr><td>11-15</td><td>📓 40🧧</td><td>—</td></tr>
                     <tr><td>16-20</td><td>📓 55🧧</td><td>—</td></tr>
@@ -189,7 +189,7 @@ window.economyData = {
         }
     ],
     items_menu: [
-        { id: 'bulk_sale', title: 'Продажа предметов оптом 5%', content: `
+        { id: 'bulk_sale', title: 'Продажа предметов оптом', content: `
             <div class="craft-row">
                 <button class="craft-btn smith-sell" onclick="sellItemsBulk()">ПРОДАТЬ ПРЕДМЕТЫ</button>
             </div>
