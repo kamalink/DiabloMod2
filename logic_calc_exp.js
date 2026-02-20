@@ -371,7 +371,7 @@ window.applyExpCalculation = function() {
             window.playerData.vp_empowered = false;
             window.playerData.current_rift_cost = 0;
             window.playerData.current_run_diff = 0;
-            setTimeout(() => window.sellItemsBulk(), 1000);
+            
         }
     }
 }

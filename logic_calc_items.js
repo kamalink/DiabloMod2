@@ -543,7 +543,7 @@ window.sellCraftedItemFromModal = function() {
     document.getElementById('sell-craft-modal').style.display = 'none';
 
     window.showCustomConfirm(
-        `Продать предмет (Lvl , )?<br>Свойств: ${selectedProps.length} (%)<br>Цена: ${window.formatCurrency(totalYen)}`,
+        `Продать предмет (Lvl ${level}, ${grade})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(totalYen)}`,
         () => {
             const currentMoney = window.getAllMoneyInYen();
             window.setMoneyFromYen(currentMoney + totalYen);
@@ -686,17 +686,7 @@ window.confirmBuySellAGrade = function() {
             finalPrice *= mult;
             bonuses.push(`Чародей ${Math.round((mult-1)*100)}%`);
         }
-        if (g.includes('ученик чародея')) {
-            finalPrice *= 0.91;
-            bonuses.push(`Ученик -9%`);
-        }
-        if (g.includes('чародей') && !g.includes('ученик')) {
-            const wizPenalties = [0.90, 0.88, 0.86, 0.84, 0.82, 0.80, 0.78, 0.75, 0.72, 0.70];
-            const rank = window.playerData.rank || 0;
-            const mult = wizPenalties[Math.max(0, Math.min(rank - 1, 9))] || 0.9;
-            finalPrice *= mult;
-            bonuses.push(`Чародей ${Math.round((mult-1)*100)}%`);
-        }
+        
         if (g.includes('ученик чародея')) {
             finalPrice *= 0.91;
             bonuses.push(`Ученик -9%`);
@@ -893,10 +883,7 @@ window.buyAncientImmediate = function(mode = 'buy') {
             finalPrice *= mult;
             bonuses.push(`Чародей ${Math.round((mult-1)*100)}%`);
         }
-        if (g.includes('ученик чародея')) {
-            finalPrice *= 0.91;
-            bonuses.push(`Ученик -9%`);
-        }
+       
         if (g.includes('вор') && !g.includes('воришка')) {
             finalPrice *= 1.5;
             bonuses.push(`Вор +50%`);
@@ -920,7 +907,7 @@ window.buyAncientImmediate = function(mode = 'buy') {
 
     if (mode === 'buy') {
     window.showCustomConfirm(
-        `Купить ${type === 'ancient' ? 'Древний' : 'Первозданный'} -grade?<br>Свойств: ${selectedProps.length} (%)<br>Цена: ${window.formatCurrency(cost)}`,
+        `Купить ${type === 'ancient' ? 'Древний' : 'Первозданный'} ${grade}-grade?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}`,
         () => {
             const currentMoney = window.getAllMoneyInYen();
             if (currentMoney >= cost) {
@@ -951,7 +938,7 @@ window.buyAncientImmediate = function(mode = 'buy') {
     );
     } else {
         window.showCustomConfirm(
-            `Продать ${type === 'ancient' ? 'Древний' : 'Первозданный'} -grade?<br>Свойств: ${selectedProps.length} (%)<br>Цена: ${window.formatCurrency(cost)}`,
+            `Продать ${type === 'ancient' ? 'Древний' : 'Первозданный'} ${grade}-grade?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}`,
             () => {
                 const currentMoney = window.getAllMoneyInYen();
                 window.setMoneyFromYen(currentMoney + cost);
@@ -1073,7 +1060,7 @@ window.buySetImmediate = function(mode = 'buy') {
 
     if (mode === 'buy') {
     window.showCustomConfirm(
-        `Купить  ()?<br>Свойств: ${selectedProps.length} (%)<br>Цена: ${window.formatCurrency(cost)}`,
+        `Купить ${grade} (${type})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}`,
         () => {
             const currentMoney = window.getAllMoneyInYen();
             if (currentMoney >= cost) {
@@ -1104,7 +1091,7 @@ window.buySetImmediate = function(mode = 'buy') {
     );
     } else {
         window.showCustomConfirm(
-            `Продать  ()?<br>Свойств: ${selectedProps.length} (%)<br>Цена: ${window.formatCurrency(cost)}`,
+            `Продать ${grade} (${type})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}`,
             () => {
                 const currentMoney = window.getAllMoneyInYen();
                 window.setMoneyFromYen(currentMoney + cost);
@@ -1130,7 +1117,7 @@ window.manageLegendaryGem = function(classType, action) {
     const actionName = action === 'insert' ? "Вставить" : "Убрать";
     
     window.showCustomConfirm(
-        ` Легендарный камень ( кл.)?<br>Стоимость: ${window.formatCurrency(cost)}`,
+        `${actionName} Легендарный камень (${classType} кл.)?<br>Стоимость: ${window.formatCurrency(cost)}`,
         () => {
             const currentMoney = window.getAllMoneyInYen();
             if (currentMoney >= cost) {
@@ -1193,7 +1180,7 @@ window.confirmSellLegendaryGem = function() {
     document.getElementById('sell-leg-gem-modal').style.display = 'none';
 
     window.showCustomConfirm(
-        `Продать Лег. камень (Кл. , Ур. )?<br>Цена: ${window.formatCurrency(totalYen)}`,
+        `Продать Лег. камень (Кл. ${classType}, Ур. ${level})?<br>Цена: ${window.formatCurrency(totalYen)}`,
         () => {
             const currentMoney = window.getAllMoneyInYen();
             window.setMoneyFromYen(currentMoney + totalYen);

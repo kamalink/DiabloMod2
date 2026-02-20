@@ -777,7 +777,7 @@ window.calculateRiftRewards = function(minutes) {
     );
     
     // Автоматически открываем калькулятор опыта
-    setTimeout(() => window.openExpCalculator(), 1000);
+    setTimeout(() => window.nextRiftSequenceStep(1), 1000);
 }
 
 window.nextRiftSequenceStep = function(step) {
@@ -1033,5 +1033,43 @@ window.createCollisionSparks = function(x, y, side) {
         
         document.body.appendChild(spark);
         setTimeout(() => spark.remove(), 600);
+    }
+}
+
+// --- АТМОСФЕРНЫЕ ЭФФЕКТЫ ---
+window.startCrowFlocks = function() {
+    const run = () => {
+        const delay = (90 + Math.random() * 30) * 1000; // 90-120 секунд
+        setTimeout(() => {
+            window.spawnCrowFlock();
+            run();
+        }, delay);
+    };
+    run();
+}
+
+window.spawnCrowFlock = function() {
+    // Звуковой эффект (50/50)
+    const soundSrc = Math.random() < 0.5 ? 'creepy-cry.mp3' : 'cawing.mp3';
+    const audio = new Audio(soundSrc);
+    audio.volume = 0.4;
+    audio.play().catch(() => {});
+    const count = 3 + Math.floor(Math.random() * 5); // 3-7 ворон
+    for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+            const crow = document.createElement('img');
+            crow.src = 'Crow.gif';
+            crow.className = 'flying-crow';
+            
+            // Случайная высота (10-60% от верха)
+            crow.style.top = (10 + Math.random() * 50) + '%';
+            crow.style.width = (100 + Math.random() * 40) + 'px'; // Размер
+            const duration = 5 + Math.random() * 10; // Скорость
+            crow.style.animationDuration = duration + 's';
+            crow.style.opacity = 0.6 + Math.random() * 0.4;
+
+            document.body.appendChild(crow);
+            setTimeout(() => crow.remove(), duration * 1000);
+        }, i * 400 + Math.random() * 500);
     }
 }

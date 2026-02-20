@@ -30,7 +30,7 @@
     <div id="breadcrumb">ГЛАВНАЯ</div>
     <div class="wallpaper"></div>
 
-    <div class="menu-container rpg-entry-effect">
+    <div class="menu-container">
         <div class="header-title" id="menu-title">Diablo III Mod</div>
         <div id="buttons-area"></div>
     </div>
@@ -47,7 +47,7 @@
     <input type="range" id="volume-slider" min="0" max="1" step="0.01" oninput="setVolume(this.value)" style="display: none; position: fixed; top: 55px; right: 230px; width: 100px; z-index: 1001;">
 
     <!-- Виджет изученных навыков -->
-    <div id="learned-skills-widget" class="sidebar-widget" style="position: fixed; top: 110px; right: 310px; width: 180px; max-height: 300px; z-index: 900; display: none;">
+    <div id="learned-skills-widget" class="sidebar-widget" style="position: fixed; top: 110px; right: 310px; width: 180px; max-height: 300px; z-index: 1100; display: none;">
         <div id="learned-skills-title" class="text-gradient-gold" style="border-bottom: 1px solid #555; margin-bottom: 5px; font-weight: bold; text-align: center; cursor: move;">ИЗУЧЕНО</div>
         <div id="learned-skills-content"></div>
     </div>
@@ -794,7 +794,7 @@
                             <div id="stack-y" class="coin-stack"></div>
                         </div>
                     </div>
-                    <div id="view-sell-bonus" style="position: absolute; bottom:120px; left: 20px; width: 100%; text-align: left; font-size: 0.6rem; color: #aaa; pointer-events: none;"></div>
+                    <div id="view-sell-bonus" style="position: absolute; bottom:120px; left: 0px; width: 100%; text-align: left; font-size: 0.6rem; color: #aaa; pointer-events: none;"></div>
                 </div>
             </div>
 
@@ -857,7 +857,7 @@
     
     <!-- Свиток ГИЛЬДИИ -->
     <div id="active-guild-bonus" class="sidebar-widget" style="display: none;">
-        <h4 id="bonus-guild-name" style="margin: 0 0 10px 0; color: #d4af37; text-align: center; border-bottom: 1px solid #5a0000; font-size: 0.9rem;">ГИЛЬДИЯ</h4>
+        <h4 id="bonus-guild-name" class="text-gradient-gold" style="margin: 0 0 10px 0; text-align: center; border-bottom: 1px solid #5a0000; font-size: 0.9rem;">ГИЛЬДИЯ</h4>
         <div id="bonus-content" style="font-size: 0.7rem;"></div>
     </div>
 

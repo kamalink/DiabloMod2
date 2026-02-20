@@ -42,7 +42,7 @@ body, html {
     --gradient-bottom: #d4af37;
 }
 
-body.theme-barbarian { --theme-border: #8a0000; --theme-highlight: #ff4444; --theme-bg-tint: rgba(138, 0, 0, 0.1); --gradient-bottom: #ff4444; }
+body.theme-barbarian { --theme-border: #850000; --theme-highlight: #7e0505; --theme-bg-tint: rgba(138, 0, 0, 0.295); --gradient-bottom: #6b0000; }
 body.theme-wizard { --theme-border: #4834d4; --theme-highlight: #a29bfe; --theme-bg-tint: rgba(72, 52, 212, 0.1); --gradient-bottom: #a29bfe; }
 body.theme-monk { --theme-border: #b8860b; --theme-highlight: #ffd700; --theme-bg-tint: rgba(184, 134, 11, 0.1); --gradient-bottom: #ffd700; }
 body.theme-wd { --theme-border: #006400; --theme-highlight: #32cd32; --theme-bg-tint: rgba(0, 100, 0, 0.1); --gradient-bottom: #32cd32; }
@@ -50,7 +50,7 @@ body.theme-dh { --theme-border: #7f8c8d; --theme-highlight: #ecf0f1; --theme-bg-
 body.theme-crusader { --theme-border: #77aaff; --theme-highlight: #add8e6; --theme-bg-tint: rgba(119, 170, 255, 0.1); --gradient-bottom: #00bfff; }
 
 /* Контейнеры, которые будут плавно появляться */
-.menu-container,
+
 #char-sheet,
 #right-panels-stack,
 #reset-btn,
@@ -58,10 +58,13 @@ body.theme-crusader { --theme-border: #77aaff; --theme-highlight: #add8e6; --the
 #breadcrumb,
 #learned-skills-widget,
 #widgets-container,
-#inventory-widget {
-    opacity: 0;
-    animation: fadeIn 5s ease-in forwards;
-}
+#inventory-widget,
+#journal-widget,
+#save-load-controls,
+#buttons-area,
+#credits-label {    opacity: 0;
+animation: fadeIn 3s ease-in forwards;
+    animation-delay: 6.5s;}
 
 * {
     cursor: url('cursor.png'), auto;
@@ -138,11 +141,13 @@ body::after {
     font-family: 'Exocet', serif; font-weight: 700;
     font-size: 3rem; margin-bottom: 40px;
     
-    background: linear-gradient(to top, #e69b43, #c0c0c0);
+    background: linear-gradient(to top, #c27f33, #c0c0c0);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8));
+        animation: title-intro 6.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+
 }
 
 @keyframes shimmer {
@@ -256,12 +261,12 @@ body::after {
 }
 
 /* Классовые темы для кнопок меню (границы) */
-.menu-btn-barbarian { border-color: #8a0000; }
-.menu-btn-wizard { border-color: #4834d4; }
+.menu-btn-barbarian { border-color: #8a00008c; }
+.menu-btn-wizard { border-color: #4934d4c0; }
 .menu-btn-dh { border-color: #444; }
 .menu-btn-monk { border-color: #b8860b; }
-.menu-btn-wd { border-color: #006400; }
-.menu-btn-crusader { border-color: #77aaff; }
+.menu-btn-wd { border-color: #006400c5; }
+.menu-btn-crusader { border-color: #77a9ffb0; }
 
 .d2-button.locked-btn {
     cursor: not-allowed;
@@ -333,7 +338,7 @@ body::after {
 
 #window-title { font-family: 'Cinzel', serif; font-weight: 700; color: var(--theme-highlight); text-align: center; border-bottom: 1px solid #5a0000; padding-bottom: 10px; }
 #window-content { font-size: 1.15rem; line-height: 1.6; color: #ccc; margin-top: 20px; }
-.close-x { position: absolute; top: 15px; right: 15px; color: #ff4444; cursor: pointer; font-size: 1.5rem; text-shadow: 0 0 5px #000; }
+.close-x { position: absolute; top: 15px; right: 15px; color: #ff4444; cursor: pointer; font-size: 1.5rem; text-shadow: 0 0 5px #000; z-index: 20; }
 
 /* Режим предпросмотра для окна (не перехватывает мышь) */
 #text-window.preview-mode {
@@ -1301,6 +1306,14 @@ th,
     color: transparent !important;
     text-shadow: none !important;
     filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8));
+    
+}
+
+@keyframes title-intro {
+    0% { opacity: 0; transform: translateY(40vh) scale(2.5); }
+    8% { opacity: 1; transform: translateY(40vh) scale(2.5); }
+    69% { transform: translateY(40vh) scale(2.5); }
+    100% { transform: translateY(0) scale(1); }
 }
 
 .text-gradient-gold {
@@ -1310,4 +1323,23 @@ th,
     color: transparent;
     text-shadow: none;
     filter: drop-shadow(0 2px 1px rgba(0,0,0,0.8));
+}
+
+/* Вороны */
+.flying-crow {
+    position: fixed;
+    left: -150px;
+    z-index: 5000; /* На заднем плане, но перед обоями */
+    pointer-events: none;
+    filter: brightness(2); /* Силуэт */
+    animation: crowFlyRight linear forwards;
+}
+
+@keyframes crowFlyRight {
+    0% { transform: translateX(0) translateY(0); }
+    20% { transform: translateX(25vw) translateY(-30px); }
+    40% { transform: translateX(50vw) translateY(10px); }
+    60% { transform: translateX(75vw) translateY(-20px); }
+    80% { transform: translateX(90vw) translateY(15px); }
+    100% { transform: translateX(calc(100vw + 300px)) translateY(0); }
 }

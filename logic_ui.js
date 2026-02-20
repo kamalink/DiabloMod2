@@ -210,8 +210,10 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
 
         area.appendChild(navBox);
         menuTitle.innerText = titleText;
+                menuTitle.setAttribute('data-text', titleText); // Обновляем текст для блика/тени
     } else {
         menuTitle.innerText = "Diablo III Mod";
+                menuTitle.setAttribute('data-text', "Diablo III Mod");
     }
     menuTitle.style.display = 'block';
 

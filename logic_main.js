@@ -52,14 +52,20 @@ window.onload = function() {
     window.audioTrack.volume = 0.15;
     if (slider) slider.value = 0.15;
     
-    // Попытка автозапуска (может быть заблокирована браузером)
-    window.toggleMusic(); 
+    // Блокировка музыки до конца интро (6.5 сек)
+    window.introFinished = false;
+    setTimeout(() => {
+        window.introFinished = true;
+        window.toggleMusic(); // Попытка автозапуска после интро
+    }, 6500); 
 
     // Гарантированный запуск при первом клике
     document.addEventListener('click', function initAudio() {
-        if (!window.isMusicPlaying) window.toggleMusic();
-        document.removeEventListener('click', initAudio);
-    }, { once: true });
+       if (window.introFinished && !window.isMusicPlaying) {
+            window.toggleMusic();
+            document.removeEventListener('click', initAudio);
+        }
+    });
 
     // Глобальный обработчик клавиатуры для модальных окон
     document.addEventListener('keydown', (event) => {
@@ -113,14 +119,26 @@ window.onload = function() {
     });
     
     // Запуск слежения за бездействием
-    document.addEventListener('mousemove', window.resetIdleTimer);
+    let lastIdleReset = 0;
+    const throttledIdleReset = () => {
+        const now = Date.now();
+        // Сбрасываем таймер не чаще раза в секунду, если экран не активен
+        if (now - lastIdleReset > 1000 || (document.getElementById('idle-screen') && document.getElementById('idle-screen').classList.contains('active'))) {
+            window.resetIdleTimer();
+            lastIdleReset = now;
+        }
+    };
+    document.addEventListener('mousemove', throttledIdleReset);
     document.addEventListener('keydown', window.resetIdleTimer);
     document.addEventListener('click', window.resetIdleTimer);
-    document.addEventListener('touchstart', window.resetIdleTimer);
+    document.addEventListener('touchstart', throttledIdleReset);
     window.resetIdleTimer();
 
     // Запуск случайных глитч-эффектов
     startRandomGlitches();
+
+    // Запуск атмосферных эффектов (Вороны)
+    window.startCrowFlocks();
 
     // Инициализация перетаскивания для всех модальных окон
     const draggableIds = ['text-window', 'death-modal', 'skill-calc-modal', 'exp-calc-modal', 'difficulty-calc-modal', 'zaken-buy-modal', 'sell-craft-modal', 'gem-service-modal', 'multi-sell-modal', 'custom-confirm-modal', 'custom-prompt-modal', 'add-money-modal', 'sell-leg-gem-modal', 'buy-ancient-modal', 'buy-set-modal', 'buy-sell-agrade-modal', 'melt-item-modal', 'learned-skills-widget', 'inventory-widget', 'journal-widget'];
@@ -147,12 +165,16 @@ window.onload = function() {
 
     // Огненный след за курсором при нажатии
     let isCursorDown = false;
+        let lastFireTime = 0;
     document.addEventListener('mousedown', () => isCursorDown = true);
     document.addEventListener('mouseup', () => isCursorDown = false);
     document.addEventListener('mousemove', (e) => {
         if (isCursorDown) {
-            window.createFireTrail(e.clientX, e.clientY);
-        }
+         const now = Date.now();
+            if (now - lastFireTime > 50) { // Ограничение ~20 FPS для частиц
+                window.createFireTrail(e.clientX, e.clientY);
+                lastFireTime = now;
+            }        }
     });
 
     // Проверка и создание недостающих модальных окон (фиксы ошибок)
@@ -314,7 +336,7 @@ window.makeDraggable = function(elmnt) {
 
         // Принудительно делаем элемент фиксированным, чтобы его можно было вытащить из стека
         elmnt.style.position = 'fixed';
-        elmnt.style.zIndex = '8000'; // Поверх всего
+        elmnt.style.zIndex = '1500'; // Поверх контента, но ниже окон (2000+)
         elmnt.style.margin = '0'; // Сброс отступов для предотвращения скачков
         elmnt.style.transition = 'none'; // Отключаем плавность для мгновенного отклика
 
@@ -428,6 +450,8 @@ window.makeDraggable = function(elmnt) {
         document.onmouseup = null;
         document.onmousemove = null;
         elmnt.style.transition = ""; // Возвращаем CSS переходы
+                elmnt.style.zIndex = '1100'; // Возвращаем нормальный z-index
+
         
         // Сохранение позиции виджетов
         const id = elmnt.id;
@@ -463,7 +487,7 @@ window.restoreWidgetPositions = function() {
             if (pos.height) el.style.height = pos.height;
 
             el.style.margin = '0';
-            el.style.zIndex = '4000'; // Чуть ниже модальных окон (5000+), но выше контента
+            el.style.zIndex = '1100'; // Чуть ниже модальных окон (2000+), но выше кнопок (1000)
         }
     }
 }
