@@ -714,33 +714,24 @@ window.confirmBuySellAGrade = function() {
     }
 
     if (mode === 'buy') {
-        window.showCustomConfirm(
-            `Купить предмет?<br>Цена: ${window.formatCurrency(cost)}`,
-            () => {
-                const currentMoney = window.getAllMoneyInYen();
-                if (currentMoney >= cost) {
-                    window.setMoneyFromYen(currentMoney - cost);
-                    
-                    window.showCustomPrompt("Название предмета", "Введите название:", window.selectedAGradeItemName || "A-Grade Item", (name) => {
-                        window.playerData.inventory.push({
-                            id: Date.now(),
-                            name: name,
-                            grade: "A",
-                            level: level,
-                            buyPrice: cost,
-                            isCrafted: false,
-                            properties: propsList
-                        });
-                    window.logEvent(`Куплен предмет: ${name} (A)`, 'loot');
-                        window.updateUI();
-                    }, true);
-
-                    selectedProps.forEach(el => el.classList.remove('selected'));
-                } else {
-                    window.showCustomAlert(`❌ Недостаточно средств! Нужно: ${window.formatCurrency(cost)}`);
-                }
-            }
-        );
+        window.confirmPurchaseWithZaken(cost, window.selectedAGradeItemName || "A-Grade Item", (method) => {
+            window.showCustomPrompt("Название предмета", "Введите название:", window.selectedAGradeItemName || "A-Grade Item", (name) => {
+                window.playerData.inventory.push({
+                    id: Date.now(),
+                    name: name,
+                    grade: "A",
+                    level: level,
+                    buyPrice: cost,
+                    isCrafted: false,
+                    properties: propsList
+                });
+                const payMsg = method === 'zaken' ? ' (за 🔖)' : '';
+                window.logEvent(`Куплен предмет: ${name} (A)${payMsg}`, 'loot');
+                window.updateUI();
+                window.showCustomAlert(`✅ Предмет куплен!`);
+            }, true);
+            selectedProps.forEach(el => el.classList.remove('selected'));
+        });
     } else {
         const currentMoney = window.getAllMoneyInYen();
         window.setMoneyFromYen(currentMoney + cost);
@@ -906,36 +897,28 @@ window.buyAncientImmediate = function(mode = 'buy') {
     document.getElementById('buy-ancient-modal').style.display = 'none';
 
     if (mode === 'buy') {
-    window.showCustomConfirm(
-        `Купить ${type === 'ancient' ? 'Древний' : 'Первозданный'} ${grade}-grade?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}`,
-        () => {
-            const currentMoney = window.getAllMoneyInYen();
-            if (currentMoney >= cost) {
-                window.setMoneyFromYen(currentMoney - cost);
-                const defName = `${type === 'ancient' ? 'Древний' : 'Первозданный'} `;
-                window.showCustomPrompt("Название предмета", "Введите название:", defName, (name) => {
-                    window.playerData.inventory.push({
-                        id: Date.now(),
-                        name: name,
-                        grade: grade,
-                        level: level,
-                        buyPrice: cost,
-                        isAncient: (type === 'ancient'),
-                        isPrimal: (type === 'primal'),
+    const typeName = type === 'ancient' ? 'Древний' : 'Первозданный';
+        window.confirmPurchaseWithZaken(cost, `${typeName} ${grade}-grade`, (method) => {
+            const defName = `${typeName} `;
+            window.showCustomPrompt("Название предмета", "Введите название:", defName, (name) => {
+                window.playerData.inventory.push({
+                    id: Date.now(),
+                    name: name,
+                    grade: grade,
+                    level: level,
+                    buyPrice: cost,
+                    isAncient: (type === 'ancient'),
+                    isPrimal: (type === 'primal'),
                     isCrafted: false,
                     properties: propsList
-                    });
-                    window.logEvent(`Куплен предмет: ${name} (${type})`, 'loot');
-                    window.updateUI();
-                    window.showCustomAlert(`✅ Предмет куплен!`);
-                }, true);
-
-                selectedProps.forEach(el => el.classList.remove('selected'));
-            } else {
-                window.showCustomAlert(`❌ Недостаточно средств!`);
-            }
-        }
-    );
+                });
+                const payMsg = method === 'zaken' ? ' (за 🔖)' : '';
+                window.logEvent(`Куплен предмет: ${name} (${type})${payMsg}`, 'loot');
+                window.updateUI();
+                window.showCustomAlert(`✅ Предмет куплен!`);
+            }, true);
+            selectedProps.forEach(el => el.classList.remove('selected'));
+        });
     } else {
         window.showCustomConfirm(
             `Продать ${type === 'ancient' ? 'Древний' : 'Первозданный'} ${grade}-grade?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}`,
@@ -1059,36 +1042,27 @@ window.buySetImmediate = function(mode = 'buy') {
     document.getElementById('buy-set-modal').style.display = 'none';
 
     if (mode === 'buy') {
-    window.showCustomConfirm(
-        `Купить ${grade} (${type})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}`,
-        () => {
-            const currentMoney = window.getAllMoneyInYen();
-            if (currentMoney >= cost) {
-                window.setMoneyFromYen(currentMoney - cost);
-                const defName = `Set  ()`;
-                window.showCustomPrompt("Название предмета", "Введите название:", defName, (name) => {
-                    window.playerData.inventory.push({
-                        id: Date.now(),
-                        name: name,
-                        grade: grade,
-                        level: level,
-                        buyPrice: cost,
-                        isAncient: (type === 'ancient'),
-                        isPrimal: (type === 'primal'),
-                        isCrafted: false,
-                        properties: propsList
-                    });
-                    window.logEvent(`Куплен комплект: ${name}`, 'loot');
-                    window.updateUI();
-                    window.showCustomAlert(`✅ Комплект куплен!`);
-                }, true);
-
-                selectedProps.forEach(el => el.classList.remove('selected'));
-            } else {
-                window.showCustomAlert(`❌ Недостаточно средств!`);
-            }
-        }
-    );
+    window.confirmPurchaseWithZaken(cost, `${grade} (${type})`, (method) => {
+            const defName = `Set  ()`;
+            window.showCustomPrompt("Название предмета", "Введите название:", defName, (name) => {
+                window.playerData.inventory.push({
+                    id: Date.now(),
+                    name: name,
+                    grade: grade,
+                    level: level,
+                    buyPrice: cost,
+                    isAncient: (type === 'ancient'),
+                    isPrimal: (type === 'primal'),
+                    isCrafted: false,
+                    properties: propsList
+                });
+                const payMsg = method === 'zaken' ? ' (за 🔖)' : '';
+                window.logEvent(`Куплен комплект: ${name}${payMsg}`, 'loot');
+                window.updateUI();
+                window.showCustomAlert(`✅ Комплект куплен!`);
+            }, true);
+            selectedProps.forEach(el => el.classList.remove('selected'));
+        });
     } else {
         window.showCustomConfirm(
             `Продать ${grade} (${type})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}`,
@@ -1546,9 +1520,7 @@ window.buyItemImmediate = function() {
     window.showCustomConfirm(
         `Купить предмет (Lvl ${level}, ${grade})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}${bonusText}`,
         () => {
-            const currentMoney = window.getAllMoneyInYen();
-            if (currentMoney >= cost) {
-                window.setMoneyFromYen(currentMoney - cost);
+            window.confirmPurchaseWithZaken(cost, `предмет ${grade}-Grade`, (method) => {
                 const defName = `Item ${grade}-Grade`;
                 window.showCustomPrompt("Название предмета", "Введите название:", defName, (name) => {
                     window.playerData.inventory.push({
@@ -1562,15 +1534,13 @@ window.buyItemImmediate = function() {
                         isCrafted: false,
                         properties: propsList
                     });
-                    window.logEvent(`Куплен предмет: ${name} (${grade})`, 'loot');
+                    const payMsg = method === 'zaken' ? ' (за 🔖)' : '';
+                    window.logEvent(`Куплен предмет: ${name} (${grade})${payMsg}`, 'loot');
                     window.updateUI();
                     window.showCustomAlert(`✅ Предмет куплен!`);
                 }, true);
-
                 selectedProps.forEach(el => el.classList.remove('selected'));
-            } else {
-                window.showCustomAlert(`❌ Недостаточно средств!`);
-            }
+            });
         }
     );
 }

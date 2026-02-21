@@ -11,11 +11,11 @@ window.formatCurrency = function(yen) {
     let y = remainder % 100;
 
     let parts = [];
-    if (m > 0) parts.push(`${m}💠`);
-    if (g > 0) parts.push(`${g}🥇`);
-    if (s > 0) parts.push(`${s}🥈`);
-    if (c > 0) parts.push(`${c}🥉`);
-    if (y > 0 || parts.length === 0) parts.push(`${y}🧧`);
+    if (m > 0) parts.push(`${m}<span class="d-icon icon-mithril"></span>`);
+    if (g > 0) parts.push(`${g}<span class="d-icon icon-gold"></span>`);
+    if (s > 0) parts.push(`${s}<span class="d-icon icon-silver"></span>`);
+    if (c > 0) parts.push(`${c}<span class="d-icon icon-copper"></span>`);
+    if (y > 0 || parts.length === 0) parts.push(`${y}<span class="d-icon icon-yen"></span>`);
 
     return parts.join(' ');
 }
@@ -30,7 +30,7 @@ window.addMoney = function(g, s, c, y) {
     alert(`💰 Получено: ${s} серебра!`);
 }
 
-window.buyZakens = function(mode) {
+window.buyZakens = function() {
     const modal = document.getElementById('zaken-buy-modal');
     const title = modal.querySelector('h3');
     const buyBtn = document.getElementById('btn-confirm-buy');
@@ -47,25 +47,28 @@ window.buyZakens = function(mode) {
         return;
     }
 
-    if (mode === 'buy') {
-        if (lvl < 20) {
-            window.showCustomAlert("❌ Покупка закенов доступна с 20 уровня.");
-            return;
-        }
-        if (lvl < 70 && lvl % 5 !== 0) {
-            window.showCustomAlert("❌ До 70 уровня покупка доступна только на уровнях, кратных 5 (20, 25, 30...).");
-            return;
-        }
-
-        title.innerText = '💰 ПОКУПКА ЗАКЕНОВ';
-        title.style.color = '#d4af37';
-        modal.style.borderColor = '#d4af37';
-        buyBtn.style.display = 'inline-block';
-        document.getElementById('zaken-price-display').innerText = "";
+    if (lvl < 20) {
+        window.showCustomAlert("❌ Покупка закенов доступна с 20 уровня.");
+        return;
     }
+    if (lvl < 70 && lvl % 5 !== 0) {
+        window.showCustomAlert("❌ До 70 уровня покупка доступна только на уровнях, кратных 5 (20, 25, 30...).");
+        return;
+    }
+
+    title.innerText = '💰 ПОКУПКА ЗАКЕНОВ';
+    title.style.color = '#d4af37';
+    modal.style.borderColor = '#d4af37';
+    buyBtn.style.display = 'inline-block';
+    buyBtn.innerText = 'КУПИТЬ';
+    buyBtn.className = 'death-confirm-btn';
+    buyBtn.style.background = '';
+    buyBtn.style.borderColor = '';
+            if(document.getElementById('zaken-price-display')) document.getElementById('zaken-price-display').innerText = "";
+
     
     document.getElementById('zaken-count-input').value = 1;
-    modal.dataset.mode = mode;
+    modal.dataset.mode = 'buy';
     window.updateZakenTotalCost();
     
     modal.style.display = 'block';
@@ -78,9 +81,12 @@ window.updateZakenTotalCost = function() {
     const lvl = window.playerData.level;
     let priceYen = window.getZakenPrice(lvl);
 
-    const totalYen = priceYen * count;
-    const label = mode === 'buy' ? 'Стоимость' : 'Получите';
-    document.getElementById('zaken-total-cost').innerText = `${label}: ${window.formatCurrency(totalYen)}`;
+if (window.playerData.zaken_discount_val) {
+        priceYen = priceYen * (1 + window.playerData.zaken_discount_val);
+    }
+
+    const totalYen = Math.floor(priceYen * count);    const label = mode === 'buy' ? 'Стоимость' : 'Получите';
+    document.getElementById('zaken-total-cost').innerHTML = `${label}: ${window.formatCurrency(totalYen)}`;
 }
 
 window.confirmBuyZakens = function() {
@@ -97,7 +103,7 @@ window.confirmBuyZakens = function() {
         priceYen = priceYen * (1 + window.playerData.zaken_discount_val);
         bonuses.push(`Гэмблер ${Math.round(window.playerData.zaken_discount_val*100)}%`);
     }
-    const totalCostYen = priceYen * count;
+    const totalCostYen = Math.floor(priceYen * count);
     const valError = window.validateGenericAction(totalCostYen, "Покупка Закенов");
     if (valError) {
         window.showCustomAlert(valError);
@@ -110,6 +116,7 @@ window.confirmBuyZakens = function() {
         window.setMoneyFromYen(currentYen - totalCostYen);
         window.playerData.zakens += count;
         window.playerData.deals += count;
+                window.playerData.black_market = (window.playerData.black_market || 0) + count; // Исправлено: накопление для выхода из гильдии
         if ((window.playerData.guild || "").toLowerCase().includes('гэмблер')) {
             window.playerData.gambler_bm_purchases_count = (window.playerData.gambler_bm_purchases_count || 0) + count;
             while (window.playerData.gambler_bm_purchases_count >= 2) {
@@ -124,6 +131,62 @@ window.confirmBuyZakens = function() {
     } else {
         const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
         window.showCustomAlert(`❌ Недостаточно средств!<br>Нужно: ${window.formatCurrency(totalCostYen)}${bonusText}`);
+    }
+}
+
+// Хелпер для оплаты закенами
+window.confirmPurchaseWithZaken = function(cost, itemName, onPurchase) {
+    const hasZakens = (window.playerData.zakens || 0) > 0;
+    
+    if (!hasZakens) {
+        window.showCustomConfirm(
+            `Купить ${itemName}?<br>Цена: ${window.formatCurrency(cost)}`,
+            () => {
+                const currentMoney = window.getAllMoneyInYen();
+                if (currentMoney >= cost) {
+                    window.setMoneyFromYen(currentMoney - cost);
+                    onPurchase('money');
+                } else {
+                    window.showCustomAlert(`❌ Недостаточно средств! Нужно: ${window.formatCurrency(cost)}`);
+                }
+            }
+        );
+    } else {
+        window.showCustomConfirm(
+            `Купить ${itemName}?<br>Цена: ${window.formatCurrency(cost)}`,
+            () => { // Money
+                const currentMoney = window.getAllMoneyInYen();
+                if (currentMoney >= cost) {
+                    window.setMoneyFromYen(currentMoney - cost);
+                    onPurchase('money');
+                } else {
+                    window.showCustomAlert(`❌ Недостаточно средств!`);
+                }
+            },
+            () => { // Zaken
+                if (window.playerData.zakens > 0) {
+                    window.playerData.zakens--;
+                    window.updateUI();
+                    onPurchase('zaken');
+                } else {
+                    window.showCustomAlert(`❌ Недостаточно закенов!`);
+                }
+            }
+        );
+        
+        // Кастомизация кнопок
+        setTimeout(() => {
+            const yesBtn = document.getElementById('confirm-yes-btn');
+            const noBtn = document.getElementById('confirm-no-btn');
+            if (yesBtn && noBtn) {
+                yesBtn.innerHTML = `💰 Деньги`;
+                noBtn.innerHTML = `🔖 Закен (1)`;
+                noBtn.className = 'death-confirm-btn';
+                noBtn.style.background = '#6a0dad';
+                noBtn.style.borderColor = '#a29bfe';
+                noBtn.style.display = 'inline-block';
+            }
+        }, 0);
     }
 }
 

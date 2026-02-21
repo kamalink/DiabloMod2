@@ -118,9 +118,10 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
         });
         
         function checkEntryConditions() {
+                        const reqs = window.gameConfig.guildReqs;
             if (newGuild.includes('торговц')) {
-                if (window.playerData.stat_vit < 1000) {
-                    window.showCustomAlert("❌ Для вступления требуется минимум 1000 ⛑️ (Живучести).");
+                if (window.playerData.stat_vit < reqs.traders.vit) {
+                    window.showCustomAlert(`❌ Для вступления требуется минимум ${reqs.traders.vit} ⛑️ (Живучести).`);
                     return;
                 }
                 window.showCustomConfirm(
@@ -129,15 +130,15 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                 );
             }
             else if (newGuild.includes('вор') && !newGuild.includes('воришка')) {
-                if (window.playerData.steals < 7) {
-                    window.showCustomAlert("❌ Для вступления нужно минимум 7 успешных краж (Ранг 1).");
+                if (window.playerData.steals < reqs.thieves.steals) {
+                    window.showCustomAlert(`❌ Для вступления нужно минимум ${reqs.thieves.steals} успешных краж (Ранг 1).`);
                     return;
                 }
                 window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?`, () => applySelection());
             }
             else if (newGuild.includes('гэмблер')) {
-                if (window.playerData.deals < 7 && window.playerData.stat_dex < 1000) {
-                    window.showCustomAlert("❌ Для вступления нужно 7 сделок или 1000 ловкости (Ранг 1).");
+                if (window.playerData.deals < reqs.gamblers.deals && window.playerData.stat_dex < reqs.gamblers.dex) {
+                    window.showCustomAlert(`❌ Для вступления нужно ${reqs.gamblers.deals} сделок или ${reqs.gamblers.dex} ловкости (Ранг 1).`);
                     return;
                 }
                 window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?`, () => applySelection());
@@ -164,15 +165,15 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                 return;
             }
             else if (newGuild.includes('чародей')) {
-                if (window.playerData.stat_int < 1000 && window.playerData.para < 50) {
-                    window.showCustomAlert("❌ Для вступления нужно 1000 интеллекта или 50 парагона (Ранг 1).");
+                if (window.playerData.stat_int < reqs.mages.int && window.playerData.para < reqs.mages.para) {
+                    window.showCustomAlert(`❌ Для вступления нужно ${reqs.mages.int} интеллекта или ${reqs.mages.para} парагона (Ранг 1).`);
                     return;
                 }
                 window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?`, () => applySelection());
             }
             else if (newGuild.includes('охотник')) {
                 // Проверка условий 1 ранга (85 Репутации) для Охотников на Гоблинов и Элиту
-                if ((newGuild.includes('гоблин') || newGuild.includes('на ☠️')) && window.playerData.reputation >= 85) {
+                if ((newGuild.includes('гоблин') || newGuild.includes('на ☠️')) && window.playerData.reputation >= reqs.hunters.rep) {
                     window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?<br><small>(Условие 1-го ранга выполнено)</small>`, () => applySelection());
                     return;
                 }
@@ -222,7 +223,7 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
             }
             else if (newGuild.includes('вор') || newGuild.includes('воришка')) {
                  // Проверка условий 1 ранга (7 Краж)
-                 if (window.playerData.steals >= 7) {
+                 if (window.playerData.steals >= reqs.thieves.steals) {
                     window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?<br><small>(Условие 1-го ранга выполнено)</small>`, () => applySelection());
                     return;
                  }
@@ -245,8 +246,8 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
             else if (newGuild.includes('искатель') || newGuild.includes('джимми')) {
                 // Проверка условий 1 ранга (Найденные легендарки)
                 let passed = false;
-                if (newGuild.includes('приключений') && window.playerData.found_legs >= 5) passed = true;
-                if (newGuild.includes('богатства') && window.playerData.found_legs >= 8) passed = true;
+                if (newGuild.includes('приключений') && window.playerData.found_legs >= reqs.explorers.legs) passed = true;
+                if (newGuild.includes('богатства') && window.playerData.found_legs >= reqs.wealth.legs) passed = true;
                 
                 if (passed) {
                     window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?<br><small>(Условие 1-го ранга выполнено)</small>`, () => applySelection());
@@ -274,7 +275,7 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                  const totalKills = window.playerData.kills + (window.playerData.base_kills || 0);
                  const str = window.playerData.stat_str;
                  
-                 if ((newGuild.includes('громила') || newGuild.includes('лорд')) && (str >= 1000 || totalKills >= 1700)) {
+                 if ((newGuild.includes('громила') || newGuild.includes('лорд')) && (str >= reqs.brute.str || totalKills >= reqs.brute.kills)) {
                     window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?<br><small>(Условие 1-го ранга выполнено)</small>`, () => applySelection());
                     return;
                  }
@@ -493,7 +494,7 @@ window.checkGuildProgression = function() {
     }
 
     // 2. Салага -> Громила или Лорд Войны
-    else if (g.includes('салага') && (window.playerData.stat_str >= 1000 || (window.playerData.kills + (window.playerData.base_kills || 0)) >= 1700)) {
+    else if (g.includes('салага') && (window.playerData.stat_str >= window.gameConfig.guildReqs.brute.str || (window.playerData.kills + (window.playerData.base_kills || 0)) >= window.gameConfig.guildReqs.brute.kills)) {
         if (window.playerData.refused_salaga_promotion) return false;
 
         // Тут выбор из двух, поэтому просто уведомляем или открываем меню
@@ -553,7 +554,7 @@ window.checkGuildProgression = function() {
     // 3. Ученик чародея -> Чародей
     else if (g.includes('ученик чародея')) {
         // Условие для чародея: 1000 инты или 50 парагона
-        if (!window.playerData.refused_wizard_promotion && (window.playerData.stat_int >= 1000 || window.playerData.para >= 50)) {
+        if (!window.playerData.refused_wizard_promotion && (window.playerData.stat_int >= window.gameConfig.guildReqs.mages.int || window.playerData.para >= window.gameConfig.guildReqs.mages.para)) {
              window.showCustomConfirm(
                 "Вы готовы стать полноценным Чародеем?",
                 () => {
@@ -568,7 +569,7 @@ window.checkGuildProgression = function() {
         }
     }
     // 4. Помощник охотника -> Охотник на гоблинов или Охотник на элиту
-    else if (g.includes('помощник охотника') && window.playerData.reputation >= 85) {
+    else if (g.includes('помощник охотника') && window.playerData.reputation >= window.gameConfig.guildReqs.hunters.rep) {
         const modal = document.getElementById('custom-confirm-modal');
         document.getElementById('confirm-message').innerHTML = "Вы заслужили доверие Охотников! Выберите специализацию:";
         const yesBtn = document.getElementById('confirm-yes-btn');
@@ -1213,6 +1214,14 @@ window.confirmDeath = function() {
         document.getElementById('death-modal').style.display = 'none';
         return;
     }
+
+    // Запись смерти в историю
+    if (!window.playerData.death_history) window.playerData.death_history = [];
+    window.playerData.death_history.push({
+        level: window.playerData.level,
+        time: Date.now(),
+        dateStr: new Date().toLocaleString()
+    });
 
     if (window.pendingVampireJoin) {
         window.pendingVampireJoin = false;

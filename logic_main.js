@@ -35,14 +35,48 @@ window.onload = function() {
             { id: 'guilds', title: 'Гильдии и Классы' },
             { id: 'skills_root', title: 'Навыки и Опыт' },
             { id: 'portals', title: 'Порталы' },
+            { id: 'progress_menu', title: 'Прогресс' },
             { id: 'death_root', title: 'Смерть, Сложность, Профы' }
-        ],
+       ],
         ...window.economyData,
         ...window.guildsData,
         ...window.classesData,
         ...window.skillsData,
         ...window.worldData
     };
+
+    // Данные для меню прогресса
+    window.gameData.progress_menu = {
+        content: `<div id="progress-content-area"></div><script>document.getElementById('progress-content-area').innerHTML = window.renderProgressMenu();</script>`
+    };
+    // Хак для выполнения скрипта внутри контента (так как innerHTML не выполняет скрипты)
+    const originalShowText = window.showText;
+    window.showText = function(title, content) {
+        originalShowText(title, content);
+        if (title === 'Прогресс') {
+            document.getElementById('window-content').innerHTML = window.renderProgressMenu();
+        }
+        if (title === '⚙️ Настройки') {
+            document.getElementById('window-content').innerHTML = window.renderSettingsMenu();
+        }
+    };
+
+    // Создание слоя динамического фона, если его нет
+    if (!document.getElementById('dynamic-bg-layer')) {
+        const bgLayer = document.createElement('div');
+        bgLayer.id = 'dynamic-bg-layer';
+        document.body.insertBefore(bgLayer, document.body.firstChild); // Вставляем в начало body
+         }
+
+    // Создание кнопки настроек (шестеренка)
+    if (!document.getElementById('settings-btn')) {
+        const btn = document.createElement('button');
+        btn.id = 'settings-btn';
+        btn.innerHTML = '⚙️';
+        btn.title = 'Настройки';
+        btn.onclick = function() { window.showText('⚙️ Настройки', ''); };
+        document.body.appendChild(btn);
+    }
 
     // Восстановление состояния
     window.restorePanels();
@@ -127,8 +161,6 @@ window.onload = function() {
     // Запуск случайных глитч-эффектов
     startRandomGlitches();
 
-    // Запуск атмосферных эффектов (Вороны)
-    window.startCrowFlocks();
 
 
     // Инициализация перетаскивания для всех модальных окон
@@ -145,16 +177,7 @@ window.onload = function() {
             clickSound.play().catch(() => {});
         }
         window.createClickSparks(e.clientX, e.clientY);
-        // Отстрел воронов
-        if (e.target.classList.contains('flying-crow')) {
-            e.target.remove();
-            window.createBloodExplosion(e.clientX, e.clientY);
-            if (window.playerData) {
-                window.playerData.kills = (window.playerData.kills || 0) + 1;
-                window.updateUI();
-                window.saveToStorage();
-            }
-        }
+        
     });
 
     // Авто-ресайз полей ввода при вводе
@@ -197,25 +220,10 @@ window.onload = function() {
         careerBtn.onclick = function(e) { window.importCareerFromBlizzard(e); };
         statsBtn.parentNode.insertBefore(careerBtn, statsBtn.nextSibling);
         
-
-        // Применяем тему класса к кнопке сразу после создания
-        if (window.playerData && window.playerData.className) {
-             const map = {
-                "Варвар": "menu-btn-barbarian",
-                "Чародей": "menu-btn-wizard",
-                "Охотник на демонов": "menu-btn-dh",
-                "Монах": "menu-btn-monk",
-                "Колдун": "menu-btn-wd",
-                "Крестоносец": "menu-btn-crusader"
-            };
-            if (map[window.playerData.className]) {
-                careerBtn.classList.add(map[window.playerData.className]);
-            }
-        }
     }
 
     const credits = document.getElementById('credits-label');
-    if(credits) credits.innerHTML += '<br>v1.0.0';
+    if(credits) credits.innerHTML += '<br>v1.0.3';
     
     // Инициализация напоминания о сохранении
     window.initSaveReminder();
@@ -226,7 +234,7 @@ window.startGame = function() {
     if (window.gameStarted) return; // Защита от двойного клика
     window.gameStarted = true;
     const uiIds = [
-        'char-sheet', 'right-panels-stack', 'reset-btn', 'music-btn', 'volume-slider',
+        'char-sheet', 'right-panels-stack', 'reset-btn', 'settings-btn', 'music-btn', 'volume-slider',
         'breadcrumb', 'learned-skills-widget', 'widgets-container', 
         'inventory-widget', 'journal-widget', 'save-load-controls', 
         'buttons-area', 'credits-label'
@@ -301,6 +309,7 @@ if (el) {
 window.startRandomGlitches = function() {
     // 1. Таймер для Скримера (Звук) - Ровно каждые 30 секунд
     setInterval(() => {
+                if (!window.playerData.settings.screamer) return; // Проверка настройки
         // 40% шанс на звук
         if (Math.random() < 0.40) {
             if (window.screamerSound) {
@@ -385,30 +394,6 @@ window.makeDraggable = function(elmnt) {
         // Сбор препятствий (только видимые элементы)
         obstacles = [];
         
-        // Включаем физику коллизий ТОЛЬКО для виджетов главного экрана
-        const collisionEnabledIds = ['learned-skills-widget', 'inventory-widget', 'active-guild-bonus', 'active-class-bonus', 'active-class-bonus-2', 'journal-widget'];
-        const isCollisionEnabled = collisionEnabledIds.includes(elmnt.id);
-
-        if (isCollisionEnabled) {
-            const selectors = [
-                '.d2-button', 
-                '#save-load-controls',
-                '#reset-btn',
-                '#music-btn'
-            ];
-
-            selectors.forEach(sel => {
-                document.querySelectorAll(sel).forEach(el => {
-                    // Исключаем: сам элемент, скрытые элементы, дочерние элементы
-                    if (el !== elmnt && 
-                        el.style.display !== 'none' && 
-                        el.offsetParent !== null && 
-                        !elmnt.contains(el)) {
-                        obstacles.push(el.getBoundingClientRect());
-                    }
-                });
-            });
-        }
 
         // Принудительно делаем элемент фиксированным, чтобы его можно было вытащить из стека
         elmnt.style.position = 'fixed';
@@ -456,24 +441,6 @@ window.makeDraggable = function(elmnt) {
         if (proposedTop + h > window.innerHeight) { proposedTop = window.innerHeight - h; collided = true; collisionSide = 'bottom'; }
         if (proposedLeft + w > window.innerWidth) { proposedLeft = window.innerWidth - w; collided = true; collisionSide = 'right'; }
 
-        // 2. Коллизии с объектами
-        // Проверяем движение по X
-        let rectX = { left: proposedLeft, top: elmnt.offsetTop, right: proposedLeft + w, bottom: elmnt.offsetTop + h };
-        if (checkCollision(rectX, obstacles)) {
-            proposedLeft = elmnt.offsetLeft; // Отменяем движение по X
-            collided = true;
-            if (pos1 > 0) collisionSide = 'left';
-            else if (pos1 < 0) collisionSide = 'right';
-        }
-
-        // Проверяем движение по Y (используя уже проверенный X, чтобы не застревать в углах)
-        let rectY = { left: proposedLeft, top: proposedTop, right: proposedLeft + w, bottom: proposedTop + h };
-        if (checkCollision(rectY, obstacles)) {
-            proposedTop = elmnt.offsetTop; // Отменяем движение по Y
-            collided = true;
-            if (pos2 > 0) collisionSide = 'top';
-            else if (pos2 < 0) collisionSide = 'bottom';
-        }
 
         // Эффекты (Звук и отскок) - только для разрешенных виджетов
         const collisionEnabledIds = ['learned-skills-widget', 'inventory-widget', 'active-guild-bonus', 'active-class-bonus', 'active-class-bonus-2', 'journal-widget'];
@@ -509,18 +476,6 @@ window.makeDraggable = function(elmnt) {
         elmnt.style.left = proposedLeft + "px";
     }
 
-    function checkCollision(r1, obstacles) {
-        for (let r2 of obstacles) {
-            // Проверка на пересечение прямоугольников
-            if (!(r2.left >= r1.right || 
-                  r2.right <= r1.left || 
-                  r2.top >= r1.bottom || 
-                  r2.bottom <= r1.top)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     function closeDragElement() {
         document.onmouseup = null;
@@ -622,6 +577,39 @@ window.ensureModalsExist = function() {
             <div style="margin-top:20px;">
                 <button class="craft-btn sell" onclick="window.confirmMeltItem()">РАСПЛАВИТЬ</button>
                 <button class="death-cancel-btn" onclick="document.getElementById('melt-item-modal').style.display='none'">ОТМЕНА</button>
+            </div>
+        `;
+        document.body.appendChild(div);
+        window.makeDraggable(div);
+    }
+    // 3. Фикс ошибки покупки закенов (отсутствующее окно)
+    if (!document.getElementById('zaken-buy-modal')) {
+        const div = document.createElement('div');
+        div.id = 'zaken-buy-modal';
+        div.className = 'modal';
+        div.style.display = 'none';
+        div.style.position = 'fixed';
+        div.style.zIndex = '6000';
+        div.style.left = '50%';
+        div.style.top = '50%';
+        div.style.transform = 'translate(-50%, -50%)';
+        div.style.background = '#1a1a1a';
+        div.style.border = '2px solid #d4af37';
+        div.style.padding = '20px';
+        div.style.width = '300px';
+        div.style.textAlign = 'center';
+        div.style.boxShadow = '0 0 20px #000';
+        
+        div.innerHTML = `
+            <h3 style="color:#d4af37; margin-top:0; font-family:'Exocet',serif;">💰 ПОКУПКА ЗАКЕНОВ</h3>
+            <div style="margin: 15px 0;">
+                <label style="color:#ccc;">Количество: <input type="number" id="zaken-count-input" value="1" min="1" style="width:60px; background:#000; color:#fff; border:1px solid #555; text-align:center; padding:5px;" oninput="window.updateZakenTotalCost()"></label>
+            </div>
+            <div id="zaken-total-cost" style="color:#d4af37; margin-bottom:10px; font-weight:bold;">Стоимость: 0</div>
+            <div id="zaken-price-display" style="font-size:0.8rem; color:#888; margin-bottom:15px;"></div>
+            <div style="margin-top:20px;">
+                <button id="btn-confirm-buy" class="death-confirm-btn" onclick="window.confirmBuyZakens()">КУПИТЬ</button>
+                <button class="death-cancel-btn" onclick="document.getElementById('zaken-buy-modal').style.display='none'">ОТМЕНА</button>
             </div>
         `;
         document.body.appendChild(div);

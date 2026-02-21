@@ -246,7 +246,6 @@ window.guildsData = {
         content: `
             <p style="color: #ff4444; border: 1px solid #5a0000; padding: 5px; text-align: center;">
                 ❗ Красть можно только текущие вещи из магазина.
-                ❗ Купленные 🔖 можно продать за 80% от цены.
             </p>
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <p style="color: #d4af37; margin: 0;">🕵️ ШАНС КРАЖИ:</p>
@@ -266,9 +265,11 @@ window.guildsData = {
             </table>
             <p style="font-size: 0.8rem; margin: 10px 0; color: #888;">* Нажмите "УКРАСТЬ", затем выберите ячейку.</p>
             <hr>
+            <p style="color: #ff4444; font-size: 0.8rem;">❗ Закены позволяют покупать любые предметы бесплатно (1 🔖 = 1 предмет).</p>
+
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <p style="color: #d4af37; margin: 0;">🔖 ЗАКЕНЫ (Только Братство):</p>
-                <button class="calc-nav-btn" onclick="buyZakens('buy')">💰 КУПИТЬ</button>
+                                <button class="calc-nav-btn" onclick="buyZakens()">💰 КУПИТЬ</button>
             </div>
             <div style="column-count: 2; font-size: 0.85rem;">
                 20🗡️-1.20🥈 | 25🗡️-2🥈<br>30🗡️-3🥈 | 35🗡️-5🥈<br>40🗡️-9🥈 | 45🗡️-13🥈<br>

@@ -17,11 +17,11 @@ window.showCurrencyTooltip = function(event, type, amount) {
         }
         
         const typeMap = {
-            m: 'Мифрил',
-            g: 'Золото',
-            s: 'Серебро',
-            c: 'Медь',
-            y: 'Йена'
+           m: '<span class="d-icon icon-mithril"></span> Мифрил',
+            g: '<span class="d-icon icon-gold"></span> Золото',
+            s: '<span class="d-icon icon-silver"></span> Серебро',
+            c: '<span class="d-icon icon-copper"></span> Медь',
+            y: '<span class="d-icon icon-yen"></span> Йена'
         };
 
         tooltip.innerHTML = `${typeMap[type]}: ${amount.toLocaleString('ru-RU')}`;
@@ -38,6 +38,32 @@ window.hideCurrencyTooltip = function() {
         window.currencyTooltipTimer = null;
     }
     const tooltip = document.getElementById('currency-tooltip');
+    if (tooltip) tooltip.style.display = 'none';
+}
+
+window.showCustomTooltip = function(event, text) {
+    let tooltip = document.getElementById('generic-tooltip');
+    if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.id = 'generic-tooltip';
+        document.body.appendChild(tooltip);
+    }
+    tooltip.innerHTML = text;
+    tooltip.style.display = 'block';
+    
+    const offset = 15;
+    let left = event.clientX + offset;
+    let top = event.clientY + offset;
+    
+    if (left + tooltip.offsetWidth > window.innerWidth) left = event.clientX - tooltip.offsetWidth - offset;
+    if (top + tooltip.offsetHeight > window.innerHeight) top = event.clientY - tooltip.offsetHeight - offset;
+    
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = top + 'px';
+}
+
+window.hideCustomTooltip = function() {
+    const tooltip = document.getElementById('generic-tooltip');
     if (tooltip) tooltip.style.display = 'none';
 }
 
@@ -255,33 +281,34 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
 
         const guildId = item.id;
             const pData = window.playerData;
+                        const reqs = window.gameConfig.guildReqs; // Используем конфиг
             switch(guildId) {
                 case 'traders_guild':
-                    if (pData.stat_vit < 1000) { isLocked = true; lockReason = "🔒 1000 ⛑️"; }
+                    if (pData.stat_vit < reqs.traders.vit) { isLocked = true; lockReason = `🔒 ${reqs.traders.vit} ⛑️`; }
                     break;
                 case 'vampire_mage':
                 case 'wizard_mage':
-                    if (pData.stat_int < 1000 && pData.para < 50) { isLocked = true; lockReason = "🔒 1000🔮 | 50⏳"; }
+                    if (pData.stat_int < reqs.mages.int && pData.para < reqs.mages.para) { isLocked = true; lockReason = `🔒 ${reqs.mages.int}🔮 | ${reqs.mages.para}⏳`; }
                     break;
                 case 'goblin_hunter':
                 case 'elite_hunter':
-                    if (pData.reputation < 85) { isLocked = true; lockReason = "🔒 85 🎭"; }
+                    if (pData.reputation < reqs.hunters.rep) { isLocked = true; lockReason = `🔒 ${reqs.hunters.rep} 🎭`; }
                     break;
                 case 'db_gambler':
-                    if (pData.deals < 7 && pData.stat_dex < 1000) { isLocked = true; lockReason = "🔒 7 🤝 | 1000🥢"; }
+                    if (pData.deals < reqs.gamblers.deals && pData.stat_dex < reqs.gamblers.dex) { isLocked = true; lockReason = `🔒 ${reqs.gamblers.deals} 🤝 | ${reqs.gamblers.dex}🥢`; }
                     break;
                 case 'db_thief':
-                    if (pData.steals < 7) { isLocked = true; lockReason = "🔒 7 🧤"; }
+                    if (pData.steals < reqs.thieves.steals) { isLocked = true; lockReason = `🔒 ${reqs.thieves.steals} 🧤`; }
                     break;
                 case 'adv_explorer':
-                    if (pData.found_legs < 5) { isLocked = true; lockReason = "🔒 5 📙"; }
+                    if (pData.found_legs < reqs.explorers.legs) { isLocked = true; lockReason = `🔒 ${reqs.explorers.legs} 📙`; }
                     break;
                 case 'adv_wealth':
-                    if (pData.found_legs < 8) { isLocked = true; lockReason = "🔒 8 📙"; }
+                    if (pData.found_legs < reqs.wealth.legs) { isLocked = true; lockReason = `🔒 ${reqs.wealth.legs} 📙`; }
                     break;
                 case 'comp_brute':
                 case 'comp_warlord':
-                    if (pData.stat_str < 1000 && (pData.kills + (pData.base_kills || 0)) < 1700) { isLocked = true; lockReason = "🔒 1000🏮 | 1700💀"; }
+                    if (pData.stat_str < reqs.brute.str && (pData.kills + (pData.base_kills || 0)) < reqs.brute.kills) { isLocked = true; lockReason = `🔒 ${reqs.brute.str}🏮 | ${reqs.brute.kills}💀`; }
                     break;
                 case 'prof_1':
                     if (pData.level <= 20) { isLocked = true; lockReason = "🔒 Требуется ур. 21"; }
@@ -353,6 +380,8 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
 
         area.appendChild(btn);
     });
+    // Обновляем иконки в меню (в том числе на заблокированных кнопках)
+    window.replaceStaticIcons();
 }
 
 window.showText = function(title, content) {
@@ -537,6 +566,8 @@ window.checkSaveStatus = function() {
 
 window.applyMenuButtonTheme = function(className) {
     const buttons = document.querySelectorAll('.d2-button');
+        /* Отключена смена цвета кнопок по запросу
+
     buttons.forEach(btn => {
         btn.classList.remove('menu-btn-barbarian', 'menu-btn-wizard', 'menu-btn-dh', 'menu-btn-monk', 'menu-btn-wd', 'menu-btn-crusader', 'menu-btn-necromancer');
         
@@ -553,10 +584,12 @@ window.applyMenuButtonTheme = function(className) {
             btn.classList.add(map[className]);
         }
     });
+    */
 }
 
 window.applyTheme = function(className) {
     document.body.className = ''; // Сброс классов
+    /* Отключена смена темы интерфейса по запросу
 
     if (!className) return;
     
@@ -573,6 +606,7 @@ window.applyTheme = function(className) {
         document.body.classList.add(map[className]);
         window.applyMenuButtonTheme(className); // Обновляем кнопки тоже
     }
+        */
 
     // Настройка пула ресурсов
     const pool = document.getElementById('resource-pool');
@@ -582,7 +616,7 @@ window.applyTheme = function(className) {
             "Чародей": { dark: "#4834d4", light: "#a29bfe", name: "Магическая энергия" }, // Фиолетовый
             "Монах": { dark: "#805a18", light: "#d4af37", name: "Дух" }, // Благородное золото
             "Колдун": { dark: "#00008b", light: "#4169e1", name: "Мана" }, // Синий
-            "Охотник на демонов": { dark: "#4a0000", light: "#920909fa", name: "Ненависть" }, // Жестоко кровавый
+            "Охотник на демонов": { dark: "#2c3e50", light: "#bdc3c7", name: "Ненависть" }, // Серебряный
             "Крестоносец": { dark: "#005f99", light: "#00bfff", name: "Гнев" } // Голубой
         };
         const theme = resColors[className];
@@ -687,7 +721,10 @@ window.updateUI = function() {
         actInput.type = 'text'; // Разрешаем текст для "1+"
         const currentAct = window.playerData.act || 1;
         // Если акт > 5, показываем как НГ+ (1+, 2+ и т.д.)
-        actInput.value = currentAct > 5 ? (currentAct - 5) + "+" : currentAct;
+       const newVal = currentAct > 5 ? (currentAct - 5) + "+" : currentAct;
+        if (actInput.value != newVal) {
+            actInput.value = newVal;
+        }
     }
     
     // Отображение скидки на НП
@@ -858,7 +895,7 @@ window.updateUI = function() {
     setInput('input-zakens', window.playerData.zakens);
     
     document.getElementById('view-potion-price').innerText = window.playerData.potion_price ? `(${window.playerData.potion_price})` : "";
-    document.getElementById('view-zaken-discount').innerText = window.playerData.zaken_discount || "-";
+    document.getElementById('view-zaken-discount').innerHTML = window.playerData.zaken_discount || "-";
     document.getElementById('view-theft-fine').innerText = window.playerData.theft_fine ? `(Штраф: ${window.playerData.theft_fine})` : "";
 
     document.getElementById('view-class').innerText = window.playerData.className || "Класс не выбран";
@@ -924,6 +961,7 @@ window.updateUI = function() {
         window.autoResizeInput(input);
     });
     window.updateResourcePool();
+        window.updateDynamicBackground();
 }
 
 window.updateTheftTable = function() {
@@ -1066,8 +1104,14 @@ window.toggleMusic = function() {
 
 window.switchMusicTrack = function() {
     const currentAct = window.playerData.act || 1;
-    const targetTrack = (currentAct > 5) ? window.audioTrackNGPlus : window.audioTrackDefault;
+let targetTrack = window.audioTrackDefault;
 
+    // Нормализация акта для определения музыки
+    let normalizedAct = currentAct;
+    if (currentAct > 5) normalizedAct = (currentAct - 1) % 5 + 1;
+
+    if (normalizedAct === 5) targetTrack = window.audioTrackAct5;
+    else if (currentAct > 5) targetTrack = window.audioTrackNGPlus;
     if (window.audioTrack === targetTrack) {
         return; // Трек уже правильный, ничего не делаем
     }
@@ -1251,12 +1295,6 @@ window.savePlayerData = function() {
         window.playerData.base_vp_at_70 = window.playerData.maxVp; // Фиксируем базу ВП
     }
 
-    // Логика после 70 уровня: Уровень зависит от ВП (База + (Текущий - База))
-    if (window.playerData.level >= 70) {
-        const base = window.playerData.base_vp_at_70 || 0;
-        const current = window.playerData.maxVp || 0;
-        window.playerData.level = 70 + Math.max(0, current - base);
-    }
 
     const legs = getVal('input-found-legs'); if (legs !== null) window.playerData.found_legs = legs;
     const yellows = getVal('input-found-yellows'); if (yellows !== null) window.playerData.found_yellows = yellows;
@@ -1308,21 +1346,7 @@ window.savePlayerData = function() {
         window.playerData.highest_kills = currentKills;
     }
 
-    window.calculateRank();
-    // Обновляем отображение ранга сразу
-    document.getElementById('view-rank').innerText = `${window.playerData.rank} (${window.playerData.rankName})`;
-    window.checkGuildExitConditions();
-    window.checkGuildProgression(); // Проверка на повышение
-    window.saveToStorage();
-    // checkGuildExitConditions теперь также проверяет аренду, так как она вызывается здесь
-
-    // Авто-ресайз полей
-    document.querySelectorAll('.char-input').forEach(input => {
-        window.autoResizeInput(input);
-    });
-    window.updateResourcePool();
-    window.updateCoinStacks();
-    window.updateUI();
+          window.updateUI();
 }
 
 window.importStatsFromBlizzard = function(event) {
@@ -1611,6 +1635,23 @@ window.renderInventoryWidget = function() {
         const isStolen = item.isStolen || false;
         const isLocked = item.isLocked || false;
         const g = (item.grade || "").toUpperCase();
+
+         // Определение типа иконки и класса грейда
+        let iconClass = "icon-weapon"; // По умолчанию
+        let gradeClass = "grade-n";
+        let gemColor = "#fff";
+
+        if (propsStr.includes('Основа брони')) iconClass = "icon-armor";
+        else if (propsStr.includes('Основа бижы') || propsStr.includes('бижутерии')) {
+            iconClass = "icon-jewelry";
+            if (g === 'A' || g === 'B') gemColor = "#ff4444"; // Рубин
+            else if (g === 'S' || g === 'S+') gemColor = "#00ff00"; // Изумруд
+        }
+
+        if (g === 'D') gradeClass = "grade-d";
+        else if (g === 'C') gradeClass = "grade-c";
+        else if (g === 'B' || g === 'A') gradeClass = "grade-leg";
+        else if (g === 'S' || g === 'S+' || g === 'SPECTRUM') gradeClass = "grade-set";
         
         let nameColor = "#fff";
         if (isStolen) nameColor = "#ff7979";
@@ -1643,25 +1684,39 @@ window.renderInventoryWidget = function() {
         const lockTitle = isLocked ? "Разблокировать" : "Заблокировать (защита от продажи/поломки)";
         const bgStyle = isLocked ? "background: rgba(80, 20, 20, 0.6);" : "";
 
+        // Логика луча
+        let beamHtml = '';
+        if (item.isAncient || item.isPrimal || isGreenGrade || g === 'A' || g === 'S') {
+            let beamColor = 'rgba(255, 165, 0, 0.8)'; // Оранжевый (Легендарный)
+            if (isGreenGrade) beamColor = 'rgba(0, 255, 0, 0.8)'; // Зеленый (Сет)
+            if (item.isPrimal) beamColor = 'rgba(255, 0, 0, 0.8)'; // Красный (Первозданный)
+            
+            // Добавляем луч только если виджет не переполнен, иначе будет каша. 
+            // Но можно добавить просто свечение .loot-glow без луча для компактности
+            beamHtml = `<div class="loot-glow" style="--beam-color: ${beamColor}"></div>`;
+        }
+
         return `<div class="widget-item" style="cursor: help; border: ${borderStyle}; position: relative; ${bgStyle}" onmousemove="window.showItemTooltip(event, '${safeName}', '${item.grade}', ${item.level}, ${item.buyPrice}, ${item.isCrafted}, '${propsStr}', ${isStolen})" onmouseleave="window.hideItemTooltip()">
-            <span style="position: absolute; top: 2px; right: 5px; cursor: pointer; font-size: 0.8rem;" onclick="window.toggleItemLock(${item.id}); event.stopPropagation();" title="${lockTitle}">${lockIcon}</span>
-            <span style="color: ${nameColor}; font-weight: bold; padding-right: 15px;">${item.name}${icon}</span><br>
+                    ${beamHtml}
+<span style="position: absolute; top: 2px; right: 5px; cursor: pointer; font-size: 0.8rem;" onclick="window.toggleItemLock(${item.id}); event.stopPropagation();" title="${lockTitle}">${lockIcon}</span>
+            <div class="item-icon ${iconClass} ${gradeClass}" style="--gem-color: ${gemColor}"></div>
+                        <span style="color: ${nameColor}; font-weight: bold; padding-right: 15px;">${item.name}${icon}</span><br>
             <span style="color: #888; font-size: 0.7rem;">${item.grade} | Lvl ${item.level} | ${window.formatCurrency(item.buyPrice)}</span>
         </div>`;
     };
 
     if (weapons.length > 0) {
-        html += `<div style="color: #ff9900; font-size: 0.75rem; font-weight: bold; margin: 5px 0 2px 0; border-bottom: 1px solid #555;">⚔️ ОРУЖИЕ</div><div class="widget-grid">`;
+        html += `<div style="color: #ff9900; font-size: 0.75rem; font-weight: bold; margin: 5px 0 2px 0; border-bottom: 1px solid #555;">ОРУЖИЕ</div><div class="widget-grid">`;
         weapons.forEach(i => html += renderItem(i));
         html += `</div>`;
     }
     if (armors.length > 0) {
-        html += `<div style="color: #66ccff; font-size: 0.75rem; font-weight: bold; margin: 5px 0 2px 0; border-bottom: 1px solid #555;">🛡️ БРОНЯ</div><div class="widget-grid">`;
+        html += `<div style="color: #66ccff; font-size: 0.75rem; font-weight: bold; margin: 5px 0 2px 0; border-bottom: 1px solid #555;">БРОНЯ</div><div class="widget-grid">`;
         armors.forEach(i => html += renderItem(i));
         html += `</div>`;
     }
     if (others.length > 0) {
-        html += `<div style="color: #40e0d0; font-size: 0.75rem; font-weight: bold; margin: 5px 0 2px 0; border-bottom: 1px solid #555;">💍 БИЖА</div><div class="widget-grid">`;
+        html += `<div style="color: #40e0d0; font-size: 0.75rem; font-weight: bold; margin: 5px 0 2px 0; border-bottom: 1px solid #555;">БИЖУТЕРИЯ</div><div class="widget-grid">`;
         others.forEach(i => html += renderItem(i));
         html += `</div>`;
     }
@@ -1682,7 +1737,7 @@ window.renderJournalWidget = function() {
     }
 
     content.innerHTML = journal.map(entry => {
-        return `<div class="journal-entry" title="${entry.fullDate || ''}"><span class="journal-time">[${entry.time}]</span><span class="journal-type-${entry.type}">${entry.msg}</span></div>`;
+        return `<div class="journal-entry" onmousemove="window.showCustomTooltip(event, '${(entry.fullDate || '').replace(/'/g, "\\'")}')" onmouseleave="window.hideCustomTooltip()"><span class="journal-time">[${entry.time}]</span><span class="journal-type-${entry.type}">${entry.msg}</span></div>`;
     }).join('');
 }
 
@@ -1770,7 +1825,8 @@ window.autoResizeInput = function(input) {
     const val = input.value.toString();
 // Для парагона делаем отступ меньше (1 символ вместо 3)
     const extra = (input.id === 'input-para') ? 1 : 3;
-    input.style.width = (Math.max(1, val.length) + extra) + 'ch';}
+    input.style.width = (Math.max(1, val.length) + extra) + 'ch';
+}
 
 window.updateResourcePool = function() {
     const pool = document.getElementById('resource-pool');
@@ -1868,6 +1924,45 @@ window.updateResourcePool = function() {
     if (tooltip) pool.title = tooltip;
 }
 
+window.updateDynamicBackground = function() {
+    const bgLayer = document.getElementById('dynamic-bg-layer');
+    if (!bgLayer) return;
+
+    // Сброс классов
+    bgLayer.className = '';
+
+    const act = window.playerData.act || 1;
+    // Нормализация акта для НГ+ (1-5)
+    let normalizedAct = act;
+    if (act > 5) {
+        normalizedAct = (act - 1) % 5 + 1;
+    }
+
+    // Добавление класса акта
+    bgLayer.classList.add(`bg-act-${normalizedAct}`);
+    // Установка оттенка для окон
+    let tint = 'rgba(0,0,0,0)';
+    if (normalizedAct === 1) tint = 'rgba(20, 40, 20, 0.2)';
+    else if (normalizedAct === 2) tint = 'rgba(60, 40, 10, 0.2)';
+    else if (normalizedAct === 3) tint = 'rgba(20, 40, 60, 0.2)';
+    else if (normalizedAct === 4) tint = 'rgba(40, 10, 60, 0.2)';
+    else if (normalizedAct === 5) tint = 'rgba(20, 30, 40, 0.3)';
+    document.documentElement.style.setProperty('--act-tint', tint);
+    // Смена обоев для 5 акта
+    const wallpaper = document.querySelector('.wallpaper');
+    if (wallpaper) {
+        if (normalizedAct === 5) {
+            wallpaper.classList.add('malthael-bg');
+                        wallpaper.style.animation = 'none'; // Останавливаем тряску
+
+        } else {
+            wallpaper.classList.remove('malthael-bg');
+         wallpaper.style.animation = ''; // Возвращаем тряску
+
+        }
+    }
+}
+
 window.updateCoinStacks = function() {
     const types = ['m', 'g', 's', 'c', 'y']; // Мифрил, Золото, Серебро, Медь, Йена
     const containerHeight = 75; // Макс высота стопки в пикселях
@@ -1879,6 +1974,8 @@ window.updateCoinStacks = function() {
         'c': 'м.',
         'y': 'й.'
     };
+        const shimmerSetting = window.playerData.settings.coinShimmer; // 0-3
+
 
     types.forEach(type => {
         const stackEl = document.getElementById(`stack-${type}`);
@@ -1930,13 +2027,13 @@ window.updateCoinStacks = function() {
                     targetBottom = `${i * 7}px`;
                     el.style.left = `calc(50% - 7px + ${rndOffset}px)`;
                     el.style.transform = `rotate(${rndRot}deg)`;
+                  el.style.animationDelay = `${Math.random() * 5}s`;
+
                 } else {
                     el = document.createElement('div');
                     el.className = `coin coin-${type}`;
                     targetBottom = `${i * step}px`;
-                    if (type !== 'y') {
-                        el.style.animationDelay = `${Math.random() * 5}s`;
-                    }
+                   
                 }
 
                 el.style.zIndex = i;
@@ -1959,6 +2056,25 @@ window.updateCoinStacks = function() {
                 stackEl.lastChild.remove();
             }
         }
+
+        // Обновляем мерцание для ВСЕХ монет (включая старые)
+        const coins = stackEl.children;
+        for (let i = 0; i < coins.length; i++) {
+            const el = coins[i];
+            if (el.classList.contains('neg-val')) continue;
+
+            let shouldShimmer = false;
+            if (shimmerSetting === 3) shouldShimmer = true;
+            else if (shimmerSetting === 2) shouldShimmer = (i % 4 === 0);
+            else if (shimmerSetting === 1) shouldShimmer = (i % 10 === 0);
+
+            if (shouldShimmer && type !== 'y') {
+                el.classList.add('shimmering');
+                if (!el.style.animationDelay) el.style.animationDelay = `${Math.random() * 5}s`;
+            } else {
+                el.classList.remove('shimmering');
+            }
+        }
         
         let typeName = '';
         if (type === 'm') typeName = 'Мифрила';
@@ -1972,25 +2088,266 @@ window.updateCoinStacks = function() {
         stackEl.onmousemove = (e) => window.showCurrencyTooltip(e, type, val);
         stackEl.onmouseleave = () => window.hideCurrencyTooltip();
     });
+        window.updateDynamicBackground(); // Обновляем фон при обновлении UI
 }
 
-window.createBloodExplosion = function(x, y) {
-    const count = 15;
-    for (let i = 0; i < count; i++) {
-        const p = document.createElement('div');
-        p.className = 'blood-particle';
-        p.style.left = x + 'px';
-        p.style.top = y + 'px';
-        
-        const angle = Math.random() * Math.PI * 2;
-        const velocity = 50 + Math.random() * 50;
-        const tx = Math.cos(angle) * velocity;
-        const ty = Math.sin(angle) * velocity;
-        
-        p.style.setProperty('--tx', `${tx}px`);
-        p.style.setProperty('--ty', `${ty}px`);
-        
-        document.body.appendChild(p);
-        setTimeout(() => p.remove(), 500);
+window.currentChartType = 'para';
+
+window.renderProgressMenu = function() {
+    const lvl = window.playerData.level || 1;
+    const isLocked = lvl < 70;
+    const lockAttr = isLocked ? 'disabled style="width:100%; padding:5px; font-size:0.7rem; margin:0; opacity:0.5; cursor:not-allowed;" title="Доступно с 70 уровня"' : 'style="width:100%; padding:5px; font-size:0.7rem; margin:0;"';
+    const lockIcon = isLocked ? ' 🔒' : '';
+    return `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <div style="display:flex; flex-direction:column; gap:5px; width:120px;">
+                <button class="d2-button sub-btn" style="width:100%; padding:5px; font-size:0.7rem; margin:0;" onclick="window.setChartType('para')">⏳ Парагон</button>
+                <button class="d2-button sub-btn" style="width:100%; padding:5px; font-size:0.7rem; margin:0;" onclick="window.setChartType('wealth')">💰 Богатство</button>
+                <button class="d2-button sub-btn" style="width:100%; padding:5px; font-size:0.7rem; margin:0;" onclick="window.setChartType('deaths')">☠️ Смерти</button>
+            </div>
+            <div style="font-family:'Exocet', serif; font-size:1.1rem; color:#d4af37; text-align:center; width:80px; text-shadow:0 0 5px #000;">
+                ПРОГРЕСС
+            </div>
+            <div style="display:flex; flex-direction:column; gap:5px; width:120px;">
+                <button class="d2-button sub-btn" ${lockAttr} onclick="window.setChartType('dmg')">⚔️ Урон${lockIcon}</button>
+                <button class="d2-button sub-btn" ${lockAttr} onclick="window.setChartType('tough')">🛡️ Стойкость${lockIcon}</button>
+                <div style="height:28px;"></div>
+            </div>
+        </div>
+        <div id="chart-container-area">
+            ${window.renderActiveChart()}
+        </div>
+        <div style="text-align:center; margin-top:20px; border-top:1px solid #333; padding-top:10px;">
+            <button class="death-cancel-btn" onclick="window.resetHistory()">🗑️ Сброс</button>
+        </div>
+    `;
+}
+
+window.setChartType = function(type) {
+    window.currentChartType = type;
+    const area = document.getElementById('chart-container-area');
+    if (area) area.innerHTML = window.renderActiveChart();
+}
+
+window.renderActiveChart = function() {
+    const history = window.playerData.history || [];
+    if (history.length < 2) return '<div style="text-align:center; padding:20px; color:#888;">Недостаточно данных для графика...<br><span style="font-size:0.8rem; color:#666;">(Нужно минимум 1-5 минут игры для сбора статистики)</span></div>';
+
+let type = window.currentChartType || 'para';
+    const lvl = window.playerData.level || 1;
+    
+    // Если выбран заблокированный тип графика, переключаем на парагон
+    if (lvl < 70 && (type === 'dmg' || type === 'tough')) {
+        type = 'para';
+        window.currentChartType = 'para';
+    }    const width = 400;
+    const height = 200;
+ const margin = { top: 20, right: 20, bottom: 30, left: 50 };
+    const graphWidth = width - margin.left - margin.right;
+    const graphHeight = height - margin.top - margin.bottom;
+    const data = history.map(h => {
+        switch(type) {
+            case 'para': return h.para;
+            case 'wealth': return h.wealth;
+            case 'deaths': return h.deaths;
+            case 'dmg': return h.dmg;
+            case 'tough': return h.tough;
+            default: return h.para;
+        }
+    });
+    
+    const maxVal = Math.max(...data);
+    const minVal = Math.min(...data);
+    const range = maxVal - minVal || 1;
+
+    let points = "";
+   data.forEach((val, i) => {
+        const x = (i / (data.length - 1)) * graphWidth + margin.left;
+        const y = margin.top + graphHeight - ((val - minVal) / range) * graphHeight;
+        points += `${x},${y} `;
+    });
+
+    const titles = {
+        'para': '📈 Рост Парагона',
+        'wealth': '💰 Накопление Богатства (Серебро)',
+        'deaths': '☠️ История Смертей',
+        'dmg': '⚔️ Рост Урона',
+        'tough': '🛡️ Рост Стойкости'
+    };
+    
+    const colors = {
+        'para': '#8ab6d6',   // Спокойный синий
+        'wealth': '#d6c68b', // Спокойный золотой
+        'deaths': '#d68b8b', // Спокойный красный
+        'dmg': '#d6a68b',    // Спокойный оранжевый
+        'tough': '#9bd69b'   // Спокойный зеленый
+    };
+
+    const color = colors[type] || '#fff';
+
+    const formatAxis = (num) => {
+        if (num >= 1000000) return (num/1000000).toFixed(1) + 'm';
+        if (num >= 1000) return (num/1000).toFixed(1) + 'k';
+        return num;
+    };
+
+    return `
+        <h4 style="color:${color}; text-align:center; margin:0 0 10px 0;">${titles[type]}</h4>
+         <svg viewBox="0 0 ${width} ${height}" class="chart-container" style="background:rgba(0,0,0,0.2); border:1px solid #333;">
+            <!-- Оси -->
+            <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}" stroke="${color}" stroke-width="2" />
+            <line x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}" stroke="${color}" stroke-width="2" />
+            
+            <!-- Подписи -->
+            <text x="${margin.left - 5}" y="${margin.top + 5}" fill="#aaa" font-size="10" text-anchor="end">${formatAxis(maxVal)}</text>
+            <text x="${margin.left - 5}" y="${height - margin.bottom}" fill="#aaa" font-size="10" text-anchor="end">${formatAxis(minVal)}</text>
+            <text x="${margin.left}" y="${height - 5}" fill="#aaa" font-size="10" text-anchor="start">Start</text>
+            <text x="${width - margin.right}" y="${height - 5}" fill="#aaa" font-size="10" text-anchor="end">Now</text>
+
+            <polyline points="${points}" class="chart-line" style="stroke:${color}; fill:none; stroke-width:2;" />
+            ${history.map((h, i) => {
+                const val = data[i];
+                const x = (i / (history.length - 1)) * graphWidth + margin.left;
+                const y = margin.top + graphHeight - ((val - minVal) / range) * graphHeight;
+                
+                let tooltip = `<div style="text-align:center; color:#aaa; font-size:0.7rem; margin-bottom:2px;">${new Date(h.time).toLocaleTimeString()}</div>`;
+                if (type === 'para') tooltip += `Парагон: <b style="color:#66ccff">${val}</b>`;
+                else if (type === 'wealth') tooltip += `Богатство: <b style="color:#ffd700">${val} 🥈</b>`;
+                else if (type === 'deaths') tooltip += `Смертей: <b style="color:#ff4444">${val}</b>`;
+                else if (type === 'dmg') tooltip += `Урон: <b style="color:#ff9900">${(val/1000000).toFixed(1)}m</b>`;
+                else if (type === 'tough') tooltip += `Стойкость: <b style="color:#66ff66">${(val/1000000).toFixed(1)}m</b>`;
+
+                return `<circle cx="${x}" cy="${y}" class="chart-dot" style="fill:${color}; r:3;"><title>${tooltip}</title></circle>`;
+            }).join('')}
+        </svg>
+    `;
+}
+
+
+window.resetHistory = function() {
+    window.playerData.history = [];
+    window.setChartType(window.currentChartType);
+    window.showCustomAlert("🗑️ История очищена.");
+}
+
+window.renderSettingsMenu = function() {
+    const s = window.playerData.settings;
+    
+    const shimmerLabels = ["Выкл", "Редко", "Средне", "Часто"];
+    
+    return `
+        <div style="text-align:center; padding: 10px;">
+            <h4 style="color:#d4af37; margin-bottom:20px;">НАСТРОЙКИ ИГРЫ</h4>
+            
+            <div style="margin-bottom: 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px;">
+                <span>😱 Скримеры (Звук)</span>
+                <label class="switch">
+                    <input type="checkbox" ${s.screamer ? 'checked' : ''} onchange="window.toggleSetting('screamer')">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+            <div style="margin-bottom: 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px;">
+                <span>✨ Визуальные эффекты</span>
+                <label class="switch">
+                    <input type="checkbox" ${s.vfx ? 'checked' : ''} onchange="window.toggleSetting('vfx')">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <div style="margin-bottom:5px;">💰 Блеск монет: <span id="shimmer-val" style="color:#66ccff">${shimmerLabels[s.coinShimmer]}</span></div>
+                <input type="range" min="0" max="3" value="${s.coinShimmer}" style="width:100%;" oninput="window.updateShimmerSetting(this.value)">
+            </div>
+        </div>
+    `;
+}
+
+window.toggleSetting = function(key) {
+    window.playerData.settings[key] = !window.playerData.settings[key];
+    window.saveToStorage();
+}
+
+window.updateShimmerSetting = function(val) {
+    const shimmerLabels = ["Выкл", "Редко", "Средне", "Часто"];
+    window.playerData.settings.coinShimmer = parseInt(val);
+    document.getElementById('shimmer-val').innerText = shimmerLabels[val];
+    window.saveToStorage();
+    window.updateCoinStacks(); // Сразу применяем
+}
+
+
+window.replaceStaticIcons = function() {
+    // Замена эмодзи на иконки в текстовых узлах (безопасно)
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+    const textNodes = [];
+    let currentNode;
+    while(currentNode = walker.nextNode()) {
+        // Пропускаем замену внутри калькулятора навыков
+        if (currentNode.parentElement && currentNode.parentElement.closest('#skill-calc-modal')) continue;
+                if (currentNode.parentElement && currentNode.parentElement.closest('#learned-skills-widget')) continue;
+        textNodes.push(currentNode);
     }
+    let node;
+    const replacements = [
+        { char: '🏮', html: '<span class="d-icon icon-str"></span>' },
+        { char: '🥢', html: '<span class="d-icon icon-dex"></span>' },
+        { char: '🔮', html: '<span class="d-icon icon-arcane"></span>' },
+       { char: '⛑️', html: '<span class="d-icon icon-vit"></span>' },
+        { char: '📖', html: '<span class="d-icon icon-rune"></span>' },
+        { char: '⏳', html: '<span class="d-icon icon-para"></span>' },
+                // Новые иконки (Ресурсы, Предметы, Навыки)
+        { char: '⚔️', html: '<span class="d-icon icon-phys"></span>' },
+        { char: '🛡️', html: '<span class="d-icon icon-def"></span>' },
+        { char: '💍', html: '<span class="d-icon icon-ring"></span>' }, 
+];
+
+const emojiFixes = [
+        { char: '📓', html: '<span class="emoji-fix">📓</span>' },
+        { char: '📘', html: '<span class="emoji-fix">📘</span>' },
+        { char: '📒', html: '<span class="emoji-fix">📒</span>' },
+        { char: '📙', html: '<span class="emoji-fix">📙</span>' },
+        { char: '📕', html: '<span class="emoji-fix">📕</span>' },
+        { char: '📗', html: '<span class="emoji-fix">📗</span>' },
+        { char: '💀', html: '<span class="emoji-fix">💀</span>' },
+        { char: '☠️', html: '<span class="emoji-fix">☠️</span>' },
+        { char: '👹', html: '<span class="emoji-fix">👹</span>' },
+         { char: '🎭', html: '<span class="emoji-fix">🎭</span>' }
+    ];
+    
+    const currencyReplacements = [
+        { char: '🥇', html: '<span class="d-icon icon-gold"></span>' },
+        { char: '🥈', html: '<span class="d-icon icon-silver"></span>' },
+        { char: '🥉', html: '<span class="d-icon icon-copper"></span>' },
+        { char: '💠', html: '<span class="d-icon icon-mithril"></span>' }
+    ];
+
+    textNodes.forEach(node => {
+        let val = node.nodeValue;
+        if (replacements.some(r => val.includes(r.char)) || emojiFixes.some(r => val.includes(r.char)) || currencyReplacements.some(r => val.includes(r.char)) || val.includes('Парагон')) {
+            const span = document.createElement('span');
+            let newVal = val;
+            replacements.forEach(r => newVal = newVal.replaceAll(r.char, r.html));
+                        emojiFixes.forEach(r => newVal = newVal.replaceAll(r.char, r.html));
+            // Замена текста Парагон на Пара
+            newVal = newVal.replaceAll('Парагон', 'Пара');
+            // Обработка валют: удаляем в карточке, заменяем на иконки в остальных местах
+            if (node.parentElement && node.parentElement.closest('#char-sheet')) {
+                currencyReplacements.forEach(r => newVal = newVal.replaceAll(r.char, ''));
+            } else {
+                currencyReplacements.forEach(r => newVal = newVal.replaceAll(r.char, r.html));
+            }
+            span.innerHTML = newVal;
+            if (node.parentNode) {
+                node.parentNode.replaceChild(span, node);
+            }
+        }
+    });
+}
+
+// Добавляем вызов в updateUI
+const originalUpdateUI = window.updateUI;
+window.updateUI = function() {
+    originalUpdateUI.apply(this, arguments);
+    window.replaceStaticIcons();
 }
