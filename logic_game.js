@@ -19,38 +19,128 @@ const guildRanksMap = {
     'лорд войны': ['Нет', 'Союзник', 'Начинающий', 'Странник', 'Меченосец', 'Протектор', 'Защитник', 'Охранитель', 'Страж', 'Победитель', 'Мастер']
 };
 
+// Помощники для новой анимации перехода окна -> виджет
+window.createScreenshotFlash = function() {
+    const flash = document.createElement('div');
+    flash.className = 'screenshot-flash';
+    document.body.appendChild(flash);
+    flash.addEventListener('animationend', () => flash.remove());
+};
+
+window.animateWindowToPanel = function(winEl, panelEl, callback) {
+    if (!winEl || !panelEl) {
+        if (callback) callback();
+        return;
+    }
+
+    // сделаем панель видимой лишь для расчётов, потом сразу спрячем
+    panelEl.style.display = 'block';
+    panelEl.style.visibility = 'hidden';
+    const panelRect = panelEl.getBoundingClientRect();
+    panelEl.style.visibility = '';
+    panelEl.style.display = 'none';
+
+    const winRect = winEl.getBoundingClientRect();
+    // фиксируем исходные координаты/стили окна
+    winEl.style.transition = 'none';
+    winEl.style.position = 'fixed';
+    winEl.style.left = winRect.left + 'px';
+    winEl.style.top = winRect.top + 'px';
+    winEl.style.transformOrigin = 'top left';
+    winEl.style.transform = 'none';
+    winEl.style.opacity = '1';
+
+    const deltaX = panelRect.left - winRect.left;
+    const deltaY = panelRect.top - winRect.top;
+    const scaleX = panelRect.width / winRect.width;
+    const scaleY = panelRect.height / winRect.height;
+    const scale = Math.min(scaleX, scaleY);
+
+    requestAnimationFrame(() => {
+        // скорость увеличена в 1.5 раза
+        winEl.style.transition = 'all 1.2s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
+        winEl.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scale})`;
+        // сохраняем opacity 1 до конца движения
+    });
+
+    winEl.addEventListener('transitionend', function handler(e) {
+        if (e.propertyName === 'transform') {
+            winEl.removeEventListener('transitionend', handler);
+            // теперь можно скрыть
+            winEl.style.opacity = '0';
+            if (callback) callback();
+        }
+    });
+};
+
 window.selectProfileItem = function(title, path, bypassConditions = false, contentOverride = null) {
     const textWindow = document.getElementById('text-window');
     const pathStr = path || document.getElementById('breadcrumb').innerText;
     const segments = pathStr.split(' > ').map(s => s.trim());
 
-    const applySelection = () => {
-        textWindow.classList.add('fly-to-bonus'); 
-        // Увеличено время для завершения анимации
-        setTimeout(() => {
-            const fullHtml = contentOverride || document.getElementById('window-content').innerHTML;
-            const cleanHtml = fullHtml.replace(/<button.*?>.*?<\/button>/g, ''); 
+    const applySelection = (postCallback) => {
+        // сначала карточка «снимка» – короткая белая вспышка
+        window.createScreenshotFlash();
+
+        // выбираем, куда будет лететь окно (гильдия/класс, с учётом 2‑го билда)
+        let targetPanel;
+        if (segments.includes('Гильдии')) {
+            targetPanel = document.getElementById('active-guild-bonus');
+        } else {
+            if (window.isSelectingSecondBuild) {
+                targetPanel = document.getElementById('active-class-bonus-2');
+                 if (!targetPanel) {
+                    // Создаем панель, если её нет, чтобы анимация сработала корректно
+                    targetPanel = document.createElement('div');
+                    targetPanel.id = 'active-class-bonus-2';
+                    targetPanel.className = 'sidebar-widget';
+                    targetPanel.style.display = 'none';
+                    targetPanel.innerHTML = `<h4 id="bonus-class-name-2" style="margin: 0 0 10px 0; color: #66ccff; text-align: center; border-bottom: 1px solid #003366; font-size: 0.9rem;">БИЛД 2</h4><div id="class-bonus-content-2" style="font-size: 0.7rem;"></div>`;
+                    document.getElementById('right-panels-stack').appendChild(targetPanel);
+                }
+            } else {
+                targetPanel = document.getElementById('active-class-bonus');
+            }
+        }
+
+        // --- ПРЕДВАРИТЕЛЬНОЕ ОБНОВЛЕНИЕ КОНТЕНТА ДЛЯ РАСЧЕТА РАЗМЕРОВ ---
+        const fullHtml = contentOverride || document.getElementById('window-content').innerHTML;
+        const cleanHtml = fullHtml.replace(/<button.*?>.*?<\/button>/g, ''); 
+        let finalHtml = cleanHtml;
+
+        if (segments.includes('Гильдии')) {
+            const temp = document.createElement('div');
+            temp.innerHTML = cleanHtml;
+            const frames = Array.from(temp.querySelectorAll('div')).filter(div => 
+                (div.textContent.includes('Плюсы') || div.textContent.includes('Минусы')) &&
+                !div.querySelector('table')
+            );
+            if (frames.length > 0) { 
+                finalHtml = "";
+                frames.forEach(f => finalHtml += f.outerHTML); 
+            }
+            
+            document.getElementById('bonus-guild-name').innerText = title.toUpperCase();
+            document.getElementById('bonus-content').innerHTML = finalHtml;
+        } else {
+            if (window.isSelectingSecondBuild) {
+                document.getElementById('bonus-class-name-2').innerText = title.toUpperCase();
+                document.getElementById('class-bonus-content-2').innerHTML = finalHtml;
+            } else {
+                document.getElementById('bonus-class-name').innerText = title.toUpperCase();
+                document.getElementById('class-bonus-content').innerHTML = finalHtml;
+            }
+        }
+
+        // запускаем движение окна; когда анимация завершится, выполняем обработку выбора
+        window.animateWindowToPanel(textWindow, targetPanel, () => {
 
             if (segments.includes('Гильдии')) {
                 window.playerData.guild = title;
                 window.playerData.joined_level = window.playerData.level;
                 window.logEvent(`Вступление в гильдию: ${title}`, 'info');
-                document.getElementById('bonus-guild-name').innerText = title.toUpperCase();
-                
-                const temp = document.createElement('div');
-                temp.innerHTML = cleanHtml;
-                // Ищем блоки с плюсами и минусами более надежным способом
-                const frames = Array.from(temp.querySelectorAll('div')).filter(div => 
-                    (div.textContent.includes('Плюсы') || div.textContent.includes('Минусы')) &&
-                    // Исключаем вложенные таблицы, если они есть внутри div (для вампира)
-                    !div.querySelector('table')
-                );
-                let res = "";
-                if (frames.length > 0) { frames.forEach(f => res += f.outerHTML); } 
-                else { res = cleanHtml; }
-                
-                window.playerData.guild_html = res;
-                document.getElementById('bonus-content').innerHTML = res;
+                                window.playerData.guild_html = finalHtml;
+
                 
                 const guildPanel = document.getElementById('active-guild-bonus');
                 guildPanel.style.display = 'block';
@@ -64,10 +154,15 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                 if (window.isSelectingSecondBuild) {
                     // Логика второго билда
                     window.playerData.build_2 = title;
-                    window.playerData.class_html_2 = cleanHtml;
+                    window.playerData.class_html_2 = finalHtml;
                     
-                    // Отрисовка второго виджета (через restorePanels или напрямую)
-                    window.restorePanels();
+                    const p2 = document.getElementById('active-class-bonus-2');
+                    p2.style.display = 'block';
+                    p2.style.order = '3';
+                    p2.classList.remove('right-panel-bonus');
+                    void p2.offsetWidth;
+                    p2.classList.add('right-panel-bonus');
+                    window.makeDraggable(p2);
                     window.isSelectingSecondBuild = false; // Сброс флага
                 } else {
                     const clsIndex = segments.indexOf('Классы');
@@ -76,9 +171,8 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                     }
                     window.logEvent(`Выбран класс: ${title}`, 'info');
                     window.playerData.build = title;
-                    document.getElementById('bonus-class-name').innerText = title.toUpperCase();
-                    window.playerData.class_html = cleanHtml;
-                    document.getElementById('class-bonus-content').innerHTML = cleanHtml;
+                                       window.playerData.class_html = finalHtml;
+
                     
                     const classPanel = document.getElementById('active-class-bonus');
                     classPanel.style.display = 'block';
@@ -92,11 +186,20 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                 }
             }
             
-            textWindow.style.display = 'none';
-            textWindow.classList.remove('fly-to-bonus');
-            window.updateUI();
-            window.updateProfessionButtonState(); // Обновляем состояние кнопок если открыто окно
-        }, 850);
+            // скрываем текстовое окно, по окончании сбросим временные стили
+            window.fadeOutModal(textWindow, () => {
+                textWindow.style.opacity = '';
+                textWindow.style.transform = '';
+                textWindow.style.transition = '';
+                textWindow.style.left = '';
+                textWindow.style.top = '';
+                textWindow.style.position = '';
+
+                window.updateUI();
+                window.updateProfessionButtonState(); // Обновляем состояние кнопок если открыто окно
+                if (typeof postCallback === 'function') postCallback();
+            });
+        });
     };
 
     if (segments.includes('Гильдии')) {
@@ -118,9 +221,10 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
         });
         
         function checkEntryConditions() {
+                        const reqs = window.gameConfig.guildReqs;
             if (newGuild.includes('торговц')) {
-                if (window.playerData.stat_vit < 1000) {
-                    window.showCustomAlert("❌ Для вступления требуется минимум 1000 ⛑️ (Живучести).");
+                if (window.playerData.stat_vit < reqs.traders.vit) {
+                    window.showCustomAlert(`❌ Для вступления требуется минимум ${reqs.traders.vit} ⛑️ (Живучести).`);
                     return;
                 }
                 window.showCustomConfirm(
@@ -129,15 +233,15 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                 );
             }
             else if (newGuild.includes('вор') && !newGuild.includes('воришка')) {
-                if (window.playerData.steals < 7) {
-                    window.showCustomAlert("❌ Для вступления нужно минимум 7 успешных краж (Ранг 1).");
+                if (window.playerData.steals < reqs.thieves.steals) {
+                    window.showCustomAlert(`❌ Для вступления нужно минимум ${reqs.thieves.steals} успешных краж (Ранг 1).`);
                     return;
                 }
                 window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?`, () => applySelection());
             }
             else if (newGuild.includes('гэмблер')) {
-                if (window.playerData.deals < 7 && window.playerData.stat_dex < 1000) {
-                    window.showCustomAlert("❌ Для вступления нужно 7 сделок или 1000 ловкости (Ранг 1).");
+                if (window.playerData.deals < reqs.gamblers.deals && window.playerData.stat_dex < reqs.gamblers.dex) {
+                    window.showCustomAlert(`❌ Для вступления нужно ${reqs.gamblers.deals} сделок или ${reqs.gamblers.dex} ловкости (Ранг 1).`);
                     return;
                 }
                 window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?`, () => applySelection());
@@ -164,15 +268,15 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                 return;
             }
             else if (newGuild.includes('чародей')) {
-                if (window.playerData.stat_int < 1000 && window.playerData.para < 50) {
-                    window.showCustomAlert("❌ Для вступления нужно 1000 интеллекта или 50 парагона (Ранг 1).");
+                if (window.playerData.stat_int < reqs.mages.int && window.playerData.para < reqs.mages.para) {
+                    window.showCustomAlert(`❌ Для вступления нужно ${reqs.mages.int} интеллекта или ${reqs.mages.para} парагона (Ранг 1).`);
                     return;
                 }
                 window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?`, () => applySelection());
             }
             else if (newGuild.includes('охотник')) {
                 // Проверка условий 1 ранга (85 Репутации) для Охотников на Гоблинов и Элиту
-                if ((newGuild.includes('гоблин') || newGuild.includes('на ☠️')) && window.playerData.reputation >= 85) {
+                if ((newGuild.includes('гоблин') || newGuild.includes('на ☠️')) && window.playerData.reputation >= reqs.hunters.rep) {
                     window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?<br><small>(Условие 1-го ранга выполнено)</small>`, () => applySelection());
                     return;
                 }
@@ -210,19 +314,21 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                         if (rewardYen > 0) window.addYen(rewardYen);
                         window.playerData.reputation += rewardRep;
                         window.playerData.runes += rewardRunes;
-                        applySelection();
                         let alertMsg = "Добро пожаловать!<br>Награда получена:<br>";
                         if (rewardYen > 0) alertMsg += `💰 ${window.formatCurrency(rewardYen)}<br>`;
                         if (rewardRep > 0) alertMsg += `🎭 ${rewardRep} репутации<br>`;
                         if (rewardRunes > 0) alertMsg += `📖 ${rewardRunes} рун`;
-                        window.showCustomAlert(alertMsg);
+                        // сначала сообщение, затем анимация
+                        window.showCustomAlert(alertMsg, () => {
+                            applySelection();
+                        });
                     }
                 );
                 return;
             }
             else if (newGuild.includes('вор') || newGuild.includes('воришка')) {
                  // Проверка условий 1 ранга (7 Краж)
-                 if (window.playerData.steals >= 7) {
+                 if (window.playerData.steals >= reqs.thieves.steals) {
                     window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?<br><small>(Условие 1-го ранга выполнено)</small>`, () => applySelection());
                     return;
                  }
@@ -245,8 +351,8 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
             else if (newGuild.includes('искатель') || newGuild.includes('джимми')) {
                 // Проверка условий 1 ранга (Найденные легендарки)
                 let passed = false;
-                if (newGuild.includes('приключений') && window.playerData.found_legs >= 5) passed = true;
-                if (newGuild.includes('богатства') && window.playerData.found_legs >= 8) passed = true;
+                if (newGuild.includes('приключений') && window.playerData.found_legs >= reqs.explorers.legs) passed = true;
+                if (newGuild.includes('богатства') && window.playerData.found_legs >= reqs.wealth.legs) passed = true;
                 
                 if (passed) {
                     window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?<br><small>(Условие 1-го ранга выполнено)</small>`, () => applySelection());
@@ -263,8 +369,10 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                     () => {
                         window.playerData.runes += r;
                         window.playerData.para += r;
-                        applySelection();
-                        window.showCustomAlert(`Добро пожаловать!<br>Награда: ${r} 📖 и ⏳`);
+                        const alertMsg = `Добро пожаловать!<br>Награда: ${r} 📖 и ⏳`;
+                        window.showCustomAlert(alertMsg, () => {
+                            applySelection();
+                        });
                     }
                 );
                 return;
@@ -274,7 +382,7 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                  const totalKills = window.playerData.kills + (window.playerData.base_kills || 0);
                  const str = window.playerData.stat_str;
                  
-                 if ((newGuild.includes('громила') || newGuild.includes('лорд')) && (str >= 1000 || totalKills >= 1700)) {
+                 if ((newGuild.includes('громила') || newGuild.includes('лорд')) && (str >= reqs.brute.str || totalKills >= reqs.brute.kills)) {
                     window.showCustomConfirm(`Вступить в гильдию "<span style="color:#d4af37">${title}</span>"?<br><small>(Условие 1-го ранга выполнено)</small>`, () => applySelection());
                     return;
                  }
@@ -290,8 +398,10 @@ window.selectProfileItem = function(title, path, bypassConditions = false, conte
                     () => {
                         let reward = kills * mult * window.playerData.level;
                         window.addYen(reward);
-                        applySelection();
-                        window.showCustomAlert(`Добро пожаловать!<br>Награда: ${window.formatCurrency(Math.floor(reward))}`);
+                        const alertMsg = `Добро пожаловать!<br>Награда: ${window.formatCurrency(Math.floor(reward))}`;
+                        window.showCustomAlert(alertMsg, () => {
+                            applySelection();
+                        });
                     }
                  );
                  return;
@@ -493,7 +603,7 @@ window.checkGuildProgression = function() {
     }
 
     // 2. Салага -> Громила или Лорд Войны
-    else if (g.includes('салага') && (window.playerData.stat_str >= 1000 || (window.playerData.kills + (window.playerData.base_kills || 0)) >= 1700)) {
+    else if (g.includes('салага') && (window.playerData.stat_str >= window.gameConfig.guildReqs.brute.str || (window.playerData.kills + (window.playerData.base_kills || 0)) >= window.gameConfig.guildReqs.brute.kills)) {
         if (window.playerData.refused_salaga_promotion) return false;
 
         // Тут выбор из двух, поэтому просто уведомляем или открываем меню
@@ -529,22 +639,16 @@ window.checkGuildProgression = function() {
             modal.style.display = 'none';
             if (extraBtn) extraBtn.style.display = 'none';
             yesBtn.style.background = ''; yesBtn.style.borderColor = ''; // Сброс
-            const data = window.gameData['comp_brute'];
-            if (data && data.content) {
-                document.getElementById('window-content').innerHTML = data.content;
-            }
-            window.selectProfileItem('Громила', 'Гильдии > Соратники', true);
+           const content = window.gameData['comp_brute'] ? window.gameData['comp_brute'].content : null;
+            window.selectProfileItem('Громила', 'Гильдии > Соратники', true, content);
         };
         
         noBtn.onclick = function() {
             modal.style.display = 'none';
             if (extraBtn) extraBtn.style.display = 'none';
             noBtn.style.background = ''; noBtn.style.borderColor = ''; // Сброс
-            const data = window.gameData['comp_warlord'];
-            if (data && data.content) {
-                document.getElementById('window-content').innerHTML = data.content;
-            }
-            window.selectProfileItem('Лорд Войны', 'Гильдии > Соратники', true);
+            const content = window.gameData['comp_warlord'] ? window.gameData['comp_warlord'].content : null;
+            window.selectProfileItem('Лорд Войны', 'Гильдии > Соратники', true, content);
         };
         
         modal.style.display = 'block';
@@ -553,12 +657,12 @@ window.checkGuildProgression = function() {
     // 3. Ученик чародея -> Чародей
     else if (g.includes('ученик чародея')) {
         // Условие для чародея: 1000 инты или 50 парагона
-        if (!window.playerData.refused_wizard_promotion && (window.playerData.stat_int >= 1000 || window.playerData.para >= 50)) {
+        if (!window.playerData.refused_wizard_promotion && (window.playerData.stat_int >= window.gameConfig.guildReqs.mages.int || window.playerData.para >= window.gameConfig.guildReqs.mages.para)) {
              window.showCustomConfirm(
                 "Вы готовы стать полноценным Чародеем?",
                 () => {
-                    window.selectProfileItem('Чародей', 'Гильдии > Коллегия магов', true);
-                },
+ const content = window.gameData['wizard_mage'] ? window.gameData['wizard_mage'].content : null;
+                    window.selectProfileItem('Чародей', 'Гильдии > Коллегия магов', true, content);                },
                 () => {
                     window.playerData.refused_wizard_promotion = true;
                     window.saveToStorage();
@@ -568,7 +672,7 @@ window.checkGuildProgression = function() {
         }
     }
     // 4. Помощник охотника -> Охотник на гоблинов или Охотник на элиту
-    else if (g.includes('помощник охотника') && window.playerData.reputation >= 85) {
+    else if (g.includes('помощник охотника') && window.playerData.reputation >= window.gameConfig.guildReqs.hunters.rep) {
         const modal = document.getElementById('custom-confirm-modal');
         document.getElementById('confirm-message').innerHTML = "Вы заслужили доверие Охотников! Выберите специализацию:";
         const yesBtn = document.getElementById('confirm-yes-btn');
@@ -803,8 +907,15 @@ window.applyGuildRewards = function(oldData) {
                 for (let i = 0; i < milestonesPassed; i++) {
                     if (Math.random() < breakChance) {
                         if (window.playerData.inventory && window.playerData.inventory.length > 0) {
-                            const randomIndex = Math.floor(Math.random() * window.playerData.inventory.length);
-                            const lostItem = window.playerData.inventory[randomIndex];
+// Используем криптографически стойкий рандом для гарантии честности
+        let randomIndex;
+        if (window.crypto && window.crypto.getRandomValues) {
+            const array = new Uint32Array(1);
+            window.crypto.getRandomValues(array);
+            randomIndex = array[0] % window.playerData.inventory.length;
+        } else {
+            randomIndex = Math.floor(Math.random() * window.playerData.inventory.length);
+        }                            const lostItem = window.playerData.inventory[randomIndex];
                             brokenItems.push(lostItem.name);
                             window.playerData.inventory.splice(randomIndex, 1);
                         }
@@ -1213,6 +1324,14 @@ window.confirmDeath = function() {
         document.getElementById('death-modal').style.display = 'none';
         return;
     }
+
+    // Запись смерти в историю
+    if (!window.playerData.death_history) window.playerData.death_history = [];
+    window.playerData.death_history.push({
+        level: window.playerData.level,
+        time: Date.now(),
+        dateStr: new Date().toLocaleString()
+    });
 
     if (window.pendingVampireJoin) {
         window.pendingVampireJoin = false;

@@ -21,6 +21,7 @@ window.openGemServices = function(mode) {
     const rentDurationBox = document.getElementById('gem-rent-duration-box');
 
     modal.style.top = '50%';
+        modal.style.position = 'fixed';
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
 
@@ -128,6 +129,14 @@ window.executeGemService = function(operation) {
     }
 
     let totalCost = singleCost * quantity;
+    if (isIncome) {
+        const diffMult = window.getDifficultyGoldMultiplier();
+        if (diffMult > 1) {
+            totalCost *= diffMult;
+            bonuses.push(`Сложность x${diffMult}`);
+        }
+    }
+
     if (isIncome && window.activeRiftMultiplier !== null) {
         totalCost *= window.activeRiftMultiplier;
         bonuses.push(`НП x${window.activeRiftMultiplier}`);
@@ -283,6 +292,7 @@ window.sellItemsBulk = function() {
     }
 
     modal.style.top = '50%';
+    modal.style.position = 'fixed';
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
     levelInput.value = Math.min((window.lastResourceSellLevel && window.lastResourceSellLevel >= 5) ? window.lastResourceSellLevel : (window.playerData.level || 5), 70);
@@ -331,6 +341,10 @@ window.sellItemsBulk = function() {
             const penalty = penalties[Math.min((window.playerData.rank || 1) - 1, 9)] || 0.50;
             sellMultiplier *= (1 - penalty);
         }
+         const diffMult = window.getDifficultyGoldMultiplier();
+        if (diffMult > 1) {
+            sellMultiplier *= diffMult;
+        }
 
         inputsContainer.querySelectorAll('.multi-sell-input').forEach(input => {
             const quantity = parseInt(input.value) || 0;
@@ -342,8 +356,6 @@ window.sellItemsBulk = function() {
                 totalYen += bonusCount * basePrice * mult * 5;
                 totalYen += normalCount * basePrice * mult * 1.25;
                 gamblerBonusLeft -= bonusCount;
-            } else if (g.includes('гэмблер')) {
-                totalYen += quantity * basePrice * mult * 1.25;
             } else {
                 totalYen += quantity * basePrice * mult;
             }
@@ -382,6 +394,10 @@ window.sellItemsBulk = function() {
             const penalties = [0.50, 0.48, 0.46, 0.44, 0.42, 0.40, 0.38, 0.36, 0.34, 0.30];
             const penalty = penalties[Math.min((window.playerData.rank || 1) - 1, 9)] || 0.50;
             sellMultiplier *= (1 - penalty);
+        }
+         const diffMult = window.getDifficultyGoldMultiplier();
+        if (diffMult > 1) {
+            sellMultiplier *= diffMult;
         }
 
         inputsContainer.querySelectorAll('.multi-sell-input').forEach(input => {
@@ -480,6 +496,7 @@ window.openSellCraftedModal = function() {
     }
 
     modal.style.top = '50%';
+        modal.style.position = 'fixed';
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
     modal.style.display = 'block';
@@ -511,7 +528,7 @@ window.sellCraftedItemFromModal = function() {
 
     price = price * (totalPercent / 100);
 
-    if (window.activeRiftMultiplier === null) {
+    
         const g = (window.playerData.guild || "").toLowerCase();
         let guildMultiplier = 1.0;
         if (g.includes('салага') || g.includes('громила') || g.includes('лорд')) { guildMultiplier = 0.9; bonuses.push(`Соратники -10%`); }
@@ -529,7 +546,8 @@ window.sellCraftedItemFromModal = function() {
         }
         
         price = price * guildMultiplier;
-    }
+    
+
     if ((window.playerData.guild || "").toLowerCase().includes('гэмблер')) {
         price = Math.floor(price * 1.25);
     }
@@ -604,6 +622,7 @@ window.openBuySellAGradeModal = function(mode, classMult) {
     }
 
     modal.style.top = '50%';
+        modal.style.position = 'fixed';
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
     modal.style.display = 'block';
@@ -699,6 +718,11 @@ window.confirmBuySellAGrade = function() {
             finalPrice *= 1.2;
             bonuses.push(`Воришка +20%`);
         }
+        const diffMult = window.getDifficultyGoldMultiplier();
+        if (diffMult > 1) {
+            finalPrice *= diffMult;
+            bonuses.push(`Сложность x${diffMult}`);
+        }
     }
 
     const cost = Math.floor(finalPrice);
@@ -714,33 +738,24 @@ window.confirmBuySellAGrade = function() {
     }
 
     if (mode === 'buy') {
-        window.showCustomConfirm(
-            `Купить предмет?<br>Цена: ${window.formatCurrency(cost)}`,
-            () => {
-                const currentMoney = window.getAllMoneyInYen();
-                if (currentMoney >= cost) {
-                    window.setMoneyFromYen(currentMoney - cost);
-                    
-                    window.showCustomPrompt("Название предмета", "Введите название:", window.selectedAGradeItemName || "A-Grade Item", (name) => {
-                        window.playerData.inventory.push({
-                            id: Date.now(),
-                            name: name,
-                            grade: "A",
-                            level: level,
-                            buyPrice: cost,
-                            isCrafted: false,
-                            properties: propsList
-                        });
-                    window.logEvent(`Куплен предмет: ${name} (A)`, 'loot');
-                        window.updateUI();
-                    }, true);
-
-                    selectedProps.forEach(el => el.classList.remove('selected'));
-                } else {
-                    window.showCustomAlert(`❌ Недостаточно средств! Нужно: ${window.formatCurrency(cost)}`);
-                }
-            }
-        );
+        window.confirmPurchaseWithZaken(cost, window.selectedAGradeItemName || "A-Grade Item", (method) => {
+            window.showCustomPrompt("Название предмета", "Введите название:", window.selectedAGradeItemName || "A-Grade Item", (name) => {
+                window.playerData.inventory.push({
+                    id: Date.now(),
+                    name: name,
+                    grade: "A",
+                    level: level,
+                    buyPrice: cost,
+                    isCrafted: false,
+                    properties: propsList
+                });
+                const payMsg = method === 'zaken' ? ' (за 🔖)' : '';
+                window.logEvent(`Куплен предмет: ${name} (A)${payMsg}`, 'loot');
+                window.updateUI();
+                window.showCustomAlert(`✅ Предмет куплен!`);
+            }, true);
+            selectedProps.forEach(el => el.classList.remove('selected'));
+        });
     } else {
         const currentMoney = window.getAllMoneyInYen();
         window.setMoneyFromYen(currentMoney + cost);
@@ -753,6 +768,7 @@ window.confirmBuySellAGrade = function() {
 window.openBuyAncientModal = function() {
     const modal = document.getElementById('buy-ancient-modal');
     modal.style.top = '50%';
+        modal.style.position = 'fixed';
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
     const handSelector = document.getElementById('hand-selector-ancient');
@@ -783,6 +799,7 @@ window.updateAncientInputs = function() {
 window.openBuySetModal = function() {
     const modal = document.getElementById('buy-set-modal');
     modal.style.top = '50%';
+        modal.style.position = 'fixed';
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
     const handSelector = document.getElementById('hand-selector-set');
@@ -841,6 +858,11 @@ window.buyAncientImmediate = function(mode = 'buy') {
     if (mode === 'buy') {
         finalPrice *= gradePenaltyMult;
     }
+    const diffMult = window.getDifficultyGoldMultiplier();
+    if (mode === 'sell' && diffMult > 1) {
+        finalPrice *= diffMult;
+        bonuses.push(`Сложность x${diffMult}`);
+    }
     
     const g = (window.playerData.guild || "").toLowerCase();
     let buyMult = 1.0;
@@ -892,6 +914,11 @@ window.buyAncientImmediate = function(mode = 'buy') {
             finalPrice *= 1.2;
             bonuses.push(`Воришка +20%`);
         }
+        const diffMult = window.getDifficultyGoldMultiplier();
+        if (diffMult > 1) {
+            finalPrice *= diffMult;
+            bonuses.push(`Сложность x${diffMult}`);
+        }
     }
     
     finalPrice *= buyMult;
@@ -906,36 +933,28 @@ window.buyAncientImmediate = function(mode = 'buy') {
     document.getElementById('buy-ancient-modal').style.display = 'none';
 
     if (mode === 'buy') {
-    window.showCustomConfirm(
-        `Купить ${type === 'ancient' ? 'Древний' : 'Первозданный'} ${grade}-grade?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}`,
-        () => {
-            const currentMoney = window.getAllMoneyInYen();
-            if (currentMoney >= cost) {
-                window.setMoneyFromYen(currentMoney - cost);
-                const defName = `${type === 'ancient' ? 'Древний' : 'Первозданный'} `;
-                window.showCustomPrompt("Название предмета", "Введите название:", defName, (name) => {
-                    window.playerData.inventory.push({
-                        id: Date.now(),
-                        name: name,
-                        grade: grade,
-                        level: level,
-                        buyPrice: cost,
-                        isAncient: (type === 'ancient'),
-                        isPrimal: (type === 'primal'),
+    const typeName = type === 'ancient' ? 'Древний' : 'Первозданный';
+        window.confirmPurchaseWithZaken(cost, `${typeName} ${grade}-grade`, (method) => {
+            const defName = `${typeName} `;
+            window.showCustomPrompt("Название предмета", "Введите название:", defName, (name) => {
+                window.playerData.inventory.push({
+                    id: Date.now(),
+                    name: name,
+                    grade: grade,
+                    level: level,
+                    buyPrice: cost,
+                    isAncient: (type === 'ancient'),
+                    isPrimal: (type === 'primal'),
                     isCrafted: false,
                     properties: propsList
-                    });
-                    window.logEvent(`Куплен предмет: ${name} (${type})`, 'loot');
-                    window.updateUI();
-                    window.showCustomAlert(`✅ Предмет куплен!`);
-                }, true);
-
-                selectedProps.forEach(el => el.classList.remove('selected'));
-            } else {
-                window.showCustomAlert(`❌ Недостаточно средств!`);
-            }
-        }
-    );
+                });
+                const payMsg = method === 'zaken' ? ' (за 🔖)' : '';
+                window.logEvent(`Куплен предмет: ${name} (${type})${payMsg}`, 'loot');
+                window.updateUI();
+                window.showCustomAlert(`✅ Предмет куплен!`);
+            }, true);
+            selectedProps.forEach(el => el.classList.remove('selected'));
+        });
     } else {
         window.showCustomConfirm(
             `Продать ${type === 'ancient' ? 'Древний' : 'Первозданный'} ${grade}-grade?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}`,
@@ -1043,6 +1062,11 @@ window.buySetImmediate = function(mode = 'buy') {
         if (g.includes('воришка')) {
             finalPrice *= 1.2;
             bonuses.push(`Воришка +20%`);
+            }
+        const diffMult = window.getDifficultyGoldMultiplier();
+        if (diffMult > 1) {
+            finalPrice *= diffMult;
+            bonuses.push(`Сложность x${diffMult}`);
         }
     }
 
@@ -1059,36 +1083,27 @@ window.buySetImmediate = function(mode = 'buy') {
     document.getElementById('buy-set-modal').style.display = 'none';
 
     if (mode === 'buy') {
-    window.showCustomConfirm(
-        `Купить ${grade} (${type})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}`,
-        () => {
-            const currentMoney = window.getAllMoneyInYen();
-            if (currentMoney >= cost) {
-                window.setMoneyFromYen(currentMoney - cost);
-                const defName = `Set  ()`;
-                window.showCustomPrompt("Название предмета", "Введите название:", defName, (name) => {
-                    window.playerData.inventory.push({
-                        id: Date.now(),
-                        name: name,
-                        grade: grade,
-                        level: level,
-                        buyPrice: cost,
-                        isAncient: (type === 'ancient'),
-                        isPrimal: (type === 'primal'),
-                        isCrafted: false,
-                        properties: propsList
-                    });
-                    window.logEvent(`Куплен комплект: ${name}`, 'loot');
-                    window.updateUI();
-                    window.showCustomAlert(`✅ Комплект куплен!`);
-                }, true);
-
-                selectedProps.forEach(el => el.classList.remove('selected'));
-            } else {
-                window.showCustomAlert(`❌ Недостаточно средств!`);
-            }
-        }
-    );
+    window.confirmPurchaseWithZaken(cost, `${grade} (${type})`, (method) => {
+            const defName = `Set  ()`;
+            window.showCustomPrompt("Название предмета", "Введите название:", defName, (name) => {
+                window.playerData.inventory.push({
+                    id: Date.now(),
+                    name: name,
+                    grade: grade,
+                    level: level,
+                    buyPrice: cost,
+                    isAncient: (type === 'ancient'),
+                    isPrimal: (type === 'primal'),
+                    isCrafted: false,
+                    properties: propsList
+                });
+                const payMsg = method === 'zaken' ? ' (за 🔖)' : '';
+                window.logEvent(`Куплен комплект: ${name}${payMsg}`, 'loot');
+                window.updateUI();
+                window.showCustomAlert(`✅ Комплект куплен!`);
+            }, true);
+            selectedProps.forEach(el => el.classList.remove('selected'));
+        });
     } else {
         window.showCustomConfirm(
             `Продать ${grade} (${type})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}`,
@@ -1134,6 +1149,7 @@ window.manageLegendaryGem = function(classType, action) {
 window.sellLegendaryGem = function() {
     const modal = document.getElementById('sell-leg-gem-modal');
     modal.style.top = '50%';
+        modal.style.position = 'fixed';
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
     modal.style.display = 'block';
@@ -1171,6 +1187,11 @@ window.confirmSellLegendaryGem = function() {
         bonuses.push(`Вампир -${(penalty * 100).toFixed(0)}%`);
          // Гэмблер -25% (штраф на камни тоже)
         if (g.includes('гэмблер')) { sellMult *= 0.75; bonuses.push(`Гэмблер -25%`); }
+    }
+    const diffMult = window.getDifficultyGoldMultiplier();
+    if (diffMult > 1) {
+        sellMult *= diffMult;
+        bonuses.push(`Сложность x${diffMult}`);
     }
 
     const sellPrice = baseVal * Math.pow(1.1, level) * sellMult;
@@ -1212,6 +1233,7 @@ window.openCraftModal = function() {
     document.getElementById('modal-sell-level').value = Math.min(window.playerData.level || 1, 70);
 
     modal.style.top = '50%';
+        modal.style.position = 'fixed';
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
     modal.style.display = 'block';
@@ -1313,12 +1335,28 @@ window.craftItemFromModal = function() {
 }
 
 window.openMeltModal = function() {
-    const modal = document.getElementById('melt-item-modal');
-    if (document.getElementById('melt-level')) {
+let modal = document.getElementById('melt-item-modal');
+    // Если окна нет, пробуем его создать
+    if (!modal && window.ensureModalsExist) {
+        window.ensureModalsExist();
+        modal = document.getElementById('melt-item-modal');
+    }
+    if (!modal) return;    if (document.getElementById('melt-level')) {
         document.getElementById('melt-level').value = Math.min(window.playerData.level, 70);
     }
+    // Сброс позиции в центр
+        modal.style.position = 'fixed';
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+ modal.style.zIndex = '9001';
+    
+    modal.style.opacity = '0';
     modal.style.display = 'block';
-}
+    requestAnimationFrame(() => {
+        modal.style.transition = 'opacity 0.3s ease';
+        modal.style.opacity = '1';
+    });}
 
 window.confirmMeltItem = function() {
     const level = parseInt(document.getElementById('melt-level').value) || 1;
@@ -1364,6 +1402,12 @@ window.confirmMeltItem = function() {
     if (g.includes('гэмблер')) {
         finalMeltValue = Math.floor(finalMeltValue * 0.75);
         bonuses.push(`Гэмблер -25%`);
+    }
+
+    const diffMult = window.getDifficultyGoldMultiplier();
+    if (diffMult > 1) {
+        finalMeltValue = Math.floor(finalMeltValue * diffMult);
+        bonuses.push(`Сложность x${diffMult}`);
     }
 
     const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
@@ -1543,36 +1587,29 @@ window.buyItemImmediate = function() {
     const cost = Math.floor(finalPrice);
     const bonusText = bonuses.length ? `<br><span style="font-size:0.8rem; color:#aaa;">(${bonuses.join(', ')})</span>` : "";
 
-    window.showCustomConfirm(
-        `Купить предмет (Lvl ${level}, ${grade})?<br>Свойств: ${selectedProps.length} (${totalPercent}%)<br>Цена: ${window.formatCurrency(cost)}${bonusText}`,
-        () => {
-            const currentMoney = window.getAllMoneyInYen();
-            if (currentMoney >= cost) {
-                window.setMoneyFromYen(currentMoney - cost);
-                const defName = `Item ${grade}-Grade`;
-                window.showCustomPrompt("Название предмета", "Введите название:", defName, (name) => {
-                    window.playerData.inventory.push({
-                        id: Date.now(),
-                        name: name,
-                        grade: grade,
-                        level: level,
-                        buyPrice: cost,
-                        isAncient: false,
-                        isPrimal: false,
-                        isCrafted: false,
-                        properties: propsList
-                    });
-                    window.logEvent(`Куплен предмет: ${name} (${grade})`, 'loot');
-                    window.updateUI();
-                    window.showCustomAlert(`✅ Предмет куплен!`);
-                }, true);
-
-                selectedProps.forEach(el => el.classList.remove('selected'));
-            } else {
-                window.showCustomAlert(`❌ Недостаточно средств!`);
-            }
-        }
-    );
+    const itemDesc = `предмет (Lvl ${level}, ${grade})<br>Свойств: ${selectedProps.length} (${totalPercent}%)${bonusText}`;
+    
+    window.confirmPurchaseWithZaken(cost, itemDesc, (method) => {
+        const defName = `Item ${grade}-Grade`;
+        window.showCustomPrompt("Название предмета", "Введите название:", defName, (name) => {
+            window.playerData.inventory.push({
+                id: Date.now(),
+                name: name,
+                grade: grade,
+                level: level,
+                buyPrice: cost,
+                isAncient: false,
+                isPrimal: false,
+                isCrafted: false,
+                properties: propsList
+            });
+            const payMsg = method === 'zaken' ? ' (за 🔖)' : '';
+            window.logEvent(`Куплен предмет: ${name} (${grade})${payMsg}`, 'loot');
+            window.updateUI();
+            window.showCustomAlert(`✅ Предмет куплен!`);
+        }, true);
+        selectedProps.forEach(el => el.classList.remove('selected'));
+    });
 }
 
 window.toggleBuyProperty = function(el, percent) {
@@ -1598,6 +1635,7 @@ window.openEnchantModal = function() {
     const selector = document.getElementById('enchant-properties-selector');
     const subtitle = document.getElementById('enchant-subtitle');
     modal.style.top = '50%';
+        modal.style.position = 'fixed';
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
     list.style.display = 'block';

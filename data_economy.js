@@ -49,7 +49,6 @@ window.economyData = {
                                 <option value="D">D</option>
                                 <option value="C">C</option>
                                 <option value="B">B</option>
-                                <option value="A">A</option>
                             </select>
                         </label>
                     </div>
@@ -135,6 +134,7 @@ window.economyData = {
                 <p style="color: #ff4444;">❗ Расплавление легендарных 💍 выше обычного B-gr приносят столько же ресурсов, сколько они стоят на покупку.</p>
                 <p style="background: rgba(255,255,255,0.05); padding: 5px;">
                     <strong>Пример:</strong><br>
+                    За 1 предмет А грейда (обычный) - 2.66 В грейд ресурсов.<br>
                     Spectrum обычный — 4.875 * 2.66 = 13 🧩 <span class="grade-b">B-gr</span>
                 </p>
             `

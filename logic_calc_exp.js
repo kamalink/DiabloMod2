@@ -6,6 +6,10 @@ window.openExpCalculator = function() {
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
 
+    // Сброс кнопки подтверждения к дефолтному поведению (чтобы не запускать цепочку ВП/НП при ручном открытии)
+    const expBtn = modal.querySelector('.exp-apply-btn');
+    if (expBtn) expBtn.onclick = function() { window.applyExpCalculation(); };
+    
     document.getElementById('exp-calc-modal').style.display = 'block';
     document.getElementById('exp-mobs').value = 0;
     document.getElementById('exp-elites').value = 0;
@@ -263,8 +267,8 @@ window.applyExpCalculation = function() {
             mult *= 3;
         }
         
-        const reward = Math.floor(dMobs * mult * window.playerData.level * rankMult);
-        window.addYen(reward);
+const diffMult = window.getDifficultyGoldMultiplier();
+        const reward = Math.floor(dMobs * mult * window.playerData.level * rankMult * diffMult);        window.addYen(reward);
         rewardMsg = `<br>💰 Получено: ${window.formatCurrency(reward)}`;
     }
 
@@ -273,6 +277,8 @@ window.applyExpCalculation = function() {
         const rankMultipliers = [0, 1.5, 2.5, 4, 6, 9, 12, 15, 18, 21.5, 27];
         const rankMult = (rank > 0) ? (rankMultipliers[rank] || 1) : 1;
         const lvl = window.playerData.level;
+                const diffMult = window.getDifficultyGoldMultiplier();
+
 
         let hYen = 0;
         let hRep = 0;
@@ -301,6 +307,7 @@ window.applyExpCalculation = function() {
         }
 
         if (hYen > 0 || hRep > 0) {
+                        hYen = Math.floor(hYen * diffMult);
             window.addYen(hYen);
             window.playerData.reputation += hRep;
             rewardMsg += `<br>💰 Охота: ${window.formatCurrency(hYen)}${hRep > 0 ? ` | 🎭 +` : ''}`;
@@ -393,4 +400,16 @@ window.setBaseStats = function() {
             window.showCustomAlert("✅ Изначальные параметры установлены.");
         });
     });
+}
+
+window.getDifficultyGoldMultiplier = function() {
+    const diff = window.playerData.difficulty || "Высокий";
+    const map = {
+        "T8": 1.1, "T9": 1.1,
+        "T10": 1.2, "T11": 1.2,
+        "T12": 1.3, "T13": 1.3,
+        "T14": 1.4, "T15": 1.4,
+        "T16": 1.5
+    };
+    return map[diff] || 1.0;
 }

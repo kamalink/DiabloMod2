@@ -6,6 +6,28 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* Общее для модалей: скрыты по умолчанию, плавно меняют прозрачность */
+.modal, #text-window, #custom-prompt-modal, #custom-confirm-modal {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Простая имитация объёма с динамическим смещением тени */
+.depth-shadow {
+    /* диагональный drop-shadow, смещаемый переменными */
+    filter: drop-shadow(var(--shadow-x,5px) var(--shadow-y,5px) 8px rgba(0,0,0,0.5));
+    transition: filter 0.1s linear; /* плавное изменение при перетаскивании */
+    position: relative; /* чтобы тень шла вместе с элементом */
+}
+
+/* особая стилизация карточки героя для объёма */
+#char-sheet {
+    box-shadow: inset 0 0 20px rgba(255,255,255,0.1), 0 4px 20px rgba(0,0,0,0.7);
+    border: 2px solid #5a4a2d;
+    /* небольшая градация, чтобы казалась выступающей */
+    background: linear-gradient(135deg, #1a1a1a 0%, #111 100%);
+}
+
 @keyframes zoomIn {
     from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
     to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
@@ -16,13 +38,30 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Эффект полета для основного окна */
+/* Эффект полета для основного окна (устарел, остался на случай падения обратно) */
 .fly-to-bonus {
     /* Летим вправо-вверх (примерно туда, где панели) и уменьшаемся */
     transform: translate(calc(50vw - 150px), calc(150px - 50vh)) scale(0.05) rotate(15deg) !important;
     opacity: 0 !important;
     filter: brightness(2) blur(2px); /* Эффект вспышки при исчезновении */
     transition: all 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045); /* Эффект втягивания */
+}
+
+/* эффект «скриншота» для плавного перехода окна в виджет */
+.screenshot-flash {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 50000;
+    animation: flash 0.25s ease-out forwards;
+}
+
+@keyframes flash {
+    0%   { opacity: 0; }
+    25%  { opacity: 1; }
+    100% { opacity: 0; }
 }
 
 /* МОДАЛЬНЫЕ ОКНА */

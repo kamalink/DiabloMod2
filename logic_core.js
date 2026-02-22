@@ -1,5 +1,57 @@
 // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И УТИЛИТЫ ---
 
+// Утилиты для плавного появления/скрытия модальных окон
+window.fadeInModal = function(el, callback) {
+    if (!el) { if (callback) callback(); return; }
+    el.style.opacity = '0';
+    el.style.display = 'block';
+    requestAnimationFrame(() => {
+        el.style.transition = 'opacity 0.3s ease';
+        el.style.opacity = '1';
+    });
+    const handler = (e) => {
+        if (e.propertyName === 'opacity') {
+            el.removeEventListener('transitionend', handler);
+            if (callback) callback();
+        }
+    };
+    el.addEventListener('transitionend', handler);
+};
+
+window.fadeOutModal = function(el, callback) {
+    if (!el) { if (callback) callback(); return; }
+    el.style.transition = 'opacity 0.3s ease';
+    el.style.opacity = '0';
+    const handler = (e) => {
+        if (e.propertyName === 'opacity') {
+            el.removeEventListener('transitionend', handler);
+            el.style.display = 'none';
+            if (callback) callback();
+        }
+    };
+    el.addEventListener('transitionend', handler);
+};
+
+// Конфигурация игры (Магические числа)
+window.gameConfig = {
+    guildReqs: {
+        traders: { vit: 1000 },
+        gamblers: { deals: 7, dex: 1000 },
+        mages: { int: 1000, para: 50 },
+        thieves: { steals: 7 },
+        hunters: { rep: 85 },
+        explorers: { legs: 5 },
+        wealth: { legs: 8 },
+        brute: { str: 1000, kills: 1700 }
+    },
+    zakenPrices: {
+        20: 12000, 25: 12000, 30: 20000, 35: 30000, 40: 50000,
+        45: 90000, 50: 130000, 55: 230000, 60: 350000, 65: 700000,
+        70: 820000, 99: 970000 // 99 как дефолт для 70+
+    },
+    theft: { baseChance: 0.4 } // Бонус за ловкость
+};
+
 // 1. Пытаемся достать данные из LocalStorage
 const savedData = localStorage.getItem('d3mod_player');
 // 2. Если данные есть — превращаем их в объект, если нет — создаем новый
@@ -34,7 +86,7 @@ window.playerData = savedData ? JSON.parse(savedData) : {
     elites_solo: 0,
     bosses: 0,
     gobs_solo: 0, gobs_assist: 0, 
-    found_legs: 0, found_yellows: 0,
+    found_legs: 0,
     res_n: 0, res_dc: 0, res_b: 0, res_a: 0,
     reagents: 0,
     runes_sold: 0,
@@ -83,13 +135,22 @@ window.playerData = savedData ? JSON.parse(savedData) : {
     rankName: "",
     joined_level: 1, // Уровень, на котором вступили в гильдию
     saveCount: 0,
-    journal: [] // Журнал событий
-};
+ journal: [], // Журнал событий
+     death_history: [], // История смертей
+ history: [], // История прогресса [time, para, wealth]
+        settings: { // Настройки
+            screamer: true,
+            vfx: true,
+            coinShimmer: 2 // 0: Выкл, 1: Редко, 2: Средне, 3: Часто
+        }
+    };
 
 // Исправление для старых сохранений
 if (!window.playerData.inventory) window.playerData.inventory = [];
 if (!window.playerData.journal) window.playerData.journal = [];
 if (!window.playerData.learnedSkills) window.playerData.learnedSkills = {};
+if (!window.playerData.history) window.playerData.history = [];
+if (!window.playerData.death_history) window.playerData.death_history = [];
 if (!window.playerData.forgottenSkillRunes) window.playerData.forgottenSkillRunes = {};
 if (!window.playerData.learnedSkillsOrder) window.playerData.learnedSkillsOrder = Object.keys(window.playerData.learnedSkills);
 if (typeof window.playerData.highest_kills === 'undefined') window.playerData.highest_kills = window.playerData.kills || 0;
@@ -117,6 +178,11 @@ if (typeof window.playerData.theft_attempts_count === 'undefined') window.player
 if (typeof window.playerData.current_rift_cost === 'undefined') window.playerData.current_rift_cost = 0;
 if (typeof window.playerData.refused_thief_promotion === 'undefined') window.playerData.refused_thief_promotion = false;
 
+if (!window.playerData.settings) window.playerData.settings = {
+    screamer: true,
+    vfx: true,
+    coinShimmer: 2
+};
 
 if (typeof window.playerData.base_vp_at_70 === 'undefined') {
     if (window.playerData.level >= 70) {
@@ -138,6 +204,8 @@ window.audioTrackDefault = new Audio('06 - The Slaughtered Calf Inn.mp3');
 window.audioTrackDefault.loop = true;
 window.audioTrackNGPlus = new Audio('Cave.mp3');
 window.audioTrackNGPlus.loop = true;
+window.audioTrackAct5 = new Audio('act 5.mp3');
+window.audioTrackAct5.loop = true;
 window.audioTrack = window.audioTrackDefault; // Устанавливаем трек по умолчанию
 window.coinSound = new Audio('freesound_community-coin-clatter-6-87110.mp3');
 window.activeRiftMultiplier = null; // Множитель наград за текущий рифт (null если нет активной цепочки)
@@ -168,6 +236,8 @@ window.saveToStorage = function() {
     // Debounce: откладываем сохранение на 1 сек, чтобы снизить нагрузку
     if (window.saveTimeout) clearTimeout(window.saveTimeout);
     window.saveTimeout = setTimeout(() => {
+        
+        window.updateHistory();
         localStorage.setItem('d3mod_player', JSON.stringify(window.playerData));
     }, 1000);
 }
@@ -248,26 +318,25 @@ window.addCurrency = function(type, amount) {
 }
 
 window.getZakenPrice = function(level) {
-    if (level < 20) return 12000;
-    if (level < 25) return 12000;
-    if (level < 30) return 20000;
-    if (level < 35) return 30000;
-    if (level < 40) return 50000;
-    if (level < 45) return 90000;
-    if (level < 50) return 130000;
-    if (level < 55) return 230000;
-    if (level < 60) return 350000;
-    if (level < 65) return 700000;
-    if (level < 70) return 820000;
-    return 970000;
+    const prices = window.gameConfig.zakenPrices;
+    if (level < 20) return prices[20];
+    
+    // Ищем подходящий диапазон
+    for (let cap of [25, 30, 35, 40, 45, 50, 55, 60, 65, 70]) {
+        if (level < cap) return prices[cap];
+    }
+    return prices[99];
 }
 
 window.showCustomConfirm = function(msg, onYes, onNo) {
     const modal = document.getElementById('custom-confirm-modal');
     // Сброс позиции
+        modal.style.position = 'fixed';
     modal.style.top = '50%';
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
+        modal.style.zIndex = '9002';
+
 
     document.getElementById('confirm-message').innerHTML = msg;
     const yesBtn = document.getElementById('confirm-yes-btn');
@@ -297,21 +366,20 @@ window.showCustomConfirm = function(msg, onYes, onNo) {
     noBtn.innerText = 'ОТМЕНА';
     
     yesBtn.onclick = function() {
-        modal.style.display = 'none';
-        if (onYes) onYes();
+        window.fadeOutModal(modal, () => { if (onYes) onYes(); });
     };
     
     noBtn.onclick = function() {
-        modal.style.display = 'none';
-        if (onNo) onNo();
+        window.fadeOutModal(modal, () => { if (onNo) onNo(); });
     };
     
-    modal.style.display = 'block';
+    window.fadeInModal(modal);
 }
 
-window.showCustomAlert = function(msg) {
+window.showCustomAlert = function(msg, onClose) {
     const modal = document.getElementById('custom-confirm-modal');
     // Сброс позиции
+        modal.style.position = 'fixed';
     modal.style.top = '50%';
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
@@ -325,19 +393,21 @@ window.showCustomAlert = function(msg) {
     yesBtn.innerText = 'OK';
     
     yesBtn.onclick = function() {
-        modal.style.display = 'none';
+        window.fadeOutModal(modal, () => { if (onClose) onClose(); });
     };
     
-    modal.style.display = 'block';
+    window.fadeInModal(modal);
 }
 
 window.closeWindow = function() { 
-    document.getElementById('text-window').style.display = 'none'; 
+    const win = document.getElementById('text-window');
+    window.fadeOutModal(win);
 }
 
 window.showCustomPrompt = function(title, text, defaultValue, onOk, isText = false) {
     const modal = document.getElementById('custom-prompt-modal');
     // Сброс позиции
+        modal.style.position = 'fixed';
     modal.style.top = '50%';
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
@@ -356,7 +426,7 @@ window.showCustomPrompt = function(title, text, defaultValue, onOk, isText = fal
     const okBtn = document.getElementById('prompt-ok-btn');
     const cancelBtn = document.getElementById('prompt-cancel-btn');
 
-    const close = () => modal.style.display = 'none';
+    const close = () => window.fadeOutModal(modal);
 
     okBtn.onclick = () => {
         let value = input.value;
@@ -371,9 +441,15 @@ window.showCustomPrompt = function(title, text, defaultValue, onOk, isText = fal
 
     cancelBtn.onclick = close;
 
+    // Ручная анимация для сохранения display: flex (исправляет скачок позиции)
+    modal.style.opacity = '0';
     modal.style.display = 'flex';
-    input.focus();
-    input.select();
+   requestAnimationFrame(() => {
+        modal.style.transition = 'opacity 0.3s ease';
+        modal.style.opacity = '1';
+        input.focus();
+        input.select();
+    });
 }
 
 window.exportSaveFile = function() {
@@ -431,6 +507,8 @@ window.handleFileSelect = function(input) {
                 if (!window.playerData.professions) window.playerData.professions = { 1: false, 2: false, 3: false };
                 if (!window.playerData.claimed_torments) window.playerData.claimed_torments = [];
                 if (!window.playerData.claimed_ranks) window.playerData.claimed_ranks = [];
+                if (!window.playerData.history) window.playerData.history = [];
+                if (!window.playerData.settings) window.playerData.settings = { screamer: true, vfx: true, coinShimmer: 2 };
 
                 window.saveToStorage();
                 window.restorePanels();
@@ -523,4 +601,29 @@ window.validateGenericAction = function(cost, actionName) {
     if (typeof cost !== 'number' || isNaN(cost)) return `Ошибка: Стоимость "${actionName}" не является числом.`;
     if (cost < 0) return `Ошибка: Стоимость "${actionName}" отрицательная.`;
     return null;
+}
+
+window.updateHistory = function(force = false) {
+    const d = window.playerData;
+    const now = Date.now();
+    if (!d.history) d.history = []; // Защита от отсутствия истории
+    const lastPoint = d.history[d.history.length - 1];
+// Интервал: 1 минута для первой точки после старта, 5 минут для остальных
+    let interval = 300000; // 5 мин
+    if (d.history.length === 1) interval = 60000; // 1 мин
+
+    if (force || !lastPoint || (now - lastPoint.time > interval)) {        const wealth = Math.floor(window.getAllMoneyInYen() / 10000); // В серебре для компактности
+        // Данные для 70 уровня
+        const dmg = (d.level >= 70) ? (d.calculated_dmg || 0) : 0;
+        const tough = (d.level >= 70) ? (d.calculated_tough || 0) : 0;
+        d.history.push({
+            time: now,
+            para: Math.floor(d.para),
+wealth: wealth,
+            deaths: (d.death_history || []).length,
+            dmg: dmg,
+            tough: tough        });
+        // Храним последние 50 точек
+        if (d.history.length > 50) d.history.shift();
+    }
 }

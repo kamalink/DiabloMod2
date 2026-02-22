@@ -1,6 +1,6 @@
 // --- ГЕЙМПЛЕЙ, СЛОЖНОСТЬ, ПОРТАЛЫ ---
 
-const difficultyTable = [
+window.difficultyTable = [
     { tier: "T1", dmg: 2000000, tough: 4340000 },
     { tier: "T2", dmg: 3200000, tough: 7140000 },
     { tier: "T3", dmg: 6000000, tough: 11460000 },
@@ -262,6 +262,7 @@ window.calculateDifficulty = function() {
 window.applyDifficulty = function() {
     const tier = document.getElementById('diff-result-tier').dataset.tier;
     window.playerData.difficulty = tier;
+        window.updateHistory(true); // Записываем прогресс (урон/стойкость) в график
     window.saveToStorage();
     window.updateUI();
     document.getElementById('difficulty-calc-modal').style.display = 'none';
@@ -468,7 +469,10 @@ window.selectRiftDifficulty = function(cost, name, diff, isVP = false, vpLevel =
     container.innerHTML = extraHtml + '<div id="rift-buttons-list" style="display:flex; flex-direction:column; gap:5px;"></div>';
     
     window.renderRiftButtons();
-    
+    // Сброс позиции в центр
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
     modal.style.display = 'flex';
 }
 
@@ -984,6 +988,7 @@ window.finalizeTheft = function() {
 }
 
 window.createClickSparks = function(x, y) {
+        if (!window.playerData.settings || !window.playerData.settings.vfx) return;
     const count = 8 + Math.floor(Math.random() * 5);
     for (let i = 0; i < count; i++) {
         const spark = document.createElement('div');
@@ -1003,6 +1008,7 @@ window.createClickSparks = function(x, y) {
 }
 
 window.createFireTrail = function(x, y) {
+        if (!window.playerData.settings || !window.playerData.settings.vfx) return;
     const particle = document.createElement('div');
     particle.className = 'fire-trail-particle';
     particle.style.left = x + 'px';
@@ -1012,6 +1018,7 @@ window.createFireTrail = function(x, y) {
 }
 
 window.createCollisionSparks = function(x, y, side) {
+        if (!window.playerData.settings || !window.playerData.settings.vfx) return;
     const count = 20 + Math.floor(Math.random() * 10);
     for (let i = 0; i < count; i++) {
         const spark = document.createElement('div');
@@ -1033,43 +1040,5 @@ window.createCollisionSparks = function(x, y, side) {
         
         document.body.appendChild(spark);
         setTimeout(() => spark.remove(), 600);
-    }
-}
-
-// --- АТМОСФЕРНЫЕ ЭФФЕКТЫ ---
-window.startCrowFlocks = function() {
-    const run = () => {
-        const delay = (90 + Math.random() * 30) * 1000; // 90-120 секунд
-        setTimeout(() => {
-            window.spawnCrowFlock();
-            run();
-        }, delay);
-    };
-    run();
-}
-
-window.spawnCrowFlock = function() {
-    // Звуковой эффект (50/50)
-    const soundSrc = Math.random() < 0.5 ? 'creepy-cry.mp3' : 'cawing.mp3';
-    const audio = new Audio(soundSrc);
-    audio.volume = 0.4;
-    audio.play().catch(() => {});
-    const count = 3 + Math.floor(Math.random() * 5); // 3-7 ворон
-    for (let i = 0; i < count; i++) {
-        setTimeout(() => {
-            const crow = document.createElement('img');
-            crow.src = 'Crow.gif';
-            crow.className = 'flying-crow';
-            
-            // Случайная высота (10-60% от верха)
-            crow.style.top = (10 + Math.random() * 50) + '%';
-            crow.style.width = (100 + Math.random() * 40) + 'px'; // Размер
-            const duration = 5 + Math.random() * 10; // Скорость
-            crow.style.animationDuration = duration + 's';
-            crow.style.opacity = 0.6 + Math.random() * 0.4;
-
-            document.body.appendChild(crow);
-            setTimeout(() => crow.remove(), duration * 1000);
-        }, i * 400 + Math.random() * 500);
     }
 }
