@@ -381,7 +381,7 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
         area.appendChild(btn);
     });
     // Обновляем иконки в меню (в том числе на заблокированных кнопках)
-    window.replaceStaticIcons();
+    window.replaceStaticIcons(area);
 }
 
 window.showText = function(title, content) {
@@ -422,6 +422,8 @@ window.showText = function(title, content) {
     }
 
     contentArea.innerHTML = btnHtml + html;
+        window.replaceStaticIcons(contentArea); // Оптимизация: сканируем только окно
+
     
     // Показываем селектор руки для Охотников в магазине
     const handSelector = document.getElementById('hand-selector-main');
@@ -782,6 +784,7 @@ window.updateUI = function() {
         if (g.includes('ученик чародея')) bonuses.push(`<span style="color:#ff4444">Ученик: -9% (Предметы)</span>`);
 
         sellBonusEl.innerHTML = bonuses.length > 0 ? bonuses.join('<br>') : "Нет бонусов к продаже";
+                window.replaceStaticIcons(sellBonusEl); // Локальное обновление иконок
     }
 
     setInput('input-lvl70-portal', window.playerData.lvl70_portal || "");
@@ -900,6 +903,10 @@ window.updateUI = function() {
     document.getElementById('view-zaken-discount').innerHTML = window.playerData.zaken_discount || "-";
     document.getElementById('view-theft-fine').innerText = window.playerData.theft_fine ? `(Штраф: ${window.playerData.theft_fine})` : "";
 
+    // Локальное обновление иконок для динамических текстовых полей
+    window.replaceStaticIcons(document.getElementById('view-xp-bonus'));
+    window.replaceStaticIcons(document.getElementById('view-difficulty'));
+
     document.getElementById('view-class').innerText = window.playerData.className || "Класс не выбран";
     document.getElementById('view-build').innerText = "";
     document.getElementById('view-guild').innerText = window.playerData.guild || "Нет";
@@ -931,7 +938,7 @@ window.updateUI = function() {
     window.renderLearnedSkillsWidget();
     window.renderInventoryWidget();
     window.renderJournalWidget();
-    localStorage.setItem('d3mod_player', JSON.stringify(window.playerData));
+    window.saveToStorage();
     
     window.applyTheme(window.playerData.className);
 
@@ -2407,9 +2414,9 @@ window.updateShimmerSetting = function(val) {
 }
 
 
-window.replaceStaticIcons = function() {
+    window.replaceStaticIcons = function(target = document.body) {
     // Замена эмодзи на иконки в текстовых узлах (безопасно)
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+    const walker = document.createTreeWalker(target, NodeFilter.SHOW_TEXT, null, false);
     const textNodes = [];
     let currentNode;
     while(currentNode = walker.nextNode()) {
@@ -2479,5 +2486,5 @@ const emojiFixes = [
 const originalUpdateUI = window.updateUI;
 window.updateUI = function() {
     originalUpdateUI.apply(this, arguments);
-    window.replaceStaticIcons();
+    // window.replaceStaticIcons(); // Убрано для оптимизации. Вызывается точечно.
 }

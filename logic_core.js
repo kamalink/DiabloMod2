@@ -270,6 +270,10 @@ window.setMoneyFromYen = function(totalYen) {
 
     window.playerData.mithril = absYen * sign;
 
+    // Жесткое ограничение мифрила (макс 10)
+    if (window.playerData.mithril > 10) window.playerData.mithril = 10;
+    if (window.playerData.mithril < -10) window.playerData.mithril = -10; // На всякий случай для долгов
+
     if (window.coinSound && window.playerData.gold_y !== undefined) {
         window.coinSound.currentTime = 0;
         window.coinSound.play().catch(e => {
@@ -289,7 +293,7 @@ window.addYen = function(yenAmount) {
     // setMoneyFromYen уже включает звук, так что дополнительный вызов не нужен
 }
 
-window.addCurrency = function(type, amount) {
+window.addCurrency = function(type, amount, skipFullUpdate = false) {
     const keyMap = {
         m: 'mithril',
         g: 'gold_g',
@@ -314,8 +318,9 @@ window.addCurrency = function(type, amount) {
     if (currentYen + change < 0) return;
 
     window.setMoneyFromYen(currentYen + change);
-    window.updateUI(); // updateUI вызывает saveToStorage
-}
+if (!skipFullUpdate) {
+        window.updateUI(); // updateUI вызывает saveToStorage
+    }}
 
 window.getZakenPrice = function(level) {
     const prices = window.gameConfig.zakenPrices;

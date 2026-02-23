@@ -10,7 +10,7 @@ window.startCurrencyChange = function(type, amount) {
     // Запускаем таймаут, а после него - интервал для ускоренного изменения
     currencyTimeout = setTimeout(() => {
         currencyInterval = setInterval(() => {
-            window.addCurrency(type, amount);
+            window.addCurrency(type, amount, true); // true = пропускаем тяжелое сохранение
         }, 100); // Повторять каждые 100мс
     }, 500); // Задержка перед ускорением 500мс
 }
@@ -157,6 +157,7 @@ window.onload = function() {
     if (window.updateAllShadows) window.updateAllShadows();
     window.updateUI();
     window.updateCoinStacks(); // перемещенный вызов
+        window.replaceStaticIcons(); // Глобальный проход один раз при загрузке
     window.renderMenu('main', 'ГЛАВНАЯ', true);
 
     // Настройка и попытка автозапуска музыки
@@ -301,7 +302,7 @@ window.onload = function() {
     }
 
     const credits = document.getElementById('credits-label');
-    if(credits) credits.innerHTML += '<br>v1.0.4';
+    if(credits) credits.innerHTML += '<br>v1.0.5';
     
     // Инициализация напоминания о сохранении
     window.initSaveReminder();
