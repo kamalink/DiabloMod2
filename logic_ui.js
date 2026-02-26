@@ -1903,8 +1903,10 @@ window.updateResourcePool = function() {
     let progress = 0;
     let tooltip = "";
 
-    const calcPct = (current, target) => Math.min(100, Math.max(0, (current / target) * 100));
-    const kills = (window.playerData.kills || 0);
+const calcPct = (current, target, prev = 0) => {
+        if (target <= prev) return 100;
+        return Math.min(100, Math.max(0, ((current - prev) / (target - prev)) * 100));
+    };    const kills = (window.playerData.kills || 0);
 
     if (g.includes('салага')) {
         const pStr = calcPct(window.playerData.stat_str, 1000);
@@ -1915,28 +1917,33 @@ window.updateResourcePool = function() {
     else if (g.includes('торговц')) {
         const targets = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000];
         const target = targets[rank] || 10000;
-        progress = calcPct(window.playerData.stat_vit, target);
-        tooltip = `Торговцы: Ранг ${rank} -> ${rank+1}\nЖивучесть: ${window.playerData.stat_vit} / ${target}`;
+const prev = rank > 0 ? targets[rank - 1] : 0;
+        progress = calcPct(window.playerData.stat_vit, target, prev);
+                tooltip = `Торговцы: Ранг ${rank} -> ${rank+1}\nЖивучесть: ${window.playerData.stat_vit} / ${target}`;
     }
     else if (g.includes('охотник на гоблинов')) {
         const targets = [85, 215, 430, 685, 1330, 1870, 2315, 2750, 3200, 4000];
         const target = targets[rank] || 4000;
-        progress = calcPct(window.playerData.reputation, target);
-        tooltip = `Охотник на гоблинов: Ранг ${rank} -> ${rank+1}\nРепутация: ${window.playerData.reputation} / ${target}`;
+const prev = rank > 0 ? targets[rank - 1] : 0;
+        progress = calcPct(window.playerData.reputation, target, prev);
+                tooltip = `Охотник на гоблинов: Ранг ${rank} -> ${rank+1}\nРепутация: ${window.playerData.reputation} / ${target}`;
     }
     else if (g.includes('охотник на ☠️')) {
         const targets = [85, 215, 430, 685, 1030, 1370, 1715, 2050, 2400, 3000];
         const target = targets[rank] || 3000;
-        progress = calcPct(window.playerData.reputation, target);
-        tooltip = `Охотник на Элиту: Ранг ${rank} -> ${rank+1}\nРепутация: ${window.playerData.reputation} / ${target}`;
+ const prev = rank > 0 ? targets[rank - 1] : 0;
+        progress = calcPct(window.playerData.reputation, target, prev);
+                tooltip = `Охотник на Элиту: Ранг ${rank} -> ${rank+1}\nРепутация: ${window.playerData.reputation} / ${target}`;
     }
     else if (g.includes('вампир') || g.includes('чародей')) {
         const tInt = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000];
         const tPara = [50, 100, 200, 300, 450, 600, 700, 800, 900, 1000];
         const targetInt = tInt[rank] || 10000;
+                const prevInt = rank > 0 ? tInt[rank - 1] : 0;
         const targetPara = tPara[rank] || 1000;
-        const pInt = calcPct(window.playerData.stat_int, targetInt);
-        const pPara = calcPct(window.playerData.para, targetPara);
+        const prevPara = rank > 0 ? tPara[rank - 1] : 0;
+        const pInt = calcPct(window.playerData.stat_int, targetInt, prevInt);
+        const pPara = calcPct(window.playerData.para, targetPara, prevPara);
         progress = Math.max(pInt, pPara);
         tooltip = `Маги: Ранг ${rank} -> ${rank+1}\nИнтеллект: ${window.playerData.stat_int} / ${targetInt}\nПарагон: ${window.playerData.para} / ${targetPara}`;
     }
@@ -1944,32 +1951,38 @@ window.updateResourcePool = function() {
         const tDex = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000];
         const tDeals = [7, 20, 45, 70, 100, 135, 170, 210, 255, 313];
         const targetDex = tDex[rank] || 10000;
+                const prevDex = rank > 0 ? tDex[rank - 1] : 0;
         const targetDeals = tDeals[rank] || 313;
-        const pDex = calcPct(window.playerData.stat_dex, targetDex);
-        const pDeals = calcPct(window.playerData.deals, targetDeals);
+        const prevDeals = rank > 0 ? tDeals[rank - 1] : 0;
+        const pDex = calcPct(window.playerData.stat_dex, targetDex, prevDex);
+        const pDeals = calcPct(window.playerData.deals, targetDeals, prevDeals);
         progress = Math.max(pDex, pDeals);
         tooltip = `Гэмблер: Ранг ${rank} -> ${rank+1}\nЛовкость: ${window.playerData.stat_dex} / ${targetDex}\nСделки: ${window.playerData.deals} / ${targetDeals}`;
     }
     else if (g.includes('вор') && !g.includes('воришка')) {
         const targets = [7, 20, 45, 70, 100, 135, 170, 210, 255, 300];
         const target = targets[rank] || 300;
-        progress = calcPct(window.playerData.steals, target);
-        tooltip = `Вор: Ранг ${rank} -> ${rank+1}\nКражи: ${window.playerData.steals} / ${target}`;
+const prev = rank > 0 ? targets[rank - 1] : 0;
+        progress = calcPct(window.playerData.steals, target, prev);
+                tooltip = `Вор: Ранг ${rank} -> ${rank+1}\nКражи: ${window.playerData.steals} / ${target}`;
     }
     else if (g.includes('искатель') || g.includes('джимми')) {
         // Для искателей приключений и богатства (Джимми не имеет рангов, но пусть будет)
         const targets = g.includes('богатства') ? [8, 15, 24, 35, 47, 60, 75, 92, 110, 135] : [5, 10, 16, 23, 31, 40, 50, 61, 73, 90];
         const target = targets[rank] || 135;
-        progress = calcPct(window.playerData.found_legs, target);
-        tooltip = `Искатель: Ранг ${rank} -> ${rank+1}\nЛегендарки: ${window.playerData.found_legs} / ${target}`;
+const prev = rank > 0 ? targets[rank - 1] : 0;
+        progress = calcPct(window.playerData.found_legs, target, prev);
+                tooltip = `Искатель: Ранг ${rank} -> ${rank+1}\nЛегендарки: ${window.playerData.found_legs} / ${target}`;
     }
     else if (g.includes('громила') || g.includes('лорд войны')) {
         const tStr = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000];
         const tKills = [1700, 4300, 8600, 13700, 20600, 27400, 34300, 41000, 48000, 60000];
         const targetStr = tStr[rank] || 10000;
+                const prevStr = rank > 0 ? tStr[rank - 1] : 0;
         const targetKills = tKills[rank] || 60000;
-        const pStr = calcPct(window.playerData.stat_str, targetStr);
-        const pKills = calcPct(kills, targetKills);
+       const prevKills = rank > 0 ? tKills[rank - 1] : 0;
+        const pStr = calcPct(window.playerData.stat_str, targetStr, prevStr);
+        const pKills = calcPct(kills, targetKills, prevKills);
         progress = Math.max(pStr, pKills);
         tooltip = `Соратники: Ранг ${rank} -> ${rank+1}\nСила: ${window.playerData.stat_str} / ${targetStr}\nУбийства: ${kills} / ${targetKills}`;
     }
@@ -2046,8 +2059,53 @@ window.updatePotionFlask = function() {
     const liquid = flask.querySelector('.potion-liquid');
     const count = Math.min(20, window.playerData.potions || 0);
     const pct = (count / 20) * 100;
-    liquid.style.height = `${pct}%`;
-    flask.title = `Зелья здоровья: ${count} / 20`;
+if (window.gsap) {
+        // 1. Анимация уровня жидкости
+        gsap.to(liquid, { height: `${pct}%`, duration: 0.6, ease: "power2.out" });
+
+        // 2. Бурление (пузырьки)
+        if (!flask.dataset.bubblesInit) {
+            flask.dataset.bubblesInit = "true";
+            setInterval(() => {
+                if (!document.getElementById('flask-potions')) return;
+                const b = document.createElement('div');
+                b.style.position = 'absolute';
+                b.style.bottom = '-5px';
+                b.style.left = Math.random() * 80 + 10 + '%';
+                b.style.width = (2 + Math.random() * 3) + 'px';
+                b.style.height = b.style.width;
+                b.style.borderRadius = '50%';
+                b.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                b.style.pointerEvents = 'none';
+                liquid.appendChild(b);
+
+                gsap.to(b, {
+                    y: - (Math.random() * 40 + 20),
+                    x: (Math.random() - 0.5) * 10,
+                    opacity: 0,
+                    duration: 1 + Math.random(),
+                    ease: "power1.out",
+                    onComplete: () => b.remove()
+                });
+            }, 400);
+        }
+
+        // 3. Мигание если мало зелий (< 3)
+        if (count < 3 && count > 0) {
+            if (!flask.dataset.blinking) {
+                flask.dataset.blinking = "true";
+                gsap.to(flask, { boxShadow: "0 0 15px #ff0000", borderColor: "#ff4444", duration: 0.8, yoyo: true, repeat: -1, ease: "sine.inOut" });
+            }
+        } else {
+            if (flask.dataset.blinking) {
+                flask.dataset.blinking = "";
+                gsap.killTweensOf(flask);
+                gsap.to(flask, { boxShadow: "none", borderColor: "#888", duration: 0.3 });
+            }
+        }
+    } else {
+        liquid.style.height = `${pct}%`;
+    }    flask.title = `Зелья здоровья: ${count} / 20`;
 }
 
 window.updateDynamicBackground = function() {
