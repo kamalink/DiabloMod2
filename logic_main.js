@@ -24,7 +24,7 @@ window.screamerSound = new Audio('screamer.mp3');
 window.craftSound = new Audio('diablo-3-craft-done.mp3');
 window.igniteSound = new Audio('ignite.mp3');
 window.extinguishSound = new Audio('extinguish.mp3');
-window.igniteSound.volume = 0.4;
+window.igniteSound.volume = 0.2;
 window.extinguishSound.volume = 0.4;
 
 window.onload = function() {
@@ -44,6 +44,7 @@ window.onload = function() {
         ...window.skillsData,
         ...window.worldData
     };
+
 
     // Данные для меню прогресса
     window.gameData.progress_menu = {
@@ -158,6 +159,7 @@ window.onload = function() {
     window.updateUI();
     window.updateCoinStacks(); // перемещенный вызов
         window.replaceStaticIcons(); // Глобальный проход один раз при загрузке
+            window.renderCandles(); // Создание свечей
     window.renderMenu('main', 'ГЛАВНАЯ', true);
 
     // Настройка и попытка автозапуска музыки
@@ -230,7 +232,6 @@ window.onload = function() {
     document.addEventListener('mousemove', throttledIdleReset);
     document.addEventListener('keydown', window.resetIdleTimer);
     document.addEventListener('click', window.resetIdleTimer);
-    document.addEventListener('touchstart', throttledIdleReset);
     window.resetIdleTimer();
 
     // Запуск случайных глитч-эффектов
@@ -246,15 +247,41 @@ window.onload = function() {
 
     // Звук клика
     document.addEventListener('click', function(e) {
-        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.tagName === 'IMG') {
             const clickSound = new Audio('soundreality-button-4-214382.mp3');
             clickSound.volume = 0.5;
             clickSound.play().catch(() => {});
         }
        if (window.playerData && window.playerData.settings) {
             window.createClickSparks(e.clientX, e.clientY);
+            }
+
+        // Перехват кнопки калькулятора опыта для сюжетных боссов
+        if (e.target.classList.contains('exp-apply-btn')) {
+            const bossInput = document.getElementById('exp-bosses');
+            if (bossInput) {
+                const val = parseInt(bossInput.value) || 0;
+                if (val > 0) {
+                    // Если введены боссы, считаем их сюжетными (по 1 за раз или скопом)
+                    window.advanceStoryProgress(val);
+                    // Сбрасываем поле, чтобы не накрутить лишнего при повторном нажатии (опционально)
+                    bossInput.value = 0; 
+                }
+            }
         }
         
+    });
+
+     // Обработчик всплывающих подсказок (Hints)
+    document.addEventListener('mouseover', function(e) {
+        if (!window.playerData.settings || !window.playerData.settings.showTooltips) return;
+        const target = e.target.closest('[data-hint]');
+        if (target) {
+            window.showCustomTooltip(e, target.dataset.hint);
+        }
+    });
+    document.addEventListener('mouseout', function(e) {
+        if (e.target.closest('[data-hint]')) window.hideCustomTooltip();
     });
 
     // Авто-ресайз полей ввода при вводе
@@ -302,7 +329,7 @@ window.onload = function() {
     }
 
     const credits = document.getElementById('credits-label');
-    if(credits) credits.innerHTML += '<br>v1.0.5';
+    if(credits) credits.innerHTML += '<br>v1.1.0';
     
     // Инициализация напоминания о сохранении
     window.initSaveReminder();
@@ -367,6 +394,19 @@ if (el) {
                     this.classList.remove('ignited');
                     this.classList.add('extinguishing');
                     if (window.extinguishSound) { window.extinguishSound.currentTime = 0; window.extinguishSound.play().catch(() => {}); }
+
+                    // Эффект дыма (как у свечей)
+                    for (let i = 0; i < 30; i++) {
+                        setTimeout(() => {
+                            const smoke = document.createElement('div');
+                            smoke.className = 'candle-smoke';
+                            smoke.style.left = (Math.random() * 100) + '%'; // Случайно по ширине текста
+                            smoke.style.top = (Math.random() * 50) + '%';
+                            this.appendChild(smoke);
+                            setTimeout(() => smoke.remove(), 5000);
+                        }, i * 50);
+                    }
+                    
                     setTimeout(() => this.classList.remove('extinguishing'), 2500);
                 } else {
                     this.classList.remove('extinguishing');
@@ -382,6 +422,216 @@ if (el) {
         window.introFinished = true;
         window.toggleMusic();
     }, 6500);
+}
+
+window.advanceStoryProgress = function(count) {
+    const oldProgress = window.playerData.story_progress || 0;
+    let newProgress = oldProgress + count;
+    if (newProgress > 24) newProgress = 24; // Максимум 24 (12 обычных + 12 НГ+)
+    
+    window.playerData.story_progress = newProgress;
+
+    
+    // Автоматическая смена акта
+    // 1 Акт: 2 босса (Леорик, Мясник) -> переход на 2
+    // 2 Акт: 3 босса (Магда, Кулл, Белиал) -> переход на 3 (всего 5)
+    // 3 Акт: 3 босса (Кхом, Зверь, Азмодан) -> переход на 4 (всего 8)
+    // 4 Акт: 2 босса (Раканот, Диабло) -> переход на 5 (всего 10)
+    let newAct = window.playerData.act;
+    if (newProgress >= 2 && oldProgress < 2) newAct = 2;
+    if (newProgress >= 5 && oldProgress < 5) newAct = 3;
+    if (newProgress >= 8 && oldProgress < 8) newAct = 4;
+    if (newProgress >= 10 && oldProgress < 10) newAct = 5;
+     if (newProgress >= 12 && oldProgress < 12) newAct = 6; // НГ+ Старт
+
+    // НГ+ переходы (пороги + 12)
+    if (newProgress >= 14 && oldProgress < 14) newAct = 7;
+    if (newProgress >= 17 && oldProgress < 17) newAct = 8;
+    if (newProgress >= 20 && oldProgress < 20) newAct = 9;
+    if (newProgress >= 22 && oldProgress < 22) newAct = 10;
+    
+    if (newAct !== window.playerData.act) {
+        window.playerData.act = newAct;
+        window.showCustomAlert(`Акт завершен! Переход в Акт ${newAct}.`);
+        window.updateDynamicBackground();
+    }
+    
+    window.saveToStorage();
+    window.renderCandles(); // Обновляем свечи
+    window.updateUI(); // Обновляем UI (номер акта)
+    // Если прогресс увеличился, запускаем событие Vodyani (ПОСЛЕ отрисовки свечей)
+    if (newProgress > oldProgress) {
+        window.playVodyaniEvent();
+    }
+}
+
+window.playVodyaniEvent = function() {
+    // 0. Блокируем другую музыку
+    window.isVodyaniEventActive = true;
+
+    // 1. Останавливаем текущую музыку
+    const wasPlaying = window.isMusicPlaying;
+    if (window.audioTrack) window.audioTrack.pause();
+
+    // 2. Меняем фон
+    const wallpaper = document.querySelector('.wallpaper');
+    if (wallpaper) wallpaper.classList.add('vodyani-bg');
+
+     // 3. Прячем курсор, отключаем скринсейвер, закрываем алерты
+    clearTimeout(window.idleTimer);
+    document.body.classList.add('cursor-hidden');
+    setTimeout(() => {
+        const alertModal = document.getElementById('custom-confirm-modal');
+        if (alertModal && alertModal.style.display !== 'none') window.fadeOutModal(alertModal);
+                document.body.classList.add('vodyani-ui-hidden');
+    }, 2000);
+
+    // 3. Запускаем трек
+     if (window.vodyaniAudio) { window.vodyaniAudio.pause(); window.vodyaniAudio.currentTime = 0; }
+    window.vodyaniAudio = new Audio('Vodyani_Prologue.mp3');
+    window.vodyaniAudio.volume = 1.0;
+        window.vodyaniAudio.load(); // Принудительная загрузка
+
+
+    let animationId = null;
+    const candles = document.querySelectorAll('.candle');
+
+
+    const visualize = () => {
+        const time = window.vodyaniAudio.currentTime;
+
+        // DEBUG TIMER UPDATE
+        const timerEl = document.getElementById('vodyani-debug-timer');
+        if (timerEl) timerEl.innerText = time.toFixed(2);
+
+        // Тайминги фаз (в секундах)
+      const tInertia = 18;
+        const tCall = 28;
+        const tAccumulation = 41;
+       const tAscension = 51.5;
+        const tHolyMachine = 62.5;
+        const tGrandFinale = 84.5;
+        const tTransitionOut = 87.5; // Новая фаза перехода
+        const tDissolution = window.vodyaniAudio.duration || 180; // Конец
+
+        // Определяем фазу музыки по временной карте
+       let phase = 'inertia';
+        if (time < tInertia) phase = 'inertia';
+        else if (time < tCall) phase = 'call';
+        else if (time < tAccumulation) phase = 'accumulation';
+        else if (time < tAscension) phase = 'ascension';
+        else if (time < tHolyMachine) phase = 'holy_machine';
+        else if (time < tGrandFinale) phase = 'grand_finale';
+        else if (time < tTransitionOut) phase = 'transition_out';
+        else if (time < tDissolution) phase = 'dissolution';
+                else phase = 'end';
+
+                const isTense = ['holy_machine', 'grand_finale'].includes(phase); // Убрал ascension и transition_out
+
+        candles.forEach((candle, i) => {
+             // 1. Игнорируем потушенные свечи (они не участвуют в шоу)
+            if (candle.classList.contains('extinguished')) {
+                candle.classList.remove('divinity');
+                return;
+            }
+            let scale = 1.0;
+             let opacity = 1.0;
+
+            if (isTense) candle.classList.add('divinity');
+            else candle.classList.remove('divinity');
+
+            switch (phase) {
+                case 'inertia': // 0:00 - 0:18
+                    // Низкий гул, медленный opacity
+                    scale = 1.0 + Math.sin(time * 2 + i) * 0.05;
+                    opacity = 0.5 + Math.abs(Math.sin(time * 0.5 + i)) * 0.3;
+                    break;
+                case 'call': // 0:18 - 0:28
+                    // Вокал, пульсация средних
+                    if (i >= 4 && i < 8) scale = 1.1 + Math.abs(Math.sin(time * 3 + i)) * 0.2;
+                    else scale = 1.0 + Math.sin(time + i) * 0.05;
+                    opacity = 0.8;
+                    break;
+                case 'accumulation': // 0:28 - 0:41
+                    // Рост масштаба, на 15% больше чем в фазе 2, без "божественности"
+                    scale = 1.15 + Math.abs(Math.sin(time * 5 + i)) * 0.25;
+                    opacity = 0.9;
+                    break;
+               case 'ascension': // 0:41 - 0:51.5
+                     // Пик 1, пульсация каждые 1.4 секунды
+                    scale = 1.2 + Math.abs(Math.sin(time * (Math.PI / 1.4))) * 0.2; 
+                    break;
+                case 'holy_machine': // 0:51.5 - 1:02.5
+                    // Ритмичный бас, отрывистые движения
+                    scale = 1.2 + (Math.sin(time * 6) > 0 ? 0.4 : 0);
+                    if (i < 4) scale *= 1.2; // Басы
+                    break;
+                case 'grand_finale': // 1:02.5 - 1:24.5
+                    // Максимальный пик
+                    scale = 1.5 + Math.random() * 0.5;
+                    break;
+                case 'transition_out': // 1:24.5 - 1:27.5
+                    const transProg = (time - tGrandFinale) / (tTransitionOut - tGrandFinale);
+                    // Плавное уменьшение масштаба с пикового (~1.7) до нормального (1.0)
+                    // Цвет меняется плавно благодаря CSS transition, так как убрали класс divinity
+                    scale = 1.7 - (0.7 * transProg); 
+                    break;
+                case 'dissolution': // 1:27.5 - End
+                 
+                    const disProg = (time - tTransitionOut) / (tDissolution - tTransitionOut || 1);
+                                        scale = 1.0 - (disProg * 0.1); 
+                    opacity = 1 - disProg;
+                    break;
+            }
+            candle.style.setProperty('--flame-scale', scale);
+                        candle.style.setProperty('--flame-opacity', opacity);
+        });
+
+        animationId = requestAnimationFrame(visualize);
+    };
+
+
+    const cleanup = function() {
+        // 5. Восстанавливаем фон и музыку после окончания
+                window.isVodyaniEventActive = false; // Снимаем блокировку
+                 // DEBUG TIMER REMOVE
+        const timerEl = document.getElementById('vodyani-debug-timer');
+        if (timerEl) timerEl.remove();
+                document.body.classList.remove('cursor-hidden'); // Возвращаем курсор
+        document.body.classList.remove('vodyani-ui-hidden'); // Возвращаем UI
+        window.resetIdleTimer(); // Возвращаем таймер бездействия
+
+        if (wallpaper) wallpaper.classList.remove('vodyani-bg');
+                 if (animationId) cancelAnimationFrame(animationId);
+                 candles.forEach(c => { c.classList.remove('vodyani-ghost'); c.classList.remove('divinity'); c.style.removeProperty('--flame-scale'); c.style.removeProperty('--flame-opacity'); c.style.removeProperty('--divinity-filter'); });
+        window.renderCandles(); // Принудительно перерисовываем свечи в их правильном состоянии
+
+        
+        if (wasPlaying && window.audioTrack) {
+            window.audioTrack.play().catch(()=>{});
+        }
+    };
+
+       window.vodyaniAudio.play().then(() => {
+        // DEBUG TIMER CREATE
+        const timerEl = document.createElement('div');
+        timerEl.id = 'vodyani-debug-timer';
+        timerEl.style.position = 'fixed';
+        timerEl.style.top = '10%';
+        timerEl.style.left = '50%';
+        timerEl.style.transform = 'translateX(-50%)';
+        timerEl.style.color = '#00ff00';
+        timerEl.style.fontSize = '3rem';
+        timerEl.style.zIndex = '20001';
+        timerEl.style.fontFamily = 'monospace';
+        timerEl.style.textShadow = '2px 2px 0 #000';
+        document.body.appendChild(timerEl);
+        animationId = requestAnimationFrame(visualize);
+}).catch(e => {
+        console.error("Vodyani play failed. This can happen if the browser blocks autoplay.", e);
+        cleanup(); // Если не удалось запустить, сразу все чистим
+    });
+    window.vodyaniAudio.onended = cleanup;
 }
 
 // Функция для случайных глитч-эффектов
@@ -414,6 +664,7 @@ window.resetIdleTimer = function() {
 }
 
 window.showIdleScreen = function() {
+        if (window.isVodyaniEventActive) return;
     const screen = document.getElementById('idle-screen');
     if(screen) {
         screen.style.display = 'flex';
@@ -439,7 +690,9 @@ window.makeDraggable = function(elmnt) {
         header.style.cursor = 'move';
     } else {
         // Если заголовка нет, тянем за сам элемент (аккуратно, может мешать кликам)
-        // elmnt.onmousedown = dragMouseDown; 
+         if (elmnt.id === 'movable-candle') {
+            elmnt.onmousedown = dragMouseDown;
+        } 
     }
 
     // Добавляем слушатель для сохранения размеров после изменения (resize)

@@ -133,6 +133,8 @@ window.skillDB = {
     "Чародей": [
         {
             name: "Магическая стрела",
+            unlockLevel: 1,
+            icon: "навыки/D3-Icon-Wizard-Magic-Missile.png",
             category: "Основное",
             runes: [
                 { name: "🔮 Базовая", dmg: 230, aoe: 1, desc: "230% урона." },
@@ -145,6 +147,8 @@ window.skillDB = {
         },
         {
             name: "Морозный луч",
+            unlockLevel: 2,
+            icon: "навыки/D3-Icon-Wizard-Ray-of-Frost.png",
             category: "Вспомогательное",
             runes: [
                 { name: "❄️ Базовая", dmg: 1240, aoe: 2.5, slow: 60, desc: "Луч, урон до 1240%, замедление 60%." },
@@ -157,6 +161,8 @@ window.skillDB = {
         },
         {
             name: "Магическая сфера",
+            unlockLevel: 5,
+            icon: "навыки/D3-Icon-Wizard-Arcane-Orb.png",
             category: "Вспомогательное",
             runes: [
                 { name: "🔮 Базовая", dmg: 435, aoe: 1.3, desc: "Взрыв 435% урона (радиус 15 ярд)." },
@@ -169,7 +175,9 @@ window.skillDB = {
         },
         {
             name: "Энергетический вихрь",
-            category: "Вспомогательное",
+            unlockLevel: 13,
+            icon: "навыки/D3-Icon-Wizard-Energy-Twister.png",
+            category: "Сила",
             runes: [
                 { name: "🔮 Базовая", dmg: 1525, aoe: 1.75, desc: "1525% урона за 6 сек на пути." },
                 { name: "❄️ Холодный ветер", dmg: 1525, aoe: 1.75, effInc: 40, desc: "Снижение затрат до 25 (Эфф. +40%)." },
@@ -181,6 +189,8 @@ window.skillDB = {
         },
         {
             name: "Шоковый разряд",
+            unlockLevel: 3,
+            icon: "навыки/D3-Icon-Wizard-Shock-Pulse.png",
             category: "Основное",
             runes: [
                 { name: "⚡ Базовая", dmg: 582, aoe: 1.75, desc: "3 разряда по 194% (582%)." },
@@ -193,6 +203,8 @@ window.skillDB = {
         },
         {
             name: "Кольцо льда",
+            unlockLevel: 4,
+            icon: "навыки/D3-Icon-Wizard-Frost-Nova.png",
             category: "Защита",
             runes: [
                 { name: "❄️ Базовая", stun: 2, aoe: 2, desc: "Заморозка на 2 сек (вокруг себя). Время восстановления 11 сек." },
@@ -205,6 +217,8 @@ window.skillDB = {
         },
         {
             name: "Алмазная кожа",
+            unlockLevel: 8,
+            icon: "навыки/D3-Icon-Wizard-Diamond-Skin.png",
             category: "Защита",
             runes: [
                 { name: "🔮 Базовая", heal: 40, noCdDiscount: true, desc: "Поглощает 40% HP (Щит). Время восстановления 15 сек." },
@@ -217,6 +231,8 @@ window.skillDB = {
         },
         {
             name: "Силовая волна",
+            unlockLevel: 9,
+            icon: "навыки/D3-Icon-Wizard-Wave-of-Force.png",
             category: "Сила",
             runes: [
                 { name: "🔮 Базовая", dmg: 390, aoe: 2, desc: "390% урона вокруг себя. Время восстановления 11 сек." },
@@ -229,6 +245,8 @@ window.skillDB = {
         },
         {
             name: "Замедление времени",
+            unlockLevel: 16,
+            icon: "навыки/D3-Icon-Wizard-Slow-Time.png",
             category: "Защита",
             runes: [
                 { name: "🔮 Базовая", slow: 60, aoe: 2.5, desc: "Купол: Замедление 60%. Время восстановления 15 сек." },
@@ -241,6 +259,8 @@ window.skillDB = {
         },
         {
             name: "Доспех бури",
+            unlockLevel: 17,
+            icon: "навыки/D3-Icon-Wizard-Storm-Armor.png",
             category: "Чары",
             runes: [
                 { name: "⚡ Базовая", dmg: 175, aoe: 2.5, buffPerm: true, desc: "175% урона периодически (В любое место)." },
@@ -253,6 +273,8 @@ window.skillDB = {
         },
         {
             name: "Призрачный клинок",
+            unlockLevel: 11,
+            icon: "навыки/D3-Icon-Wizard-Spectral-Blade.png",
             category: "Основное",
             runes: [
                 { name: "🔮 Базовая", dmg: 168, aoe: 1.75, desc: "168% урона перед собой (Сектор)." },
@@ -265,6 +287,8 @@ window.skillDB = {
         },
         {
             name: "Магический поток",
+            unlockLevel: 12,
+            icon: "навыки/D3-Icon-Wizard-Arcane-Torrent.png",
             category: "Вспомогательное",
             runes: [
                 { name: "🔮 Базовая", dmg: 1010, aoe: 2.5, desc: "Урон до 1010% (потоковый)." },
@@ -277,6 +301,8 @@ window.skillDB = {
         },
         {
             name: "Ледяной доспех",
+            unlockLevel: 14,
+            icon: "навыки/D3-Icon-Wizard-Ice-Armor.png",
             category: "Чары",
             runes: [
                 { name: "❄️ Базовая", buffDef: 14, buffPerm: true, slow: 60, stun: 3, aoe: 2, desc: "-12% урона + Замедл/Фриз атакующих (3 сек)." },
@@ -289,6 +315,8 @@ window.skillDB = {
         },
         {
             name: "Электрошок",
+            unlockLevel: 15,
+            icon: "навыки/D3-Icon-Wizard-Electrocute.png",
             category: "Основное",
             runes: [
                 { name: "⚡ Базовая", dmg: 138, aoe: 1.3, desc: "Цепь на 3 цели (138%)." },
@@ -301,6 +329,8 @@ window.skillDB = {
         },
         {
             name: "Энергетический взрыв",
+            unlockLevel: 19,
+            icon: "навыки/D3-Icon-Wizard-Explosive-Blast.png",
             category: "Мастерство",
             runes: [
                 { name: "🔮 Базовая", dmg: 945, aoe: 2, desc: "Взрыв вокруг себя через 1.5 сек (945%). Время восстановления 6 сек." },
@@ -313,6 +343,8 @@ window.skillDB = {
         },
         {
             name: "Магическое оружие",
+            unlockLevel: 20,
+            icon: "навыки/D3-Icon-Wizard-Magic-Weapon.png",
             category: "Чары",
             runes: [
                 { name: "🔮 Базовая", dmgAmp: 10, aoe: 1, buffPerm: true, desc: "+10% урона (Постоянно)." },
@@ -325,7 +357,9 @@ window.skillDB = {
         },
         {
             name: "Гидра",
-            category: "Мастерство",
+            unlockLevel: 21,
+            icon: "навыки/D3-Icon-Wizard-Hydra.png",
+            category: "Сила",
             runes: [
                 { name: "🔥 Базовая", dmg: 495, aoe: 1.45, desc: "3 головы по 165% (495%)." },
                 { name: "🔮 Магическая гидра", dmg: 615, aoe: 1.45, desc: "3 головы по 205% (615%)." },
@@ -337,6 +371,8 @@ window.skillDB = {
         },
         {
             name: "Расщепление",
+            unlockLevel: 21,
+            icon: "навыки/D3-Icon-Wizard-Disintegrate.png",
             category: "Вспомогательное",
             runes: [
                 { name: "🔮 Базовая", dmg: 890, aoe: 2.5, desc: "Луч, урон до 890%." },
@@ -349,6 +385,8 @@ window.skillDB = {
         },
         {
             name: "Фамилиар",
+            unlockLevel: 22,
+            icon: "навыки/D3-Icon-Wizard-Familiar.png",
             category: "Чары",
             runes: [
                 { name: "🔮 Базовая", dmg: 240, aoe: 1, desc: "Спутник, 240% урона." },
@@ -361,6 +399,8 @@ window.skillDB = {
         },
         {
             name: "Телепортация",
+            unlockLevel: 22,
+            icon: "навыки/D3-Icon-Wizard-Teleport.png",
             category: "Защита",
             runes: [
                 { name: "🔮 Базовая", customCost: 25, desc: "Телепорт до 50м. Время восстановления 11 сек." },
@@ -373,7 +413,9 @@ window.skillDB = {
         },
         {
             name: "Зеркальное отражение",
-            category: "Защита",
+            unlockLevel: 25,
+            icon: "навыки/D3-Icon-Wizard-Mirror-Image.png",
+            category: "Мастерство",
             runes: [
                 { name: "🔮 Базовая", customCost: 25, desc: "2 копии, провокация 1 сек, 10% урона. Время восстановления 15 сек." },
                 { name: "🔮 Плотные отражения", customCost: 25, desc: "200% HP копий. Время восстановления 15 сек." },
@@ -385,7 +427,9 @@ window.skillDB = {
         },
         {
             name: "Метеорит",
-            category: "Мастерство",
+            unlockLevel: 25,
+            icon: "навыки/D3-Icon-Wizard-Meteor.png",
+            category: "Сила",
             runes: [
                 { name: "🔥 Базовая", dmg: 975, aoe: 1.6, desc: "740% удар + 235% след (975%)." },
                 { name: "⚡ Грохот грома", dmg: 975, aoe: 1.6, desc: "Мгновенное падение (Молния)." },
@@ -397,7 +441,9 @@ window.skillDB = {
         },
         {
             name: "Снежная буря",
-            category: "Мастерство",
+            unlockLevel: 27,
+            icon: "навыки/D3-Icon-Wizard-Blizzard.png",
+            category: "Сила",
             runes: [
                 { name: "❄️ Базовая", dmg: 1075, aoe: 1.6, desc: "1075% урона (Холод) за 6 сек." },
                 { name: "⚡ Грозовой шторм", dmg: 1075, aoe: 1.6, dmgAmp: 15, elemSynergy: "⚡", desc: "1075% урона + 15% урона молнией (Синергия)." },
@@ -409,6 +455,8 @@ window.skillDB = {
         },
         {
             name: "Энергетический доспех",
+            unlockLevel: 28,
+            icon: "навыки/D3-Icon-Wizard-Energy-Armor.png",
             category: "Чары",
             runes: [
                 { name: "🔮 Базовая", buffDef: 35, defType: "armor", buffPerm: true, customCost: -4, desc: "Броня +35%. Макс. мана -20." },
@@ -421,6 +469,8 @@ window.skillDB = {
         },
         {
             name: "Архонт",
+            unlockLevel: 30,
+            icon: "навыки/D3-Icon-Wizard-Archon.png",
             category: "Мастерство",
             runes: [
                 { name: "🔮 Базовая", customCost: 180, customCostDesc: "Урон(30)+Защита(150)", buffDuration: 20, desc: "Архонт (20 сек). +150% урона, +150% Брони и Сопрот. Время восстановления 120 сек." },
@@ -433,6 +483,8 @@ window.skillDB = {
         },
         {
             name: "Черная дыра",
+            unlockLevel: 61,
+            icon: "навыки/D3-Icon-Wizard-Black-Hole.png",
             category: "Мастерство",
             runes: [
                 { name: "🔮 Базовая", dmg: 700, aoe: 1.6, desc: "700% урона за 2 сек. Стягивание. Время восстановления 12 сек." },
@@ -445,6 +497,8 @@ window.skillDB = {
         },
         {
             name: "Жажда энергии",
+            unlockLevel: 10,
+            icon: "навыки/D3-Icon-Wizard-Power-Hungry.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDmg: 30, buffPerm: true, desc: "+30% урона противникам дальше 30м." }
@@ -452,6 +506,8 @@ window.skillDB = {
         },
         {
             name: "Расплывчатый силуэт",
+            unlockLevel: 10,
+            icon: "навыки/D3-Icon-Wizard-Blur.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDef: 20, buffPerm: true, desc: "Уменьшает получаемый урон на 17% (Защита +20%)." }
@@ -459,6 +515,8 @@ window.skillDB = {
         },
         {
             name: "Ускоренное восстановление",
+            unlockLevel: 13,
+            icon: "навыки/D3-Icon-Wizard-Evocation.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", dmgAmp: 25, synergyCD: true, desc: "Время восстановления всех умений -20% (Эфф +25%). Выберите навык с Время восстановления." }
@@ -466,6 +524,8 @@ window.skillDB = {
         },
         {
             name: "Хрупкий разрушитель",
+            unlockLevel: 16,
+            icon: "навыки/D3-Icon-Wizard-Glass-Cannon.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDmg: 15, buffPerm: true, desc: "+15% урона, но -10% брони/сопрот." }
@@ -473,6 +533,8 @@ window.skillDB = {
         },
         {
             name: "Гениальность",
+            unlockLevel: 20,
+            icon: "навыки/D3-Icon-Wizard-Prodigy.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", resGain: 5, desc: "+5 маны за базовое заклинание." }
@@ -480,6 +542,8 @@ window.skillDB = {
         },
         {
             name: "Астральное присутствие",
+            unlockLevel: 24,
+            icon: "навыки/D3-Icon-Wizard-Astral-Presence.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 5.25, customCostDesc: "Мана +20% (4) + Реген 2.5% (1.25)", desc: "+20 маны, +2.5 реген маны." }
@@ -487,6 +551,8 @@ window.skillDB = {
         },
         {
             name: "Иллюзионист",
+            unlockLevel: 27,
+            icon: "навыки/D3-Icon-Wizard-Illusionist.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 16, customCostDesc: "Скорость 30% (6) + Сброс КД (10)", desc: "Сброс КД защиты при уроне. +30% скорость бега при касте." }
@@ -494,6 +560,8 @@ window.skillDB = {
         },
         {
             name: "Хладнокровие",
+            unlockLevel: 30,
+            icon: "навыки/D3-Icon-Wizard-Cold-Blooded.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDmg: 10, buffPerm: true, desc: "+10% урона по замороженным/окоченевшим." }
@@ -501,6 +569,8 @@ window.skillDB = {
         },
         {
             name: "Воспламенение",
+            unlockLevel: 35,
+            icon: "навыки/D3-Icon-Wizard-Conflagration.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 7.2, customCostDesc: "Крит 6% (~9% урона) [AOE]", desc: "+6% Крит шанс по горящим (экв. ~9% урона)." }
@@ -508,6 +578,8 @@ window.skillDB = {
         },
         {
             name: "Паралич",
+            unlockLevel: 37,
+            icon: "навыки/D3-Icon-Wizard-Paralysis.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 5, customCostDesc: "Стан 1.5с (15% шанс)", desc: "Урон молнией с шансом 15% оглушает на 1.5 сек." }
@@ -515,6 +587,8 @@ window.skillDB = {
         },
         {
             name: "Живительная защита",
+            unlockLevel: 40,
+            icon: "навыки/D3-Icon-Wizard-Galvanizing-Ward.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 45, customCostDesc: "Щит 60% (Живучесть)", desc: "Щит 60% HP, если не получать урон 5 сек." }
@@ -522,6 +596,8 @@ window.skillDB = {
         },
         {
             name: "Временной поток",
+            unlockLevel: 45,
+            icon: "навыки/D3-Icon-Wizard-Temporal-Flux.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 9.6, customCostDesc: "Замедление 80% [AOE]", desc: "Урон тайной магии замедляет на 80% (2 сек)." }
@@ -529,6 +605,8 @@ window.skillDB = {
         },
         {
             name: "Покорение",
+            unlockLevel: 50,
+            icon: "навыки/D3-Icon-Wizard-Dominance.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", heal: 20, desc: "Щит 2% HP за убийство (стак до 10 раз = 20%)." }
@@ -536,6 +614,8 @@ window.skillDB = {
         },
         {
             name: "Магический генератор",
+            unlockLevel: 55,
+            icon: "навыки/D3-Icon-Wizard-Arcane-Dynamo.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 12, customCostDesc: "Бурст урона (усредн.)", desc: "5 базовых атак -> +60% урона следующему заклинанию." }
@@ -543,6 +623,8 @@ window.skillDB = {
         },
         {
             name: "Нестабильная аномалия",
+            unlockLevel: 60,
+            icon: "навыки/D3-Icon-Wizard-Unstable-Anomaly.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 0, customCostDesc: "Вторая жизнь", desc: "Вторая жизнь (КД 60 сек). Бесплатно." }
@@ -550,6 +632,8 @@ window.skillDB = {
         },
         {
             name: "Несгибаемая воля",
+            unlockLevel: 64,
+            icon: "навыки/D3-Icon-Wizard-Unwavering-Will.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 42.5, customCostDesc: "Броня+Сопрот(37.5)+Урон(5)", desc: "Если стоять 1.5 сек: +20% Брони, +20% Сопрот, +10% урона." }
@@ -557,6 +641,8 @@ window.skillDB = {
         },
         {
             name: "Смелость",
+            unlockLevel: 66,
+            icon: "навыки/D3-Icon-Wizard-Audacity.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDmg: 30, buffPerm: true, desc: "+30% урона противникам в радиусе 15м." }
@@ -564,6 +650,8 @@ window.skillDB = {
         },
         {
             name: "Сила стихий",
+            unlockLevel: 68,
+            icon: "навыки/D3-Icon-Wizard-Elemental-Exposure.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDmg: 20, buffPerm: true, desc: "+5% урона за каждую стихию (макс 20%)." }
@@ -573,6 +661,8 @@ window.skillDB = {
     "Варвар": [
         {
             name: "Сокрушающий удар",
+            unlockLevel: 1,
+            icon: "навыки/D3-Icon-Barbarian-Bash.png",
             category: "Основное",
             runes: [
                 { name: "⚔️ Базовая", dmg: 320, aoe: 1, desc: "Накапливает 6 ярости. 320% урона." },
@@ -585,6 +675,8 @@ window.skillDB = {
         },
         {
             name: "Молот Древних",
+            unlockLevel: 2,
+            icon: "навыки/D3-Icon-Barbarian-Hammer-of-the-Ancients.png",
             category: "Вспомогательное",
             runes: [
                 { name: "⚔️ Базовая", dmg: 535, aoe: 1.3, buffDmg: 20, desc: "Затраты: 20 ярости. Урон 535%. +1% Крит за 5 ярости (ср. +20%)." },
@@ -597,6 +689,8 @@ window.skillDB = {
         },
         {
             name: "Рассекающий удар",
+            unlockLevel: 3,
+            icon: "навыки/D3-Icon-Barbarian-Cleave.png",
             category: "Основное",
             runes: [
                 { name: "⚔️ Базовая", dmg: 200, aoe: 1.75, desc: "Накапливает 6 ярости. Урон 200% по дуге." },
@@ -609,6 +703,8 @@ window.skillDB = {
         },
         {
             name: "Топот",
+            unlockLevel: 4,
+            icon: "навыки/D3-Icon-Barbarian-Ground-Stomp.png",
             category: "Защита",
             runes: [
                 { name: "⚔️ Базовая", stun: 4, aoe: 2, resGain: 15, resGainInstant: true, desc: "Стан 4 сек (14м). Восст. 15 ярости. КД 12 сек." },
@@ -621,6 +717,8 @@ window.skillDB = {
         },
         {
             name: "Рваные раны",
+            unlockLevel: 5,
+            icon: "навыки/D3-Icon-Barbarian-Rend.png",
             category: "Вспомогательное",
             runes: [
                 { name: "⚔️ Базовая", dmg: 1100, aoe: 2, desc: "Затраты: 20 ярости. 1100% урона за 5 сек (12м)." },
@@ -633,7 +731,9 @@ window.skillDB = {
         },
         {
             name: "Удар в прыжке",
-            category: "Сила",
+            unlockLevel: 8,
+            icon: "навыки/D3-Icon-Barbarian-Leap.png",
+            category: "Защита",
             runes: [
                 { name: "⚔️ Базовая", dmg: 180, aoe: 1.3, resGain: 15, resGainInstant: true, customCost: 25, customCostDesc: "Прыжок (Мобильность)", desc: "Прыжок. Урон 180% (8м). Восст. 15 ярости. КД 10 сек." },
                 { name: "🛡️ Железное соударение", dmg: 180, aoe: 1.3, resGain: 15, resGainInstant: true, customCost: 25, customCostDesc: "Прыжок (Мобильность)", buffDef: 150, defType: "armor", buffDuration: 4, desc: "+150% Брони на 4 сек после приземления." },
@@ -645,6 +745,8 @@ window.skillDB = {
         },
         {
             name: "Сверхсила",
+            unlockLevel: 9,
+            icon: "навыки/D3-Icon-Barbarian-Overpower.png",
             category: "Сила",
             runes: [
                 { name: "⚔️ Базовая", dmg: 380, aoe: 2, effInc: 26, desc: "380% урона вокруг. Крит снижает КД (ср. -2.5 сек)." },
@@ -657,6 +759,8 @@ window.skillDB = {
         },
         {
             name: "Бешенство",
+            unlockLevel: 11,
+            icon: "навыки/D3-Icon-Barbarian-Frenzy.png",
             category: "Основное",
             runes: [
                 { name: "⚔️ Базовая", dmg: 220, aoe: 1, effInc: 75, buffDuration: 4, desc: "Накапливает 4 ярости. С каждым ударом +15% Скор. атаки (до 75%) на 4 сек." },
@@ -669,6 +773,8 @@ window.skillDB = {
         },
         {
             name: "Сейсмический удар",
+            unlockLevel: 12,
+            icon: "навыки/D3-Icon-Barbarian-Seismic-Slam.png",
             category: "Вспомогательное",
             runes: [
                 { name: "⚔️ Базовая", dmg: 620, aoe: 2.5, desc: "Затраты: 30 ярости. 620% урона по сектору (50м)." },
@@ -681,6 +787,8 @@ window.skillDB = {
         },
         {
             name: "Отмщение",
+            unlockLevel: 13,
+            icon: "навыки/D3-Icon-Barbarian-Revenge.png",
             category: "Сила",
             runes: [
                 { name: "⚔️ Базовая", dmg: 300, aoe: 2, heal: 20, desc: "15% шанс при ударе. 300% урона. 4% HP за врага (ср. 20%)." },
@@ -693,6 +801,8 @@ window.skillDB = {
         },
         {
             name: "Угрожающий крик",
+            unlockLevel: 14,
+            icon: "навыки/D3-Icon-Barbarian-Threatening-Shout.png",
             category: "Тактика",
             runes: [
                 { name: "⚔️ Базовая", buffDef: 25, buffIsAoe: true, buffDuration: 15, resGain: 15, resGainInstant: true, desc: "Восст. 15 ярости. КД 10 сек. Враги (25м) наносят -20% урона (Защита +25%) на 15 сек." },
@@ -705,7 +815,9 @@ window.skillDB = {
         },
         {
             name: "Спринт",
-            category: "Тактика",
+            unlockLevel: 16,
+            icon: "навыки/D3-Icon-Barbarian-Sprint.png",
+            category: "Защита",
             runes: [
                 { name: "⚔️ Базовая", customCost: 6, customCostDesc: "Скорость 30%", buffDuration: 3, desc: "Затраты: 20 ярости. +30% скорости бега на 3 сек." },
                 { name: "⚔️ Приток крови", customCost: 6, customCostDesc: "Скорость 30%", buffDuration: 3, buffDef: 12, defType: "dodge", desc: "+30% скорости + 12% Уклонения." },
@@ -717,6 +829,8 @@ window.skillDB = {
         },
         {
             name: "Бросок оружия",
+            unlockLevel: 17,
+            icon: "навыки/D3-Icon-Barbarian-Weapon-Throw.png",
             category: "Основное",
             runes: [
                 { name: "⚔️ Базовая", dmg: 275, aoe: 1, resGain: 6, desc: "Накапливает 6 ярости. Бросок на 275% урона." },
@@ -729,7 +843,9 @@ window.skillDB = {
         },
         {
             name: "Землетрясение",
-            category: "Сила",
+            unlockLevel: 19,
+            icon: "навыки/D3-Icon-Barbarian-Earthquake.png",
+            category: "Мастерство",
             runes: [
                 { name: "🔥 Базовая", dmg: 4800, aoe: 2.6, desc: "Затраты: 25 ярости. 4800% урона за 8 сек (18м). КД 60 сек." },
                 { name: "🔥 Великаньи шаги", dmg: 4800, aoe: 2.6, dmg2: 3000, aoe2: 2, desc: "Создает очаги при ходьбе (20x300%, ср. 3000%)." },
@@ -741,6 +857,8 @@ window.skillDB = {
         },
         {
             name: "Вихрь",
+            unlockLevel: 20,
+            icon: "навыки/D3-Icon-Barbarian-Whirlwind.png",
             category: "Вспомогательное",
             runes: [
                 { name: "⚔️ Базовая", dmg: 340, aoe: 2, desc: "Затраты: 10 ярости. 340% урона. 100% скорость бега." },
@@ -753,6 +871,8 @@ window.skillDB = {
         },
         {
             name: "Яростный рывок",
+            unlockLevel: 21,
+            icon: "навыки/D3-Icon-Barbarian-Furious-Charge.png",
             category: "Сила",
             runes: [
                 { name: "⚔️ Базовая", dmg: 600, aoe: 1.5, resGain: 15, resGainInstant: true, stun: 0.5, customCost: 25, customCostDesc: "Рывок (Мобильность)", desc: "Рывок (600%). Отбрасывание. Восст. 15 ярости. 1 заряд (10 сек)." },
@@ -765,6 +885,8 @@ window.skillDB = {
         },
         {
             name: "Стойкость к боли",
+            unlockLevel: 22,
+            icon: "навыки/D3-Icon-Barbarian-Ignore-Pain.png",
             category: "Защита",
             runes: [
                 { name: "⚔️ Базовая", buffDef: 100, buffDuration: 5, customCost: 5, customCostDesc: "Иммунитет к контролю", desc: "-50% урона (Стойкость +100%) и Иммунитет к контролю на 5 сек. КД 30 сек." },
@@ -777,6 +899,8 @@ window.skillDB = {
         },
         {
             name: "Боевая ярость",
+            unlockLevel: 22,
+            icon: "навыки/D3-Icon-Barbarian-Battle-Rage.png",
             category: "Тактика",
             runes: [
                 { name: "⚔️ Базовая", buffDmg: 15, buffPerm: true, desc: "Затраты: 20 ярости. +10% урона и +3% крит шанс (экв. +15% урона). 120 сек." },
@@ -789,7 +913,9 @@ window.skillDB = {
         },
         {
             name: "Зов Древних",
-            category: "Сила",
+            unlockLevel: 25,
+            icon: "навыки/D3-Icon-Barbarian-Call-of-the-Ancients.png",
+            category: "Мастерство",
             runes: [
                 { name: "⚔️ Базовая", dmg: 270, aoe: 1, customCost: 100, customCostDesc: "Призыв (Ульта)", desc: "КД 120 сек. 3 Древних по 270% урона. 20 сек." },
                 { name: "🔥 Восстание Совета", dmg: 540, aoe: 1, customCost: 100, customCostDesc: "Призыв (Ульта)", desc: "Урон Древних увеличен до 540% (Огонь)." },
@@ -801,7 +927,9 @@ window.skillDB = {
         },
         {
             name: "Копье Древних",
-            category: "Сила",
+            unlockLevel: 26,
+            icon: "навыки/D3-Icon-Barbarian-Ancient-Spear.png",
+            category: "Вспомогательное",
             runes: [
                 { name: "⚔️ Базовая", dmg: 500, aoe: 2.5, desc: "Затраты: 25 ярости. 500% урона (Линия)." },
                 { name: "⚔️ Рунка", dmg: 500, aoe: 2.5, stun: 0.5, desc: "Отбрасывание врагов." },
@@ -813,6 +941,8 @@ window.skillDB = {
         },
         {
             name: "Воинственный клич",
+            unlockLevel: 28,
+            icon: "навыки/D3-Icon-Barbarian-War-Cry.png",
             category: "Тактика",
             runes: [
                 { name: "⚔️ Базовая", buffDef: 20, defType: "armor", buffIsAoe: true, buffPerm: true, resGain: 20, resGainInstant: true, desc: "Восст. 20 ярости. +20% Брони союзникам (120 сек)." },
@@ -825,7 +955,9 @@ window.skillDB = {
         },
         {
             name: "Гнев берсерка",
-            category: "Сила",
+            unlockLevel: 30,
+            icon: "навыки/D3-Icon-Barbarian-Wrath-of-the-Berserker.png",
+            category: "Мастерство",
             runes: [
                 { name: "🔥 Базовая", customCost: 100, customCostDesc: "Форма (Ульта)", buffDuration: 20, desc: "КД 120 сек. +10% Крит, +25% Скор. атаки, +20% Уклонение, +20% Бег." },
                 { name: "🔥 Арреатский вопль", customCost: 100, customCostDesc: "Форма (Ульта)", dmg: 3400, aoe: 2, desc: "При активации наносит 3400% урона врагам вокруг (15м)." },
@@ -837,6 +969,8 @@ window.skillDB = {
         },
         {
             name: "Лавина",
+            unlockLevel: 61,
+            icon: "навыки/D3-Icon-Barbarian-Avalanche.png",
             category: "Сила",
             runes: [
                 { name: "⚔️ Базовая", dmg: 2400, aoe: 2, desc: "2400% урона (Область). КД 30 сек. КД -1с за 25 ярости." },
@@ -849,6 +983,8 @@ window.skillDB = {
         },
         {
             name: "Кусок мяса",
+            unlockLevel: 10,
+            icon: "навыки/D3-Icon-Barbarian-Pound-of-Flesh.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 24, customCostDesc: "Реген(10%) + Скорость(20%)", desc: "Сферы здоровья дают +2% регена и +4% скорости (стак до 5 раз)." }
@@ -856,6 +992,8 @@ window.skillDB = {
         },
         {
             name: "Остервенение",
+            unlockLevel: 10,
+            icon: "навыки/D3-Icon-Barbarian-Ruthless.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDmg: 12, buffPerm: true, desc: "+40% урона противникам с <30% HP (Эфф. +12%)." }
@@ -863,6 +1001,8 @@ window.skillDB = {
         },
         {
             name: "Стальные нервы",
+            unlockLevel: 13,
+            icon: "навыки/D3-Icon-Barbarian-Nerves-of-Steel.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 0, customCostDesc: "Вторая жизнь", desc: "Вторая жизнь (КД 60 сек). Бесплатно." }
@@ -870,6 +1010,8 @@ window.skillDB = {
         },
         {
             name: "Мастерское владение оружием",
+            unlockLevel: 16,
+            icon: "навыки/D3-Icon-Barbarian-Weapons-Master.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDmg: 8, buffPerm: true, desc: "Бонус зависит от оружия (Урон/Крит/Скорость/Ярость)." }
@@ -877,6 +1019,8 @@ window.skillDB = {
         },
         {
             name: "Ободряющий пример",
+            unlockLevel: 20,
+            icon: "навыки/D3-Icon-Barbarian-Inspiring-Presence.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 6, customCostDesc: "Реген 3% в сек", desc: "Крики лечат 3% HP/сек (120 сек). Удваивает длительность криков." }
@@ -884,6 +1028,8 @@ window.skillDB = {
         },
         {
             name: "Ярость берсерка",
+            unlockLevel: 20,
+            icon: "навыки/D3-Icon-Barbarian-Berserker-Rage.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDmg: 25, buffPerm: true, desc: "+25% урона при полной ярости." }
@@ -891,6 +1037,8 @@ window.skillDB = {
         },
         {
             name: "Кровожадность",
+            unlockLevel: 24,
+            icon: "навыки/D3-Icon-Barbarian-Bloodthirst.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 8, customCostDesc: "Лечение за ярость", desc: "Лечение за потраченную ярость (966 за ед + бонус сфер)." }
@@ -898,6 +1046,8 @@ window.skillDB = {
         },
         {
             name: "Враждебность",
+            unlockLevel: 27,
+            icon: "навыки/D3-Icon-Barbarian-Animosity.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 5, customCostDesc: "Ярость +20 и Генерация", desc: "+10% генерации ярости. +20 к максимуму ярости." }
@@ -905,6 +1055,8 @@ window.skillDB = {
         },
         {
             name: "Суеверие",
+            unlockLevel: 30,
+            icon: "навыки/D3-Icon-Barbarian-Superstition.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDef: 20, defType: "res", buffPerm: true, desc: "-20% нефизического урона (Сопрот +20%). Генерация ярости при получении урона." }
@@ -912,6 +1064,8 @@ window.skillDB = {
         },
         {
             name: "Твердость",
+            unlockLevel: 30,
+            icon: "навыки/D3-Icon-Barbarian-Tough-as-Nails.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDef: 25, defType: "armor", buffPerm: true, desc: "+25% Брони. +100% урона от шипов." }
@@ -919,6 +1073,8 @@ window.skillDB = {
         },
         {
             name: "Неотвратимая кара",
+            unlockLevel: 35,
+            icon: "навыки/D3-Icon-Barbarian-No-Escape.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDmg: 30, buffPerm: true, desc: "+30% урона дальними атаками (Копье, Бросок, Сейсмический, Лавина)." }
@@ -926,6 +1082,8 @@ window.skillDB = {
         },
         {
             name: "Неутомимость",
+            unlockLevel: 40,
+            icon: "навыки/D3-Icon-Barbarian-Relentless.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 15, customCostDesc: "Защита 50% (<35% HP)", desc: "При HP < 35%: -50% урона, -50% затрат ярости, х2 лечение за ярость." }
@@ -933,6 +1091,8 @@ window.skillDB = {
         },
         {
             name: "Задира",
+            unlockLevel: 45,
+            icon: "навыки/D3-Icon-Barbarian-Brawler.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDmg: 20, buffPerm: true, desc: "+20% урона, если рядом 3 врага." }
@@ -940,6 +1100,8 @@ window.skillDB = {
         },
         {
             name: "Неудержимость",
+            unlockLevel: 50,
+            icon: "навыки/D3-Icon-Barbarian-Juggernaut.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 10, customCostDesc: "CC -50% + Лечение", desc: "-50% времени контроля. Шанс восстановить 20% HP при контроле." }
@@ -947,6 +1109,8 @@ window.skillDB = {
         },
         {
             name: "Беспощадность",
+            unlockLevel: 55,
+            icon: "навыки/D3-Icon-Barbarian-Unforgiving.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 3, customCostDesc: "Реген ярости", desc: "Ярость не падает. +2 ярости в секунду." }
@@ -954,6 +1118,8 @@ window.skillDB = {
         },
         {
             name: "Милость Бул-Катоса",
+            unlockLevel: 60,
+            icon: "навыки/D3-Icon-Barbarian-Boon-of-Bul-Kathos.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", dmgAmp: 33, synergyCD: true, desc: "Снижает КД: Землетрясение (-15с), Зов Древних (-30с), Гнев Берсерка (-30с)." }
@@ -961,6 +1127,8 @@ window.skillDB = {
         },
         {
             name: "Мощь земли",
+            unlockLevel: 64,
+            icon: "навыки/D3-Icon-Barbarian-Earthen-Might.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", resGain: 30, desc: "При использовании Лавины или Землетрясения +30 ярости." }
@@ -968,6 +1136,8 @@ window.skillDB = {
         },
         {
             name: "Нападение и защита",
+            unlockLevel: 66,
+            icon: "навыки/D3-Icon-Barbarian-Sword-and-Board.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDef: 43, defType: "armor", effInc: 25, desc: "Со щитом: -30% урона (Защита +43%) и -20% затрат ярости (Эфф. +25%)." }
@@ -975,6 +1145,8 @@ window.skillDB = {
         },
         {
             name: "Буйство",
+            unlockLevel: 68,
+            icon: "навыки/D3-Icon-Barbarian-Rampage.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDmg: 25, buffDef: 25, defType: "armor", desc: "+1% Силы за убийство (стак до 25). +25% Урона и Брони." }
@@ -985,6 +1157,8 @@ window.skillDB = {
     "Монах": [
         {
             name: "Кулаки грома",
+            unlockLevel: 1,
+            icon: "навыки/D3-Icon-Monk-Fists-of-Thunder.png",
             category: "Основное",
             runes: [
                 { name: "⚡ Базовая", dmg: 267, aoe: 1.2, desc: "Восст. 14 духа. Серия ударов (ср. 267%). 3-й удар бьет по площади." },
@@ -997,6 +1171,8 @@ window.skillDB = {
         },
         {
             name: "Хвост дракона",
+            unlockLevel: 2,
+            icon: "навыки/D3-Icon-Monk-Lashing-Tail-Kick.png",
             category: "Вспомогательное",
             runes: [
                 { name: "⚔️ Базовая", dmg: 755, aoe: 1.5, desc: "Удар с разворота (755%)." },
@@ -1009,6 +1185,8 @@ window.skillDB = {
         },
         {
             name: "Касание смерти",
+            unlockLevel: 3,
+            icon: "навыки/D3-Icon-Monk-Deadly-Reach.png",
             category: "Основное",
             runes: [
                 { name: "⚔️ Базовая", dmg: 150, aoe: 1.5, stun: 0.17, desc: "Восст. 12 духа. 150% урона. 3-й удар подбрасывает (50%)." },
@@ -1021,6 +1199,8 @@ window.skillDB = {
         },
         {
             name: "Ослепляющая вспышка",
+            unlockLevel: 4,
+            icon: "навыки/D3-Icon-Monk-Blinding-Flash.png",
             category: "Защита",
             runes: [
                 { name: "⚔️ Базовая", stun: 3, aoe: 2, desc: "Ослепление 3 сек (20м). Время восстановления 15 сек." },
@@ -1033,6 +1213,8 @@ window.skillDB = {
         },
         {
             name: "Стремительность урагана",
+            unlockLevel: 5,
+            icon: "навыки/D3-Icon-Monk-Tempest-Rush.png",
             category: "Вспомогательное",
             runes: [
                 { name: "⚔️ Базовая", dmg: 390, aoe: 1.3, desc: "Бег сквозь врагов (390%)." },
@@ -1045,6 +1227,8 @@ window.skillDB = {
         },
         {
             name: "Дыхание небес",
+            unlockLevel: 8,
+            icon: "навыки/D3-Icon-Monk-Breath-of-Heaven.png",
             category: "Защита",
             runes: [
                 { name: "🌟 Базовая", heal: 15, aoe: 2, desc: "Исцеление 15% HP (12м). Время восстановления 15 сек." },
@@ -1057,7 +1241,9 @@ window.skillDB = {
         },
         {
             name: "Мощный рывок",
-            category: "Вспомогательное",
+            unlockLevel: 9,
+            icon: "навыки/D3-Icon-Monk-Dashing-Strike.png",
+            category: "Сила",
             runes: [
                 { name: "⚔️ Базовая", dmg: 370, aoe: 1.5, customCost: 40, desc: "Рывок 50м (370%). 2 заряда. Время восстановления 8 сек." },
                 { name: "🌟 Путь упавшей звезды", dmg: 370, aoe: 1.5, customCost: 44, customCostDesc: "База (40) + Скорость (4)", desc: "370% урона. Скорость бега +20% на 4 сек. Время восстановления 8 сек." },
@@ -1069,6 +1255,8 @@ window.skillDB = {
         },
         {
             name: "Волна увечий",
+            unlockLevel: 11,
+            icon: "навыки/D3-Icon-Monk-Crippling-Wave.png",
             category: "Основное",
             runes: [
                 { name: "⚔️ Базовая", dmg: 155, aoe: 1.75, slow: 10, buffDef: 13, desc: "Восст. 12 духа. 155% урона. 3-й удар замедляет (30%) и снижает скор. атаки (20%)." },
@@ -1081,6 +1269,8 @@ window.skillDB = {
         },
         {
             name: "Волна Света",
+            unlockLevel: 12,
+            icon: "навыки/D3-Icon-Monk-Wave-of-Light.png",
             category: "Вспомогательное",
             runes: [
                 { name: "🌟 Базовая", dmg: 835, aoe: 2.5, desc: "Урон 835% (Свет)." },
@@ -1093,7 +1283,9 @@ window.skillDB = {
         },
         {
             name: "Взрывное касание",
-            category: "Вспомогательное",
+            unlockLevel: 13,
+            icon: "навыки/D3-Icon-Monk-Exploding-Palm.png",
+            category: "Сила",
             runes: [
                 { name: "⚔️ Базовая", dmg: 1200, aoe: 1, dmg2: 2770, aoe2: 1.3, desc: "Кровотечение 1200% за 9 сек. Взрыв при смерти 2770%." },
                 { name: "⚔️ Плоть немощна", dmg: 1200, aoe: 1, dmg2: 2770, aoe2: 1.3, dmgAmp: 15, buffDuration: 9, desc: "1200% за 9 сек + Взрыв 2770%. Враги получают +15% урона." },
@@ -1105,7 +1297,9 @@ window.skillDB = {
         },
         {
             name: "Ураганный удар",
-            category: "Сила",
+            unlockLevel: 14,
+            icon: "навыки/D3-Icon-Monk-Cyclone-Strike.png",
+            category: "Чары",
             runes: [
                 { name: "🌟 Базовая", dmg: 261, aoe: 2, stun: 1, desc: "Стяжка (24м, Стан 1с) + 261% урона (Свет)." },
                 { name: "⚡ Глаз бури", dmg: 261, aoe: 2, stun: 1, effInc: 92, desc: "Затраты снижены до 26 (Эфф. +92%). Стяжка (Стан 1с)." },
@@ -1117,6 +1311,8 @@ window.skillDB = {
         },
         {
             name: "Путь Сотни Кулаков",
+            unlockLevel: 15,
+            icon: "навыки/D3-Icon-Monk-Way-of-the-Hundred-Fists.png",
             category: "Основное",
             runes: [
                 { name: "⚔️ Базовая", dmg: 190, aoe: 1.3, desc: "Восст. 12 духа. Серия ударов (190%)." },
@@ -1129,6 +1325,8 @@ window.skillDB = {
         },
         {
             name: "Покой",
+            unlockLevel: 16,
+            icon: "навыки/D3-Icon-Monk-Serenity.png",
             category: "Защита",
             runes: [
                 { name: "🌟 Базовая", customCost: 20, customCostDesc: "Неуязвимость (3 сек)", desc: "Неуязвимость 3 сек. Время восстановления 16 сек." },
@@ -1141,7 +1339,9 @@ window.skillDB = {
         },
         {
             name: "Семь сторон света",
-            category: "Сила",
+            unlockLevel: 17,
+            icon: "навыки/D3-Icon-Monk-Seven-Sided-Strike.png",
+            category: "Чары",
             runes: [
                 { name: "⚔️ Базовая", dmg: 5677, aoe: 1.3, desc: "7 ударов по 5677% (всего). Время восстановления 30 сек." },
                 { name: "⚡ Внезапное нападение", dmg: 8285, aoe: 1.3, desc: "Телепорт. Урон увеличен до 8285% (Молния). Время восстановления 30 сек." },
@@ -1153,7 +1353,9 @@ window.skillDB = {
         },
         {
             name: "Мантра спасения",
-            category: "Чары",
+            unlockLevel: 19,
+            icon: "навыки/D3-Icon-Monk-Mantra-of-Salvation.png",
+            category: "Мастерство",
             runes: [
                 { name: "🌟 Базовая", buffDef: 20, defType: "res", buffPerm: true, buffIsAoe: true, desc: "Аура: +20% к сопротивлению всем стихиям (60м)." },
                 { name: "⚔️ Крепкий орешек", buffDef: 20, defType: "res", buffDef2: 20, defType2: "armor", buffPerm: true, buffIsAoe: true, desc: "Аура: +20% сопрот. + 20% брони (Всего 40%)." },
@@ -1165,6 +1367,8 @@ window.skillDB = {
         },
         {
             name: "Хлещущий ветер",
+            unlockLevel: 21,
+            icon: "навыки/D3-Icon-Monk-Sweeping-Wind.png",
             category: "Сила",
             runes: [
                 { name: "⚔️ Базовая", dmg: 315, aoe: 2, desc: "Вихрь 10м. 3 стака по 105% (315%)." },
@@ -1178,7 +1382,9 @@ window.skillDB = {
         },
         {
             name: "Мантра воздаяния",
-            category: "Чары",
+            unlockLevel: 21,
+            icon: "навыки/D3-Icon-Monk-Mantra-of-Retribution.png",
+            category: "Мастерство",
             runes: [
                 { name: "🌟 Базовая", dmg: 101, aoe: 2.5, buffIsAoe: true, buffPerm: true, desc: "Аура: Отражение 101% урона (Свет)." },
                 { name: "🔥 Расплата", dmg: 202, aoe: 2.5, buffIsAoe: true, buffPerm: true, desc: "Отражение увеличено до 202% (Огонь)." },
@@ -1190,6 +1396,8 @@ window.skillDB = {
         },
         {
             name: "Святая святых",
+            unlockLevel: 22,
+            icon: "навыки/D3-Icon-Monk-Inner-Sanctuary.png",
             category: "Защита",
             runes: [
                 { name: "🌟 Базовая", buffDef: 122, buffDuration: 6, buffIsAoe: true, desc: "Круг: -55% урона (Стойкость +122%) на 6 сек. Время восстановления 20 сек." },
@@ -1202,6 +1410,8 @@ window.skillDB = {
         },
         {
             name: "Таинственный союзник",
+            unlockLevel: 22,
+            icon: "навыки/D3-Icon-Monk-Mystic-Ally.png",
             category: "Чары",
             runes: [
                 { name: "⚔️ Базовая", passiveDmg: 130, buffDmg: 50, buffDuration: 10, desc: "Пассив: 130% урона. Актив: +50% урона союзнику (10 сек). Время восстановления 30 сек." },
@@ -1214,7 +1424,9 @@ window.skillDB = {
         },
         {
             name: "Мантра исцеления",
-            category: "Чары",
+            unlockLevel: 26,
+            icon: "навыки/D3-Icon-Monk-Mantra-of-Healing.png",
+            category: "Мастерство",
             runes: [
                 { name: "🌟 Базовая", heal: 15, buffIsAoe: true, customCost: 4, customCostDesc: "Пассив: Реген (2%)", desc: "Аура: Реген 2% HP/сек. Актив: Щит 15% HP (3 сек)." },
                 { name: "🌟 Поддержка", heal: 15, buffIsAoe: true, customCost: 8, customCostDesc: "Пассив: Реген (4%)", desc: "Аура: Реген увеличен до 4% HP/сек. Актив: Щит 15% HP." },
@@ -1226,7 +1438,9 @@ window.skillDB = {
         },
         {
             name: "Мантра осуждения",
-            category: "Чары",
+            unlockLevel: 30,
+            icon: "навыки/D3-Icon-Monk-Mantra-of-Conviction.png",
+            category: "Мастерство",
             runes: [
                 { name: "🌟 Базовая", dmgAmp: 8, aoe: 2.5, buffPerm: true, buffIsAoe: true, desc: "Аура: Враги получают +8% урона (Синергия). Актив: +16%." },
                 { name: "🌟 Благоговейный ужас", dmgAmp: 12, aoe: 2.5, buffPerm: true, buffIsAoe: true, desc: "Аура: Бонус урона увеличен до +12% (Синергия)." },
@@ -1238,7 +1452,9 @@ window.skillDB = {
         },
         {
             name: "Прозрение",
-            category: "Защита",
+            unlockLevel: 61,
+            icon: "навыки/D3-Icon-Monk-Epiphany.png",
+            category: "Чары",
             runes: [
                 { name: "🌟 Базовая", resGain: 300, buffDuration: 15, customCost: 20, customCostDesc: "Телепорт при ударе", desc: "Реген 20 духа/сек (Всего 300). Телепорт при ударе. Длительность 15 сек. КД 60 сек." },
                 { name: "🌟 Песчаная вуаль", resGain: 300, buffDuration: 15, customCost: 20, customCostDesc: "Телепорт при ударе", buffDef: 100, desc: "Реген 300 духа. Телепорт. -50% урона (Стойкость +100%)." },
@@ -1250,6 +1466,8 @@ window.skillDB = {
         },
         {
             name: "Решимость",
+            unlockLevel: 10,
+            icon: "навыки/D3-Icon-Monk-Resolve.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDef: 25, buffPerm: true, desc: "Уменьшает урон от задетых противников на 20% (Стойкость +25%)." }
@@ -1257,6 +1475,8 @@ window.skillDB = {
         },
         {
             name: "Легкий шаг",
+            unlockLevel: 10,
+            icon: "навыки/D3-Icon-Monk-Fleet-Footed.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 2, customCostDesc: "Скорость 10%", desc: "Скорость передвижения +10%." }
@@ -1264,6 +1484,8 @@ window.skillDB = {
         },
         {
             name: "Ликующая душа",
+            unlockLevel: 13,
+            icon: "навыки/D3-Icon-Monk-Exalted-Soul.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 4.8, customCostDesc: "Дух(50)+Реген(4)", desc: "Макс. дух +50, Реген духа +4/сек." }
@@ -1271,6 +1493,8 @@ window.skillDB = {
         },
         {
             name: "Перерождение",
+            unlockLevel: 16,
+            icon: "навыки/D3-Icon-Monk-Transcendence.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 4.8, customCostDesc: "Лечение за дух", desc: "Восполняет ~429 HP за ед. потраченного духа." }
@@ -1278,6 +1502,8 @@ window.skillDB = {
         },
         {
             name: "Песнопение",
+            unlockLevel: 20,
+            icon: "навыки/D3-Icon-Monk-Chant-of-Resonance.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 5.4, customCostDesc: "Мантры(-50%)+Реген(4)", desc: "Затраты на мантры -50%. Реген духа +4/сек (если есть мантра)." }
@@ -1285,6 +1511,8 @@ window.skillDB = {
         },
         {
             name: "Перехват инициативы",
+            unlockLevel: 20,
+            icon: "навыки/D3-Icon-Monk-Seize-the-Initiative.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 6, customCostDesc: "Скорость атаки 30%", desc: "+30% скорости атаки на 4 сек при ударе врага с >75% HP." }
@@ -1292,6 +1520,8 @@ window.skillDB = {
         },
         {
             name: "Путь стража",
+            unlockLevel: 24,
+            icon: "навыки/D3-Icon-Monk-The-Guardians-Path.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDef: 35, defType: "dodge", buffPerm: true, desc: "При парном оружии: +35% к уклонению. При двуручном: +15% к восстановлению духа." }
@@ -1299,6 +1529,8 @@ window.skillDB = {
         },
         {
             name: "Шестое чувство",
+            unlockLevel: 27,
+            icon: "навыки/D3-Icon-Monk-Sixth-Sense.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDef: 33, defType: "res", buffPerm: true, desc: "Получаемый нефизический урон уменьшается на 25% (Сопрот +33%)." }
@@ -1306,6 +1538,8 @@ window.skillDB = {
         },
         {
             name: "Твердая воля",
+            unlockLevel: 30,
+            icon: "навыки/D3-Icon-Monk-Determination.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 10, customCostDesc: "Урон +20%", desc: "+4% урона за каждого врага в радиусе 12м (до +20%)." }
@@ -1313,55 +1547,17 @@ window.skillDB = {
         },
         {
             name: "Безжалостный натиск",
+            unlockLevel: 30,
+            icon: "навыки/D3-Icon-Monk-Relentless-Assault.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 10, customCostDesc: "Урон +20%", desc: "+20% урона по ослепленным, замороженным или оглушенным." }
             ]
         },
         {
-            name: "Гармония",
-            category: "Пассивные",
-            runes: [
-                { name: "Пассивный эффект", buffDef: 25, defType: "res", buffPerm: true, desc: "40% от единичного сопротивления добавляется ко всем сопротивлениям (Примерно +25% Сопрот)." }
-            ]
-        },
-        {
-            name: "Комбинация ударов",
-            category: "Пассивные",
-            runes: [
-                { name: "Пассивный эффект", customCost: 5, customCostDesc: "Урон +10%", desc: "+10% урона на 3 сек при использовании генератора духа." }
-            ]
-        },
-        {
-            name: "Познание смерти",
-            category: "Пассивные",
-            runes: [
-                { name: "Пассивный эффект", customCost: 0, customCostDesc: "Вторая жизнь", desc: "При смертельном уроне: восст. 35% HP и Духа, иммунитет 2 сек. КД 60 сек." }
-            ]
-        },
-        {
-            name: "Единство",
-            category: "Пассивные",
-            runes: [
-                { name: "Пассивный эффект", customCost: 10, customCostDesc: "Урон +20%", desc: "+5% урона за союзника с мантрой (до 20%). Игрок платит полностью." }
-            ]
-        },
-        {
-            name: "Импульс",
-            category: "Пассивные",
-            runes: [
-                { name: "Пассивный эффект", customCost: 10, customCostDesc: "Урон +20%", desc: "+20% урона на 6 сек после перемещения на 25м (Постоянно)." }
-            ]
-        },
-        {
-            name: "Неземной ритм",
-            category: "Пассивные",
-            runes: [
-                { name: "Пассивный эффект", dmgAmp: 40, desc: "3-й удар генератора повышает урон следующего умения на 40% (Синергия)." }
-            ]
-        },
-        {
             name: "Светоч Итара",
+            unlockLevel: 35,
+            icon: "навыки/D3-Icon-Monk-Beacon-of-Ytar.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", dmgAmp: 25, synergyCD: true, desc: "Время восстановления всех умений -20% (Эфф +25%). Выберите навык с КД." }
@@ -1369,14 +1565,72 @@ window.skillDB = {
         },
         {
             name: "Стремительность",
+            unlockLevel: 40,
+            icon: "навыки/D3-Icon-Monk-Alacrity.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 8, customCostDesc: "Скор. атаки генераторов", desc: "Скорость атаки восстанавливающих дух умений +15%." }
+            ]
+        },
+        {
+            name: "Гармония",
+            unlockLevel: 45,
+            icon: "навыки/D3-Icon-Monk-Harmony.png",
+            category: "Пассивные",
+            runes: [
+                { name: "Пассивный эффект", buffDef: 25, defType: "res", buffPerm: true, desc: "40% от единичного сопротивления добавляется ко всем сопротивлениям (Примерно +25% Сопрот)." }
+            ]
+        },
+        {
+            name: "Комбинация ударов",
+            unlockLevel: 50,
+            icon: "навыки/D3-Icon-Monk-Combination-Strike.png",
+            category: "Пассивные",
+            runes: [
+                { name: "Пассивный эффект", customCost: 5, customCostDesc: "Урон +10%", desc: "+10% урона на 3 сек при использовании генератора духа." }
+            ]
+        },
+        {
+            name: "Познание смерти",
+            unlockLevel: 58,
+            icon: "навыки/D3-Icon-Monk-Near-Death-Experience.png",
+            category: "Пассивные",
+            runes: [
+                { name: "Пассивный эффект", customCost: 0, customCostDesc: "Вторая жизнь", desc: "При смертельном уроне: восст. 35% HP и Духа, иммунитет 2 сек. КД 60 сек." }
+            ]
+        },
+        {
+            name: "Единство",
+            unlockLevel: 64,
+            icon: "навыки/D3-Icon-Monk-Unity.png",
+            category: "Пассивные",
+            runes: [
+                { name: "Пассивный эффект", customCost: 10, customCostDesc: "Урон +20%", desc: "+5% урона за союзника с мантрой (до 20%). Игрок платит полностью." }
+            ]
+        },
+        {
+            name: "Импульс",
+            unlockLevel: 66,
+            icon: "навыки/D3-Icon-Monk-Momentum.png",
+            category: "Пассивные",
+            runes: [
+                { name: "Пассивный эффект", customCost: 10, customCostDesc: "Урон +20%", desc: "+20% урона на 6 сек после перемещения на 25м (Постоянно)." }
+            ]
+        },
+        {
+            name: "Неземной ритм",
+            unlockLevel: 68,
+            icon: "навыки/D3-Icon-Monk-Mythic-Rhythm.png",
+            category: "Пассивные",
+            runes: [
+                { name: "Пассивный эффект", dmgAmp: 40, desc: "3-й удар генератора повышает урон следующего умения на 40% (Синергия)." }
             ]
         }
     ],
     "Колдун": [{
             name: "Отравленный дротик",
+            unlockLevel: 1,
+            icon: "навыки/D3-Icon-Witch-Doctor-Poison-Dart.png",
             category: "Основное",
             runes: [
                 { name: "💧 Базовая", dmg: 185, dmg2: 40, aoe: 1, desc: "Мгновенно 185% урона + 40% урона от яда за 2 сек. Не требует маны." },
@@ -1389,6 +1643,8 @@ window.skillDB = {
         },
         {
             name: "Огненная бомба",
+            unlockLevel: 21,
+            icon: "навыки/D3-Icon-Witch-Doctor-Firebomb.png",
             category: "Основное",
             runes: [
                 { name: "🔥 Базовая", dmg: 155, aoe: 1.3, desc: "Взрыв 155% (8м). Не требует маны." },
@@ -1401,7 +1657,9 @@ window.skillDB = {
         },
         {
             name: "Объятия смерти",
-            category: "Мастерство",
+            unlockLevel: 2,
+            icon: "навыки/D3-Icon-Witch-Doctor-Grasp-of-the-Dead.png",
+            category: "Вспомогательное",
             runes: [
                 { name: "⚔️ Базовая", dmg: 760, aoe: 2, slow: 60, desc: "Затраты: 150 маны. КД 8 сек. Замедляет на 60% и наносит 760% урона за 8 сек." },
                 { name: "❄️ Мертвая хватка", dmg: 760, aoe: 2, slow: 80, effInc: 100, desc: "Замедляет на 80%. Не требует затрат маны. 760% урона за 8 сек (Холод)." },
@@ -1413,6 +1671,8 @@ window.skillDB = {
         },
         {
             name: "Трупные пауки",
+            unlockLevel: 3,
+            icon: "навыки/D3-Icon-Witch-Doctor-Corpse-Spiders.png",
             category: "Основное",
             runes: [
                 { name: "⚔️ Базовая", dmg: 576, aoe: 1.3, desc: "4 паука (576% урона). Не требует маны." },
@@ -1425,6 +1685,8 @@ window.skillDB = {
         },
         {
             name: "Призыв псов-зомби",
+            unlockLevel: 4,
+            icon: "навыки/D3-Icon-Witch-Doctor-Summon-Zombie-Dogs.png",
             category: "Защита",
             runes: [
                 { name: "⚔️ Базовая", dmg: 360, aoe: 1.3, noCdDiscount: true, desc: "3 пса по 120% урона (360%). КД 45 сек (не снижает цену)." },
@@ -1437,6 +1699,8 @@ window.skillDB = {
         },
         {
             name: "Огненные нетопыри",
+            unlockLevel: 5,
+            icon: "навыки/D3-Icon-Witch-Doctor-Firebats.png",
             category: "Вспомогательное",
             runes: [
                 { name: "🔥 Базовая", dmg: 475, aoe: 1.75, desc: "Затраты: 125 маны. 475% урона перед собой." },
@@ -1449,6 +1713,8 @@ window.skillDB = {
         },
         {
             name: "Ужас",
+            unlockLevel: 8,
+            icon: "навыки/D3-Icon-Witch-Doctor-Horrify.png",
             category: "Защита",
             runes: [
                 { name: "⚔️ Базовая", stun: 3, aoe: 2, desc: "КД 10 сек. Страх и обездвиживание на 3 сек (18м)." },
@@ -1461,7 +1727,9 @@ window.skillDB = {
         },
         {
             name: "Жатва душ",
-            category: "Мастерство",
+            unlockLevel: 9,
+            icon: "навыки/D3-Icon-Witch-Doctor-Soul-Harvest.png",
+            category: "Ужас",
             runes: [
                 { name: "🔮 Базовая", buffDmg: 75, buffPerm: true, desc: "КД 12 сек. +3% Инт * 5 врагов * 5 стаков = +75% Интеллекта. 30 сек." },
                 { name: "🔮 Я пожру твою душу", buffDmg: 75, buffPerm: true, customCost: 5, customCostDesc: "Макс. мана +25%", resGain: 188, resGainInstant: true, desc: "+75% Инт. Восст. 25% маны (188) и +25% Макс. маны." },
@@ -1473,6 +1741,8 @@ window.skillDB = {
         },
         {
             name: "Нашествие жаб",
+            unlockLevel: 11,
+            icon: "навыки/D3-Icon-Witch-Doctor-Plague-of-Toads.png",
             category: "Основное",
             runes: [
                 { name: "💧 Базовая", dmg: 190, aoe: 1.5, desc: "Выпускает жаб (190% урона ядом)." },
@@ -1485,6 +1755,8 @@ window.skillDB = {
         },
         {
             name: "Мстительный дух",
+            unlockLevel: 12,
+            icon: "навыки/D3-Icon-Witch-Doctor-Haunt.png",
             category: "Вспомогательное",
             runes: [
                 { name: "❄️ Базовая", dmg: 4000, aoe: 1, desc: "4000% урона (Холод) за 12 сек. Переходит на другую цель при смерти." },
@@ -1497,7 +1769,9 @@ window.skillDB = {
         },
         {
             name: "Жертвенный обряд",
-            category: "Мастерство",
+            unlockLevel: 13,
+            icon: "навыки/D3-Icon-Witch-Doctor-Sacrifice.png",
+            category: "Ужас",
             runes: [
                 { name: "⚔️ Базовая", dmg: 1090, aoe: 2, desc: "Взрывает пса-зомби: 1090% урона (Физ) в радиусе 12м." },
                 { name: "⚔️ Черная кровь", dmg: 1090, aoe: 2, stun: 3, desc: "1090% урона. Оглушение 3 сек." },
@@ -1509,7 +1783,9 @@ window.skillDB = {
         },
         {
             name: "Призрачный шквал",
-            category: "Вспомогательное",
+            unlockLevel: 17,
+            icon: "навыки/D3-Icon-Witch-Doctor-Spirit-Barrage.png",
+            category: "Некроз",
             runes: [
                 { name: "❄️ Базовая", dmg: 600, aoe: 1, desc: "Затраты: 100 маны. 4 заряда по 150% (600% Холод)." },
                 { name: "🔮 Воля духов", dmg: 600, aoe: 1, resGain: 12, desc: "600% урона. Восст. 12 маны за попадание." },
@@ -1521,7 +1797,9 @@ window.skillDB = {
         },
         {
             name: "Громадень",
-            category: "Защита",
+            unlockLevel: 19,
+            icon: "навыки/D3-Icon-Witch-Doctor-Gargantuan.png",
+            category: "Мастерство",
             runes: [
                 { name: "⚔️ Базовая", dmg: 450, aoe: 1.3, noCdDiscount: true, desc: "КД 60 сек. Питомец: 450% урона (Физ)." },
                 { name: "❄️ Здоровяк", dmg: 585, aoe: 2, noCdDiscount: true, desc: "Урон 585% (Холод). Рассекающий удар (AoE)." },
@@ -1533,7 +1811,9 @@ window.skillDB = {
         },
         {
             name: "Зомби-берсерк",
-            category: "Вспомогательное",
+            unlockLevel: 14,
+            icon: "навыки/D3-Icon-Witch-Doctor-Zombie-Charger.png",
+            category: "Некроз",
             runes: [
                 { name: "💧 Базовая", dmg: 560, aoe: 1.5, desc: "Затраты: 150 маны. 560% урона ядом по пути." },
                 { name: "⚔️ Башня из зомби", dmg: 880, aoe: 1.5, desc: "Урон увеличен до 880% (Физический)." },
@@ -1545,6 +1825,8 @@ window.skillDB = {
         },
         {
             name: "Рой саранчи",
+            unlockLevel: 21,
+            icon: "навыки/D3-Icon-Witch-Doctor-Locust-Swarm.png",
             category: "Вспомогательное",
             runes: [
                 { name: "💧 Базовая", dmg: 1040, aoe: 2, desc: "Затраты: 300 маны. 1040% урона (Яд) за 8 сек. Перелетает." },
@@ -1557,7 +1839,9 @@ window.skillDB = {
         },
         {
             name: "Сглаз",
-            category: "Вспомогательное",
+            unlockLevel: 22,
+            icon: "навыки/D3-Icon-Witch-Doctor-Hex.png",
+            category: "Защита",
             runes: [
                 { name: "⚔️ Базовая", stun: 12, aoe: 2, desc: "КД 15 сек. Шаман превращает врагов в куриц (Контроль 12с)." },
                 { name: "⚔️ Оберегающая магия", stun: 12, aoe: 2, heal: 10, desc: "Шаман лечит союзников (10% HP)." },
@@ -1569,7 +1853,9 @@ window.skillDB = {
         },
         {
             name: "Едкое облако",
-            category: "Мастерство",
+            unlockLevel: 22,
+            icon: "навыки/D3-Icon-Witch-Doctor-Acid-Cloud.png",
+            category: "Некроз",
             runes: [
                 { name: "💧 Базовая", dmg: 300, aoe: 1.6, dmg2: 360, aoe2: 1.6, desc: "Затраты: 175 маны. 300% сразу + 360% за 3 сек (Яд)." },
                 { name: "💧 Едкий дождь", dmg: 300, aoe: 2.6, dmg2: 360, aoe2: 2.6, desc: "Радиус увеличен до 24м (Область х2.6)." },
@@ -1581,7 +1867,9 @@ window.skillDB = {
         },
         {
             name: "Всеобщее помешательство",
-            category: "Мастерство",
+            unlockLevel: 22,
+            icon: "навыки/D3-Icon-Witch-Doctor-Mass-Confusion.png",
+            category: "Ужас",
             runes: [
                 { name: "⚔️ Базовая", stun: 12, aoe: 2, desc: "КД 60 сек. Очаровывает врагов на 12 сек." },
                 { name: "⚔️ Нестабильная реальность", stun: 12, aoe: 2, effInc: 100, desc: "Время восстановления уменьшено до 30 сек (Эфф. +100%)." },
@@ -1593,6 +1881,8 @@ window.skillDB = {
         },
         {
             name: "Большое страшное вуду",
+            unlockLevel: 25,
+            icon: "навыки/D3-Icon-Witch-Doctor-Big-Bad-Voodoo.png",
             category: "Мастерство",
             runes: [
                 { name: "⚔️ Базовая", buffDmg: 15, buffDuration: 20, buffIsAoe: true, customCost: 6, customCostDesc: "Скорость 15%", desc: "КД 120 сек. +15% Скор. атаки и бега (20 сек)." },
@@ -1605,6 +1895,8 @@ window.skillDB = {
         },
         {
             name: "Поступь духа",
+            unlockLevel: 16,
+            icon: "навыки/D3-Icon-Witch-Doctor-Spirit-Walk.png",
             category: "Защита",
             runes: [
                 { name: "⚔️ Базовая", customCost: 20, customCostDesc: "Неуязвимость (2 сек)", desc: "КД 10 сек. Неуязвимость и проход сквозь врагов на 2 сек." },
@@ -1617,7 +1909,9 @@ window.skillDB = {
         },
         {
             name: "Стена смерти",
-            category: "Мастерство",
+            unlockLevel: 28,
+            icon: "навыки/D3-Icon-Witch-Doctor-Wall-of-Death.png",
+            category: "Некроз",
             runes: [
                 { name: "⚔️ Базовая", dmg: 1200, aoe: 2, desc: "КД 8 сек. 1200% урона за 6 сек (Физ). Стена зомби." },
                 { name: "💧 Кольцо яда", dmg: 1200, aoe: 2, desc: "1200% урона за 8 сек (Яд). Кольцо." },
@@ -1629,6 +1923,8 @@ window.skillDB = {
         },
         {
             name: "Армия фетишей",
+            unlockLevel: 30,
+            icon: "навыки/D3-Icon-Witch-Doctor-Fetish-Army.png",
             category: "Мастерство",
             runes: [
                 { name: "⚔️ Базовая", dmg: 9000, aoe: 1.3, desc: "КД 120 сек. 5 фетишей x 180% x 10 ударов = 9000%." },
@@ -1641,6 +1937,8 @@ window.skillDB = {
         },
         {
             name: "Пираньи",
+            unlockLevel: 61,
+            icon: "навыки/D3-Icon-Witch-Doctor-Piranhas.png",
             category: "Мастерство",
             runes: [
                 { name: "💧 Базовая", dmg: 400, aoe: 2, dmgAmp: 15, desc: "КД 8 сек. 400% урона (Яд) за 8 сек. Враги получают +15% урона." },
@@ -1653,6 +1951,8 @@ window.skillDB = {
         },
         {
             name: "Первобытная стойкость",
+            unlockLevel: 10,
+            icon: "навыки/D3-Icon-Witch-Doctor-Jungle-Fortitude.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDef: 18, defType: "res", buffPerm: true, desc: "Уменьшает получаемый урон на 15% (Стойкость +18%). Действует на питомцев." }
@@ -1660,6 +1960,8 @@ window.skillDB = {
         },
         {
             name: "Круг жизни",
+            unlockLevel: 10,
+            icon: "навыки/D3-Icon-Witch-Doctor-Circle-of-Life.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 5, customCostDesc: "Призыв пса (Шанс)", desc: "15% шанс призвать пса-зомби при смерти врага (20м)." }
@@ -1667,6 +1969,8 @@ window.skillDB = {
         },
         {
             name: "Близость к духам",
+            unlockLevel: 13,
+            icon: "навыки/D3-Icon-Witch-Doctor-Spiritual-Attunement.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 3, customCostDesc: "Мана +10% и Реген", desc: "Макс. мана +10%. Реген маны +2% в сек." }
@@ -1674,6 +1978,8 @@ window.skillDB = {
         },
         {
             name: "Жуткая трапеза",
+            unlockLevel: 16,
+            icon: "навыки/D3-Icon-Witch-Doctor-Gruesome-Feast.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 12, customCostDesc: "Урон +50% (Сферы)", desc: "Сферы здоровья дают +10% Интеллекта (до 5 стаков = +50%) и 10% маны." }
@@ -1681,6 +1987,8 @@ window.skillDB = {
         },
         {
             name: "Кровавый ритуал",
+            unlockLevel: 20,
+            icon: "навыки/D3-Icon-Witch-Doctor-Blood-Ritual.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 6, customCostDesc: "Реген 1% + Экон. маны", desc: "Реген 1% HP/сек. 20% затрат маны оплачивается здоровьем." }
@@ -1688,6 +1996,8 @@ window.skillDB = {
         },
         {
             name: "Опасный яд",
+            unlockLevel: 20,
+            icon: "навыки/D3-Icon-Witch-Doctor-Bad-Medicine.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDef: 33, buffIsAoe: true, desc: "Урон ядом снижает урон врагов на 25% (Стойкость +33%)." }
@@ -1695,6 +2005,8 @@ window.skillDB = {
         },
         {
             name: "Хозяин зомби",
+            unlockLevel: 24,
+            icon: "навыки/D3-Icon-Witch-Doctor-Zombie-Handler.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 11, customCostDesc: "HP +20% и +1 Пес", desc: "+20% здоровья герою и питомцам. +1 Пес-зомби." }
@@ -1702,6 +2014,8 @@ window.skillDB = {
         },
         {
             name: "Шаг за грань",
+            unlockLevel: 27,
+            icon: "навыки/D3-Icon-Witch-Doctor-Pierce-the-Veil.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDmg: 20, buffPerm: true, desc: "+20% урона. Затраты маны +30%." }
@@ -1709,6 +2023,8 @@ window.skillDB = {
         },
         {
             name: "Вместилище духов",
+            unlockLevel: 30,
+            icon: "навыки/D3-Icon-Witch-Doctor-Spirit-Vessel.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 0, customCostDesc: "Вторая жизнь", desc: "Вторая жизнь (КД 60 сек). Бесплатно." }
@@ -1716,6 +2032,8 @@ window.skillDB = {
         },
         {
             name: "Льстивые фетиши",
+            unlockLevel: 30,
+            icon: "навыки/D3-Icon-Witch-Doctor-Fetish-Sycophants.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 15, customCostDesc: "Призыв фетишей", desc: "15% шанс призвать фетиша на 60 сек при попадании." }
@@ -1723,6 +2041,8 @@ window.skillDB = {
         },
         {
             name: "Беспокойные духи",
+            unlockLevel: 36,
+            icon: "навыки/D3-Icon-Witch-Doctor-Rush-of-Essence.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 6, customCostDesc: "Восст. маны (Духи)", desc: "Заклинания духов восстанавливают 100 маны за 10 сек." }
@@ -1730,6 +2050,8 @@ window.skillDB = {
         },
         {
             name: "Поиски прозрения",
+            unlockLevel: 40,
+            icon: "навыки/D3-Icon-Witch-Doctor-Vision-Quest.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 4, customCostDesc: "Реген маны +40%", desc: "+40% к восполнению маны при использовании основных умений." }
@@ -1737,6 +2059,8 @@ window.skillDB = {
         },
         {
             name: "Рьяная преданность",
+            unlockLevel: 45,
+            icon: "навыки/D3-Icon-Witch-Doctor-Fierce-Loyalty.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 6, customCostDesc: "Скорость +15% и +1 Пес", desc: "+15% скорости (30% вне боя) при наличии питомцев. +1 Пес-зомби." }
@@ -1744,6 +2068,8 @@ window.skillDB = {
         },
         {
             name: "Несправедливая смерть",
+            unlockLevel: 50,
+            icon: "навыки/D3-Icon-Witch-Doctor-Grave-Injustice.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 15, customCostDesc: "КД -1с и Реген за убийство", desc: "Убийство врага (20м): -1 сек КД, +1% HP и Маны." }
@@ -1751,6 +2077,8 @@ window.skillDB = {
         },
         {
             name: "Племенной обряд",
+            unlockLevel: 55,
+            icon: "навыки/D3-Icon-Witch-Doctor-Tribal-Rites.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 8, customCostDesc: "КД -25% (Ульта)", desc: "-25% времени восстановления для Сглаза, Громадня, Фетишей, Псов, Вуду и Помешательства." }
@@ -1758,6 +2086,8 @@ window.skillDB = {
         },
         {
             name: "Ритуал доверия",
+            unlockLevel: 60,
+            icon: "навыки/D3-Icon-Witch-Doctor-Confidence-Ritual.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDmg: 25, buffPerm: true, desc: "+25% урона противникам в радиусе 20м." }
@@ -1765,6 +2095,8 @@ window.skillDB = {
         },
         {
             name: "Медленная смерть",
+            unlockLevel: 64,
+            icon: "навыки/D3-Icon-Witch-Doctor-Creeping-Death.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 10, customCostDesc: "Вечные DoT", desc: "Эффекты урона со временем действуют почти бесконечно." }
@@ -1772,6 +2104,8 @@ window.skillDB = {
         },
         {
             name: "Болотная гармония",
+            unlockLevel: 66,
+            icon: "навыки/D3-Icon-Witch-Doctor-Swampland-Attunement.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 12, customCostDesc: "Сопрот за врагов", desc: "+120 к сопротивлениям за каждого врага в радиусе 20м." }
@@ -1779,6 +2113,8 @@ window.skillDB = {
         },
         {
             name: "Полуночный пир",
+            unlockLevel: 68,
+            icon: "навыки/D3-Icon-Witch-Doctor-Midnight-Feast.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 18, customCostDesc: "Урон питомцев +50% и +1 Пес", desc: "+50% урона Псам и Громадню. +1 Пес-зомби." }
@@ -1788,6 +2124,8 @@ window.skillDB = {
     "Крестоносец": [
         {
             name: "Наказание",
+            unlockLevel: 1,
+            icon: "навыки/D3-Icon-Crusader-Punish.png",
             category: "Основное",
             runes: [
                 { name: "⚔️ Базовая", dmg: 335, aoe: 1, customCost: 4, customCostDesc: "Блок +15% (Неуязв.)", buffDuration: 5, desc: "335% урона. +15% Блок на 5 сек." },
@@ -1800,6 +2138,8 @@ window.skillDB = {
         },
         {
             name: "Удар щитом",
+            unlockLevel: 2,
+            icon: "навыки/D3-Icon-Crusader-Shield-Bash.png",
             category: "Вспомогательное",
             runes: [
                 { name: "🌟 Базовая", dmg: 700, blockDmg: 300, aoe: 1.3, desc: "Затраты: 30 гнева. 700% + 300% Шанса Блока." },
@@ -1812,6 +2152,8 @@ window.skillDB = {
         },
         {
             name: "Широкий замах",
+            unlockLevel: 5,
+            icon: "навыки/D3-Icon-Crusader-Sweep-Attack.png",
             category: "Вспомогательное",
             runes: [
                 { name: "⚔️ Базовая", dmg: 480, aoe: 1.75, desc: "Затраты: 20 гнева. 480% урона перед собой (18м)." },
@@ -1824,6 +2166,8 @@ window.skillDB = {
         },
         {
             name: "Удар сплеча",
+            unlockLevel: 3,
+            icon: "навыки/D3-Icon-Crusader-Slash.png",
             category: "Основное",
             runes: [
                 { name: "🔥 Базовая", dmg: 230, aoe: 1.75, desc: "Накапливает 5 гнева. 230% урона перед собой." },
@@ -1836,6 +2180,8 @@ window.skillDB = {
         },
         {
             name: "Сияющий щит",
+            unlockLevel: 4,
+            icon: "навыки/D3-Icon-Crusader-Shield-Glare.png",
             category: "Защита",
             runes: [
                 { name: "🌟 Базовая", stun: 4, aoe: 2.5, desc: "КД 12 сек. Ослепление 4 сек (30м)." },
@@ -1848,6 +2194,8 @@ window.skillDB = {
         },
         {
             name: "Железная кожа",
+            unlockLevel: 8,
+            icon: "навыки/D3-Icon-Crusader-Iron-Skin.png",
             category: "Защита",
             runes: [
                 { name: "⚔️ Базовая", buffDef: 100, buffDuration: 4, desc: "КД 30 сек. Поглощает 50% урона (Стойкость +100%)." },
@@ -1860,6 +2208,8 @@ window.skillDB = {
         },
         {
             name: "Насмешка",
+            unlockLevel: 9,
+            icon: "навыки/D3-Icon-Crusader-Provoke.png",
             category: "Тактика",
             runes: [
                 { name: "⚔️ Базовая", resGain: 55, resGainInstant: true, desc: "КД 20 сек. Восст. 30 гнева + 5 за врага (ср. 55). Провокация 4 сек." },
@@ -1872,6 +2222,8 @@ window.skillDB = {
         },
         {
             name: "Кара",
+            unlockLevel: 11,
+            icon: "навыки/D3-Icon-Crusader-Smite.png",
             category: "Основное",
             runes: [
                 { name: "🌟 Базовая", dmg: 175, aoe: 1, dmg2: 150, aoe2: 1.3, desc: "Накапливает 5 гнева. 175% + Цепь 150% по 3 врагам." },
@@ -1884,6 +2236,8 @@ window.skillDB = {
         },
         {
             name: "Освященный молот",
+            unlockLevel: 12,
+            icon: "навыки/D3-Icon-Crusader-Blessed-Hammer.png",
             category: "Вспомогательное",
             runes: [
                 { name: "🌟 Базовая", dmg: 320, aoe: 1.75, desc: "Затраты: 10 гнева. Молот летает по спирали (320%)." },
@@ -1896,6 +2250,8 @@ window.skillDB = {
         },
         {
             name: "Скакун",
+            unlockLevel: 13,
+            icon: "навыки/D3-Icon-Crusader-Steed-Charge.png",
             category: "Тактика",
             runes: [
                 { name: "⚔️ Базовая", customCost: 20, customCostDesc: "Рывок (2 сек)", desc: "КД 16 сек. Проход сквозь врагов на 2 сек." },
@@ -1908,6 +2264,8 @@ window.skillDB = {
         },
         {
             name: "Принцип доблести",
+            unlockLevel: 14,
+            icon: "навыки/D3-Icon-Crusader-Laws-of-Valor.png",
             category: "Чары",
             runes: [
                 { name: "⚔️ Базовая", buffDmg: 8, buffPerm: true, buffIsAoe: true, customCost: 1, customCostDesc: "Актив: +15% Скор. (5с)", desc: "Пассив: +8% Скор. атаки. Актив: +15% Скор. атаки на 5 сек. КД 30 сек." },
@@ -1920,6 +2278,8 @@ window.skillDB = {
         },
         {
             name: "Правосудие",
+            unlockLevel: 15,
+            icon: "навыки/D3-Icon-Crusader-Justice.png",
             category: "Основное",
             runes: [
                 { name: "🌟 Базовая", dmg: 245, aoe: 1, desc: "Накапливает 5 гнева. Бросок молота (245%)." },
@@ -1932,6 +2292,8 @@ window.skillDB = {
         },
         {
             name: "Освящение",
+            unlockLevel: 16,
+            icon: "навыки/D3-Icon-Crusader-Consecration.png",
             category: "Защита",
             runes: [
                 { name: "🌟 Базовая", heal: 40, buffIsAoe: true, aoe: 2.5, desc: "КД 30 сек. Лечение ~40% HP за 10 сек (20м)." },
@@ -1944,6 +2306,8 @@ window.skillDB = {
         },
         {
             name: "Принцип справедливости",
+            unlockLevel: 17,
+            icon: "навыки/D3-Icon-Crusader-Laws-of-Justice.png",
             category: "Чары",
             runes: [
                 { name: "🌟 Базовая", buffDef: 10, defType: "res", buffPerm: true, buffIsAoe: true, customCost: 4, customCostDesc: "Актив: +490 Сопрот.", desc: "Пассив: +140 Сопрот (~10%). Актив: +490 Сопрот на 5 сек. КД 30 сек." },
@@ -1956,6 +2320,8 @@ window.skillDB = {
         },
         {
             name: "Падающий меч",
+            unlockLevel: 19,
+            icon: "навыки/D3-Icon-Crusader-Falling-Sword.png",
             category: "Мастерство",
             runes: [
                 { name: "⚔️ Базовая", dmg: 1700, aoe: 2, desc: "КД 30 сек. Прыжок и удар 1700% (14м)." },
@@ -1968,6 +2334,8 @@ window.skillDB = {
         },
         {
             name: "Освященный щит",
+            unlockLevel: 20,
+            icon: "навыки/D3-Icon-Crusader-Blessed-Shield.png",
             category: "Вспомогательное",
             runes: [
                 { name: "🌟 Базовая", dmg: 430, blockDmg: 250, aoe: 1.3, desc: "Затраты: 20 гнева. 430% + 250% Блока. Рикошет (3 цели)." },
@@ -1980,7 +2348,9 @@ window.skillDB = {
         },
         {
             name: "Порицание",
-            category: "Мастерство",
+            unlockLevel: 21,
+            icon: "навыки/D3-Icon-Crusader-Condemn.png",
+            category: "Тактика",
             runes: [
                 { name: "🌟 Базовая", dmg: 1160, aoe: 2, desc: "КД 15 сек. Взрыв через 3 сек (1160%)." },
                 { name: "🌟 Вакуум", dmg: 1160, aoe: 2, stun: 1, desc: "Затягивает врагов перед взрывом." },
@@ -1992,6 +2362,8 @@ window.skillDB = {
         },
         {
             name: "Суд",
+            unlockLevel: 22,
+            icon: "навыки/D3-Icon-Crusader-Judgment.png",
             category: "Защита",
             runes: [
                 { name: "🌟 Базовая", stun: 6, aoe: 2.5, desc: "КД 20 сек. Обездвиживание на 6 сек (20м)." },
@@ -2004,6 +2376,8 @@ window.skillDB = {
         },
         {
             name: "Принцип надежды",
+            unlockLevel: 24,
+            icon: "навыки/D3-Icon-Crusader-Laws-of-Hope.png",
             category: "Чары",
             runes: [
                 { name: "🌟 Базовая", heal: 20, buffIsAoe: true, customCost: 4, customCostDesc: "Пассив: Реген (2%)", desc: "Пассив: Реген 2% HP/сек. Актив: Щит 20% HP (5 сек). КД 30 сек." },
@@ -2016,6 +2390,8 @@ window.skillDB = {
         },
         {
             name: "Поборник Акарата",
+            unlockLevel: 25,
+            icon: "навыки/D3-Icon-Crusader-Akarats-Champion.png",
             category: "Мастерство",
             runes: [
                 { name: "🌟 Базовая", customCost: 100, customCostDesc: "Форма (Ульта)", buffDuration: 20, desc: "КД 90 сек. +35% Урона, +5 Гнева/сек. 20 сек." },
@@ -2028,6 +2404,8 @@ window.skillDB = {
         },
         {
             name: "Длань небес",
+            unlockLevel: 29,
+            icon: "навыки/D3-Icon-Crusader-Fist-of-the-Heavens.png",
             category: "Вспомогательное",
             runes: [
                 { name: "⚡ Базовая", dmg: 545, aoe: 1.3, dmg2: 765, aoe2: 1.5, desc: "Затраты: 30 гнева. Взрыв 545% + 6 молний (ср. 765%)." },
@@ -2040,7 +2418,9 @@ window.skillDB = {
         },
         {
             name: "Фаланга",
-            category: "Сила",
+            unlockLevel: 27,
+            icon: "навыки/D3-Icon-Crusader-Phalanx.png",
+            category: "Тактика",
             runes: [
                 { name: "⚔️ Базовая", dmg: 490, aoe: 1.5, desc: "Затраты: 30 гнева. Рывок соратников (490% урона)." },
                 { name: "⚔️ Лучники", dmg: 925, aoe: 1.3, desc: "Лучники (185%/сек) на 5 сек. КД 15 сек." },
@@ -2052,6 +2432,8 @@ window.skillDB = {
         },
         {
             name: "Ярость Небес",
+            unlockLevel: 26,
+            icon: "навыки/D3-Icon-Crusader-Heavens-Fury.png",
             category: "Мастерство",
             runes: [
                 { name: "🌟 Базовая", dmg: 1710, aoe: 1.6, desc: "КД 20 сек. 1710% урона за 6 сек." },
@@ -2064,6 +2446,8 @@ window.skillDB = {
         },
         {
             name: "Бомбардировка",
+            unlockLevel: 61,
+            icon: "навыки/D3-Icon-Crusader-Bombardment.png",
             category: "Мастерство",
             runes: [
                 { name: "⚔️ Базовая", dmg: 2850, aoe: 2, desc: "КД 60 сек. 5 снарядов наносят 2850% урона (12м)." },
@@ -2076,6 +2460,8 @@ window.skillDB = {
         },
         {
             name: "Божественная мощь",
+            unlockLevel: 10,
+            icon: "навыки/D3-Icon-Crusader-Heavenly-Strength.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 15, customCostDesc: "2H Оружие + Щит", desc: "Позволяет использовать двуручное оружие со щитом. Урон снижен на 20%." }
@@ -2083,6 +2469,8 @@ window.skillDB = {
         },
         {
             name: "Рвение",
+            unlockLevel: 10,
+            icon: "навыки/D3-Icon-Crusader-Fervor.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 17, customCostDesc: "Скор.атаки +15%, КД -15%", desc: "С одноручным оружием: +15% скорости атаки и -15% времени восстановления." }
@@ -2090,6 +2478,8 @@ window.skillDB = {
         },
         {
             name: "Бдительность",
+            unlockLevel: 13,
+            icon: "навыки/D3-Icon-Crusader-Vigilant.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 21, customCostDesc: "Реген + Защита", desc: "Увеличивает регенерацию здоровья. Снижает нефизический урон на 20%." }
@@ -2097,6 +2487,8 @@ window.skillDB = {
         },
         {
             name: "Праведность",
+            unlockLevel: 16,
+            icon: "навыки/D3-Icon-Crusader-Righteousness.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 7.5, customCostDesc: "Гнев +30, +3 за удар", desc: "Макс. гнев +30. Основные умения генерируют +3 гнева." }
@@ -2104,6 +2496,8 @@ window.skillDB = {
         },
         {
             name: "Несокрушимый боец",
+            unlockLevel: 20,
+            icon: "навыки/D3-Icon-Crusader-Insurmountable.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 5, customCostDesc: "Гнев при блоке", desc: "Восстанавливает 6 ед. гнева при блокировании." }
@@ -2111,6 +2505,8 @@ window.skillDB = {
         },
         {
             name: "Фанатизм",
+            unlockLevel: 20,
+            icon: "навыки/D3-Icon-Crusader-Fanaticism.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 4, customCostDesc: "Скор. атаки +15% (Осн.)", desc: "Скорость атаки основных умений увеличена на 15%." }
@@ -2118,6 +2514,8 @@ window.skillDB = {
         },
         {
             name: "Непробиваемая броня",
+            unlockLevel: 25,
+            icon: "навыки/D3-Icon-Crusader-Indestructible.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 0, customCostDesc: "Вторая жизнь", desc: "Вторая жизнь (КД 60 сек). Бесплатно. Дает +35% урона и лечение за убийство на 5 сек." }
@@ -2125,6 +2523,8 @@ window.skillDB = {
         },
         {
             name: "Благое дело",
+            unlockLevel: 27,
+            icon: "навыки/D3-Icon-Crusader-Holy-Cause.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 5.4, customCostDesc: "Урон +10% и Лечение", desc: "+10% урона. Урон от Света лечит 1% от макс. здоровья." }
@@ -2132,6 +2532,8 @@ window.skillDB = {
         },
         {
             name: "Праведный гнев",
+            unlockLevel: 30,
+            icon: "навыки/D3-Icon-Crusader-Wrathful.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 4, customCostDesc: "Лечение за гнев", desc: "Восстанавливает здоровье за каждую потраченную единицу гнева." }
@@ -2139,6 +2541,8 @@ window.skillDB = {
         },
         {
             name: "Священная твердыня",
+            unlockLevel: 30,
+            icon: "навыки/D3-Icon-Crusader-Divine-Fortress.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 22.5, customCostDesc: "Броня +30% (от блока)", desc: "Показатель брони увеличен на значение шанса блока (ср. +30%)." }
@@ -2146,6 +2550,8 @@ window.skillDB = {
         },
         {
             name: "Лорд-командующий",
+            unlockLevel: 35,
+            icon: "навыки/D3-Icon-Crusader-Lord-Commander.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 12, customCostDesc: "КД и Урон", desc: "КД Скакуна -25%, Бомбардировки -35%. Урон Фаланги +20%." }
@@ -2153,6 +2559,8 @@ window.skillDB = {
         },
         {
             name: "Ни шагу назад",
+            unlockLevel: 40,
+            icon: "навыки/D3-Icon-Crusader-Hold-Your-Ground.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 8, customCostDesc: "Блок +30%", desc: "Нельзя уклониться. Шанс блока +30%." }
@@ -2160,6 +2568,8 @@ window.skillDB = {
         },
         {
             name: "Длинная рука закона",
+            unlockLevel: 45,
+            icon: "навыки/D3-Icon-Crusader-Long-Arm-of-the-Law.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 10, customCostDesc: "Длит. Принципов +5с", desc: "Увеличивает время действия активного эффекта Принципов на 5 секунд." }
@@ -2167,6 +2577,8 @@ window.skillDB = {
         },
         {
             name: "Железная дева",
+            unlockLevel: 50,
+            icon: "навыки/D3-Icon-Crusader-Iron-Maiden.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 12.5, customCostDesc: "Шипы +50%", desc: "Урон от шипов увеличен на 50%." }
@@ -2174,6 +2586,8 @@ window.skillDB = {
         },
         {
             name: "Обновление",
+            unlockLevel: 55,
+            icon: "навыки/D3-Icon-Crusader-Renewal.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 4, customCostDesc: "Лечение при блоке", desc: "При блокировании восполняет здоровье (экв. ~1% HP)." }
@@ -2181,6 +2595,8 @@ window.skillDB = {
         },
         {
             name: "Многоцветие",
+            unlockLevel: 60,
+            icon: "навыки/D3-Icon-Crusader-Finery.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 7.5, customCostDesc: "Сила +15% (от камней)", desc: "Увеличивает силу на 1.5% за каждый самоцвет в экипировке (ср. +15%)." }
@@ -2188,6 +2604,8 @@ window.skillDB = {
         },
         {
             name: "Резкость",
+            unlockLevel: 64,
+            icon: "навыки/D3-Icon-Crusader-Blunt.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 8, customCostDesc: "Урон +20% (2 навыка)", desc: "Урон от 'Правосудия' и 'Освященного молота' увеличен на 20%." }
@@ -2195,6 +2613,8 @@ window.skillDB = {
         },
         {
             name: "Надежный щит",
+            unlockLevel: 66,
+            icon: "навыки/D3-Icon-Crusader-Towering-Shield.png",
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 13, customCostDesc: "Урон +20% (3 навыка), КД -30%", desc: "Урон от 'Наказания', 'Удара щитом', 'Освященного щита' +20%. КД 'Сияющего щита' -30%." }
@@ -2204,294 +2624,344 @@ window.skillDB = {
     "Охотник на демонов": [
         {
             name: "Самонаводящаяся стрела",
+            icon: "навыки/D3-Icon-Demon-Hunter-Hungering-Arrow.png",
+            unlockLevel: 1,
             category: "Основное",
             runes: [
-                { name: "🏹 Базовая", dmg: 209, aoe: 1, desc: "Восст. 4 ненависти. 155% + 35% шанс пронзить (ср. 209%)." },
-                { name: "🏹 Пронзающая стрела", dmg: 232, aoe: 1, desc: "Шанс пронзания 50% (ср. 232%)." },
-                { name: "🔥 Зазубренный наконечник", dmg: 209, aoe: 1, resGain: 7, desc: "Восстановление ненависти увеличено до 7 (+3)." },
-                { name: "⚡ Дробящаяся стрела", dmg: 209, aoe: 1.5, desc: "Расщепляется на 3 стрелы после пронзания." },
-                { name: "❄️ Разрушительная стрела", dmg: 280, aoe: 1, desc: "+70% урона за каждое пронзание (ср. 280%)." },
-                { name: "🏹 Мелкое крошево", dmg: 209, aoe: 1, dmg2: 30, aoe2: 2, desc: "Криты взрываются на 60% (ср. 30%)." }
+                { name: "🏹 Базовая", unlockLevel: 1, dmg: 209, aoe: 1, desc: "Восст. 4 ненависти. 155% + 35% шанс пронзить (ср. 209%)." },
+                { name: "🏹 Пронзающая стрела", unlockLevel: 6, dmg: 232, aoe: 1, desc: "Шанс пронзания 50% (ср. 232%)." },
+                { name: "🔥 Зазубренный наконечник", unlockLevel: 17, dmg: 209, aoe: 1, resGain: 7, desc: "Восстановление ненависти увеличено до 7 (+3)." },
+                { name: "⚡ Дробящаяся стрела", unlockLevel: 26, dmg: 209, aoe: 1.5, desc: "Расщепляется на 3 стрелы после пронзания." },
+                { name: "❄️ Разрушительная стрела", unlockLevel: 42, dmg: 280, aoe: 1, desc: "+70% урона за каждое пронзание (ср. 280%)." },
+                { name: "🏹 Мелкое крошево", unlockLevel: 52, dmg: 209, aoe: 1, dmg2: 30, aoe2: 2, desc: "Криты взрываются на 60% (ср. 30%)." }
             ]
         },
         {
             name: "Бросок кинжала",
+            icon: "навыки/D3-Icon-Demon-Hunter-Impale.png",
+            unlockLevel: 2,
             category: "Вспомогательное",
             runes: [
-                { name: "🏹 Базовая", dmg: 750, aoe: 1, desc: "Затраты: 20 ненависти. Бросок кинжала (750%)." },
-                { name: "🏹 Удар", dmg: 750, aoe: 1, stun: 1.5, desc: "Оглушение 1.5 сек и отбрасывание." },
-                { name: "🔥 Химический ожог", dmg: 750, aoe: 1, dmg2: 500, aoe2: 1, desc: "750% + Ожог 500% за 2 сек." },
-                { name: "❄️ Пронзание", dmg: 750, aoe: 1.5, desc: "Пронзает всех врагов на линии." },
-                { name: "⚡ Рикошет", dmg: 750, aoe: 1.3, desc: "Рикошетит в 2 доп. цели (3 цели)." },
-                { name: "🏹 Тяжелые раны", dmg: 915, aoe: 1, desc: "Криты наносят +330% урона (ср. 915%)." }
+                { name: "🏹 Базовая", unlockLevel: 2, dmg: 750, aoe: 1, desc: "Затраты: 20 ненависти. Бросок кинжала (750%)." },
+                { name: "🏹 Удар", unlockLevel: 7, dmg: 750, aoe: 1, stun: 1.5, desc: "Оглушение 1.5 сек и отбрасывание." },
+                { name: "🔥 Химический ожог", unlockLevel: 15, dmg: 750, aoe: 1, dmg2: 500, aoe2: 1, desc: "750% + Ожог 500% за 2 сек." },
+                { name: "❄️ Пронзание", unlockLevel: 28, dmg: 750, aoe: 1.5, desc: "Пронзает всех врагов на линии." },
+                { name: "⚡ Рикошет", unlockLevel: 38, dmg: 750, aoe: 1.3, desc: "Рикошетит в 2 доп. цели (3 цели)." },
+                { name: "🏹 Тяжелые раны", unlockLevel: 53, dmg: 915, aoe: 1, desc: "Криты наносят +330% урона (ср. 915%)." }
             ]
         },
         {
             name: "Замедляющий выстрел",
+            icon: "навыки/D3-Icon-Demon-Hunter-Entangling-Shot.png",
+            unlockLevel: 3,
             category: "Основное",
             runes: [
-                { name: "🏹 Базовая", dmg: 200, aoe: 1.3, slow: 60, resGain: 4, desc: "Восст. 4 ненависти. 200% урона (2 цели). Замедление 60%." },
-                { name: "🏹 Цепляющий выстрел", dmg: 200, aoe: 1.5, slow: 60, resGain: 4, desc: "Опутывает до 4 врагов (Увел. область)." },
-                { name: "⚡ Цепь", dmg: 200, aoe: 1.3, slow: 60, resGain: 4, dmg2: 80, aoe2: 1.3, desc: "200% + 80% урона молнией за 2 сек." },
-                { name: "❄️ Тяжкая ноша", dmg: 200, aoe: 1.3, slow: 60, resGain: 4, desc: "Длительность замедления 4 сек (Холод)." },
-                { name: "🔥 Справедливость восстановлена", dmg: 200, aoe: 1.3, slow: 60, resGain: 7, desc: "Восстановление ненависти увеличено до 7 (+3)." },
-                { name: "🏹 Охотник за головами", dmg: 200, aoe: 1.3, slow: 80, resGain: 4, desc: "Замедление увеличено до 80%." }
+                { name: "🏹 Базовая", unlockLevel: 3, dmg: 200, aoe: 1.3, slow: 60, resGain: 4, desc: "Восст. 4 ненависти. 200% урона (2 цели). Замедление 60%." },
+                { name: "🏹 Цепляющий выстрел", unlockLevel: 9, dmg: 200, aoe: 1.5, slow: 60, resGain: 4, desc: "Опутывает до 4 врагов (Увел. область)." },
+                { name: "⚡ Цепь", unlockLevel: 18, dmg: 200, aoe: 1.3, slow: 60, resGain: 4, dmg2: 80, aoe2: 1.3, desc: "200% + 80% урона молнией за 2 сек." },
+                { name: "❄️ Тяжкая ноша", unlockLevel: 34, dmg: 200, aoe: 1.3, slow: 60, resGain: 4, desc: "Длительность замедления 4 сек (Холод)." },
+                { name: "🔥 Справедливость восстановлена", unlockLevel: 47, dmg: 200, aoe: 1.3, slow: 60, resGain: 7, desc: "Восстановление ненависти увеличено до 7 (+3)." },
+                { name: "🏹 Охотник за головами", unlockLevel: 54, dmg: 200, aoe: 1.3, slow: 80, resGain: 4, desc: "Замедление увеличено до 80%." }
             ]
         },
         {
             name: "Шипы",
-            category: "Тактика",
+            icon: "навыки/D3-Icon-Demon-Hunter-Caltrops.png",
+            unlockLevel: 4,
+            category: "Защита",
             runes: [
-                { name: "🏹 Базовая", slow: 60, aoe: 2, desc: "Затраты: 6 конц. Ловушка (12м). Замедление 60%." },
-                { name: "🏹 Крючковатые шипы", slow: 80, aoe: 2, desc: "Замедление увеличено до 80%." },
-                { name: "🏹 Земные мучения", stun: 2, aoe: 2, desc: "Обездвиживание на 2 сек." },
-                { name: "⚔️ Зазубренные шипы", slow: 60, aoe: 2, dmg: 270, desc: "Замедление + 270% урона за 6 сек." },
-                { name: "🏹 Заостренные колья", slow: 60, aoe: 2, effInc: 100, desc: "Затраты снижены до 3 конц. (Эфф. +100%)." },
-                { name: "🏹 Приманка", slow: 60, aoe: 2, buffDmg: 15, desc: "Стоя в ловушке: +10% Крит шанс (экв. +15% урона)." }
+                { name: "🏹 Базовая", unlockLevel: 4, slow: 60, aoe: 2, desc: "Затраты: 6 конц. Ловушка (12м). Замедление 60%." },
+                { name: "🏹 Крючковатые шипы", unlockLevel: 12, slow: 80, aoe: 2, desc: "Замедление увеличено до 80%." },
+                { name: "🏹 Земные мучения", unlockLevel: 18, stun: 2, aoe: 2, desc: "Обездвиживание на 2 сек." },
+                { name: "⚔️ Зазубренные шипы", unlockLevel: 28, slow: 60, aoe: 2, dmg: 270, desc: "Замедление + 270% урона за 6 сек." },
+                { name: "🏹 Заостренные колья", unlockLevel: 41, slow: 60, aoe: 2, effInc: 100, desc: "Затраты снижены до 3 конц. (Эфф. +100%)." },
+                { name: "🏹 Приманка", unlockLevel: 54, slow: 60, aoe: 2, buffDmg: 15, desc: "Стоя в ловушке: +10% Крит шанс (экв. +15% урона)." }
             ]
         },
         {
             name: "Скоростная стрельба",
+            icon: "навыки/D3-Icon-Demon-Hunter-Rapid-Fire.png",
+            unlockLevel: 5,
             category: "Вспомогательное",
             runes: [
-                { name: "🏹 Базовая", dmg: 685, aoe: 1, desc: "Затраты: 20 + 6/сек. Потоковый урон 685%." },
-                { name: "🔥 Губительный огонь", dmg: 685, aoe: 1, desc: "Снижение начальных затрат до 10 (Огонь)." },
-                { name: "❄️ Морозные выстрелы", dmg: 685, aoe: 1, slow: 80, desc: "Замедление 80% на 2 сек (Холод)." },
-                { name: "🏹 Огневая поддержка", dmg: 685, aoe: 1, dmg2: 290, aoe2: 1.3, desc: "685% + 2 ракеты по 145% (290%)." },
-                { name: "⚡ Высокая скорость", dmg: 685, aoe: 1.5, desc: "50% шанс пронзить цели (Линия)." },
-                { name: "🔥 Настильный огонь", dmg: 545, aoe: 1.3, desc: "Гранаты по 545% (8м)." }
+                { name: "🏹 Базовая", unlockLevel: 5, dmg: 685, aoe: 1, desc: "Затраты: 20 + 6/сек. Потоковый урон 685%." },
+                { name: "🔥 Губительный огонь", unlockLevel: 11, dmg: 685, aoe: 1, desc: "Снижение начальных затрат до 10 (Огонь)." },
+                { name: "❄️ Морозные выстрелы", unlockLevel: 19, dmg: 685, aoe: 1, slow: 80, desc: "Замедление 80% на 2 сек (Холод)." },
+                { name: "🏹 Огневая поддержка", unlockLevel: 32, dmg: 685, aoe: 1, dmg2: 290, aoe2: 1.3, desc: "685% + 2 ракеты по 145% (290%)." },
+                { name: "⚡ Высокая скорость", unlockLevel: 45, dmg: 685, aoe: 1.5, desc: "50% шанс пронзить цели (Линия)." },
+                { name: "🔥 Настильный огонь", unlockLevel: 56, dmg: 545, aoe: 1.3, desc: "Гранаты по 545% (8м)." }
             ]
         },
         {
             name: "Дымовая завеса",
+            icon: "навыки/D3-Icon-Demon-Hunter-Smoke-Screen.png",
+            unlockLevel: 8,
             category: "Защита",
             runes: [
-                { name: "🏹 Базовая", customCost: 10, customCostDesc: "Невидимость (1с)", desc: "Затраты: 14 конц. Невидимость 1 сек." },
-                { name: "🏹 Сдвиг", customCost: 30, customCostDesc: "Невидимость + Скорость 100%", desc: "Невидимость + 100% скорости бега." },
-                { name: "🏹 Густой туман", customCost: 15, customCostDesc: "Невидимость (1.5с)", desc: "Длительность увеличена до 1.5 сек." },
-                { name: "🏹 Исцеляющие пары", customCost: 10, customCostDesc: "Невидимость (1с)", heal: 15, desc: "Невидимость + Лечение 15% HP." },
-                { name: "🏹 Особое средство", customCost: 10, customCostDesc: "Невидимость (1с)", effInc: 75, desc: "Затраты снижены до 8 конц. (Эфф. +75%)." },
-                { name: "🏹 Маскирующий порошок", customCost: 10, customCostDesc: "Невидимость (1с)", desc: "Без затрат концентрации. КД 6 сек." }
+                { name: "🏹 Базовая", unlockLevel: 8, customCost: 10, customCostDesc: "Невидимость (1с)", desc: "Затраты: 14 конц. Невидимость 1 сек." },
+                { name: "🏹 Сдвиг", unlockLevel: 14, customCost: 30, customCostDesc: "Невидимость + Скорость 100%", desc: "Невидимость + 100% скорости бега." },
+                { name: "🏹 Густой туман", unlockLevel: 23, customCost: 15, customCostDesc: "Невидимость (1.5с)", desc: "Длительность увеличена до 1.5 сек." },
+                { name: "🏹 Исцеляющие пары", unlockLevel: 35, customCost: 10, customCostDesc: "Невидимость (1с)", heal: 15, desc: "Невидимость + Лечение 15% HP." },
+                { name: "🏹 Особое средство", unlockLevel: 47, customCost: 10, customCostDesc: "Невидимость (1с)", effInc: 75, desc: "Затраты снижены до 8 конц. (Эфф. +75%)." },
+                { name: "🏹 Маскирующий порошок", unlockLevel: 57, customCost: 10, customCostDesc: "Невидимость (1с)", desc: "Без затрат концентрации. КД 6 сек." }
             ]
         },
         {
             name: "Кульбит",
-            category: "Тактика",
+            icon: "навыки/D3-Icon-Demon-Hunter-Vault.png",
+            unlockLevel: 9,
+            category: "Выслеживание",
             runes: [
-                { name: "🏹 Базовая", customCost: 30, customCostDesc: "Прыжок (35м)", desc: "Затраты: 8 конц. Акробатический прыжок." },
-                { name: "🏹 Стрельба на бегу", customCost: 30, customCostDesc: "Прыжок (35м)", dmg: 300, effInc: 100, desc: "4 стрелы по 75% (300%). Всегда крит (Эфф. +100%)." },
-                { name: "🏹 Стремительный кувырок", customCost: 30, customCostDesc: "Прыжок (35м)", stun: 1.5, desc: "Отбрасывание и оглушение 1.5 сек." },
-                { name: "🏹 Сальто-мортале", customCost: 30, customCostDesc: "Прыжок (35м)", effInc: 50, desc: "Повторное использование дешевле на 50%." },
-                { name: "🏹 Акробатика", customCost: 30, customCostDesc: "Прыжок (35м)", desc: "Без затрат концентрации. КД 6 сек." },
-                { name: "🔥 Пепельный след", customCost: 30, customCostDesc: "Прыжок (35м)", dmg: 300, desc: "Огненный след 300% за 3 сек." }
+                { name: "🏹 Базовая", unlockLevel: 9, customCost: 30, customCostDesc: "Прыжок (35м)", desc: "Затраты: 8 конц. Акробатический прыжок." },
+                { name: "🏹 Стрельба на бегу", unlockLevel: 16, customCost: 30, customCostDesc: "Прыжок (35м)", dmg: 300, effInc: 100, desc: "4 стрелы по 75% (300%). Всегда крит (Эфф. +100%)." },
+                { name: "🏹 Стремительный кувырок", unlockLevel: 23, customCost: 30, customCostDesc: "Прыжок (35м)", stun: 1.5, desc: "Отбрасывание и оглушение 1.5 сек." },
+                { name: "🏹 Сальто-мортале", unlockLevel: 33, customCost: 30, customCostDesc: "Прыжок (35м)", effInc: 50, desc: "Повторное использование дешевле на 50%." },
+                { name: "🏹 Акробатика", unlockLevel: 48, customCost: 30, customCostDesc: "Прыжок (35м)", desc: "Без затрат концентрации. КД 6 сек." },
+                { name: "🔥 Пепельный след", unlockLevel: 57, customCost: 30, customCostDesc: "Прыжок (35м)", dmg: 300, desc: "Огненный след 300% за 3 сек." }
             ]
         },
         {
             name: "Болас",
+            icon: "навыки/D3-Icon-Demon-Hunter-Bolas.png",
+            unlockLevel: 11,
             category: "Основное",
             runes: [
-                { name: "🔥 Базовая", dmg: 160, aoe: 1, dmg2: 110, aoe2: 1.3, desc: "Восст. 4 ненависти. Взрыв через 1 сек (160% цель + 110% вокруг)." },
-                { name: "🔥 Разрывной снаряд", dmg: 160, aoe: 1, dmg2: 110, aoe2: 2, desc: "Радиус взрыва увеличен до 20м." },
-                { name: "⚡ Клубок молний", dmg: 160, aoe: 1, dmg2: 110, aoe2: 1.3, resGain: 7, desc: "Восстановление ненависти увеличено до 7 (+3)." },
-                { name: "❄️ Леденящий удар", dmg: 480, aoe: 1, stun: 0.5, desc: "3 боласа по 160% (480%). 50% шанс заморозки (1с)." },
-                { name: "⚡ Горькая пилюля", dmg: 160, aoe: 1, dmg2: 110, aoe2: 1.3, customCost: 2, customCostDesc: "Реген конц.", desc: "15% шанс восстановить 2 конц." },
-                { name: "🔥 Неотвратимый рок", dmg: 216, aoe: 1, dmg2: 148, aoe2: 1.3, desc: "Урон увеличен (216% + 148%), задержка 2 сек." }
+                { name: "🔥 Базовая", unlockLevel: 11, dmg: 160, aoe: 1, dmg2: 110, aoe2: 1.3, desc: "Восст. 4 ненависти. Взрыв через 1 сек (160% цель + 110% вокруг)." },
+                { name: "🔥 Разрывной снаряд", unlockLevel: 14, dmg: 160, aoe: 1, dmg2: 110, aoe2: 2, desc: "Радиус взрыва увеличен до 20м." },
+                { name: "⚡ Клубок молний", unlockLevel: 24, dmg: 160, aoe: 1, dmg2: 110, aoe2: 1.3, resGain: 7, desc: "Восстановление ненависти увеличено до 7 (+3)." },
+                { name: "❄️ Леденящий удар", unlockLevel: 37, dmg: 480, aoe: 1, stun: 0.5, desc: "3 боласа по 160% (480%). 50% шанс заморозки (1с)." },
+                { name: "⚡ Горькая пилюля", unlockLevel: 51, dmg: 160, aoe: 1, dmg2: 110, aoe2: 1.3, customCost: 2, customCostDesc: "Реген конц.", desc: "15% шанс восстановить 2 конц." },
+                { name: "🔥 Неотвратимый рок", unlockLevel: 57, dmg: 216, aoe: 1, dmg2: 148, aoe2: 1.3, desc: "Урон увеличен (216% + 148%), задержка 2 сек." }
             ]
         },
         {
             name: "Шакрам",
+            icon: "навыки/D3-Icon-Demon-Hunter-Chakram.png",
+            unlockLevel: 12,
             category: "Вспомогательное",
             runes: [
-                { name: "🏹 Базовая", dmg: 380, aoe: 1.5, desc: "Затраты: 10 ненависти. 380% урона по пути." },
-                { name: "🔥 Два шакрама", dmg: 440, aoe: 1.5, desc: "2 шакрама по 220% (440%)." },
-                { name: "❄️ Зигзаг", dmg: 500, aoe: 1.5, desc: "Урон увеличен до 500% (Холод)." },
-                { name: "🏹 Бритвенно-острый диск", dmg: 380, aoe: 2, desc: "Полет по спирали (Увел. область)." },
-                { name: "⚡ Бумеранг", dmg: 400, aoe: 1.5, desc: "400% урона (Молния)." },
-                { name: "🏹 Облако сюрикенов", dmg: 200, aoe: 2, buffPerm: true, desc: "Аура: 200% урона в сек (10 мин)." }
+                { name: "🏹 Базовая", unlockLevel: 12, dmg: 380, aoe: 1.5, desc: "Затраты: 10 ненависти. 380% урона по пути." },
+                { name: "🔥 Два шакрама", unlockLevel: 18, dmg: 440, aoe: 1.5, desc: "2 шакрама по 220% (440%)." },
+                { name: "❄️ Зигзаг", unlockLevel: 26, dmg: 500, aoe: 1.5, desc: "Урон увеличен до 500% (Холод)." },
+                { name: "🏹 Бритвенно-острый диск", unlockLevel: 34, dmg: 380, aoe: 2, desc: "Полет по спирали (Увел. область)." },
+                { name: "⚡ Бумеранг", unlockLevel: 48, dmg: 400, aoe: 1.5, desc: "400% урона (Молния)." },
+                { name: "🏹 Облако сюрикенов", unlockLevel: 57, dmg: 200, aoe: 2, buffPerm: true, desc: "Аура: 200% урона в сек (10 мин)." }
             ]
         },
         {
             name: "На изготовку",
-            category: "Тактика",
+            icon: "навыки/D3-Icon-Demon-Hunter-Preparation.png",
+            unlockLevel: 13,
+            category: "Выслеживание",
             runes: [
-                { name: "🏹 Базовая", customCost: 15, customCostDesc: "Восст. 30 конц.", desc: "КД 45 сек. Мгновенно +30 концентрации." },
-                { name: "🏹 Прилив сил", customCost: 15, customCostDesc: "Восст. 30 конц. + Макс 20", desc: "Пассивно: +20 макс. концентрации." },
-                { name: "🏹 Наказание", resGain: 75, resGainInstant: true, desc: "Восстанавливает 75 ненависти. КД 20 сек." },
-                { name: "🏹 Боевые шрамы", customCost: 15, customCostDesc: "Восст. 30 конц.", heal: 40, desc: "+30 конц. и +40% здоровья." },
-                { name: "🏹 Сосредоточение", customCost: 22.5, customCostDesc: "Восст. 45 конц. (15с)", desc: "+45 концентрации за 15 сек." },
-                { name: "🏹 План «Б»", customCost: 15, customCostDesc: "Восст. 30 конц.", effInc: 30, desc: "30% шанс не активировать КД." }
+                { name: "🏹 Базовая", unlockLevel: 13, customCost: 15, customCostDesc: "Восст. 30 конц.", desc: "КД 45 сек. Мгновенно +30 концентрации." },
+                { name: "🏹 Прилив сил", unlockLevel: 19, customCost: 15, customCostDesc: "Восст. 30 конц. + Макс 20", desc: "Пассивно: +20 макс. концентрации." },
+                { name: "🏹 Наказание", unlockLevel: 25, resGain: 75, resGainInstant: true, desc: "Восстанавливает 75 ненависти. КД 20 сек." },
+                { name: "🏹 Боевые шрамы", unlockLevel: 35, customCost: 15, customCostDesc: "Восст. 30 конц.", heal: 40, desc: "+30 конц. и +40% здоровья." },
+                { name: "🏹 Сосредоточение", unlockLevel: 44, customCost: 22.5, customCostDesc: "Восст. 45 конц. (15с)", desc: "+45 концентрации за 15 сек." },
+                { name: "🏹 План «Б»", unlockLevel: 52, customCost: 15, customCostDesc: "Восст. 30 конц.", effInc: 30, desc: "30% шанс не активировать КД." }
             ]
         },
         {
             name: "Веер клинков",
-            category: "Защита",
+            icon: "навыки/D3-Icon-Demon-Hunter-Fan-of-Knives.png",
+            unlockLevel: 14,
+            category: "Приспособление",
             runes: [
-                { name: "🏹 Базовая", dmg: 620, aoe: 2.5, slow: 60, desc: "КД 10 сек. 620% урона (20м). Замедление 60%." },
-                { name: "⚡ Ювелирная точность", dmg: 1600, aoe: 2.5, slow: 60, desc: "Урон увеличен до 1600%. КД 15 сек (Молния)." },
-                { name: "❄️ Клинковая броня", dmg: 620, aoe: 2.5, slow: 60, buffDef: 40, defType: "armor", buffDuration: 6, desc: "620% урона + 40% Брони на 6 сек (Холод)." },
-                { name: "🔥 Экспертный бросок", dmg: 620, aoe: 2.5, slow: 60, desc: "Без КД. Затраты 30 ненависти (Огонь)." },
-                { name: "🔥 Веер кинжалов", dmg: 620, aoe: 2.5, stun: 3, desc: "620% урона + Оглушение 3 сек (Огонь)." },
-                { name: "🏹 Клинки убийцы", dmg: 620, aoe: 2.5, slow: 60, dmg2: 620, aoe2: 1.3, desc: "620% (20м) + 620% по 5 дальним целям." }
+                { name: "🏹 Базовая", unlockLevel: 14, dmg: 620, aoe: 2.5, slow: 60, desc: "КД 10 сек. 620% урона (20м). Замедление 60%." },
+                { name: "⚡ Ювелирная точность", unlockLevel: 21, dmg: 1600, aoe: 2.5, slow: 60, desc: "Урон увеличен до 1600%. КД 15 сек (Молния)." },
+                { name: "❄️ Клинковая броня", unlockLevel: 32, dmg: 620, aoe: 2.5, slow: 60, buffDef: 40, defType: "armor", buffDuration: 6, desc: "620% урона + 40% Брони на 6 сек (Холод)." },
+                { name: "🔥 Экспертный бросок", unlockLevel: 40, dmg: 620, aoe: 2.5, slow: 60, desc: "Без КД. Затраты 30 ненависти (Огонь)." },
+                { name: "🔥 Веер кинжалов", unlockLevel: 49, dmg: 620, aoe: 2.5, stun: 3, desc: "620% урона + Оглушение 3 сек (Огонь)." },
+                { name: "🏹 Клинки убийцы", unlockLevel: 57, dmg: 620, aoe: 2.5, slow: 60, dmg2: 620, aoe2: 1.3, desc: "620% (20м) + 620% по 5 дальним целям." }
             ]
         },
         {
             name: "Отход под прикрытием",
+            icon: "навыки/D3-Icon-Demon-Hunter-Evasive-Fire.png",
+            unlockLevel: 14,
             category: "Основное",
             runes: [
-                { name: "🏹 Базовая", dmg: 200, aoe: 1, dmg2: 100, aoe2: 1.3, desc: "Восст. 4 ненависти. 200% + 2x100%. Сальто назад (5м)." },
-                { name: "🏹 Сгруппироваться", dmg: 200, aoe: 1, dmg2: 100, aoe2: 1.3, buffDef: 25, defType: "armor", buffDuration: 3, desc: "Нет сальто. +25% Брони на 3 сек." },
-                { name: "🏹 Прощальный подарок", dmg: 200, aoe: 1, dmg2: 100, aoe2: 1.3, dmg3: 150, aoe3: 2, desc: "Сальто + Бомба 150% (12м)." },
-                { name: "🔥 Прикрывающий огонь", dmg: 200, aoe: 1, dmg2: 200, aoe2: 1.3, desc: "Боковые стрелы наносят 200% урона (Огонь)." },
-                { name: "❄️ Внимание", dmg: 200, aoe: 1, dmg2: 100, aoe2: 1.3, resGain: 7, desc: "Нет сальто. Восст. 7 ненависти (+3) (Холод)." },
-                { name: "⚡ Град", dmg: 200, aoe: 1, dmg2: 100, aoe2: 1.3, desc: "Сальто увеличено до 15м (Молния)." }
+                { name: "🏹 Базовая", unlockLevel: 14, dmg: 200, aoe: 1, dmg2: 100, aoe2: 1.3, desc: "Восст. 4 ненависти. 200% + 2x100%. Сальто назад (5м)." },
+                { name: "🏹 Сгруппироваться", unlockLevel: 21, dmg: 200, aoe: 1, dmg2: 100, aoe2: 1.3, buffDef: 25, defType: "armor", buffDuration: 3, desc: "Нет сальто. +25% Брони на 3 сек." },
+                { name: "🏹 Прощальный подарок", unlockLevel: 26, dmg: 200, aoe: 1, dmg2: 100, aoe2: 1.3, dmg3: 150, aoe3: 2, desc: "Сальто + Бомба 150% (12м)." },
+                { name: "🔥 Прикрывающий огонь", unlockLevel: 34, dmg: 200, aoe: 1, dmg2: 200, aoe2: 1.3, desc: "Боковые стрелы наносят 200% урона (Огонь)." },
+                { name: "❄️ Внимание", unlockLevel: 42, dmg: 200, aoe: 1, dmg2: 100, aoe2: 1.3, resGain: 7, desc: "Нет сальто. Восст. 7 ненависти (+3) (Холод)." },
+                { name: "⚡ Град", unlockLevel: 53, dmg: 200, aoe: 1, dmg2: 100, aoe2: 1.3, desc: "Сальто увеличено до 15м (Молния)." }
             ]
         },
         {
             name: "Граната",
+            icon: "навыки/D3-Icon-Demon-Hunter-Grenade.png",
+            unlockLevel: 15,
             category: "Основное",
             runes: [
-                { name: "🔥 Базовая", dmg: 160, aoe: 1.3, desc: "Восст. 4 ненависти. Взрыв 160%." },
-                { name: "🔥 Экспериментатор", dmg: 160, aoe: 1.3, resGain: 7, desc: "Восстановление ненависти увеличено до 7 (+3)." },
-                { name: "🔥 Связка гранат", dmg: 200, aoe: 1.3, desc: "Урон увеличен до 200% (9м)." },
-                { name: "🔥 Запас гранат", dmg: 480, aoe: 1.5, desc: "3 гранаты по 160% (480%)." },
-                { name: "⚡ Оглушающая граната", dmg: 160, aoe: 1.3, stun: 0.3, desc: "20% шанс оглушить на 1.5 сек (ср. 0.3с)." },
-                { name: "❄️ Морозная граната", dmg: 160, aoe: 1.3, dmg2: 120, aoe2: 1.3, slow: 60, desc: "160% + 120% облако (3 сек). Окоченение." }
+                { name: "🔥 Базовая", unlockLevel: 15, dmg: 160, aoe: 1.3, desc: "Восст. 4 ненависти. Взрыв 160%." },
+                { name: "🔥 Экспериментатор", unlockLevel: 22, dmg: 160, aoe: 1.3, resGain: 7, desc: "Восстановление ненависти увеличено до 7 (+3)." },
+                { name: "🔥 Связка гранат", unlockLevel: 32, dmg: 200, aoe: 1.3, desc: "Урон увеличен до 200% (9м)." },
+                { name: "🔥 Запас гранат", unlockLevel: 40, dmg: 480, aoe: 1.5, desc: "3 гранаты по 160% (480%)." },
+                { name: "⚡ Оглушающая граната", unlockLevel: 48, dmg: 160, aoe: 1.3, stun: 0.3, desc: "20% шанс оглушить на 1.5 сек (ср. 0.3с)." },
+                { name: "❄️ Морозная граната", unlockLevel: 54, dmg: 160, aoe: 1.3, dmg2: 120, aoe2: 1.3, slow: 60, desc: "160% + 120% облако (3 сек). Окоченение." }
             ]
         },
         {
             name: "Сила тьмы",
+            icon: "навыки/D3-Icon-Demon-Hunter-Shadow-Power.png",
+            unlockLevel: 16,
             category: "Защита",
             runes: [
-                { name: "🏹 Базовая", heal: 20, buffDuration: 5, desc: "Затраты: 14 конц. Лечение за удар (LoH) на 5 сек." },
-                { name: "🏹 Ночное проклятье", heal: 20, buffDuration: 5, slow: 80, aoe: 2.5, desc: "Лечение + Замедление 80% (30м)." },
-                { name: "🏹 Кровавая луна", heal: 40, buffDuration: 5, desc: "Лечение удвоено (ср. 40% HP)." },
-                { name: "🏹 Колодец тьмы", heal: 20, buffDuration: 5, effInc: 75, desc: "Затраты снижены до 8 конц. (Эфф. +75%)." },
-                { name: "🏹 Сумрак", heal: 20, buffDuration: 5, buffDef: 53, desc: "Лечение + Снижение урона 35% (Стойкость +53%)." },
-                { name: "🏹 Полет теней", heal: 20, buffDuration: 5, customCost: 6, customCostDesc: "Скорость 30%", desc: "Лечение + 30% скорости бега." }
+                { name: "🏹 Базовая", unlockLevel: 16, heal: 20, buffDuration: 5, desc: "Затраты: 14 конц. Лечение за удар (LoH) на 5 сек." },
+                { name: "🏹 Ночное проклятье", unlockLevel: 21, heal: 20, buffDuration: 5, slow: 80, aoe: 2.5, desc: "Лечение + Замедление 80% (30м)." },
+                { name: "🏹 Кровавая луна", unlockLevel: 29, heal: 40, buffDuration: 5, desc: "Лечение удвоено (ср. 40% HP)." },
+                { name: "🏹 Колодец тьмы", unlockLevel: 37, heal: 20, buffDuration: 5, effInc: 75, desc: "Затраты снижены до 8 конц. (Эфф. +75%)." },
+                { name: "🏹 Сумрак", unlockLevel: 51, heal: 20, buffDuration: 5, buffDef: 53, desc: "Лечение + Снижение урона 35% (Стойкость +53%)." },
+                { name: "🏹 Полет теней", unlockLevel: 57, heal: 20, buffDuration: 5, customCost: 6, customCostDesc: "Скорость 30%", desc: "Лечение + 30% скорости бега." }
             ]
         },
         {
             name: "Шипастая ловушка",
-            category: "Мастерство",
+            icon: "навыки/D3-Icon-Demon-Hunter-Spike-Trap.png",
+            unlockLevel: 17,
+            category: "Приспособление",
             runes: [
-                { name: "🔥 Базовая", dmg: 1160, aoe: 1.3, desc: "Затраты: 15 ненависти. Взрыв 1160% (8м). Цепная реакция." },
-                { name: "❄️ Вторящий взрыв", dmg: 2020, aoe: 1.3, slow: 60, desc: "Урон 2020% (Холод) + Замедление." },
-                { name: "🔥 Хитроумный механизм", dmg: 1900, aoe: 1.3, desc: "Урон 1900%. Детонация генераторами." },
-                { name: "⚔️ Пронзающие шипы", dmg: 1930, aoe: 1.3, stun: 3, desc: "Урон 1930% + Обездвиживание 3 сек." },
-                { name: "⚡ Громоотвод", dmg: 2020, aoe: 1.3, desc: "Цепь молний между ловушками (2020%)." },
-                { name: "🔥 Разбросанные ловушки", dmg: 1160, aoe: 1.3, effInc: 100, desc: "Ставит 2 ловушки сразу (Эфф. +100%)." }
+                { name: "🔥 Базовая", unlockLevel: 17, dmg: 1160, aoe: 1.3, desc: "Затраты: 15 ненависти. Взрыв 1160% (8м). Цепная реакция." },
+                { name: "❄️ Вторящий взрыв", unlockLevel: 27, dmg: 2020, aoe: 1.3, slow: 60, desc: "Урон 2020% (Холод) + Замедление." },
+                { name: "🔥 Хитроумный механизм", unlockLevel: 30, dmg: 1900, aoe: 1.3, desc: "Урон 1900%. Детонация генераторами." },
+                { name: "⚔️ Пронзающие шипы", unlockLevel: 39, dmg: 1930, aoe: 1.3, stun: 3, desc: "Урон 1930% + Обездвиживание 3 сек." },
+                { name: "⚡ Громоотвод", unlockLevel: 46, dmg: 2020, aoe: 1.3, desc: "Цепь молний между ловушками (2020%)." },
+                { name: "🔥 Разбросанные ловушки", unlockLevel: 55, dmg: 1160, aoe: 1.3, effInc: 100, desc: "Ставит 2 ловушки сразу (Эфф. +100%)." }
             ]
         },
         {
             name: "Питомец",
-            category: "Сила",
+            icon: "навыки/D3-Icon-Demon-Hunter-Companion.png",
+            unlockLevel: 17,
+            category: "Выслеживание",
             runes: [
-                { name: "⚔️ Базовая (Ворон)", passiveDmg: 100, dmg: 500, aoe: 1, desc: "Пассив: Ворон (100%). Актив: Атака 500%. КД 30 сек." },
-                { name: "⚔️ Паук", passiveDmg: 140, passiveSlow: 60, slow: 80, aoe: 2.5, desc: "Пассив: Паук (140%, Замедл 60%). Актив: Паутина 80% (25м)." },
-                { name: "⚔️ Летучая мышь", passiveDmg: 60, resGain: 50, resGainInstant: true, customCost: 2, customCostDesc: "Пассив: Реген (1/с)", desc: "Пассив: Мышь (60%) + 1 нен/сек. Актив: +50 ненависти." },
-                { name: "⚔️ Вепрь", passiveDmg: 50, buffDef: 20, defType: "res", buffPerm: true, buffIsAoe: true, stun: 5, desc: "Пассив: Вепрь (50%) + Реген + 20% Сопрот. Актив: Провокация 5 сек." },
-                { name: "⚔️ Хорьки", passiveDmg: 100, customCost: 4, customCostDesc: "Пассив: Золото/Скорость 10%", desc: "Пассив: 2 Хорька (по 50%) + Сбор золота + 10% Скорости." },
-                { name: "⚔️ Волк", passiveDmg: 150, buffDmg: 15, buffDuration: 10, buffIsAoe: true, desc: "Пассив: Волк (150%). Актив: +15% урона на 10 сек." }
+                { name: "⚔️ Базовая (Ворон)", unlockLevel: 17, passiveDmg: 100, dmg: 500, aoe: 1, desc: "Пассив: Ворон (100%). Актив: Атака 500%. КД 30 сек." },
+                { name: "⚔️ Паук", unlockLevel: 22, passiveDmg: 140, passiveSlow: 60, slow: 80, aoe: 2.5, desc: "Пассив: Паук (140%, Замедл 60%). Актив: Паутина 80% (25м)." },
+                { name: "⚔️ Летучая мышь", unlockLevel: 29, passiveDmg: 60, resGain: 50, resGainInstant: true, customCost: 2, customCostDesc: "Пассив: Реген (1/с)", desc: "Пассив: Мышь (60%) + 1 нен/сек. Актив: +50 ненависти." },
+                { name: "⚔️ Вепрь", unlockLevel: 41, passiveDmg: 50, buffDef: 20, defType: "res", buffPerm: true, buffIsAoe: true, stun: 5, desc: "Пассив: Вепрь (50%) + Реген + 20% Сопрот. Актив: Провокация 5 сек." },
+                { name: "⚔️ Хорьки", unlockLevel: 46, passiveDmg: 100, customCost: 4, customCostDesc: "Пассив: Золото/Скорость 10%", desc: "Пассив: 2 Хорька (по 50%) + Сбор золота + 10% Скорости." },
+                { name: "⚔️ Волк", unlockLevel: 59, passiveDmg: 150, buffDmg: 15, buffDuration: 10, buffIsAoe: true, desc: "Пассив: Волк (150%). Актив: +15% урона на 10 сек." }
             ]
         },
         {
             name: "Обстрел",
-            category: "Вспомогательное",
+            icon: "навыки/D3-Icon-Demon-Hunter-Strafe.png",
+            unlockLevel: 19,
+            category: "Стрельба",
             runes: [
-                { name: "🏹 Базовая", dmg: 675, aoe: 1.5, desc: "Затраты: 12 ненависти. Стрельба на ходу (675%). Скорость 75%." },
-                { name: "❄️ Морозный след", dmg: 675, aoe: 1.5, dmg2: 300, aoe2: 1.5, slow: 60, desc: "675% + Морозный след 300% за 3 сек. Окоченение." },
-                { name: "⚡ Парящая тень", dmg: 675, aoe: 1.5, customCost: 5, customCostDesc: "Скорость 100%", desc: "Скорость передвижения 100% (без штрафа). Урон молнией." },
-                { name: "⚔️ Острая сталь", dmg: 745, aoe: 1.5, desc: "Криты наносят +140% урона (ср. 745%)." },
-                { name: "🔥 Огненная буря", dmg: 675, aoe: 1.5, dmg2: 130, aoe2: 1, desc: "675% + Самонаводящиеся снаряды 130%." },
-                { name: "🔥 Подрыв", dmg: 460, aoe: 1.3, desc: "Гранаты по 460% (9м)." }
+                { name: "🏹 Базовая", unlockLevel: 19, dmg: 675, aoe: 1.5, desc: "Затраты: 12 ненависти. Стрельба на ходу (675%). Скорость 75%." },
+                { name: "❄️ Морозный след", unlockLevel: 24, dmg: 675, aoe: 1.5, dmg2: 300, aoe2: 1.5, slow: 60, desc: "675% + Морозный след 300% за 3 сек. Окоченение." },
+                { name: "⚡ Парящая тень", unlockLevel: 29, dmg: 675, aoe: 1.5, customCost: 5, customCostDesc: "Скорость 100%", desc: "Скорость передвижения 100% (без штрафа). Урон молнией." },
+                { name: "⚔️ Острая сталь", unlockLevel: 37, dmg: 745, aoe: 1.5, desc: "Криты наносят +140% урона (ср. 745%)." },
+                { name: "🔥 Огненная буря", unlockLevel: 50, dmg: 675, aoe: 1.5, dmg2: 130, aoe2: 1, desc: "675% + Самонаводящиеся снаряды 130%." },
+                { name: "🔥 Подрыв", unlockLevel: 56, dmg: 460, aoe: 1.3, desc: "Гранаты по 460% (9м)." }
             ]
         },
         {
             name: "Стрела стихий",
+            icon: "навыки/D3-Icon-Demon-Hunter-Elemental-Arrow.png",
+            unlockLevel: 20,
             category: "Вспомогательное",
             runes: [
-                { name: "🔥 Базовая", dmg: 300, aoe: 1.5, desc: "Затраты: 10 ненависти. Огненная стрела 300% (Линия)." },
-                { name: "⚡ Шаровая молния", dmg: 300, aoe: 2, desc: "Шаровая молния 300% (поражает врагов по пути)." },
-                { name: "❄️ Морозная стрела", dmg: 330, aoe: 2.5, slow: 60, desc: "330% урона. Распадается на 10 стрел. Замедление 60%." },
-                { name: "🔥 Обжигающая стрела", dmg: 300, aoe: 1.5, dmg2: 315, aoe2: 1.3, desc: "300% + Поджог земли 315% за 2 сек (10м)." },
-                { name: "⚡ Молнии", dmg: 300, aoe: 1.5, stun: 0.5, desc: "300% урона. Криты оглушают на 1 сек (ср. 0.5с)." },
-                { name: "⚔️ Щупальца пустоты", dmg: 300, aoe: 1.5, heal: 2, desc: "300% урона. Восст. 0.4% HP за врага (ср. 2%)." }
+                { name: "🔥 Базовая", unlockLevel: 20, dmg: 300, aoe: 1.5, desc: "Затраты: 10 ненависти. Огненная стрела 300% (Линия)." },
+                { name: "⚡ Шаровая молния", unlockLevel: 24, dmg: 300, aoe: 2, desc: "Шаровая молния 300% (поражает врагов по пути)." },
+                { name: "❄️ Морозная стрела", unlockLevel: 29, dmg: 330, aoe: 2.5, slow: 60, desc: "330% урона. Распадается на 10 стрел. Замедление 60%." },
+                { name: "🔥 Обжигающая стрела", unlockLevel: 36, dmg: 300, aoe: 1.5, dmg2: 315, aoe2: 1.3, desc: "300% + Поджог земли 315% за 2 сек (10м)." },
+                { name: "⚡ Молнии", unlockLevel: 43, dmg: 300, aoe: 1.5, stun: 0.5, desc: "300% урона. Криты оглушают на 1 сек (ср. 0.5с)." },
+                { name: "⚔️ Щупальца пустоты", unlockLevel: 59, dmg: 300, aoe: 1.5, heal: 2, desc: "300% урона. Восст. 0.4% HP за врага (ср. 2%)." }
             ]
         },
         {
             name: "Метка смерти",
-            category: "Тактика",
+            icon: "навыки/D3-Icon-Demon-Hunter-Marked-for-Death.png",
+            unlockLevel: 21,
+            category: "Выслеживание",
             runes: [
-                { name: "⚔️ Базовая", dmgAmp: 15, desc: "Затраты: 3 конц. Враг получает +15% урона (Синергия)." },
-                { name: "⚔️ Заражение", dmgAmp: 15, aoe: 1.3, desc: "Распространяется на 3 цели при смерти." },
-                { name: "⚔️ Долина смерти", dmgAmp: 15, aoe: 2, buffIsAoe: true, desc: "Область 15м: Враги получают +15% урона." },
-                { name: "⚔️ Мрачный жнец", dmgAmp: 15, dmg2: 15, aoe2: 2, desc: "15% нанесенного урона распределяется вокруг (20м)." },
-                { name: "⚔️ Смертельный враг", dmgAmp: 15, resGain: 4, desc: "+15% урона. +4 ненависти за удар по цели." },
-                { name: "⚔️ Погребальный колокол", dmgAmp: 15, heal: 3, desc: "+15% урона. Атакующий лечится на 3% HP." }
+                { name: "⚔️ Базовая", unlockLevel: 21, dmgAmp: 15, desc: "Затраты: 3 конц. Враг получает +15% урона (Синергия)." },
+                { name: "⚔️ Заражение", unlockLevel: 27, dmgAmp: 15, aoe: 1.3, desc: "Распространяется на 3 цели при смерти." },
+                { name: "⚔️ Долина смерти", unlockLevel: 31, dmgAmp: 15, aoe: 2, buffIsAoe: true, desc: "Область 15м: Враги получают +15% урона." },
+                { name: "⚔️ Мрачный жнец", unlockLevel: 39, dmgAmp: 15, dmg2: 15, aoe2: 2, desc: "15% нанесенного урона распределяется вокруг (20м)." },
+                { name: "⚔️ Смертельный враг", unlockLevel: 48, dmgAmp: 15, resGain: 4, desc: "+15% урона. +4 ненависти за удар по цели." },
+                { name: "⚔️ Погребальный колокол", unlockLevel: 60, dmgAmp: 15, heal: 3, desc: "+15% урона. Атакующий лечится на 3% HP." }
             ]
         },
         {
             name: "Залп",
-            category: "Вспомогательное",
+            icon: "навыки/D3-Icon-Demon-Hunter-Multishot.png",
+            unlockLevel: 22,
+            category: "Стрельба",
             runes: [
-                { name: "🏹 Базовая", dmg: 360, aoe: 1.75, desc: "Затраты: 25 ненависти. 360% урона (Конус)." },
-                { name: "⚡ Беглый огонь", dmg: 360, aoe: 1.75, effInc: 39, desc: "Затраты снижены до 18 (Эфф. +39%) (Молния)." },
-                { name: "❄️ Ледяной шквал", dmg: 360, aoe: 1.75, buffDmg: 12, slow: 60, desc: "+8% Крит шанс (экв. +12% урона). Окоченение." },
-                { name: "⚔️ Подавляющий огонь", dmg: 360, aoe: 1.75, stun: 0.5, desc: "Отбрасывание врагов." },
-                { name: "🔥 Мощный залп", dmg: 500, aoe: 1.75, desc: "Урон увеличен до 500%." },
-                { name: "🔥 Арсенал", dmg: 360, aoe: 1.75, dmg2: 900, aoe2: 1.3, desc: "360% + 3 ракеты по 300% (900%)." }
+                { name: "🏹 Базовая", unlockLevel: 22, dmg: 360, aoe: 1.75, desc: "Затраты: 25 ненависти. 360% урона (Конус)." },
+                { name: "⚡ Беглый огонь", unlockLevel: 26, dmg: 360, aoe: 1.75, effInc: 39, desc: "Затраты снижены до 18 (Эфф. +39%) (Молния)." },
+                { name: "❄️ Ледяной шквал", unlockLevel: 31, dmg: 360, aoe: 1.75, buffDmg: 12, slow: 60, desc: "+8% Крит шанс (экв. +12% урона). Окоченение." },
+                { name: "⚔️ Подавляющий огонь", unlockLevel: 39, dmg: 360, aoe: 1.75, stun: 0.5, desc: "Отбрасывание врагов." },
+                { name: "🔥 Мощный залп", unlockLevel: 46, dmg: 500, aoe: 1.75, desc: "Урон увеличен до 500%." },
+                { name: "🔥 Арсенал", unlockLevel: 55, dmg: 360, aoe: 1.75, dmg2: 900, aoe2: 1.3, desc: "360% + 3 ракеты по 300% (900%)." }
             ]
         },
         {
             name: "Турель",
-            category: "Сила",
+            icon: "навыки/D3-Icon-Demon-Hunter-Sentry.png",
+            unlockLevel: 25,
+            category: "Приспособление",
             runes: [
-                { name: "🏹 Базовая", dmg: 280, aoe: 1, desc: "Затраты: 20 ненависти. Турель (280%). 2 заряда. КД 8 сек." },
-                { name: "🔥 Самонаводящиеся снаряды", dmg: 280, aoe: 1, dmg2: 120, aoe2: 1.3, desc: "280% + Ракеты 120% (Огонь)." },
-                { name: "⚡ Пробивная стрела", dmg: 280, aoe: 1.5, desc: "Стрелы пронзают врагов (Линия)." },
-                { name: "⚔️ Цепь мучения", dmg: 300, aoe: 1.5, desc: "Цепь между героем и турелью (300%/сек)." },
-                { name: "❄️ Северная турель", dmg: 280, aoe: 1, slow: 60, desc: "Аура замедления 60% (16м)." },
-                { name: "🛡️ Защитная турель", dmg: 280, aoe: 1, buffDef: 33, buffIsAoe: true, desc: "Щит -25% урона союзникам (Стойкость +33%)." }
+                { name: "🏹 Базовая", unlockLevel: 25, dmg: 280, aoe: 1, desc: "Затраты: 20 ненависти. Турель (280%). 2 заряда. КД 8 сек." },
+                { name: "🔥 Самонаводящиеся снаряды", unlockLevel: 28, dmg: 280, aoe: 1, dmg2: 120, aoe2: 1.3, desc: "280% + Ракеты 120% (Огонь)." },
+                { name: "⚡ Пробивная стрела", unlockLevel: 36, dmg: 280, aoe: 1.5, desc: "Стрелы пронзают врагов (Линия)." },
+                { name: "⚔️ Цепь мучения", unlockLevel: 45, dmg: 300, aoe: 1.5, desc: "Цепь между героем и турелью (300%/сек)." },
+                { name: "❄️ Северная турель", unlockLevel: 52, dmg: 280, aoe: 1, slow: 60, desc: "Аура замедления 60% (16м)." },
+                { name: "🛡️ Защитная турель", unlockLevel: 60, dmg: 280, aoe: 1, buffDef: 33, buffIsAoe: true, desc: "Щит -25% урона союзникам (Стойкость +33%)." }
             ]
         },
         {
             name: "Разрывная стрела",
-            category: "Мастерство",
+            icon: "навыки/D3-Icon-Demon-Hunter-Cluster-Arrow.png",
+            unlockLevel: 27,
+            category: "Стрельба",
             runes: [
-                { name: "🔥 Базовая", dmg: 650, aoe: 1.3, dmg2: 1000, aoe2: 1.5, desc: "Затраты: 40 ненависти. 650% + 4 гранаты по 250% (1000%)." },
-                { name: "⚡ Сияющая стрела", dmg: 1650, aoe: 1.5, stun: 1.5, desc: "1650% урона + Оглушение 1.5 сек (Молния)." },
-                { name: "⚔️ Звездопад", dmg: 650, aoe: 1.3, dmg2: 1200, aoe2: 1.3, desc: "650% + 2 ракеты по 600% (1200%)." },
-                { name: "❄️ Водоворот", dmg: 650, aoe: 1.3, dmg2: 1350, aoe2: 1.3, heal: 10, desc: "650% + 3 ракеты по 450% (1350%). Лечение 2% за врага." },
-                { name: "🔥 Разрывные бомбы", dmg: 650, aoe: 2, desc: "Гранаты в ряд (650% по площади)." },
-                { name: "🔥 Во всеоружии", dmg: 850, aoe: 1.3, dmg2: 1000, aoe2: 1.5, desc: "Удар 850% + 4 гранаты по 250% (1000%)." }
+                { name: "🔥 Базовая", unlockLevel: 27, dmg: 650, aoe: 1.3, dmg2: 1000, aoe2: 1.5, desc: "Затраты: 40 ненависти. 650% + 4 гранаты по 250% (1000%)." },
+                { name: "⚡ Сияющая стрела", unlockLevel: 29, dmg: 1650, aoe: 1.5, stun: 1.5, desc: "1650% урона + Оглушение 1.5 сек (Молния)." },
+                { name: "⚔️ Звездопад", unlockLevel: 36, dmg: 650, aoe: 1.3, dmg2: 1200, aoe2: 1.3, desc: "650% + 2 ракеты по 600% (1200%)." },
+                { name: "❄️ Водоворот", unlockLevel: 41, dmg: 650, aoe: 1.3, dmg2: 1350, aoe2: 1.3, heal: 10, desc: "650% + 3 ракеты по 450% (1350%). Лечение 2% за врага." },
+                { name: "🔥 Разрывные бомбы", unlockLevel: 49, dmg: 650, aoe: 2, desc: "Гранаты в ряд (650% по площади)." },
+                { name: "🔥 Во всеоружии", unlockLevel: 58, dmg: 850, aoe: 1.3, dmg2: 1000, aoe2: 1.5, desc: "Удар 850% + 4 гранаты по 250% (1000%)." }
             ]
         },
         {
             name: "Ливень возмездия",
-            category: "Мастерство",
+            icon: "навыки/D3-Icon-Demon-Hunter-Rain-of-Vengeance.png",
+            unlockLevel: 30,
+            category: "Стрельба",
             runes: [
-                { name: "🏹 Базовая", dmg: 1500, aoe: 2.5, desc: "КД 30 сек. 1500% урона за 5 сек." },
-                { name: "🏹 Темное облако", dmg: 3500, aoe: 2.5, desc: "Самонаводящиеся стрелы. 3500% урона за 8 сек." },
-                { name: "⚡ Тьма стрел", dmg: 2800, aoe: 2.5, desc: "Урон увеличен до 2800% за 5 сек (Молния)." },
-                { name: "🔥 Темная стая", dmg: 4600, aoe: 2.5, stun: 0.5, desc: "Тени наносят 4600% урона за 3 сек. Отбрасывание." },
-                { name: "🔥 Анафема", dmg: 5800, aoe: 2.5, desc: "Гранаты наносят 5800% урона за 2 сек." },
-                { name: "❄️ Удар с воздуха", dmg: 3800, aoe: 2.5, stun: 2, desc: "Тени наносят 3800% урона за 5 сек. Заморозка 2 сек." }
+                { name: "🏹 Базовая", unlockLevel: 30, dmg: 1500, aoe: 2.5, desc: "КД 30 сек. 1500% урона за 5 сек." },
+                { name: "🏹 Темное облако", unlockLevel: 35, dmg: 3500, aoe: 2.5, desc: "Самонаводящиеся стрелы. 3500% урона за 8 сек." },
+                { name: "⚡ Тьма стрел", unlockLevel: 40, dmg: 2800, aoe: 2.5, desc: "Урон увеличен до 2800% за 5 сек (Молния)." },
+                { name: "🔥 Темная стая", unlockLevel: 47, dmg: 4600, aoe: 2.5, stun: 0.5, desc: "Тени наносят 4600% урона за 3 сек. Отбрасывание." },
+                { name: "🔥 Анафема", unlockLevel: 54, dmg: 5800, aoe: 2.5, desc: "Гранаты наносят 5800% урона за 2 сек." },
+                { name: "❄️ Удар с воздуха", unlockLevel: 60, dmg: 3800, aoe: 2.5, stun: 2, desc: "Тени наносят 3800% урона за 5 сек. Заморозка 2 сек." }
             ]
         },
         {
             name: "Возмездие",
-            category: "Мастерство",
+            icon: "навыки/D3-Icon-Demon-Hunter-Vengeance.png",
+            unlockLevel: 61,
+            category: "Приспособление",
             runes: [
-                { name: "🏹 Базовая", customCost: 100, customCostDesc: "Форма (Ульта)", buffDuration: 20, desc: "КД 90 сек. +40% урона, доп. выстрелы и ракеты. 20 сек." },
-                { name: "🔥 Мортира", customCost: 105, customCostDesc: "Форма (Ульта)", buffDuration: 20, desc: "Ракеты заменены на гранаты (300% урона)." },
-                { name: "🏹 Мрачная душа", customCost: 130, customCostDesc: "Форма (Ульта)", buffDef: 100, buffDuration: 20, desc: "Снижение получаемого урона на 50% (Стойкость +100%)." },
-                { name: "🏹 Поясные пушки", customCost: 100, customCostDesc: "Форма (Ульта)", heal: 3, buffDuration: 20, desc: "Ракеты заменены на мощные пушки (225%), лечащие за удар." },
-                { name: "🏹 Бешенство", customCost: 100, customCostDesc: "Форма (Ульта)", resGain: 200, buffDuration: 20, desc: "Восстанавливает 10 ненависти в сек (Всего 200)." },
-                { name: "❄️ Удар из тени", customCost: 100, customCostDesc: "Форма (Ульта)", stun: 3, buffDuration: 20, desc: "Ракеты заменены на теневых союзников, замораживающих на 3 сек." }
+                { name: "🏹 Базовая", unlockLevel: 61, customCost: 100, customCostDesc: "Форма (Ульта)", buffDuration: 20, desc: "КД 90 сек. +40% урона, доп. выстрелы и ракеты. 20 сек." },
+                { name: "🔥 Мортира", unlockLevel: 62, customCost: 105, customCostDesc: "Форма (Ульта)", buffDuration: 20, desc: "Ракеты заменены на гранаты (300% урона)." },
+                { name: "🏹 Мрачная душа", unlockLevel: 63, customCost: 130, customCostDesc: "Форма (Ульта)", buffDef: 100, buffDuration: 20, desc: "Снижение получаемого урона на 50% (Стойкость +100%)." },
+                { name: "🏹 Поясные пушки", unlockLevel: 65, customCost: 100, customCostDesc: "Форма (Ульта)", heal: 3, buffDuration: 20, desc: "Ракеты заменены на мощные пушки (225%), лечащие за удар." },
+                { name: "🏹 Бешенство", unlockLevel: 67, customCost: 100, customCostDesc: "Форма (Ульта)", resGain: 200, buffDuration: 20, desc: "Восстанавливает 10 ненависти в сек (Всего 200)." },
+                { name: "❄️ Удар из тени", unlockLevel: 69, customCost: 100, customCostDesc: "Форма (Ульта)", stun: 3, buffDuration: 20, desc: "Ракеты заменены на теневых союзников, замораживающих на 3 сек." }
             ]
         },
         {
             name: "Охотничий азарт",
+            icon: "навыки/D3-Icon-Demon-Hunter-Thrill-of-the-Hunt.png",
+            unlockLevel: 10,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 9, customCostDesc: "Замедление 80%", desc: "Умения, требующие ненависти, замедляют врагов на 80% на 2 сек." }
@@ -2499,6 +2969,8 @@ window.skillDB = {
         },
         {
             name: "Тактическое превосходство",
+            icon: "навыки/D3-Icon-Demon-Hunter-Tactical-Advantage.png",
+            unlockLevel: 10,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 12, customCostDesc: "Скорость +60%", desc: "При использовании умений передвижения скорость +60% на 2 сек." }
@@ -2506,6 +2978,8 @@ window.skillDB = {
         },
         {
             name: "Кровавая месть",
+            icon: "навыки/D3-Icon-Demon-Hunter-Blood-Vengeance.png",
+            unlockLevel: 13,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 8, customCostDesc: "Ненависть +25, Реген от сфер", desc: "Макс. ненависть +25. Сферы здоровья дают 30 ненависти и 3 концентрации." }
@@ -2513,6 +2987,8 @@ window.skillDB = {
         },
         {
             name: "Твердая рука",
+            icon: "навыки/D3-Icon-Demon-Hunter-Steady-Aim.png",
+            unlockLevel: 16,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDmg: 20, buffPerm: true, desc: "+20% урона, если рядом нет врагов (10м)." }
@@ -2520,6 +2996,8 @@ window.skillDB = {
         },
         {
             name: "Добивание",
+            icon: "навыки/D3-Icon-Demon-Hunter-Cull-the-Weak.png",
+            unlockLevel: 20,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDmg: 20, buffPerm: true, desc: "+20% урона по замедленным или окоченевшим врагам." }
@@ -2527,6 +3005,8 @@ window.skillDB = {
         },
         {
             name: "Ночной охотник",
+            icon: "навыки/D3-Icon-Demon-Hunter-Night-Stalker.png",
+            unlockLevel: 20,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 6, customCostDesc: "Генерация +4", desc: "Основные умения восстанавливают +4 ненависти." }
@@ -2534,6 +3014,8 @@ window.skillDB = {
         },
         {
             name: "Раздумья",
+            icon: "навыки/D3-Icon-Demon-Hunter-Brooding.png",
+            unlockLevel: 25,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 9, customCostDesc: "Реген HP до 9%", desc: "Стоя на месте, вы восполняете до 9% здоровья в сек." }
@@ -2541,6 +3023,8 @@ window.skillDB = {
         },
         {
             name: "Жаркая погоня",
+            icon: "навыки/D3-Icon-Demon-Hunter-Hot-Pursuit.png",
+            unlockLevel: 27,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 5, customCostDesc: "Скорость +20%", desc: "При попадании по врагу скорость +20% на 4 сек." }
@@ -2548,6 +3032,8 @@ window.skillDB = {
         },
         {
             name: "Стрельба",
+            icon: "навыки/D3-Icon-Demon-Hunter-Archery.png",
+            unlockLevel: 30,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 5, customCostDesc: "Бонус от оружия", desc: "Дает бонус в зависимости от типа оружия (Урон/Крит/Скорость/Реген)." }
@@ -2555,6 +3041,8 @@ window.skillDB = {
         },
         {
             name: "Сковывающие ловушки",
+            icon: "навыки/D3-Icon-Demon-Hunter-Numbing-Traps.png",
+            unlockLevel: 30,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDef: 33, buffIsAoe: true, desc: "Враги под контролем или от ловушек наносят -25% урона (Стойкость +33%)." }
@@ -2562,6 +3050,8 @@ window.skillDB = {
         },
         {
             name: "Вершина мастерства",
+            icon: "навыки/D3-Icon-Demon-Hunter-Perfectionist.png",
+            unlockLevel: 35,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 8, customCostDesc: "Конц -10%, Защита +10%", desc: "Затраты концентрации -10%. Броня и Сопротивление +10%." }
@@ -2569,6 +3059,8 @@ window.skillDB = {
         },
         {
             name: "Доработка механизмов",
+            icon: "навыки/D3-Icon-Demon-Hunter-Custom-Engineering.png",
+            unlockLevel: 40,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 15, customCostDesc: "Турели/Ловушки x2", desc: "Длительность x2. Макс. турелей 3, ловушек 5." }
@@ -2576,6 +3068,8 @@ window.skillDB = {
         },
         {
             name: "Гренадер",
+            icon: "навыки/D3-Icon-Demon-Hunter-Grenadier.png",
+            unlockLevel: 45,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 8, customCostDesc: "Гранаты +10% и Радиус", desc: "Урон гранат +10%. Радиус +20%. Взрыв при смерти." }
@@ -2583,6 +3077,8 @@ window.skillDB = {
         },
         {
             name: "Меткий стрелок",
+            icon: "навыки/D3-Icon-Demon-Hunter-Sharpshooter.png",
+            unlockLevel: 50,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 10, customCostDesc: "Крит шанс (накопл.)", desc: "+4% Крит шанс в сек. Сбрасывается при крите." }
@@ -2590,6 +3086,8 @@ window.skillDB = {
         },
         {
             name: "Баллистика",
+            icon: "навыки/D3-Icon-Demon-Hunter-Ballistics.png",
+            unlockLevel: 55,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 12, customCostDesc: "Ракеты +100%", desc: "Урон от ракет (снарядов) увеличен на 100%. Шанс доп. ракеты." }
@@ -2597,6 +3095,8 @@ window.skillDB = {
         },
         {
             name: "Самоисцеление",
+            icon: "навыки/D3-Icon-Demon-Hunter-Leech.png",
+            unlockLevel: 60,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 6, customCostDesc: "Лечение за удар", desc: "Восполняет здоровье при ударе (LoH) + бонус от LpK." }
@@ -2604,6 +3104,8 @@ window.skillDB = {
         },
         {
             name: "Засада",
+            icon: "навыки/D3-Icon-Demon-Hunter-Ambush.png",
+            unlockLevel: 64,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", buffDmg: 10, buffPerm: true, desc: "+40% урона по врагам с >75% HP (ср. +10%)." }
@@ -2611,6 +3113,8 @@ window.skillDB = {
         },
         {
             name: "Бдительность",
+            icon: "навыки/D3-Icon-Demon-Hunter-Awareness.png",
+            unlockLevel: 66,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 0, customCostDesc: "Вторая жизнь", desc: "Вторая жизнь (КД 60 сек). Бесплатно." }
@@ -2618,6 +3122,8 @@ window.skillDB = {
         },
         {
             name: "Охота на одиночку",
+            icon: "навыки/D3-Icon-Demon-Hunter-Single-Out.png",
+            unlockLevel: 68,
             category: "Пассивные",
             runes: [
                 { name: "Пассивный эффект", customCost: 12, customCostDesc: "Крит +25% (Одиночки)", desc: "+25% Крит шанс по одиночным целям (>20м от других)." }

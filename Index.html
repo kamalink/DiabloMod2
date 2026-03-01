@@ -3,7 +3,6 @@
 <head>
    
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Diablo III Mod UI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,6 +12,7 @@
     <script src="data_classes.js"></script>
     <script src="data_skills.js"></script>
     <script src="data_world.js"></script>
+    <script src="data_hints.js"></script> 
     <script src="logic_core.js"></script>
     <script src="logic_ui.js"></script>
     <script src="logic_game.js"></script>
@@ -79,61 +79,69 @@
     </div>
 
     <!-- МОДАЛЬНОЕ ОКНО КАЛЬКУЛЯТОРА НАВЫКОВ -->
-    <div id="skill-calc-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; max-width: 700px; max-height: 90vh; background: #1a1a1a; border: 2px solid #d4af37; z-index: 5000; padding: 20px; overflow-y: auto; box-shadow: 0 0 50px #000;">
-        <h2 style="color: #d4af37; text-align: center; font-family: 'Cinzel', serif; margin-top: 0;">🧮 КАЛЬКУЛЯТОР НАВЫКОВ</h2>
+       <div id="skill-calc-modal" class="skill-calc-modal-new">
+                <h2 style="color: #d4af37; text-align: center; font-family: 'Cinzel', serif; margin-top: 0;">🗺️ КАРТА НАВЫКОВ</h2>
         <span class="close-x" onclick="document.getElementById('skill-calc-modal').style.display='none'">[X]</span>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <!-- Левая часть: Выбор -->
-            <div>
-                <label for="calc-class-select" style="color: #aaa;">Класс:</label>
-                <select id="calc-class-select" class="simple-btn" style="padding: 5px; margin: 5px 0; width: 100%;" onchange="updateCalcSkills()"></select>
-                
-                <label for="calc-skill-select" style="color: #aaa;">Навык:</label>
-                <select id="calc-skill-select" class="simple-btn" style="padding: 5px; margin: 5px 0; width: 100%;" onchange="updateCalcRunes()"></select>
-                
-                <label for="calc-rune-select" style="color: #aaa;">Руна:</label>
-                <select id="calc-rune-select" class="simple-btn" style="padding: 5px; margin: 5px 0; width: 100%;" onchange="loadCalcSkillData()"></select>
-                
-                <hr style="border-color: #333;">
-                
-                <div style="margin-bottom: 5px;"><span style="color: #66ccff;">⚔️ Урон:</span> <span id="calc-dmg" style="color: #e0e0e0;">0</span>%</div>
-                <div style="margin-bottom: 5px;"><span style="color: #a29bfe;">🎯 Область:</span> <span id="calc-aoe" style="color: #e0e0e0;" data-value="1">-</span></div>
+        <div class="skill-calc-layout">
+            <!-- ЛЕВАЯ ЧАСТЬ: Дерево навыков -->
+            <div id="skill-tree-viewport" class="skill-tree-viewport">
+                <div id="skill-tree-content" class="skill-tree-content">
+                    <!-- Сюда JS генерирует узлы и линии -->
+                </div>
+                <div class="tree-controls">
+                     <button onclick="window.toggleSkillTreeEditor()" style="color: #d4af37; border-color: #d4af37;">✏️ Редактор</button>
+                    <div id="editor-controls" style="display:none; margin-top:5px;">
+                        <button onclick="window.saveTreeLayout()" style="color: #66ff66; border-color: #66ff66;">💾 Сохранить</button>
+                        <button onclick="window.exportTreeLayout()" style="color: #66ccff; border-color: #66ccff;">📋 Экспорт</button>
+                        <button onclick="window.clearTreeLayout()" style="color: #ff4444; border-color: #ff4444;">🗑️ Сброс</button>
+                    </div>
+                    <button onclick="window.resetTreeCamera()">🎯 Центр</button>
+                </div>
             </div>
 
-            <!-- Правая часть: Доп параметры -->
-            <div>
-                <div><span style="color: #ff7979;">❄️ Замедление:</span> <span id="calc-slow" style="color: #e0e0e0;">0</span>%</div>
-                <div><span style="color: #ff7979;">⚡ Стан/Фриз:</span> <span id="calc-stun" style="color: #e0e0e0;">0</span> сек</div>
-                <div><span style="color: #66ff66;">❤️ Лечение:</span> <span id="calc-heal" style="color: #e0e0e0;">0</span>% HP</div>
-                <div><span style="color: #ffd700;">🛡️ Бафф Урона:</span> <span id="calc-buff-dmg" style="color: #e0e0e0;">0</span>%</div>
-                <div><span style="color: #ffd700;">🛡️ Бафф Защиты:</span> <span id="calc-buff-def" style="color: #e0e0e0;">0</span>%</div>
-                <div><span style="color: #a29bfe;">⚡ Эффективность:</span> <span id="calc-eff-inc" style="color: #e0e0e0;">0</span>%</div>
-                <div><span style="color: #66ccff;">🌀 Восст. ресурса:</span> <span id="calc-res-gain" style="color: #e0e0e0;">0</span></div>
+             <!-- ПРАВАЯ ЧАСТЬ: Инфо-панель -->
+            <div class="skill-calc-sidebar">
+                <div id="calc-class-selector-container" style="margin-bottom: 15px; display: none;">
+                                       <label for="calc-class-select" style="color: #aaa;">Класс:</label>
+                    <select id="calc-class-select" class="simple-btn" style="width: 100%;" onchange="window.initSkillTree(this.value)"></select>
+                </div>
+
+                <h3 id="calc-skill-name" style="color: #d4af37; margin: 0 0 10px 0; border-bottom: 1px solid #555; padding-bottom: 5px;">Выберите навык</h3>
+                
+                <div id="calc-runes-container" class="runes-grid"></div>
+
+                <div id="calc-stats-container" style="margin-top: 15px; font-size: 0.85rem; line-height: 1.6;">
+                    <!-- Сюда JS вставляет статы -->
+                </div>
+
+                <!-- Скрытые поля для расчетов -->
                 <input type="hidden" id="calc-buff-perm" value="false"> <!-- Скрытое поле для постоянных баффов -->
                 <input type="hidden" id="calc-buff-duration" value="0"> <!-- Длительность баффа -->
                 <input type="hidden" id="calc-dmg-amp" value="0"> <!-- Усиление урона по врагам -->
                 <input type="hidden" id="calc-dmg-2" value="0"> <!-- Второй источник урона -->
                 <input type="hidden" id="calc-aoe-2" value="1"> <!-- Область второго источника -->
+                 <input type="hidden" id="calc-cost-red-flat" value="0">
+                <input type="hidden" id="calc-skill-idx" value="">
+                <input type="hidden" id="calc-rune-idx" value="">
                 
                 <div id="calc-synergy-box" style="display:none; margin-top:10px; border-top: 1px dashed #444; padding-top: 5px;">
                     <label for="calc-synergy-skill" style="color: #ff9900; font-size: 0.8rem;">⚔️ Лучший навык атаки:</label>
                     <select id="calc-synergy-skill" class="simple-btn" style="padding: 3px; font-size: 0.75rem; margin: 3px 0; width: 100%;" onchange="calculateSkillCost()"></select>
                 </div>
-                <input type="hidden" id="calc-cost-red-flat" value="0"> <!-- Скрытое поле для снижения затрат (плоское) -->
+                
                 
                 <div id="calc-skill-cost-box" style="display:none; margin-top:5px;">
                     <label for="calc-main-skill-cost" style="color: #a29bfe;">📉 Цена осн. навыка:</label> <input type="number" id="calc-main-skill-cost" style="width: 80px;" value="0" oninput="calculateSkillCost()">
                 </div>
+             <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid #5a0000;">
+                    <div style="font-size: 1.2rem; color: #d4af37; text-align: center; margin-bottom: 10px;">
+                        <span id="calc-result" style="font-weight: bold; color: #fff;">0</span> 📖
+                    </div>
+                    <button class="buy-skill-btn" style="width: 100%; margin: 0;" onclick="buySkill()">ИЗУЧИТЬ</button>
+                    <p id="calc-details" style="font-size: 0.7rem; color: #888; margin-top: 5px; max-height: 100px; overflow-y: auto;"></p>
+                </div>
             </div>
-        </div>
-
-        <div style="margin-top: 20px; text-align: center; border-top: 1px solid #5a0000; padding-top: 10px;">
-            <div style="font-size: 1.5rem; color: #d4af37; display: flex; align-items: center; justify-content: center;">
-                <span>СТОИМОСТЬ: <span id="calc-result" style="font-weight: bold; color: #fff;">0</span> 📖</span>
-                <button class="buy-skill-btn" onclick="buySkill()">ИЗУЧИТЬ</button>
-            </div>
-            <p id="calc-details" style="font-size: 0.8rem; color: #888; margin-top: 5px;"></p>
         </div>
     </div>
 
@@ -731,13 +739,6 @@
         </div>
     </div>
 
-    <!-- Нижнее меню для мобильных -->
-    <div id="mobile-nav-bar">
-        <button class="mobile-nav-btn" onclick="toggleMobilePanel('char-sheet', this)">👤 ГЕРОЙ</button>
-        <button class="mobile-nav-btn" onclick="toggleMobilePanel('right-panels-stack', this)">📜 БОНУСЫ</button>
-        <button class="mobile-nav-btn" onclick="toggleEditModal()">✍️ КНИГА</button>
-    </div>
-
     <div id="save-load-controls" class="ui-element" style="position: fixed; left: 10px; top: 65px; z-index: 1000; display: flex; gap: 10px;">
         <button id="save-btn" class="d2-button" onclick="exportSaveFile()"><span class="text-gradient-gold">СОХРАНИТЬ</span><span class="btn-shimmer"></span></button>
         <button id="load-btn" class="d2-button" onclick="importSaveFile()"><span class="text-gradient-gold">ЗАГРУЗИТЬ</span><span class="btn-shimmer"></span></button>
@@ -767,10 +768,7 @@
                     <!-- Анимированный пул ресурсов -->
                     <div id="resource-pool" class="resource-pool">
                         <div class="resource-liquid"></div>
-                        <div class="resource-particle p1"></div>
-                        <div class="resource-particle p2"></div>
-                        <div class="resource-particle p3"></div>
-                        <div class="resource-particle p4"></div>
+                    
                     </div>
                 </div>
             </div>

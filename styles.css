@@ -19,6 +19,12 @@ body, html {
     scrollbar-width: none; /* Firefox: скрываем скроллбар */
     -ms-overflow-style: none; /* IE/Edge */
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8); /* Глубина текста */
+    }
+
+body.no-select {
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10+ and Edge */
+    user-select: none; /* Standard syntax */
     
 }
 
@@ -64,6 +70,30 @@ body.theme-crusader { --theme-border: #77aaff; --theme-highlight: #add8e6; --the
 #buttons-area,
 #credits-label {
     opacity: 0;
+    transition: opacity 1s ease-out; /* Плавность для скрытия */
+}
+
+/* Скрытие UI во время Vodyani */
+.vodyani-ui-hidden #right-panels-stack,
+.vodyani-ui-hidden #reset-btn,
+.vodyani-ui-hidden #settings-btn,
+.vodyani-ui-hidden #music-btn,
+.vodyani-ui-hidden #volume-slider,
+.vodyani-ui-hidden #breadcrumb,
+.vodyani-ui-hidden #widgets-container,
+.vodyani-ui-hidden #save-load-controls,
+.vodyani-ui-hidden #buttons-area,
+.vodyani-ui-hidden #credits-label,
+.vodyani-ui-hidden #inventory-widget,
+.vodyani-ui-hidden #journal-widget,
+.vodyani-ui-hidden #learned-skills-widget,
+.vodyani-ui-hidden .modal,
+.vodyani-ui-hidden #text-window,
+.vodyani-ui-hidden #custom-confirm-modal,
+.vodyani-ui-hidden #custom-prompt-modal,
+.vodyani-ui-hidden #menu-title {
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 .fade-in-ui {
@@ -76,8 +106,15 @@ body.theme-crusader { --theme-border: #77aaff; --theme-highlight: #add8e6; --the
 }
 
 /* Курсор при наведении на активные элементы */
-button, a, .select-btn, .close-x, input, select, label, .penta-slot {
-    cursor: url('cursor.png'), pointer !important;
+button, a, .select-btn, .close-x, input, select, label, .penta-slot, .candle, .potion-flask, img, .craft-btn, .death-btn, .death-confirm-btn, .death-cancel-btn, .slider, .group-toggle, .add-money-btn, .buy-prop-item, .sell-prop-item, .selectable-item, .theft-cell {
+    }
+
+.vodyani-ui-hidden #char-sheet {
+    pointer-events: none !important;
+}
+
+.cursor-hidden, .cursor-hidden * {
+    cursor: none !important;
 }
 
 /* Скрываем скроллбар для Chrome/Safari/Opera */
@@ -132,6 +169,19 @@ body::after {
     opacity: 1;
      animation: none !important;
     transform: none !important;
+}
+
+/* Фон Vodyani (Событие) */
+.wallpaper.vodyani-bg {
+    background-image: url('vodyani.jpg') !important;
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+}
+
+/* Фикс для фона Vodyani в 5 акте */
+.wallpaper.vodyani-bg::before {
+    opacity: 0 !important;
 }
 
 @keyframes diabloShake {
@@ -244,8 +294,8 @@ body::after {
             0 -50px 30px rgba(255, 255, 255, 0), 
             -15px -70px 40px rgba(200, 200, 200, 0),
             15px -60px 35px rgba(180, 180, 180, 0);
-        filter: blur(12px);
-        transform: translateY(-20px) scale(1.05);
+        filter: blur(15px);
+        transform: translateY(-100px) scale(1.5);
     }
 }
 
@@ -405,6 +455,84 @@ body::after {
     box-shadow: 0 5px 15px #000;
 }
 
+/* Меню с картинками */
+.image-menu-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 30px auto;
+    width: 100%;
+    max-width: 700px;
+}
+
+.img-menu-item {
+    flex: 1;
+    text-align: center;
+}
+
+.img-menu-title {
+    font-family: 'Exocet', serif;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    text-shadow: 0 0 5px #000;
+}
+
+/* Сетка гильдий */
+.guild-grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin: 20px auto;
+    max-width: 800px;
+}
+.guild-img-item {
+    text-align: center;
+}
+.guild-img-item img {
+    width: 100%;
+        height: auto;
+    border: 2px solid #5a4a2d;
+    box-shadow: 0 5px 15px #000;
+    cursor: pointer;
+    transition: transform 0.2s;
+    border-radius: 4px;
+}
+.guild-img-item img:hover {
+    transform: scale(1.05);
+    border-color: #d4af37;
+}
+.locked-guild-img {
+    filter: grayscale(100%) brightness(0.5);
+    cursor: not-allowed !important;
+}
+.guild-lock-overlay {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ff4444;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 0 0 5px #000;
+    text-align: center;
+    pointer-events: none;
+}
+
+.image-menu-container img {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    border: 2px solid #5a4a2d;
+    box-shadow: 0 5px 15px #000;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    border-radius: 4px;
+}
+.image-menu-container img:hover {
+    transform: scale(1.05);
+    border-color: var(--theme-highlight);
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.5);
+}
+
 /* Эффект Shimmer (Блик) через span */
 .btn-shimmer {
     position: absolute;
@@ -454,73 +582,6 @@ table { width: 100%; border-collapse: collapse; margin: 15px 0; }
 th, td { border: 1px solid #333; padding: 8px; text-align: center; }
 th { color: var(--theme-highlight); }
 
-/* АДАПТАЦИЯ ПОД ТЕЛЕФОН */
-@media (max-width: 768px) {
-    .header-title { font-size: 1.5rem; margin-top: 20px; }
-    
-    /* Кнопки меню */
-    .main-btn { padding: 15px; font-size: 1.2rem; margin: 15px auto; width: 95%; }
-    .sub-btn { padding: 12px; font-size: 1rem; margin: 8px auto; }
-
-    /* Контейнер */
-    .menu-container { padding-top: 80px; padding-bottom: 80px; width: 95%; }
-
-    /* Скрываем боковые панели по умолчанию и делаем их полноэкранными при открытии */
-    #char-sheet {
-        display: none !important; /* Скрыто */
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        max-height: 100vh; z-index: 4000;
-        border-radius: 0; border: none;
-        padding-bottom: 80px; /* Место для нижнего меню */
-        box-sizing: border-box;
-    }
-    #char-sheet.mobile-visible { display: block !important; }
-
-    #right-panels-stack {
-        display: none !important; /* Скрыто */
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        z-index: 4000;
-        background: rgba(0,0,0,0.95);
-        padding: 20px;
-        overflow-y: auto;
-        padding-bottom: 80px;
-        box-sizing: border-box;
-    }
-    #right-panels-stack.mobile-visible { display: block !important; }
-
-    /* Кнопки управления */
-    #reset-btn { top: 10px; right: 10px; padding: 5px 10px; font-size: 0.7rem; }
-    #music-btn { top: 45px; right: 10px; padding: 5px 10px; font-size: 0.7rem; }
-    #edit-char-btn { display: none; } /* Скрываем кнопку, она будет в нижнем меню */
-    
-    #breadcrumb { top: 15px; left: 10px; font-size: 0.7rem; max-width: 150px; }
-
-    #credits-label {
-        top: 52px;
-        right: 100px;
-        font-size: 0.5rem;
-    }
-
-    #text-window { width: 95%; max-height: 80vh; padding: 15px; }
-
-    /* Нижнее меню */
-    #mobile-nav-bar { display: flex !important; }
-}
-
-/* Нижнее меню (скрыто на ПК) */
-#mobile-nav-bar {
-    display: none;
-    position: fixed; bottom: 0; left: 0; width: 100%;
-    background: #1a0505; border-top: 2px solid #d4af37;
-    z-index: 5000; justify-content: space-around; padding: 10px 0;
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
-}
-.mobile-nav-btn {
-    background: none; border: 1px solid #5a0000; color: #d4af37;
-    padding: 8px 12px; font-family: 'Cinzel', serif; font-weight: 700;
-    font-size: 0.8rem; border-radius: 4px; cursor: pointer;
-}
-.mobile-nav-btn.active { background: #d4af37; color: #000; }
 
 /* Цвета для грейдов */
 .grade-b { color: #d2b48c; font-weight: bold; } /* тускло оранжево-бежевый */
@@ -1121,47 +1182,52 @@ font-size: 0.7rem; /* Увеличено на ~20% */
     right: 10px;
     width: 72px;
     height: 72px;
-    /* полупрозрачная круглая оболочка с градиентом для объёма */
-    background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.8) 80%);
-    border: 3px solid #444;
+        border: 3px solid #2a2a2a;
     border-radius: 50%;
+    background: #000;
+    box-shadow: 0 0 15px #000;
     overflow: hidden;
-    box-shadow: inset 0 0 10px #000, 0 0 5px rgba(0,0,0,0.5);
     display: none; /* Скрыт по умолчанию */
-    z-index: 5;
+    z-index: 20;
 }
 
+/* Жидкость (Маска) */
 .resource-liquid {
     position: absolute;
     bottom: 0;
-    left: -50%;
-    width: 200%;
-    height: 85%; /* Уровень заполнения */
-    background: radial-gradient(circle at 50% 60%, var(--res-light, #888) 0%, var(--res-dark, #444) 80%);
-    box-shadow: 0 0 15px var(--res-light, #888);
-    opacity: 0.9;
+    left: 0;
+    width: 100%;
+    height: 50%; /* Уровень заполнения (меняется JS) */
     transition: height 0.5s ease-out;
-    animation: liquidSlosh 3s ease-in-out infinite;
-    transform-origin: 50% 100%;
+   /* Темный градиент жидкости (свет снизу-центра) */
+    background: radial-gradient(circle at 50% 100%, var(--res-light, #888), var(--res-dark, #444) 80%);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+    overflow: hidden;
 }
 
-@keyframes liquidSlosh {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(-3deg); }
-    75% { transform: rotate(3deg); }
+.resource-liquid::before {
+       display: none;
 }
 
-/* Частицы (пузырьки) */
-.resource-particle { position: absolute; bottom: 0; width: 3px; height: 3px; background: rgba(255,255,255,0.4); border-radius: 50%; animation: particleRise 2s infinite linear; }
-.p1 { left: 20%; animation-duration: 2.5s; animation-delay: 0s; }
-.p2 { left: 60%; animation-duration: 3s; animation-delay: 1s; }
-.p3 { left: 40%; animation-duration: 2.2s; animation-delay: 0.5s; }
-.p4 { left: 80%; animation-duration: 2.8s; animation-delay: 1.5s; }
+.resource-liquid::after {
+       display: none;
+}
 
-@keyframes particleRise {
-    0% { bottom: 0; opacity: 0; }
-    20% { opacity: 1; }
-    100% { bottom: 100%; opacity: 0; }
+/* Стеклянный блик и объем (поверх жидкости) */
+.resource-pool::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    border-radius: 50%;
+    /* Блик сверху-слева + затемнение по краям */
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.1) 15%, transparent 50%);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.9);
+    pointer-events: none;
+}
+
+@keyframes mist-swirl {
+     0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 /* Стопки монет (вид сбоку) */
@@ -2037,6 +2103,9 @@ input:checked + .slider:before { transform: translateX(20px); background-color: 
     height: 0%;
     transition: height 0.5s ease-out;
     opacity: 0.9;
+    /* Объемный градиент для колб (цилиндр) */
+    background: linear-gradient(90deg, rgba(0,0,0,0.6) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.6) 100%),
+                linear-gradient(to bottom, var(--flask-light, #888), var(--flask-dark, #444));
 }
 
 /* Блик на стекле */
@@ -2078,16 +2147,350 @@ input:checked + .slider:before { transform: translateX(20px); background-color: 
         cursor: pointer;
 }
 .potion-liquid {
-    background-color: #cc0000; /* Статичный красный */
+    /* Объемный красный градиент */
+    background: linear-gradient(90deg, rgba(0,0,0,0.6) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.6) 100%),
+                linear-gradient(to bottom, #ff6666, #8a0000);
 }
 .flask-ticks {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background-image: linear-gradient(to bottom, rgba(0,0,0,0.5) 1px, transparent 1px);
-    background-size: 100% 5%; /* 20 делений (100/20 = 5%) */
-    pointer-events: none;
-    z-index: 3;
+       display: none; /* Убираем полоски */
 }
+
+/* Церемониальные свечи */
+.candle-circle-container {
+    
+    position: relative;
+    height: 150px;
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.candle {
+    position: absolute;
+     width: 10px;
+    height: 35px;
+     /* Добавляем блик (радиальный градиент) и основной цвет */
+    background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.4) 0%, transparent 25%), linear-gradient(to right, #8B5A2B, #6E4D21, #5d4037);
+    box-shadow: inset 0 0 2px rgba(0,0,0,0.5); /* Легкая внутренняя тень для объема */
+    border-radius: 2px;
+        cursor: pointer; /* Кликабельно */
+}
+
+.candle::before { /* Фитиль */
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 5px;
+    width: 2px;
+    height: 4px;
+    background: #222;
+}
+
+.candle::after { /* Пламя */
+    content: '';
+    position: absolute;
+    top: -18px;
+    left: 1px;
+    width: 8px;
+    height: 20px;
+    background: radial-gradient(ellipse at bottom, #fff, #ffd700, transparent 70%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    filter: blur(1px);
+        transition: background 3s ease-in-out, filter 3s ease-in-out, height 3s ease-in-out; /* Плавный морфинг */
+   }
+
+/* Адское пламя */
+.candle.hellish::after {
+    background: radial-gradient(ellipse at bottom, #fff, #ff00ff, #4b0082, transparent 80%);
+    height: 30px; /* Увеличенный размер */
+    width: 12px;
+    top: -28px;
+    left: -1px;
+    filter: blur(2px);
+}
+
+/* Разные анимации */
+.candle.flicker-1::after { animation: candleFlicker1 0.1s infinite alternate; }
+.candle.flicker-2::after { animation: candleFlicker2 0.12s infinite alternate; }
+.candle.flicker-3::after { animation: candleFlicker3 0.09s infinite alternate; }
+
+@keyframes candleFlicker1 {
+  0% { transform: scale(var(--flame-scale, 1)); opacity: calc(var(--flame-opacity, 1) * 0.9); }
+    100% { transform: scale(calc(var(--flame-scale, 1) * 1.1)) skewX(2deg); opacity: var(--flame-opacity, 1); }
+}
+@keyframes candleFlicker2 {
+    0% { transform: scale(calc(var(--flame-scale, 1) * 1.05)); opacity: calc(var(--flame-opacity, 1) * 0.85); }
+    100% { transform: scale(calc(var(--flame-scale, 1) * 0.95)) skewX(-1deg); opacity: var(--flame-opacity, 1); }
+}
+@keyframes candleFlicker3 {
+    0% { transform: scale(var(--flame-scale, 1)); opacity: calc(var(--flame-opacity, 1) * 0.95); }
+    100% { transform: scale(calc(var(--flame-scale, 1) * 1.15)) skewX(1deg); opacity: calc(var(--flame-opacity, 1) * 0.9); }
+}
+
+.candle.extinguished::after {
+    display: none; /* Скрываем пламя */
+}
+.candle.extinguished {
+    filter: brightness(0.6); /* Затемняем воск */
+}
+
+/* Временное тушение (клик) */
+.candle.temp-extinguished::after {
+    display: none;
+}
+.candle.temp-extinguished {
+    filter: brightness(0.6);
+}
+/* Призрачное пламя для Vodyani (потушенные свечи) */
+.candle.extinguished.vodyani-ghost {
+    --flame-opacity: 0.5;
+}
+.candle.extinguished.vodyani-ghost::after {
+display: block !important; /* Показываем пламя */
+    opacity: var(--flame-opacity, 0.5) !important; /* Управляем прозрачностью через JS */
+}
+
+/* Эффект "Виртуальной божественности" для напряженных моментов */
+.candle.divinity::after {
+    display: block !important;
+    background: radial-gradient(ellipse at bottom, #fff, #00d4ff, #000000, transparent 80%) !important;
+       filter: var(--divinity-filter, blur(2px) drop-shadow(0 0 8px #00d4ff) brightness(1.5)) !important;
+    backdrop-filter: blur(10px);
+    height: 35px;
+     opacity: var(--flame-opacity, 1) !important; /* Управляем прозрачностью */
+}
+
+/* Усиленное адское пламя для НГ+ в режиме божественности */
+.candle.hellish.divinity::after {
+    background: radial-gradient(ellipse at bottom, #fff, #ff00ff, #8b0000, transparent 80%) !important;
+    filter: blur(3px) drop-shadow(0 0 12px #ff00ff) brightness(2.0) !important;
+}
+
+/* Дым от свечи */
+.candle-smoke {
+    position: absolute;
+    top: -20px; left: 0; width: 10px; height: 20px;
+    pointer-events: none;
+}
+.candle-smoke::before {
+    content: ''; position: absolute;
+    width: 4px; height: 4px;
+    background: rgba(200, 200, 200, 0.5);
+    border-radius: 50%;
+    filter: blur(2px);
+    animation: smokeRise 5s ease-out forwards;
+}
+@keyframes smokeRise {
+    0% { transform: translateY(0) scale(1); opacity: 0.8; }
+    100% { transform: translateY(-150px) scale(8); opacity: 0; }
+}
+
+/* Вспышка при зажигании */
+.candle.reigniting::after {
+    animation: candleFlash 0.5s ease-out;
+}
+@keyframes candleFlash {
+    0% { transform: scale(2); filter: brightness(2); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* --- НОВЫЙ КАЛЬКУЛЯТОР НАВЫКОВ (ДЕРЕВО) --- */
+.skill-calc-modal-new {
+    display: none;
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 95%; max-width: 1000px; height: 85vh;
+    background: #0a0a0a; border: 2px solid #d4af37;
+    z-index: 5000; box-shadow: 0 0 50px #000;
+        display: none; flex-direction: column; /* Исправлено: скрыто по умолчанию */
+
+}
+
+.skill-calc-layout {
+    display: flex;
+    height: 100%;
+    overflow: hidden;
+}
+
+.skill-tree-viewport {
+    flex-grow: 1;
+    position: relative;
+    background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+    overflow: hidden;
+    cursor: grab;
+    border-right: 1px solid #333;
+}
+.skill-tree-viewport:active { cursor: grabbing; }
+
+.skill-tree-content {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform-origin: 0 0;
+    /* transform задается через JS */
+}
+
+.skill-calc-sidebar {
+    width: 300px;
+    min-width: 300px;
+    background: #151515;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    border-left: 2px solid #d4af37;
+}
+
+/* Узлы дерева */
+.skill-node {
+    position: absolute;
+    width: 50px; height: 50px;
+    background: #222;
+    border: 2px solid #555;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+     transition: all 0.3s;
+    z-index: 2;
+     font-size: 1.5rem;
+    box-shadow: 0 0 10px #000;
+}
+.skill-node:hover { border-color: #d4af37; box-shadow: 0 0 10px #d4af37; z-index: 10; transform: translate(-50%, -50%) scale(1.2); }
+.skill-node.active { border-color: #66ff66; box-shadow: 0 0 15px #66ff66; background: #1a3a1a; }
+.skill-node.center-node { width: 80px; height: 80px; border-color: #d4af37; background: #000; z-index: 5; font-size: 2rem; }
+.skill-node.learned { border-color: #ffd700; background: #3a2a0a; }
+/* Пассивные навыки всегда круглые */
+.skill-node.passive-node { border-radius: 50% !important; }
+
+.skill-node.locked { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; border-color: #333; }
+.skill-node.dimmed { opacity: 0.2; pointer-events: none; filter: grayscale(1); }
+.rune-node.dimmed { opacity: 0.1; pointer-events: none; filter: grayscale(1); }
+
+/* Бейдж категории навыка */
+.skill-cat-badge {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    background: #000;
+    color: #d4af37;
+    border: 1px solid #d4af37;
+    border-radius: 50%;
+    width: 16px; height: 16px;
+    font-size: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold;
+    z-index: 5;
+}
+
+/* Стиль для запланированных в билде, но закрытых по уровню навыков */
+.skill-node.build-planned {
+    border-color: #66ff66 !important;
+    box-shadow: 0 0 8px #66ff66 !important;
+    
+}
+
+/* Руны вокруг навыка */
+.rune-node {
+    position: absolute;
+       width: 24px; height: 24px; /* Чуть больше для картинок */
+    transform: translate(-50%, -50%);
+    z-index: 4;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 0 5px #000;
+    border-radius: 50%;
+}
+.rune-node:hover { transform: translate(-50%, -50%) scale(1.5); z-index: 10; filter: brightness(1.5); }
+.rune-node.active { 
+    box-shadow: 0 0 10px #ffd700, 0 0 20px #ff4444; 
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+.rune-node.locked { 
+    cursor: not-allowed; 
+        opacity: 0.5; 
+    filter: grayscale(1); 
+}
+
+/* Анимация мигания для изученных */
+@keyframes learnedPulse {
+     0% { box-shadow: 0 0 2px #00ff00; border-color: #00ff00; filter: brightness(1); }
+    50% { box-shadow: 0 0 8px #00ff00; border-color: #33cc33; filter: brightness(1.1); }
+    100% { box-shadow: 0 0 2px #00ff00; border-color: #00ff00; filter: brightness(1); }
+}
+
+.skill-node.learned { 
+    border-color: #00ff00; 
+    background: #0a1a0a;
+    animation: learnedPulse 3s infinite ease-in-out;
+}
+.rune-node.learned {
+    animation: learnedPulse 3s infinite ease-in-out;
+}
+
+/* Стилизация по классам */
+/* Варвар: Грубые формы, металл */
+.tree-theme-barbarian .skill-node { border-radius: 4px; border: 2px solid #8a0000; background: #2a0505; font-family: 'Exocet', serif; }
+.tree-theme-barbarian .skill-connection { background: #5a0000; }
+
+/* Монах: Круги, золото, гармония */
+.tree-theme-monk .skill-node { border-radius: 50%; border: 2px double #ffd700; background: #1a1a0a; }
+.tree-theme-monk .skill-connection { background: #b8860b; }
+
+/* Охотник: Шипы, тьма */
+.tree-theme-dh .skill-node { border-radius: 0; background: #1a1a1a; border: 1px solid #444; }
+.tree-theme-dh .skill-connection { background: #333; height: 1px; }
+
+/* Колдун: Ацтекские мотивы, зелень */
+.tree-theme-wd .skill-node { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; border: 2px solid #32cd32; background: #051a05; }
+.tree-theme-wd .skill-connection { background: #006400; }
+
+/* Чародей: Энергия, фиолетовый */
+.tree-theme-wizard .skill-node { border-radius: 50%; box-shadow: 0 0 5px #a29bfe; border: 1px solid #a29bfe; background: #0a0a1a; }
+.tree-theme-wizard .skill-connection { background: linear-gradient(90deg, #4834d4, #a29bfe); height: 1px; }
+
+/* Крестоносец: Щиты, свет */
+.tree-theme-crusader .skill-node { border-radius: 2px; border: 2px solid #77aaff; background: #0a1a2a; }
+.tree-theme-crusader .skill-connection { background: #77aaff; }
+
+/* Некромант */
+.tree-theme-necromancer .skill-node { border-radius: 50% 50% 0 0; border: 2px solid #00aaaa; background: #051a1a; }
+
+.skill-connection {
+    position: absolute;
+    background: #333;
+    height: 2px;
+    transform-origin: 0 50%;
+    z-index: 1;
+}
+
+.tree-controls {
+    position: absolute; bottom: 10px; left: 10px; z-index: 10;
+}
+
+/* Сетка рун в сайдбаре */
+.runes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px;
+    margin-bottom: 15px;
+}
+.rune-btn {
+    background: #222; border: 1px solid #444; color: #aaa;
+    padding: 5px; font-size: 0.75rem; cursor: pointer;
+    text-align: left;
+}
+.rune-btn:hover { background: #333; color: #fff; }
+.rune-btn.active { border-color: #d4af37; color: #d4af37; background: #1a1a0a; }
+.rune-btn.learned { border-color: #66ff66; color: #66ff66; }
+
+.stat-row-calc {
+    display: flex; justify-content: space-between;
+    border-bottom: 1px solid #333; padding: 2px 0;
+}
+.stat-label { color: #aaa; }
+.stat-val { color: #fff; font-weight: bold; }
+
 
 
 

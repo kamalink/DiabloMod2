@@ -67,6 +67,37 @@ window.hideCustomTooltip = function() {
     if (tooltip) tooltip.style.display = 'none';
 }
 
+window.openImageModal = function(src) {
+    let modal = document.getElementById('image-viewer-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'image-viewer-modal';
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        modal.style.backgroundColor = 'rgba(0,0,0,0.9)';
+        modal.style.zIndex = '10000';
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.style.cursor = 'zoom-out';
+        modal.onclick = () => modal.style.display = 'none';
+        
+        const img = document.createElement('img');
+        img.style.maxHeight = '90%';
+        img.style.maxWidth = '90%';
+        img.style.boxShadow = '0 0 20px #000';
+        img.style.border = '2px solid #d4af37';
+        modal.appendChild(img);
+        document.body.appendChild(modal);
+    }
+    const img = modal.querySelector('img');
+    img.src = src;
+    modal.style.display = 'flex';
+}
+
 window.closeAllWindows = function() {
     const modalIds = [
         'text-window',
@@ -212,7 +243,7 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
 
         const backBtn = document.createElement('button');
         backBtn.className = 'd2-button nav-btn';
-        backBtn.innerHTML = '<span class="text-gradient-gold">НАЗАД</span><span class="btn-shimmer"></span>';
+               backBtn.innerHTML = '<span class="text-gradient-gold">НАЗАД</span><span class="btn-shimmer"></span><span class="btn-reflection"></span>';
         backBtn.onclick = () => {
             window.closeAllWindows();
             if (window.historyStack.length > 1) {
@@ -229,7 +260,7 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
         if (menuId === 'skills_study_menu') {
             const calcBtn = document.createElement('button');
             calcBtn.className = 'calc-nav-btn';
-            calcBtn.innerText = '🧮 КАЛЬКУЛЯТОР';
+                       calcBtn.innerText = '🗺️ КАРТА НАВЫКОВ';
             calcBtn.setAttribute('onclick', 'window.openSkillCalculator()');
             navBox.appendChild(calcBtn);
         }
@@ -261,6 +292,97 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
         area.appendChild(gridContainer);
         return; // Прерываем стандартную отрисовку кнопок
     }
+
+    if (menuId === 'guilds' && window.playerData.settings && window.playerData.settings.showImages) {
+        const imageMenuContainer = document.createElement('div');
+        imageMenuContainer.className = 'image-menu-container';
+
+        const createImgItem = (src, title, targetId) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'img-menu-item';
+            
+            const titleEl = document.createElement('div');
+            titleEl.className = 'text-gradient-gold img-menu-title';
+            titleEl.innerText = title;
+
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = title;
+            img.onclick = () => window.renderMenu(targetId, title);
+            
+            wrapper.appendChild(titleEl);
+            wrapper.appendChild(img);
+            return wrapper;
+        };
+
+        imageMenuContainer.appendChild(createImgItem('гильдии.jpg', 'Гильдии', 'guilds_list'));
+        imageMenuContainer.appendChild(createImgItem('классы.jpg', 'Классы', 'classes_list'));
+        area.appendChild(imageMenuContainer);
+        return;
+    }
+
+    if (menuId === 'guilds_list' && window.playerData.settings && window.playerData.settings.showImages) {
+        const guildGrid = document.createElement('div');
+        guildGrid.className = 'guild-grid-container';
+
+        const guildImages = {
+            'traders_guild': 'торговцы.jpg',
+            'hunters_guild': 'охотники.jpg',
+            'mages_college_menu': 'маги.jpg',
+            'dark_brotherhood': 'братство.jpg',
+            'adventurers_menu': 'искатели.jpg',
+            'companions_menu': 'соратники.jpg'
+        };
+
+        window.gameData[menuId].forEach(item => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'guild-img-item';
+            
+            const titleEl = document.createElement('div');
+            titleEl.className = 'text-gradient-gold img-menu-title';
+            titleEl.innerText = item.title;
+
+            const imgContainer = document.createElement('div');
+            imgContainer.style.position = 'relative';
+
+            const img = document.createElement('img');
+            img.src = guildImages[item.id] || 'cursor.png';
+            img.alt = item.title;
+
+            // Коррекция размеров (оптическая компенсация)
+            if (item.id === 'hunters_guild') img.style.width = '90%', img.style.height = '90%';
+            if (item.id === 'adventurers_menu') img.style.width = '83%', img.style.height = '83%';
+            
+            // Логика замка для Торговцев
+            if (item.id === 'traders_guild') {
+                const vit = window.playerData.stat_vit || 0;
+                if (vit < 1000) {
+                    img.classList.add('locked-guild-img');
+                    const lockOverlay = document.createElement('div');
+                    lockOverlay.className = 'guild-lock-overlay';
+                    lockOverlay.innerHTML = '🔒<br>1000 ⛑️';
+                    imgContainer.appendChild(lockOverlay);
+                    imgContainer.onclick = () => window.showCustomAlert("🔒 Требуется 1000 Живучести для доступа к Гильдии Торговцев.");
+                } else {
+                    img.onclick = () => {
+                        const targetData = window.gameData[item.id];
+                        if (targetData.content) window.showText(item.title, targetData.content);
+                    };
+                }
+            } else {
+                img.onclick = () => window.renderMenu(item.id, item.title);
+            }
+
+            imgContainer.appendChild(img);
+            wrapper.appendChild(titleEl);
+            wrapper.appendChild(imgContainer);
+            guildGrid.appendChild(wrapper);
+        });
+
+        area.appendChild(guildGrid);
+        return;
+    }
+
 
     // Отрисовка кнопок
     window.gameData[menuId].forEach((item, index) => {
@@ -320,6 +442,9 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
                     if (pData.level < 70) { isLocked = true; lockReason = "🔒 Требуется ур. 70"; }
                     break;
             }
+            if (window.hintData && window.hintData.menu && window.hintData.menu[item.id]) {
+            btn.setAttribute('data-hint', window.hintData.menu[item.id]);
+        }
 
         if (isLocked) {
             btn.disabled = true;
@@ -347,7 +472,7 @@ window.renderMenu = function(menuId, titleText, isBack = false, noAnim = false) 
                 }
             };
         } else {
-            btn.innerHTML = `<span class="text-gradient-gold">${item.title}</span><span class="btn-shimmer"></span>`;
+                        btn.innerHTML = `<span class="text-gradient-gold">${item.title}</span><span class="btn-shimmer"></span><span class="btn-reflection"></span>`;
             if (!noAnim) {
                 btn.style.opacity = '0';
                 btn.style.animation = `fadeInUp 0.3s ease-out forwards ${index * 0.05}s`;
@@ -711,7 +836,8 @@ window.updateUI = function() {
     setInput('input-bosses', window.playerData.bosses);
     setInput('input-gobs-solo', window.playerData.gobs_solo);
     setInput('input-gobs-assist', window.playerData.gobs_assist);
-    setInput('input-max-vp', window.playerData.maxVp);
+        setInput('input-max-vp', window.playerData.maxVp);
+
     
     // Отображение поля ввода уровня ВП (если Т16)
     const vpLevelInput = document.getElementById('vp-level-input');
@@ -724,6 +850,7 @@ window.updateUI = function() {
     const actInput = document.getElementById('input-act');
     if (actInput) {
         actInput.type = 'text'; // Разрешаем текст для "1+"
+                actInput.disabled = true; // Блокируем ручной ввод
         const currentAct = window.playerData.act || 1;
         // Если акт > 5, показываем как НГ+ (1+, 2+ и т.д.)
        const newVal = currentAct > 5 ? (currentAct - 5) + "+" : currentAct;
@@ -969,10 +1096,12 @@ window.updateUI = function() {
     document.querySelectorAll('.char-input').forEach(input => {
         window.autoResizeInput(input);
     });
+        window.applyTextSelectionSetting();
     window.updateResourcePool();
         window.updateFlasks();
             window.updatePotionFlask();
         window.updateDynamicBackground();
+            window.applyHints(); // Применяем подсказки к элементам
 }
 
 window.updateTheftTable = function() {
@@ -1092,6 +1221,8 @@ window.setVolume = function(value) {
 }
 
 window.toggleMusic = function() {
+        if (window.isVodyaniEventActive) return; // Блокируем смену музыки во время события
+
     const btn = document.getElementById('music-btn');
     const slider = document.getElementById('volume-slider');
     if (window.isMusicPlaying) {
@@ -1197,8 +1328,12 @@ window.savePlayerData = function() {
     const lvl = getVal('input-lvl', true);
     if (lvl !== null) {
         window.playerData.level = lvl;
+         // ПРИНУДИТЕЛЬНО: При получении 70 уровня ставим T2 (если пришли с меньшего)
+        if (oldData.level < 70 && lvl >= 70) {
+            window.playerData.difficulty = "T2";
+        }
         // Автоматическое изменение сложности до 70 уровня
-        if (lvl < 70) {
+                else if (lvl < 70) {
             let tier = "Высокий";
             if (lvl <= 19) tier = "Высокий";
             else if (lvl <= 39) tier = "Эксперт";
@@ -1223,6 +1358,8 @@ window.savePlayerData = function() {
         }
         if (isNaN(act)) act = null;
     }
+        const maxVp = getVal('input-max-vp'); if (maxVp !== null) window.playerData.maxVp = maxVp;
+
 
     if (act !== null && act !== window.playerData.act) {
         // Если акт изменился, сбрасываем счетчик НП
@@ -1234,51 +1371,7 @@ window.savePlayerData = function() {
     const baseKills = getVal('input-base-kills'); if (baseKills !== null) window.playerData.base_kills = baseKills;
     const baseElites = getVal('input-base-elites'); if (baseElites !== null) window.playerData.base_elites = baseElites;
     
-    let gg = getVal('input-gold-g', true);
-    let gs = getVal('input-gold-s', true);
-    let gc = getVal('input-gold-c', true);
-    let gy = getVal('input-gold-y', true);
-    let mithril = getVal('input-mithril');
-
-    // Автоматическая конвертация валют при вводе >= 100
-    if (gy !== null && gy >= 100) {
-        const extra = Math.floor(gy / 100);
-        gy = gy % 100;
-        if (gc !== null) gc += extra; else gc = extra;
-        document.getElementById('input-gold-y').value = gy;
-        document.getElementById('input-gold-c').value = gc;
-    }
-    if (gc !== null && gc >= 100) {
-        const extra = Math.floor(gc / 100);
-        gc = gc % 100;
-        if (gs !== null) gs += extra; else gs = extra;
-        document.getElementById('input-gold-c').value = gc;
-        document.getElementById('input-gold-s').value = gs;
-    }
-    if (gs !== null && gs >= 100) {
-        const extra = Math.floor(gs / 100);
-        gs = gs % 100;
-        if (gg !== null) gg += extra; else gg = extra;
-        document.getElementById('input-gold-s').value = gs;
-        document.getElementById('input-gold-g').value = gg;
-    }
-    if (gg !== null && gg >= 100) {
-        const extra = Math.floor(gg / 100);
-        gg = gg % 100;
-        if (mithril !== null) mithril += extra; else mithril = extra;
-        document.getElementById('input-gold-g').value = gg;
-        document.getElementById('input-mithril').value = mithril;
-    }
-
-    if (gg !== null) window.playerData.gold_g = gg;
-    if (gs !== null) window.playerData.gold_s = gs;
-    if (gc !== null) window.playerData.gold_c = gc;
-    if (gy !== null) window.playerData.gold_y = gy;
-    
-    if (mithril !== null) {
-        window.playerData.mithril = Math.min(mithril, 10); // Ограничение 10
-        if (mithril > 10) document.getElementById('input-mithril').value = 10;
-    }
+       // Валюта управляется через кнопки и updateCoinStacks, прямого ввода в карточке нет.
     
     const runes = getVal('input-runes', true); if (runes !== null) window.playerData.runes = runes;
     const para = getVal('input-para', true); if (para !== null) window.playerData.para = para;
@@ -1294,7 +1387,6 @@ window.savePlayerData = function() {
     const bosses = getVal('input-bosses'); if (bosses !== null) window.playerData.bosses = bosses;
     const gobsS = getVal('input-gobs-solo'); if (gobsS !== null) window.playerData.gobs_solo = gobsS;
     const gobsA = getVal('input-gobs-assist'); if (gobsA !== null) window.playerData.gobs_assist = gobsA;
-    const maxVp = getVal('input-max-vp'); if (maxVp !== null) window.playerData.maxVp = maxVp;
     
     const portal70 = getStr('input-lvl70-portal'); if (portal70 !== null) window.playerData.lvl70_portal = portal70;
 
@@ -2024,12 +2116,16 @@ window.updateFlasks = function() {
             el.classList.remove('danger-blink');
         }
 
-                // Статичные цвета без слоев
+        // Устанавливаем переменные для градиента в CSS
         if (type === 'dmg') {
-                       liquid.style.backgroundColor = '#800000'; // Темно-красный
+                      el.style.setProperty('--flask-dark', '#5a0000');
+            el.style.setProperty('--flask-light', '#ff3333');
+            liquid.style.backgroundColor = ''; // Сбрасываем inline-цвет
 
         } else {
-                        liquid.style.backgroundColor = '#006400'; // Темно-зеленый
+                       el.style.setProperty('--flask-dark', '#004400');
+            el.style.setProperty('--flask-light', '#33ff33');
+            liquid.style.backgroundColor = ''; // Сбрасываем inline-цвет
 
         }
 
@@ -2389,6 +2485,38 @@ window.renderSettingsMenu = function() {
                 </label>
             </div>
 
+             <div style="margin-bottom: 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px;">
+                <span>📋 Копирование текста</span>
+                <label class="switch">
+                    <input type="checkbox" ${s.textSelect ? 'checked' : ''} onchange="window.toggleSetting('textSelect')">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+            <div style="margin-bottom: 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px;">
+                <span>💡 Подсказки</span>
+                <label class="switch">
+                    <input type="checkbox" ${s.showTooltips ? 'checked' : ''} onchange="window.toggleSetting('showTooltips')">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+             <div style="margin-bottom: 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px;">
+                <span>🕯️ Круг свечей</span>
+                <label class="switch">
+                    <input type="checkbox" ${s.showCandles ? 'checked' : ''} onchange="window.toggleSetting('showCandles')">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+             <div style="margin-bottom: 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px;">
+                <span>🖼️ Картинки в меню</span>
+                <label class="switch">
+                    <input type="checkbox" ${s.showImages ? 'checked' : ''} onchange="window.toggleSetting('showImages')">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
             <div style="margin-bottom: 15px;">
                 <div style="margin-bottom:5px;">💰 Блеск монет: <span id="shimmer-val" style="color:#66ccff">${shimmerLabels[s.coinShimmer]}</span></div>
                 <input type="range" min="0" max="3" value="${s.coinShimmer}" style="width:100%;" oninput="window.updateShimmerSetting(this.value)">
@@ -2398,20 +2526,150 @@ window.renderSettingsMenu = function() {
 }
 
 window.toggleSetting = function(key) {
+        if (!window.playerData.settings) window.playerData.settings = {}; // FIX: Создаем объект, если его нет
     window.playerData.settings[key] = !window.playerData.settings[key];
     window.saveToStorage();
      if (key === 'vfx') {
         window.updateDynamicBackground();
     }
+    if (key === 'textSelect') {
+        window.applyTextSelectionSetting();
+    }
+    if (key === 'showCandles') {
+        window.renderCandles();
+    }
 }
 
 window.updateShimmerSetting = function(val) {
     const shimmerLabels = ["Выкл", "Редко", "Средне", "Часто"];
+    if (!window.playerData.settings) window.playerData.settings = {}; // FIX
     window.playerData.settings.coinShimmer = parseInt(val);
     document.getElementById('shimmer-val').innerText = shimmerLabels[val];
     window.saveToStorage();
     window.updateCoinStacks(); // Сразу применяем
 }
+
+window.applyTextSelectionSetting = function() {
+    if (window.playerData.settings && window.playerData.settings.textSelect === false) {
+        document.body.classList.add('no-select');
+    } else {
+        document.body.classList.remove('no-select');
+    }
+}
+
+window.renderCandles = function() {
+    const charSheet = document.getElementById('char-sheet');
+    let container = document.getElementById('ceremonial-candles');
+
+     if (window.playerData.settings && window.playerData.settings.showCandles === false) {
+        if (container) container.remove();
+        return;
+    }
+
+    if (!container) {
+        if (!charSheet) return;
+        container = document.createElement('div');
+        container.id = 'ceremonial-candles';
+        container.className = 'candle-circle-container';
+        
+        // Размещаем в правой колонке (под разделом Лут и Крафт)
+        const cols = charSheet.querySelectorAll('.char-sheet-col');
+        if (cols.length >= 2) {
+            cols[1].appendChild(container);
+        } else {
+            charSheet.appendChild(container);
+        }
+    } else {
+        container.innerHTML = ''; // Очищаем для перерисовки
+    }
+
+    const count = 12;
+    const radiusX = 100; // Ширина овала
+    const radiusY = 60;  // Высота овала (угол обзора выше)
+        const progress = window.playerData.story_progress || 0;
+         const isNGPlus = progress > 12;
+    const ngProgress = Math.max(0, progress - 12);
+
+    
+    for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2;
+        const x = Math.cos(angle) * radiusX;
+        const y = Math.sin(angle) * radiusY;
+        
+        const candle = document.createElement('div');
+        candle.className = 'candle';
+        candle.style.left = `calc(50% + ${x}px)`;
+        candle.style.top = `calc(50% + ${y}px)`;
+
+        // Случайная анимация (1, 2 или 3)
+        const animNum = Math.floor(Math.random() * 3) + 1;
+        candle.classList.add(`flicker-${animNum}`);
+        
+        if (isNGPlus) {
+            // НГ+: Все горят. Первые ngProgress становятся адскими.
+            if (i < ngProgress) {
+                candle.classList.add('hellish');
+            }
+        } else {
+            // Обычная игра: Горят только первые progress.
+            if (i >= progress) {
+                candle.classList.add('extinguished');
+            }
+        }
+
+        // Z-index и масштаб для псевдо-3D
+        candle.style.zIndex = Math.floor(y + radiusY);
+        const scale = 0.7 + ((y + radiusY) / (radiusY * 2)) * 0.3;
+        candle.style.transform = `translate(-50%, -50%) scale(${scale})`;
+
+         // Интерактивность свечей
+        candle.onclick = function(e) {
+                        if (window.isVodyaniEventActive) return; // Запрещаем тушить во время ритуала
+            e.stopPropagation();
+            // Если свеча уже потушена сюжетом или временно, ничего не делаем
+            if (candle.classList.contains('extinguished') || candle.classList.contains('temp-extinguished')) return;
+
+            // Тушим
+            candle.classList.add('temp-extinguished');
+            if (window.extinguishSound) {
+                window.extinguishSound.currentTime = 0;
+                window.extinguishSound.play().catch(()=>{});
+            }
+            
+            // Эффект дымка
+             for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const smoke = document.createElement('div');
+                    smoke.className = 'candle-smoke';
+                    smoke.style.left = (Math.random() * 10 - 5) + 'px'; // Случайный разброс
+                    candle.appendChild(smoke);
+                    setTimeout(() => smoke.remove(), 5000);
+                }, i * 100);
+            }
+
+            // Таймер на зажигание (10 сек)
+            setTimeout(() => {
+                if (candle.classList.contains('temp-extinguished')) {
+                    candle.classList.remove('temp-extinguished');
+                    
+                    
+                    if (window.igniteSound) {
+                        window.igniteSound.currentTime = 0;
+                        window.igniteSound.play().catch(()=>{});
+                    }
+                    
+                    // Эффект вспышки
+                    candle.classList.add('reigniting');
+                    setTimeout(() => candle.classList.remove('reigniting'), 500);
+                }
+            }, 10000);
+        };
+        
+        container.appendChild(candle);
+    }
+}
+
+
 
 
     window.replaceStaticIcons = function(target = document.body) {
@@ -2487,4 +2745,13 @@ const originalUpdateUI = window.updateUI;
 window.updateUI = function() {
     originalUpdateUI.apply(this, arguments);
     // window.replaceStaticIcons(); // Убрано для оптимизации. Вызывается точечно.
+}
+
+window.applyHints = function() {
+    if (!window.hintData || !window.hintData.elements) return;
+    
+    for (const [id, text] of Object.entries(window.hintData.elements)) {
+        const el = document.getElementById(id);
+        if (el) el.setAttribute('data-hint', text);
+    }
 }

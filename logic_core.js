@@ -141,8 +141,13 @@ window.playerData = savedData ? JSON.parse(savedData) : {
         settings: { // Настройки
             screamer: true,
             vfx: true,
-            coinShimmer: 2 // 0: Выкл, 1: Редко, 2: Средне, 3: Часто
-        }
+ coinShimmer: 2, // 0: Выкл, 1: Редко, 2: Средне, 3: Часто
+             textSelect: false,
+                         showCandles: true, // Круг свечей
+                                     showTooltips: false, // Всплывающие подсказки
+            showImages: false, // Картинки в меню (false = кнопки)
+            story_progress: 0 // 0-12 (Свечи)
+                }
     };
 
 // Исправление для старых сохранений
@@ -178,11 +183,20 @@ if (typeof window.playerData.theft_attempts_count === 'undefined') window.player
 if (typeof window.playerData.current_rift_cost === 'undefined') window.playerData.current_rift_cost = 0;
 if (typeof window.playerData.refused_thief_promotion === 'undefined') window.playerData.refused_thief_promotion = false;
 
-if (!window.playerData.settings) window.playerData.settings = {
-    screamer: true,
-    vfx: true,
-    coinShimmer: 2
+// FIX: Полная проверка и инициализация настроек
+if (!window.playerData.settings) window.playerData.settings = {};
+const defaultSettings = {
+    screamer: true, vfx: true, coinShimmer: 2, textSelect: false,
+    showTooltips: false, showImages: false, showCandles: true
 };
+for (let key in defaultSettings) {
+    if (typeof window.playerData.settings[key] === 'undefined') {
+        window.playerData.settings[key] = defaultSettings[key];
+    }
+}
+
+if (typeof window.playerData.story_progress === 'undefined') window.playerData.story_progress = 0;
+
 
 if (typeof window.playerData.base_vp_at_70 === 'undefined') {
     if (window.playerData.level >= 70) {
@@ -209,6 +223,7 @@ window.audioTrackAct5.loop = true;
 window.audioTrack = window.audioTrackDefault; // Устанавливаем трек по умолчанию
 window.coinSound = new Audio('freesound_community-coin-clatter-6-87110.mp3');
 window.activeRiftMultiplier = null; // Множитель наград за текущий рифт (null если нет активной цепочки)
+window.isVodyaniEventActive = false; // Флаг для блокировки другой музыки
 window.activeRiftExpMultiplier = null; // Отдельный множитель для опыта (для ВП)
 window.riftSuccess = null; // Флаг успешного закрытия портала
 window.idleTimer = null;
